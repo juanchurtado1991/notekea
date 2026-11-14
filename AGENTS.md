@@ -29,8 +29,9 @@ Everything written into this repository (code, comments, commits, pull requests,
   trailers in commits.
 - **Everything done is tracked, in the same change (the developer, 2026-11-14):** every change, a fix as much as a
   feature, updates `CHANGELOG.md` (an entry under Unreleased), the roadmap (the feature's spec, in `ROADMAP.md` or
-  `docs/roadmap/` for a done milestone: what changed, when and why) and `docs/HANDOFF.md` (where the work stands and
-  what is left open). A change is not done while one of the three does not say it.
+  `docs/roadmap/` for a done milestone: what changed, when and why) `docs/HANDOFF.md` (where the work stands and
+  what is left open) and `docs/history.md` (what the handoff said of a round once it is no longer the current work
+  moves there, never deleted). A change is not done while one of the four does not say it.
 - **Ask before** anything outward-facing that is not part of the task (closing issues, deleting branches or
   releases, publishing a tag).
 - **UI is shown, never committed:** render screens headless (`ImageComposeScene`, in a temporary test you delete

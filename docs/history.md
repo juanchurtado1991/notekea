@@ -157,3 +157,75 @@ these choices taken before the work started:
 - **Ghost (added):** the readers of the model's JSON catch only Ghost Serializer's parse error, so a programming
   error is not taken for a bad reply.
 - **Not in it:** web search (dropped by the developer for now).
+
+## Videos and M5 on `feature/videos` (#142): the rounds that are no longer the current work
+
+Moved from the handoff on 2026-11-14. The round of that day (the chat's work stands on what it read, the tree's drag
+and Duplicate, a new note's properties) is the current work and is in `docs/HANDOFF.md`.
+
+### The smoke of 2026-11-13: the chat and the web clips
+
+- **Chat:** answers are drawn as Markdown (`AnswerMarkdown`, `NotekeaMarkdown(isCompact, inlineContent)`; citations
+  stay chips, drawn inline through `InlineLinks`), the steps are a list of tasks with checks (`ChatTasks`,
+  `ChatEntry.passed`), and the list follows the text by what it measures (`FollowNewest`: Markdown is laid out a
+  moment after its text changes). The prompts ask for a shaped reply (`ReplyFormat.MARKDOWN`).
+- **Web clips:** a probe of fifteen real sites drove the fixes. The article is Markdown blocks (`HtmlMarkdown`,
+  `HtmlInline`, `HtmlTable`) cleaned of the site's chrome (`ArticleBlocks`, the extractor's `CHROME`); the section
+  search takes links from `<a>` only, walks `..`, drops a wiki's namespaces, and offers no section for a page with
+  hundreds of pages beside it in a site's first folder (`SectionLinks.mostBeside`). Notes clipped before read as
+  changed at their next update and are rewritten once in the new shape.
+- **Also:** the welcome waits for the vault's first scan (`OnboardingGate`, `WindowLoading`), and the YouTube
+  player hides under anything drawn over the window (`WindowCovers`, told by each overlay with `CoversWindow()`).
+- **A page's links (chat):** four rows (`ChatSectionQuestion`, `NotekeaOptionRow`), a deep choice counted first
+  (`WebPageClipper.counted`, `ClipWords.COUNT_FIRST`, `SectionRequest`), the scan kept for the clip
+  (`ClipsForChat.scan`), the whole documentation up to 1,000 pages (`SectionLinks.FULL_DEPTH`), no model summary
+  past 40 pages. `SectionLinks.isIndex` suggests going deeper.
+- **Agent answers:** written apart from the moves, from what they found only (`AgentFinalAnswer`): asked for
+  Markdown inside the move's own summary, the model made up an answer (Auto-Test 3.3-05).
+- **Follow-ups:** `FollowUps`, `ChatFollowUps`, under the last answer.
+- **Not found, look in the site:** `ChatSiteSearch` (`ChatEntry.sites`, `sitePages`, `pickedPages`), the port
+  `SourceSites` with `SourceSitesForChat`, `WebSourceSearch` in clips (pages not clipped yet, ranked with the
+  embedding model, clipped into their section by `UpdatedSection.add`), and `AnswerFromPagesUseCase`, which answers
+  from the pages just clipped since the index has not read them yet.
+- **Study cards of a subject:** `CardsNamed` makes a request for cards a card step for each note it is about (five
+  at most); `ActOnRequestUseCase.composed` leaves out a note that backs none. Agent mode makes no cards.
+- **A move cut short:** `AgentTaskUseCase.readMove` asks again with `AgentTaskPrompt.CUT_SHORT` and more room, then
+  ends on what it found (`unread`).
+- **Fixed since from the code review of 2026-11-13** (each with its test):
+  - **Chat:** an action never writes or moves outside the vault (`RelativePath.isInside`); a plan that throws is
+    taken back (`VaultActionRunner.takenBack`); Undo says when it cannot, and leaves a note the person changed;
+    Clear history cancels a compaction; a button of an older turn starts no second turn; `AnswerPrompt.SAYS_NONE`
+    keeps "No hay azúcar… [1]." an answer; a question of a page's links is not kept in the history.
+  - **Editor:** Locate stays in its own text; one compression at a time; FFmpeg's exit code and install lock.
+  - **Settings and design:** Files reads the vault again when shown; date samples with a day over 12; the theme
+    sets `surfaceContainer*`, `secondary*` and `scrim`; darker light warning and success; focus rings of the switch
+    and the pop-up button.
+  - **Tree:** a case-only rename leaves no ghost; an unclosed `---` keeps the note's tags; a line is read up to
+    1 MB; the watcher logs when it stops; the welcome ignores clicks while a vault opens.
+  - **Sync:** the status never stays at Syncing; a merge that fails goes back clean; an older conflict's copy is
+    set aside (`FreeFile`); errors hide a token; fetch and push time out; a new file over 100 MB is left out
+    (`LargeFiles`).
+  - **Core, shell, others:** links encode `#`, parentheses and `%`; Windows device names refused; Obsidian's
+    settings written atomically; the cache database kept unless it is broken; preference saves in order; the chat
+    forgets a closed note; the side panel waits for its restore; three PDFs stay open; a deck's tag in any form;
+    a page deleted from a section stays deleted; reserved address ranges refused; the hardware probed once; a
+    selection of no case refused; releases test before packaging.
+- **Fixed in the last round:** empty folders in Settings › Files (`AttachmentStore.folders`); a copy that fails
+  leaves no file; two Notekeas merge what each changed into settings.properties; a comment after a YAML value
+  (`YamlValues.withoutComment`); a token written in a remote's address goes to the keychain (`RemoteAddress`); a
+  tree read before a rename (`TreeRenaming.withPending`); a poster is kept once made; pictures are decoded no wider
+  than drawn (`decodedImage(maxWidth)`); the YouTube player joins the window by its title and hands the keyboard
+  back (`MacWebView.contentView`, `yieldKeyboard`); CI counts a deleted document as code; the chat's web sources
+  resolve from the real modules (`DesktopModulesTest`).
+- **Left open on purpose** (none loses a note):
+  - **Sync:** a repository left MERGING or REBASING by a crash is not repaired by itself: the only repair is a hard
+    reset, which would discard what the person wrote since. It needs a decision, and a dialog.
+  - **Editor:** a broken embed lists the vault again when the text changes. That listing is what finds a file
+    added outside Notekea (`EditorAttachmentsTest`); a throttle needs the vault's watcher to tell the editor.
+  - **YouTube:** the page's own full screen is not followed, and the window match was not seen on screen.
+  - **Tree:** the note cache of a vault removed from the recents stays in the database (vault and tree are two
+    features; it needs a port in the shell).
+  - **Core:** `NoteTextCache` is one per consumer and unbounded; the three `HttpClient`s live as long as the app.
+  - **Tests and CI:** `expectNoText` passes at once by design (`expectTextStaysAway` waits); milestone builds are
+    versioned 1.M.K, above 1.0.0, which the first release will not install over; Koin's own `verify()` is not
+    used (it needs koin-test).
