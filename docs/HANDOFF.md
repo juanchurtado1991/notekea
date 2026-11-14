@@ -220,6 +220,9 @@ what was measured"), each with what it changes in the design:
 - **How many tools:** 98 % right among 5, 96 % among 10, 91 % among 20, 84 % among 33: ten tools at most in a
   toolset, so *write* and *organize* are split in step 5.
 - **Koog:** read in its documentation of today (1.3.0); a loop of our own, with tools shaped as Koog's and MCP's.
+- **Fixtures:** `smoke-data/eval/fixtures/actions-medium.json`, the model's raw replies to the 126 requests,
+  replayed in `check` by `ActionFixturesTest`; `ActionFixturesChatModelTest` records them again when the planner's
+  prompt changes on purpose.
 
 **Measuring on a Mac left alone:** it falls asleep in the middle of a run (a 3-minute test took 20). Run model
 tests as `caffeinate -is ./gradlew …`; `RawChatModel` (the test helper of these experiments, the model as llama.cpp

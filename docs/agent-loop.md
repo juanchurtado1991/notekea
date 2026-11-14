@@ -331,6 +331,16 @@ stays open: a tool is a name, a description, typed arguments and a result with a
 `Tool<Args, Result>` and MCP both have it. When extensions arrive (post-MVP item 1) the question is asked again
 for the MCP client alone, Koog's module or the MCP Kotlin SDK directly; `LIBRARIES.md` does not change now.
 
+### The net: the model's replies as fixtures — recorded 2026-11-14, Medium
+
+`smoke-data/eval/fixtures/actions-medium.json` holds, for each of the 126 requests of the action evaluation, every
+reply the Medium model gave the planner, word for word, and whether the plan that came of it was the expected one
+(123 of 126 with one slot; the evaluation's own run, four at a time, gave 92 %). `ActionFixturesTest` replays them
+through `FakeLlmEngine` in `check`: each reply must still become the plan it became. So everything between the
+model's reply and the plan (the reader, the 74 regexes, the checks) is held in place with no model, which is what
+steps 1 to 6 need while they move that work into tools and a router. `ActionFixturesChatModelTest` records them
+again (five minutes) when the planner's prompt changes on purpose; a recording shows as a diff a request a line.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and

@@ -343,6 +343,7 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      one shared context give a lone call all of it, if the engine admits calls by their tokens; a tool call is our
      JSON under a grammar per tool (113 of 126 requests right, against 107 for today's flat schema and 100 for the
      model's own format); ten tools at most in a toolset; and a loop of our own, not Koog.
+   - **Step 0, the net:** the model's replies to the action evaluation are fixtures replayed in `check`.
 
 ## Out of scope for the MVP
 
