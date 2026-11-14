@@ -157,31 +157,42 @@ pasted documentation page asks its question in the chat again.
   at most); `ActOnRequestUseCase.composed` leaves out a note that backs none. Agent mode makes no cards.
 - **A move cut short:** `AgentTaskUseCase.readMove` asks again with `AgentTaskPrompt.CUT_SHORT` and more room, then
   ends on what it found (`unread`).
-- **Fixed since from the code review of 2026-11-13:** an action never writes outside the vault
-  (`RelativePath.isInside`, `NoteWriter`); a button of an older turn starts no second turn mid-answer; Undo says
-  when it could not take the action back (`ActionProblem.CannotUndo`); the YouTube player releases its
-  configuration, keeps nothing on disk, waits for the window at startup and keeps its callback alive; Windows
-  opens a file without a shell (`ProcessFileOpener`); a file already gone is not trashed twice; Git's fetch and
-  push time out after 60 s.
-- **Still open from that review** (none of them loses a note; the list with its files is in the session of
-  2026-11-13):
-  - **YouTube:** the player is added to the key window, not surely Notekea's own; the first responder is not
-    handed back to the window; element full screen is not followed; `TabKind.YOUTUBE` is not a `WorkPlace`.
-  - **Chat:** Clear history does not cancel a compaction under way; a failed action is not rolled back; an undo
-    of a created note trashes it even when the person changed it; the section question is not shown again after a
-    reload; `AnswerPrompt.isNotFound` reads some real answers as not found; token budgets over the model's window.
-  - **Editor:** "Locate…" inside an embedded note; posters restarted on every keystroke and never cleaned;
-    full-resolution image decoding; two compressions at once.
-  - **Settings › Files:** empty folders are not offered; the lists are not reloaded on reopen; DD-MM and MM-DD
-    read alike. Design: unset color roles, contrast of the warning and success colors, keyboard access of the
-    video bars.
-  - **Tree:** a rename that changes only the case leaves a ghost; heavy work on the interface's thread; an
-    unclosed `---` drops tags and tasks; cache rows never deleted.
-  - **Git:** a merge or rebase left half way; files over 100 MB; token and keyring errors; a URL with its token.
-    **AI:** the hardware probe is not cached; cancelling an install can delete an installed model.
-  - **Core, tests, CI, DI:** two instances overwrite settings.properties; link rewrite does not escape `#` and
-    parentheses; `NoteTextCache` unbounded; reserved Windows names; `expectNoText`'s meaning; an empty `-Pcases`
-    passes; the release workflow runs no tests; no Koin graph check.
+- **Fixed since from the code review of 2026-11-13** (each with its test):
+  - **Chat:** an action never writes or moves outside the vault (`RelativePath.isInside`); a plan that throws is
+    taken back (`VaultActionRunner.takenBack`); Undo says when it cannot, and leaves a note the person changed;
+    Clear history cancels a compaction; a button of an older turn starts no second turn; `AnswerPrompt.SAYS_NONE`
+    keeps "No hay azúcar… [1]." an answer; a question of a page's links is not kept in the history.
+  - **Editor:** Locate stays in its own text; one compression at a time; FFmpeg's exit code and install lock.
+  - **Settings and design:** Files reads the vault again when shown; date samples with a day over 12; the theme
+    sets `surfaceContainer*`, `secondary*` and `scrim`; darker light warning and success; focus rings of the switch
+    and the pop-up button.
+  - **Tree:** a case-only rename leaves no ghost; an unclosed `---` keeps the note's tags; a line is read up to
+    1 MB; the watcher logs when it stops; the welcome ignores clicks while a vault opens.
+  - **Sync:** the status never stays at Syncing; a merge that fails goes back clean; an older conflict's copy is
+    set aside (`FreeFile`); errors hide a token; fetch and push time out; a new file over 100 MB is left out
+    (`LargeFiles`).
+  - **Core, shell, others:** links encode `#`, parentheses and `%`; Windows device names refused; Obsidian's
+    settings written atomically; the cache database kept unless it is broken; preference saves in order; the chat
+    forgets a closed note; the side panel waits for its restore; three PDFs stay open; a deck's tag in any form;
+    a page deleted from a section stays deleted; reserved address ranges refused; the hardware probed once; a
+    selection of no case refused; releases test before packaging.
+- **Still open from that review** (none loses a note):
+  - **YouTube:** the player is added to the key window, not surely Notekea's own (`MacWebView.contentView`: match
+    `orderedWindows` by the window's title, which needs an `ObjC.count`); the first responder is not handed back;
+    element full screen is not followed. Not done because it cannot be checked without the app on screen.
+  - **Editor:** posters are asked again on every keystroke (`EditorFiles.update` cancels `makePosters`) and their
+    cache is never cleaned; a broken embed walks the vault each time (`EditorAttachments.viewsIn`); images are
+    decoded at full resolution (`ImageDecoding.kt`).
+  - **Settings › Files:** empty folders are not offered (needs `AttachmentStore.folders`).
+  - **Tree:** an optimistic rename can be undone by a tree computed before it (`VaultTreeViewModel.observe`); the
+    note cache of a vault removed from the recents is never deleted.
+  - **Sync:** a repository left MERGING or REBASING by a crash is not repaired (resetting it could lose edits made
+    since); keyring errors are silent; an address written with its token is stored with it.
+  - **Core:** two Notekeas overwrite each other's settings.properties; `NoteTextCache` is one per consumer and
+    unbounded; an attachment copy that fails leaves a cut file; YAML comments after a value stay in it.
+  - **Tests, CI, DI:** `expectNoText` passes at once (documented; `expectTextStaysAway` exists); milestone builds
+    are versioned above 1.0.0; the docs-only filter skips `KDocLinksTest`; no Koin graph check; three
+    `HttpClient`s are never closed.
 
 ## The release run
 

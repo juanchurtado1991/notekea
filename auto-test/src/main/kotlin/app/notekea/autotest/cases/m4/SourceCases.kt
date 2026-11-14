@@ -32,6 +32,7 @@ fun SuiteBuilder.sourceCases() {
     studyChoiceCases()
     webUpdateCases()
     clipDepthCases()
+    lookFurtherCases()
 }
 
 private fun SuiteBuilder.document() {

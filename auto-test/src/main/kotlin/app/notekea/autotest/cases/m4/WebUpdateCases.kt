@@ -73,16 +73,21 @@ internal fun SuiteBuilder.clipDepthCases() {
         steps(
             text =
             "1. Con un modelo de chat instalado, abre la Playground Vault y el chat.\n2. " +
-                "Pide: clip https://developer.android.com/develop\n3. En la pregunta, elige 2 " +
-                "niveles.\n4. Mira el chat mientras trabaja y, al terminar, haz clic en Hacerlo."
+                "Pide: clip https://wordpress.org/documentation/\n3. En la pregunta, elige Ir más " +
+                "profundo.\n4. Cuando diga cuántas páginas encontró, elige Recortar N páginas.\n5. " +
+                "Mira el chat mientras trabaja y, al terminar, haz clic en Hacerlo.\n6. Pide lo " +
+                "mismo otra vez y elige Documentación completa."
         )
 
         expected(
             text =
-            "La pregunta ofrece Solo esta página, Esta página y N más, y 2 o 3 niveles. " +
-                "Mientras trabaja, el chat dice cuántas páginas dieron los enlaces hasta ahora y " +
-                "luego Recortando la página n de m, con una barra. Al final hay notas de las " +
-                "páginas de dos niveles en Web sources."
+            "La pregunta dice cuántos enlaces encontró y lista cuatro filas, cada una con qué " +
+                "recorta y cuánto: Solo esta página, Esta página y sus enlaces, Ir más profundo y " +
+                "Documentación completa, con la que encaja marcada Recomendada. Una opción profunda " +
+                "sigue primero los enlaces (el chat dice cuántas páginas lleva), dice cuántas " +
+                "encontró y vuelve a preguntar antes de recortar. Luego dice Recortando la página " +
+                "n de m, con una barra. Cada nota guarda el texto con su forma (títulos, listas, " +
+                "código, tablas), sin el menú del sitio."
         )
     }
 }
