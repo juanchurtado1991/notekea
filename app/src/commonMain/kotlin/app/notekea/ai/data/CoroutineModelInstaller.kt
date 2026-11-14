@@ -19,6 +19,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
@@ -126,6 +127,16 @@ class CoroutineModelInstaller(
                     it.size == size
                 }
                 ?.file
+
+            // Cancelled a moment after it finished: the model is the one in use now, and is not deleted under it.
+            val active = activeModelStore.observe().first()
+
+            val isInUse =
+                active == size &&
+                    model != null &&
+                    storage.isInstalled(file = model)
+
+            if (isInUse) return@launch
 
             (started + listOfNotNull(model))
                 .distinct()

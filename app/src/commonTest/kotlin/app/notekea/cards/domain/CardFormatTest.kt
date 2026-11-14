@@ -117,4 +117,25 @@ class CardFormatTest {
             actual = CardFormat.blockOf(cards = listOf("What is a::b?" to "it"))
         )
     }
+
+    // The code review of 2026-11-13: a deck tagged in its properties, or "#Flashcards", had no cards.
+    @Test
+    fun `the deck's tag counts in any case and among the note's properties`() {
+        val texts = listOf(
+            "#Flashcards\n\nCapital of Peru::Lima",
+            "---\ntags: [geography, flashcards]\n---\nCapital of Peru::Lima",
+            "---\ntags:\n  - flashcards\n---\nCapital of Peru::Lima",
+            "About flashcards in general.\n\nCapital of Peru::Lima"
+        )
+
+        assertEquals(
+            expected = listOf(1, 1, 1, 0),
+            actual = texts.map {
+                CardFormat.cardsOf(
+                    note = note,
+                    text = it
+                ).size
+            }
+        )
+    }
 }

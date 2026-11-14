@@ -5,6 +5,8 @@ import app.notekea.ai.domain.HardwareProbe
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.platform.domain.OperatingSystem
 import com.sun.management.OperatingSystemMXBean
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.lang.management.ManagementFactory
 import java.nio.file.Files
@@ -23,13 +25,19 @@ class JvmHardwareProbe(
     private val dispatchers: AppDispatchers,
     private val drmFolder: Path = Path.of(DRM_FOLDER)
 ) : HardwareProbe {
-    override suspend fun probe(): Hardware = withContext(context = dispatchers.io) {
-        val bean = ManagementFactory.getOperatingSystemMXBean() as OperatingSystemMXBean
+    // The machine does not change while the app runs: read once, not before every reply (nvidia-smi each time).
+    private val probing = Mutex()
+    private var probed: Hardware? = null
 
-        Hardware(
-            memoryGb = installedGb(visibleBytes = bean.totalMemorySize),
-            videoMemoryGb = videoMemoryGb()
-        )
+    override suspend fun probe(): Hardware = probing.withLock {
+        probed ?: withContext(context = dispatchers.io) {
+            val bean = ManagementFactory.getOperatingSystemMXBean() as OperatingSystemMXBean
+
+            Hardware(
+                memoryGb = installedGb(visibleBytes = bean.totalMemorySize),
+                videoMemoryGb = videoMemoryGb()
+            )
+        }.also { probed = it }
     }
 
     private fun videoMemoryGb(): Int? = when (operatingSystem) {

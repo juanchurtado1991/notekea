@@ -10,16 +10,23 @@ import app.notekea.core.notes.domain.RelativePath
  */
 object CardFormat {
     const val TAG = "#flashcards"
+
+    // The tag in the text in any case ("#Flashcards"), or among the note's properties ("tags: [flashcards]",
+    // "- flashcards"): a deck tagged there had no cards (the code review of 2026-11-13).
+    private val DECK = Regex(
+        pattern = "#flashcards\\b|^\\s*(tags:.*|-\\s*)\\bflashcards\\b",
+        options = setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)
+    )
     private const val SEPARATOR = "::"
     private const val FENCE = "```"
     private val SCHEDULE = Regex(pattern = "<!--SR:!(\\d{4})-(\\d{2})-(\\d{2}),(\\d+),(\\d+)-->")
 
-    /** The cards of the note at [note] with [text]; none in a note without [TAG]. */
+    /** The cards of the note at [note] with [text]; none in a note without the deck's tag ([TAG]). */
     fun cardsOf(
         note: RelativePath,
         text: String
     ): List<StudyCard> {
-        if (TAG !in text) return emptyList()
+        if (!DECK.containsMatchIn(input = text)) return emptyList()
 
         val lines = text.lines()
         var inCode = false

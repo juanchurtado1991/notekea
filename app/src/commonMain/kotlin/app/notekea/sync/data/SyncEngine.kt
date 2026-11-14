@@ -171,16 +171,23 @@ class SyncEngine(
     }
 
     private suspend fun syncNow(settings: SyncSettings) = cycle.withLock {
+        val before = mutableStatus.value
         mutableStatus.value = SyncStatus.Syncing
-        val token = tokens.read(remoteUrl = settings.remoteUrl)
 
-        val error = SyncCycle.run(
-            repository = repository,
-            vaultPath = vaultPath,
-            token = token
-        )
+        // Whatever ends the cycle (stopped half way, or something thrown), the ring stops turning.
+        try {
+            val token = tokens.read(remoteUrl = settings.remoteUrl)
 
-        mutableStatus.value = error?.let { statusOf(error = it) } ?: settled()
+            val error = SyncCycle.run(
+                repository = repository,
+                vaultPath = vaultPath,
+                token = token
+            )
+
+            mutableStatus.value = error?.let { statusOf(error = it) } ?: settled()
+        } finally {
+            if (mutableStatus.value == SyncStatus.Syncing) mutableStatus.value = before
+        }
     }
 
     /** Where the vault stands once a cycle went through: a conflict, changes not pushed, or up to date. */

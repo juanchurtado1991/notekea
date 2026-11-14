@@ -135,6 +135,9 @@ class StudyViewModel(
                 null
             }
 
+            // Choices that could not be made (the model was not ready) are asked again next time, not kept as none.
+            if (choices == null) made.remove(key = keyOf(card = card))
+
             reduce {
                 val isStill = it.current?.let(::keyOf) == keyOf(card = card) && !it.isShown
 
