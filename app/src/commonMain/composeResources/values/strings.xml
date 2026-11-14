@@ -263,6 +263,7 @@
     <string name="settings_web_last_today">Today</string>
     <string name="settings_web_last_yesterday">Yesterday</string>
     <string name="settings_web_last_days">%1$d days ago</string>
+    <string name="settings_web_failed">Could not read the pages. Check your connection and try again.</string>
     <string name="settings_web_now">Update now</string>
     <string name="settings_web_updating">Updating…</string>
     <string name="settings_web_update_never">Never</string>

@@ -122,28 +122,25 @@ class OkioVaultFileSystemTest {
         context = testDispatcher
     ) { block() }
 
-    // Import a vault from a repository (2026-11-14): a failed import leaves no folder half made.
+    // Import a vault from a repository (2026-11-14): a failed or cancelled import leaves no folder half made, not
+    // even the notes it had already brought.
     @Test
-    fun `a failed import's Git folder goes, and its folder too unless something else is in it`() =
-        runVaultTest {
-            val empty = "$DOCUMENTS/Imported"
-            val kept = "$DOCUMENTS/Kept"
-            writeFile(path = "$empty/.git/config")
-            writeFile(path = "$kept/.git/config")
-            writeFile(path = "$kept/Mine.md")
+    fun `the folder a failed import was making goes with all it had brought`() = runVaultTest {
+        val imported = "$DOCUMENTS/Imported"
+        writeFile(path = "$imported/.git/config")
+        writeFile(path = "$imported/Brought.md")
+        writeFile(path = "$DOCUMENTS/Mine.md")
 
-            vaultFileSystem().discardImport(path = empty)
-            vaultFileSystem().discardImport(path = kept)
+        vaultFileSystem().discardImport(path = imported)
 
-            assertEquals(
-                expected = listOf(false, false, true),
-                actual = listOf(
-                    fakeFileSystem.exists(path = empty.toPath()),
-                    fakeFileSystem.exists(path = "$kept/.git".toPath()),
-                    fakeFileSystem.exists(path = "$kept/Mine.md".toPath())
-                )
+        assertEquals(
+            expected = listOf(false, true),
+            actual = listOf(
+                fakeFileSystem.exists(path = imported.toPath()),
+                fakeFileSystem.exists(path = "$DOCUMENTS/Mine.md".toPath())
             )
-        }
+        )
+    }
 
     private fun unlistable(): FileSystem {
         fakeFileSystem.createDirectories(dir = NOTES.toPath())

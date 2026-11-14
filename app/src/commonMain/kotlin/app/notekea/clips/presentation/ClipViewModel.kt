@@ -225,7 +225,8 @@ class ClipViewModel(
         reduce {
             it.copy(
                 update = null,
-                isUpdateShown = isShown
+                isUpdateShown = isShown,
+                hasUpdateFailed = false
             )
         }
 
@@ -251,6 +252,7 @@ class ClipViewModel(
         if (done.updated.isNotEmpty()) emit(effect = ClipEffect.Rewritten(paths = done.updated))
         val read = done.updated.size + done.added.size + done.unchanged
         if (read > 0 || done.failed == 0) automatic?.done(vaultPath = vaultPath)
+        reduce { it.copy(hasUpdateFailed = read == 0 && done.failed > 0) }
         showLastUpdate()
     }
 

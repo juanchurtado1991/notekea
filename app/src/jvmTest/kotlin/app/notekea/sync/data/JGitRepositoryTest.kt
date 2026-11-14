@@ -9,7 +9,11 @@ import app.notekea.sync.domain.SyncError
 import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.TransportException
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.transport.Daemon
 import java.io.File
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.UnknownHostException
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -71,6 +75,47 @@ class JGitRepositoryTest {
 
         pulled
     }
+
+    // Code review, 2026-11-14: connecting pushed even with nothing to push, so a repository the person can only read
+    // failed to import after its notes had been brought. Git's own daemon serves it here, which takes no pushes.
+    @Test
+    fun `a repository that takes no pushes still connects when there is nothing to push`() =
+        runBlocking {
+            laptop.write(
+                path = "Home.md",
+                text = "# Home"
+            )
+
+            git.connect(
+                vaultPath = laptop.path,
+                remoteUrl = url,
+                token = null
+            )
+
+            val daemon = Daemon(InetSocketAddress(InetAddress.getLoopbackAddress(), 0))
+
+            daemon.setRepositoryResolver { _, _ ->
+                FileRepositoryBuilder().setGitDir(remote).build()
+            }
+
+            daemon.start()
+            val imported = File(root, "Read only").apply { mkdirs() }
+
+            val connected = try {
+                git.connect(
+                    vaultPath = imported.path,
+                    remoteUrl = "git://127.0.0.1:${daemon.address.port}/remote.git",
+                    token = null
+                )
+            } finally {
+                daemon.stop()
+            }
+
+            assertEquals(
+                expected = listOf<Any?>(true, "# Home"),
+                actual = listOf<Any?>(connected is Outcome.Success, imported.read(path = "Home.md"))
+            )
+        }
 
     // Import a vault from a repository (2026-11-14): connecting a new, empty folder brings everything the remote has.
     @Test

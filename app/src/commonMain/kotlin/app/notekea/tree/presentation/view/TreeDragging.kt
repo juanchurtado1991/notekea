@@ -59,7 +59,8 @@ internal fun Modifier.treeDrag(
     ) {
         moved += amount
         val isDragging = drag.dragged == row.path
-        if (!isDragging && moved.getDistance() < startDistance) return
+        val isStillAClick = !isDragging && moved.getDistance() < startDistance
+        if (isStillAClick) return
 
         if (!isDragging) {
             drag.start(

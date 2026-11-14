@@ -337,6 +337,47 @@ class GroundedWorkTest {
         )
     }
 
+    // Code review, 2026-11-14: thirty long notes asked for 6,600 tokens of digests, and a long source for more
+    // output than the 4,096-token context has left.
+    @Test
+    fun `many long notes and a long source are written within the model's context`() = runTest {
+        val many = (1..30).map { RelativePath(value = "Folder/Note $it.md") }
+        many.forEach { store.texts[it] = "A fact about the lease. ".repeat(n = 40) }
+        script(written = listOf("A summary of the lease."))
+
+        compose(
+            ActionStep(
+                kind = ActionKind.WRITE_FROM_NOTES,
+                notes = many,
+                title = "Summary",
+                text = "a summary"
+            ),
+            "summarize them",
+            VAULT,
+            many.map { entry(path = it.value) }
+        )
+
+        val digests = engine
+            .options
+            .dropLast(n = 1)
+            .sumOf { it.maxTokens }
+
+        val written = engine
+            .options
+            .last()
+            .maxTokens
+
+        val read = engine
+            .generated
+            .last()
+            .sumOf { it.text.length } / 3
+
+        assertEquals(
+            expected = listOf(30, true, true),
+            actual = listOf(engine.options.size - 1, digests <= 2_200, written + read <= 4_096)
+        )
+    }
+
     @Test
     fun `placeholders and unbacked figures are told from a text taken from the notes`() {
         assertEquals(

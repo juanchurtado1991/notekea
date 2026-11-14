@@ -24,7 +24,9 @@ data class ClipState(
     val update: UpdateStep? = null,
     val isUpdateShown: Boolean = false,
     // How many days ago the web sources were last updated (0 is today), null when never: Settings → General says it.
-    val daysSinceUpdate: Int? = null
+    val daysSinceUpdate: Int? = null,
+    // The last update read none of its pages (no connection): said where it was asked for without its dialog.
+    val hasUpdateFailed: Boolean = false
 ) {
     val isAsking: Boolean get() =
         section != null &&

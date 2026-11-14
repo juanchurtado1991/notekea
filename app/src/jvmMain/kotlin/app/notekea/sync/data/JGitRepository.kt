@@ -244,8 +244,20 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         git: Git,
         token: String?
     ) {
-        if (git.repository.resolve(JGitMerge.HEAD) == null) return
+        val head = git.repository.resolve(JGitMerge.HEAD) ?: return
         val branch = git.repository.branch
+
+        // With nothing the remote lacks there is nothing to push, and the remote is not asked to be written: a
+        // repository the person can only read (someone else's notes, a read-only token) still connects and syncs
+        // what it publishes (code review, 2026-11-14: importing one failed after its notes were brought).
+        val isUpToDate = head == git.repository.resolve("refs/remotes/$ORIGIN/$branch")
+
+        if (isUpToDate) {
+            return track(
+                git = git,
+                branch = branch
+            )
+        }
 
         val updates = git
             .push()
@@ -262,6 +274,16 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
 
         if (refused != null) error("$PUSH_REFUSED ${refused.status}: ${refused.message.orEmpty()}")
 
+        track(
+            git = git,
+            branch = branch
+        )
+    }
+
+    private fun track(
+        git: Git,
+        branch: String
+    ) {
         git
             .repository
             .config

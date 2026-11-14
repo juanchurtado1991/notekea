@@ -100,7 +100,9 @@ class SyncEngine(
         val settings = written.copy(remoteUrl = address.url)
         mutableStatus.value = SyncStatus.Syncing
 
-        (token?.takeIf { it.isNotBlank() } ?: address.secret)?.let {
+        val typed = token?.takeIf { it.isNotBlank() } ?: address.secret
+
+        typed?.let {
             tokens.save(
                 remoteUrl = settings.remoteUrl,
                 token = it
@@ -121,6 +123,11 @@ class SyncEngine(
             }
 
             is Outcome.Failure -> {
+                // A token just typed that the remote refused is not kept: left there it was sent again when the
+                // field was later left empty, for a repository that needs none (code review, 2026-11-14).
+                val isRefused = typed != null && connected.error == SyncError.AuthFailed
+                if (isRefused) tokens.delete(remoteUrl = settings.remoteUrl)
+
                 mutableStatus.value = statusOf(error = connected.error)
                 Outcome.Failure(error = connected.error)
             }

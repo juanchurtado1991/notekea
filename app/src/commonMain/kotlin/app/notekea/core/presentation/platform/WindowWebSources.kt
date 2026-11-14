@@ -13,4 +13,7 @@ class WindowWebSources {
     var updateNow: (() -> Unit)? by mutableStateOf(value = null)
     var daysSinceUpdate: Int? by mutableStateOf(value = null)
     var isUpdating: Boolean by mutableStateOf(value = false)
+
+    /** The last update asked for read none of its pages: Settings says so, since it runs without its dialog. */
+    var hasFailed: Boolean by mutableStateOf(value = false)
 }

@@ -13,8 +13,8 @@ interface VaultFileSystem {
     ): Outcome<String, VaultError>
 
     /**
-     * Takes away what a failed import left in the folder made for it: its Git folder, and the folder itself when
-     * nothing else is in it. Anything else there is never touched.
+     * Takes away the folder a failed or cancelled import was making, with what it had brought so far. Only ever
+     * called for a folder [createFolder] made or found empty for that import, so nothing of the person's is in it.
      */
     suspend fun discardImport(path: String)
 

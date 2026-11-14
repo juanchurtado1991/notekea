@@ -68,9 +68,10 @@ private fun ReportWebSources(clip: ClipViewModel) {
     val sources = LocalWindowWebSources.current
     val state by clip.state.collectAsState()
 
-    LaunchedEffect(state.daysSinceUpdate, state.update) {
+    LaunchedEffect(state.daysSinceUpdate, state.update, state.hasUpdateFailed) {
         sources.daysSinceUpdate = state.daysSinceUpdate
         sources.isUpdating = state.update is UpdateStep.Reading
+        sources.hasFailed = state.hasUpdateFailed
     }
 
     DisposableEffect(clip) {
@@ -80,6 +81,7 @@ private fun ReportWebSources(clip: ClipViewModel) {
             sources.updateNow = null
             sources.daysSinceUpdate = null
             sources.isUpdating = false
+            sources.hasFailed = false
         }
     }
 }

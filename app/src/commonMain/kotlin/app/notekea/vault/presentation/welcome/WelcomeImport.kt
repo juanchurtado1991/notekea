@@ -77,13 +77,19 @@ internal class WelcomeImport(
         }
     }
 
-    // An import under way stops, and the panel stays to try again; with none, the panel closes.
+    // An import under way stops, and the panel stays to try again; with none, the panel closes. The screen stays busy
+    // until the import has really ended: Git's work is not interrupted at once, and Import pressed meanwhile would
+    // do nothing (code review, 2026-11-14).
     private fun cancel() {
         val running = job?.takeIf { it.isActive }
 
         if (running != null) {
             running.cancel()
-            reduce { it.copy(isBusy = false) }
+
+            launch {
+                running.join()
+                reduce { it.copy(isBusy = false) }
+            }
         } else {
             reduce {
                 it.copy(

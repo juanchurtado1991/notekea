@@ -13,6 +13,7 @@ import app.notekea.core.presentation.designsystem.components.settings.NotekeaSet
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalWindowWebSources
 import app.notekea.resources.Res
+import app.notekea.resources.settings_web_failed
 import app.notekea.resources.settings_web_group
 import app.notekea.resources.settings_web_last
 import app.notekea.resources.settings_web_last_days
@@ -72,6 +73,7 @@ internal fun WebUpdateSetting(
             LastUpdate(
                 days = sources.daysSinceUpdate,
                 isUpdating = sources.isUpdating,
+                hasFailed = sources.hasFailed,
                 onUpdate = update
             )
         }
@@ -87,15 +89,19 @@ internal fun WebUpdateSetting(
 @Composable
 private fun LastUpdate(
     isUpdating: Boolean,
+    hasFailed: Boolean,
     onUpdate: () -> Unit,
     days: Int?
 ) {
-    val detail = when (days) {
+    val last = when (days) {
         null -> stringResource(resource = Res.string.settings_web_last_never)
         0 -> stringResource(resource = Res.string.settings_web_last_today)
         1 -> stringResource(resource = Res.string.settings_web_last_yesterday)
         else -> stringResource(Res.string.settings_web_last_days, days)
     }
+
+    // Update now runs without its dialog: what went wrong is said here, in its place.
+    val detail = if (hasFailed) stringResource(resource = Res.string.settings_web_failed) else last
 
     val button = if (isUpdating) Res.string.settings_web_updating else Res.string.settings_web_now
 

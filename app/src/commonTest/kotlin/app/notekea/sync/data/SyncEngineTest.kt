@@ -175,6 +175,31 @@ class SyncEngineTest {
         )
     }
 
+    // Code review, 2026-11-14: a refused token stayed in the keychain and was sent again with the field empty.
+    @Test
+    fun `a token the remote refuses is not kept, one that only met no connection is`() = runTest {
+        val engine = engine()
+        repository.connectError = SyncError.AuthFailed
+
+        engine.connect(
+            settings = SyncSettings(remoteUrl = URL),
+            token = TOKEN
+        )
+
+        val refused = tokens.tokens[URL]
+        repository.connectError = SyncError.Offline
+
+        engine.connect(
+            settings = SyncSettings(remoteUrl = URL),
+            token = TOKEN
+        )
+
+        assertEquals(
+            expected = null to TOKEN,
+            actual = refused to tokens.tokens[URL]
+        )
+    }
+
     @Test
     fun `disconnecting forgets the settings and the token`() = runTest {
         val engine = engine()

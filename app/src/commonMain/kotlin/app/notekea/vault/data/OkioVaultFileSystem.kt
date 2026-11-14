@@ -49,8 +49,9 @@ class OkioVaultFileSystem(
         val folder = path.toPath()
 
         try {
-            fileSystem.deleteRecursively(fileOrDirectory = folder / GIT_FOLDER)
-            if (isEmptyFolder(folder = folder)) fileSystem.delete(path = folder)
+            // All of it: notes already checked out without their Git folder would be a vault that no longer syncs,
+            // and would take the folder's name from the next try (code review, 2026-11-14).
+            fileSystem.deleteRecursively(fileOrDirectory = folder)
         } catch (_: IOException) {
             // What could not be removed stays: the next import names the folder as taken.
         }
@@ -92,6 +93,5 @@ class OkioVaultFileSystem(
 
     companion object {
         private const val DOCUMENTS_FOLDER = "Documents"
-        private const val GIT_FOLDER = ".git"
     }
 }

@@ -89,6 +89,40 @@ class GeneralSettingsTest {
             )
         }
 
+    // Code review, 2026-11-14: Update now runs without its dialog, and offline it ended without a word.
+    @Test
+    fun `an update that could read no page says so in place of the last update`() =
+        runComposeUiTest {
+            val sources = WindowWebSources().apply {
+                updateNow = {}
+                daysSinceUpdate = 3
+                hasFailed = true
+            }
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    CompositionLocalProvider(LocalWindowWebSources provides sources) {
+                        GeneralSettings(
+                            preferences = AppPreferences(),
+                            onIntent = {},
+                            spotlight = null
+                        )
+                    }
+                }
+            }
+
+            assertEquals(
+                expected = listOf(1, 0),
+                actual = listOf(
+                    onAllNodesWithText(
+                        text = "Could not read the pages",
+                        substring = true
+                    ).fetchSemanticsNodes().size,
+                    onAllNodesWithText(text = "3 days ago").fetchSemanticsNodes().size
+                )
+            )
+        }
+
     @Test
     fun `with no vault open there is nothing to update now`() = runComposeUiTest {
         setContent {
