@@ -7,7 +7,10 @@ import app.notekea.core.domain.Outcome
  * work, reached through this port: features do not depend on each other). `token` is null for a repository that
  * needs none.
  */
-fun interface VaultImporter {
+interface VaultImporter {
+    /** Whether [remoteUrl] is the address of a repository that can be brought: asked before any folder is made. */
+    fun isAddress(remoteUrl: String): Boolean
+
     suspend fun import(
         vaultPath: String,
         remoteUrl: String,

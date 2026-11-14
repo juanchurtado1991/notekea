@@ -177,6 +177,14 @@ First run flow, three steps, skippable at any point:
    it only if you turn on sync.", reworded on 2026-11-11 because sync sends them to the repository).
 2. **Choose your notes:** open folder / create vault / use the sample vault.
 3. **Get the AI:** recommended model for this machine's RAM, download in the background while indexing starts.
+- **Import from a repository (the developer, 2026-11-14):** the welcome screen's third action, where Open the sample
+  vault was (the first-run welcome still offers the sample). A panel in place, as Create a new vault's: Repository
+  address (HTTPS, or `file:` for a folder), Token (only for a private one, kept in the keychain), Folder name (it
+  follows the repository's name until typed) and Location. `ImportVaultUseCase` checks the address before making
+  any folder, never writes into a folder that holds files, and takes away what it made when the repository cannot
+  be brought or the import is cancelled; the notes come through the sync feature (`VaultImporter`,
+  `SyncVaultImporter`), so the vault opens already syncing. Problems are said under the field they are about
+  (`ImportProblemPlace`). Case 1.3-11.
 
 ### 🚧 5.2 Settings — `feature/videos` (built, in [notekea#142](https://github.com/juanchurtado1991/notekea/pull/142): macOS System Settings style, General, Editor, Files, Shortcuts, About, and Spanish)
 

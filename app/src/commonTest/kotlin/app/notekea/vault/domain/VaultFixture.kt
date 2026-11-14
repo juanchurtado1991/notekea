@@ -34,6 +34,15 @@ class VaultFixture {
         openVault = openVault,
         removeRecentVault = removeRecentVault
     )
+
+    /** Import from a repository over this fixture's folders, [importer] standing for the sync feature. */
+    fun importVault(importer: VaultImporter): ImportVaultUseCase = ImportVaultUseCase(
+        vaultFileSystem = fileSystem,
+        validateFileName = validateFileName,
+        importer = importer,
+        openVault = openVault
+    )
+
     val restoreLastVault = RestoreLastVaultUseCase(
         recentVaultsStore = store,
         openVault = openVault

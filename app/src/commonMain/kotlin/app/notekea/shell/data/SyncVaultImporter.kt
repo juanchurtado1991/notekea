@@ -14,14 +14,15 @@ import app.notekea.vault.domain.VaultImporter
  * keeps it.
  */
 class SyncVaultImporter(private val vaultSyncs: VaultSyncs) : VaultImporter {
+    override fun isAddress(remoteUrl: String): Boolean = RemoteAddress.isAddress(url = remoteUrl)
+
     override suspend fun import(
         vaultPath: String,
         remoteUrl: String,
         token: String?
     ): Outcome<Unit, VaultError> {
-        if (!RemoteAddress.isAddress(url = remoteUrl)) {
-            return Outcome.Failure(error = VaultError.RepositoryBadAddress)
-        }
+        val isAddress = isAddress(remoteUrl = remoteUrl)
+        if (!isAddress) return Outcome.Failure(error = VaultError.RepositoryBadAddress)
 
         val connected = vaultSyncs
             .of(vaultPath = vaultPath)

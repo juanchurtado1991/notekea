@@ -449,6 +449,16 @@
     <string name="tree_untitled_note">Sin título</string>
 
     <string name="welcome_busy">Abriendo la bóveda…</string>
+    <string name="welcome_import_vault">Importar desde un repositorio…</string>
+    <string name="welcome_import_title">Importar una bóveda desde un repositorio</string>
+    <string name="welcome_import_address_label">Dirección del repositorio</string>
+    <string name="welcome_import_address_placeholder">https://github.com/tu/notas.git</string>
+    <string name="welcome_import_token_label">Token</string>
+    <string name="welcome_import_token_hint">Solo si el repositorio es privado</string>
+    <string name="welcome_import_name_label">Nombre de la carpeta</string>
+    <string name="welcome_import_summary">Las notas del repositorio se traen a una carpeta nueva aquí, que queda sincronizada con él.</string>
+    <string name="welcome_import_confirm">Importar</string>
+    <string name="welcome_import_busy">Trayendo el repositorio…</string>
     <string name="onboarding_welcome_title">Te damos la bienvenida a Notekea</string>
     <string name="onboarding_private_title">Privado por defecto</string>
     <string name="onboarding_private_text">La IA funciona en esta computadora. Las notas solo salen de ella si activas la sincronización.</string>
@@ -469,7 +479,6 @@
     <string name="onboarding_skip">Omitir</string>
     <string name="onboarding_not_now">Ahora no</string>
     <string name="onboarding_step">%1$d de %2$d</string>
-    <string name="welcome_sample_vault">Abrir la bóveda de ejemplo</string>
     <string name="onboarding_sample_vault">Probar la bóveda de ejemplo</string>
     <string name="welcome_create_vault">Crear bóveda nueva</string>
     <string name="welcome_feature_ai_text">Notas relacionadas y respuestas, calculadas en tu computadora.</string>

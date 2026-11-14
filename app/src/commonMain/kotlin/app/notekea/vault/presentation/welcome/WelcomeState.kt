@@ -15,6 +15,7 @@ data class WelcomeState(
     val isBusy: Boolean = false,
     val recentVaults: List<RecentVaultStatus> = emptyList(),
     val newVaultForm: NewVaultForm? = null,
+    val importForm: ImportVaultForm? = null,
     val error: VaultError? = null,
     val hasUnexpectedError: Boolean = false,
     val openedVault: Vault? = null

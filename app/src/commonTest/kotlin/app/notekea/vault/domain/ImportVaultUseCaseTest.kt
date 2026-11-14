@@ -17,9 +17,19 @@ class ImportVaultUseCaseTest {
     private val import = ImportVaultUseCase(
         vaultFileSystem = fileSystem,
         validateFileName = ValidateFileNameUseCase(),
-        importer = { vaultPath, remoteUrl, token ->
-            imports += listOf(vaultPath, remoteUrl, token)
-            failure?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = Unit)
+        importer = object : VaultImporter {
+            override fun isAddress(remoteUrl: String): Boolean =
+                remoteUrl.startsWith(prefix = "https://")
+
+            override suspend fun import(
+                vaultPath: String,
+                remoteUrl: String,
+                token: String?
+            ): Outcome<Unit, VaultError> {
+                imports += listOf(vaultPath, remoteUrl, token)
+
+                return failure?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = Unit)
+            }
         },
         openVault = OpenVaultUseCase(
             vaultFileSystem = fileSystem,
@@ -79,6 +89,7 @@ class ImportVaultUseCaseTest {
             val taken = run()
             val unnamed = run(name = "a/b")
             val noAddress = run(url = "  ")
+            val notOne = run(url = "github.com/ana/notes")
 
             assertEquals(
                 expected = listOf<Any?>(

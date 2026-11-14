@@ -2,6 +2,9 @@ package app.notekea.vault.domain
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 /**
  * A vault brought from a Git repository (the developer's request of 2026-11-14): a new folder named `name` inside
@@ -23,9 +26,12 @@ class ImportVaultUseCase(
         val folderName = name.trim()
         val address = remoteUrl.trim()
 
+        // The address first: with none, the folder has no name to follow, and its problem is the address's.
+        val isAddress = importer.isAddress(remoteUrl = address)
+        if (!isAddress) return Outcome.Failure(error = VaultError.RepositoryBadAddress)
+
         val isNamed = validateFileName(name = folderName)
         if (!isNamed) return Outcome.Failure(error = VaultError.InvalidName)
-        if (address.isEmpty()) return Outcome.Failure(error = VaultError.RepositoryBadAddress)
 
         val folder = when (
             val created = vaultFileSystem.createFolder(parentPath = parentPath, name = folderName)
@@ -34,11 +40,18 @@ class ImportVaultUseCase(
             is Outcome.Success -> created.value
         }
 
-        val imported = importer.import(
-            vaultPath = folder,
-            remoteUrl = address,
-            token = token?.trim()?.takeIf { it.isNotEmpty() }
-        )
+        val imported = try {
+            importer.import(
+                vaultPath = folder,
+                remoteUrl = address,
+                token = token?.trim()?.takeIf { it.isNotEmpty() }
+            )
+        } catch (cancelled: CancellationException) {
+            // Cancelled half way: the folder made for it goes too, so the same name can be used again.
+            withContext(context = NonCancellable) { vaultFileSystem.discardImport(path = folder) }
+
+            throw cancelled
+        }
 
         if (imported is Outcome.Failure) {
             vaultFileSystem.discardImport(path = folder)

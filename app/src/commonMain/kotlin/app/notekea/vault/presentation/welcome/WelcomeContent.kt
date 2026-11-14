@@ -36,10 +36,10 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.resources.Res
 import app.notekea.resources.welcome_busy
 import app.notekea.resources.welcome_create_vault
+import app.notekea.resources.welcome_import_vault
 import app.notekea.resources.welcome_new_vault_default_name
 import app.notekea.resources.welcome_open_folder
 import app.notekea.resources.welcome_open_hint
-import app.notekea.resources.welcome_sample_vault
 import app.notekea.resources.welcome_tagline
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
@@ -197,8 +197,12 @@ private fun WelcomeStartColumn(
     ) {
         WelcomeHeader()
 
-        val showBanner =
-            state.hasUnexpectedError || (state.error != null && state.newVaultForm == null)
+        val showBanner = state.hasUnexpectedError ||
+            (
+                state.error != null &&
+                    state.newVaultForm == null &&
+                    state.importForm == null
+                )
 
         if (showBanner) {
             WelcomeErrorBanner(
@@ -270,6 +274,20 @@ private fun WelcomeStart(
         return
     }
 
+    val importForm = state.importForm
+
+    if (importForm != null) {
+        ImportVaultPanel(
+            form = importForm,
+            platformConventions = state.platformConventions,
+            onIntent = onIntent,
+            error = state.error,
+            isBusy = state.isBusy
+        )
+
+        return
+    }
+
     StartActions(
         state = state,
         onIntent = onIntent
@@ -309,8 +327,8 @@ private fun StartActions(
         )
 
         NotekeaButton(
-            text = stringResource(resource = Res.string.welcome_sample_vault),
-            onClick = { onIntent(WelcomeIntent.OnSampleVaultClick) },
+            text = stringResource(resource = Res.string.welcome_import_vault),
+            onClick = { onIntent(WelcomeIntent.OnImportClick) },
             style = NotekeaButtonStyle.TEXT,
             enabled = !state.isBusy
         )

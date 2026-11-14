@@ -172,8 +172,8 @@ ready, now that its properties are written first; it waits for the name (`expect
 
 Asked on 2026-11-14 before the pull request is merged: the web sources' update, which was in General and was not
 found, is General's first group with its last update and Update now (`WebUpdateSetting`, `WindowWebSources`); and a
-vault is brought from a Git repository from the welcome screen (`ImportVaultUseCase`, `SyncVaultImporter`: the
-logic and its tests are in, its screen waits for the developer's choice of design). The repair of a repository left
+vault is brought from a Git repository from the welcome screen (`ImportVaultUseCase`, `SyncVaultImporter`, `ImportVaultPanel`: a panel in place of the sample vault's link, the
+developer's choice; case 1.3-11 imports from a repository on disk in the real app). The repair of a repository left
 half merged and the one agent loop go in the next pull request, as the developer decided.
 
 Two more from the developer that day: a source clicked in the chat shows its passage without editing its lines

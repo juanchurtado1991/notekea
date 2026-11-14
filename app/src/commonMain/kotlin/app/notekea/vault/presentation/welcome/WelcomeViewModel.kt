@@ -7,6 +7,7 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.vault.domain.CreateVaultUseCase
 import app.notekea.vault.domain.FolderPicker
 import app.notekea.vault.domain.GetRecentVaultsUseCase
+import app.notekea.vault.domain.ImportVaultUseCase
 import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
 import app.notekea.vault.domain.RemoveRecentVaultUseCase
@@ -34,11 +35,27 @@ class WelcomeViewModel(
     private val restoreLastVault: RestoreLastVaultUseCase,
     private val vaultFileSystem: VaultFileSystem,
     private val preferencesStore: AppPreferencesStore,
-    private val sampleVault: SampleVaultSource
+    private val sampleVault: SampleVaultSource,
+    importVault: ImportVaultUseCase
 ) : BaseViewModel<WelcomeState, WelcomeIntent, Nothing>(
     initialState = WelcomeState(platformConventions = platformConventions)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
+
+    private val importing = WelcomeImport(
+        importVault = importVault,
+        vaultFileSystem = vaultFileSystem,
+        folderPicker = folderPicker,
+        state = { state.value },
+        reduce = ::reduce,
+        launch = { block ->
+            launchGuarded(
+                onError = ::showUnexpectedError,
+                block = block
+            )
+        },
+        open = ::openNow
+    )
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
@@ -63,7 +80,11 @@ class WelcomeViewModel(
 
     override fun handleIntent(intent: WelcomeIntent) {
         // While a vault opens, a second click (or a key) opens nothing beside it: the buttons only look disabled.
-        val isIgnored = state.value.isBusy && intent !is WelcomeIntent.OnErrorDismiss
+        // While a vault opens nothing else is taken, but the error's dismissal and an import's Cancel.
+        val isAllowed =
+            intent is WelcomeIntent.OnErrorDismiss || intent is WelcomeIntent.OnImportCancel
+
+        val isIgnored = state.value.isBusy && !isAllowed
         if (isIgnored) return
 
         when (intent) {
@@ -77,6 +98,14 @@ class WelcomeViewModel(
                     hasUnexpectedError = false
                 )
             }
+
+            WelcomeIntent.OnImportClick,
+            WelcomeIntent.OnImportCancel,
+            WelcomeIntent.OnImportConfirm,
+            WelcomeIntent.OnImportLocationClick,
+            is WelcomeIntent.OnImportNameChange,
+            is WelcomeIntent.OnImportTokenChange,
+            is WelcomeIntent.OnImportUrlChange -> importing.on(intent = intent)
 
             is WelcomeIntent.OnLocateVaultClick -> locate(missingPath = intent.missingPath)
 

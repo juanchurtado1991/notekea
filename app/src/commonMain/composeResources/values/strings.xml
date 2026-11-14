@@ -449,6 +449,16 @@
     <string name="tree_untitled_note">Untitled</string>
 
     <string name="welcome_busy">Opening vault…</string>
+    <string name="welcome_import_vault">Import from a repository…</string>
+    <string name="welcome_import_title">Import a vault from a repository</string>
+    <string name="welcome_import_address_label">Repository address</string>
+    <string name="welcome_import_address_placeholder">https://github.com/you/notes.git</string>
+    <string name="welcome_import_token_label">Token</string>
+    <string name="welcome_import_token_hint">Only for a private repository</string>
+    <string name="welcome_import_name_label">Folder name</string>
+    <string name="welcome_import_summary">The repository’s notes are brought into a new folder here, which then syncs with it.</string>
+    <string name="welcome_import_confirm">Import</string>
+    <string name="welcome_import_busy">Bringing the repository…</string>
     <string name="onboarding_welcome_title">Welcome to Notekea</string>
     <string name="onboarding_private_title">Private by default</string>
     <string name="onboarding_private_text">The AI runs on this computer. Notes leave it only if you turn on sync.</string>
@@ -469,7 +479,6 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_not_now">Not now</string>
     <string name="onboarding_step">%1$d of %2$d</string>
-    <string name="welcome_sample_vault">Open the sample vault</string>
     <string name="onboarding_sample_vault">Try the sample vault</string>
     <string name="welcome_create_vault">Create new vault</string>
     <string name="welcome_feature_ai_text">Related notes and answers, worked out on your computer.</string>

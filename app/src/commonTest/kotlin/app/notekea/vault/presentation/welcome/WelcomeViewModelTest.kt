@@ -472,7 +472,8 @@ class WelcomeViewModelTest {
             sampleVault = { folder ->
                 fixture.fileSystem.filled += folder
                 Outcome.Success(value = Unit)
-            }
+            },
+            importVault = fixture.importVault(importer = WelcomeImportTest.NoImporter)
         )
 
         advanceUntilIdle()

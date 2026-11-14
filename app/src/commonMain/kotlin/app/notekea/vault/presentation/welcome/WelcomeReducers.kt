@@ -19,6 +19,7 @@ internal fun reduceOpenOutcome(
         isBusy = false,
         openedVault = outcome.value,
         newVaultForm = null,
+        importForm = null,
         error = null
     )
 }

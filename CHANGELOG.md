@@ -75,6 +75,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Import from a repository, on the welcome screen where Open the sample vault was: the HTTPS address of a Git
+  repository of notes, its token if it is private, and a folder named after it; Import brings the notes into that
+  new folder, opens it and leaves it syncing. Each problem is said under its field (the address, the token, the
+  folder), nothing is left half made, and Cancel stops an import under way. The sample vault is still offered by the
+  first-run welcome.
 - In the tree, a note, a file or a folder is dragged onto a folder (or the empty part, for the vault's root) and moves
   there, its tab, its bookmark and the links to it following; a note's menu has Duplicate.
 - A new note starts with the properties `created` (today) and `tags` (empty), as do the notes the chat creates.

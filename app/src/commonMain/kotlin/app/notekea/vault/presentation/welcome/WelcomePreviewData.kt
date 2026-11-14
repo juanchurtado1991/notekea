@@ -42,6 +42,13 @@ internal object WelcomePreviewData {
         parentPath = DOCUMENTS_PATH
     )
 
+    val importForm = ImportVaultForm(
+        url = "https://github.com/ana/notes.git",
+        token = "",
+        name = "notes",
+        parentPath = DOCUMENTS_PATH
+    )
+
     fun state(): WelcomeState = WelcomeState(
         platformConventions = platformConventions,
         isLoading = false

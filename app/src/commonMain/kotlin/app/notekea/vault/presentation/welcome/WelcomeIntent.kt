@@ -6,6 +6,22 @@ sealed interface WelcomeIntent {
 
     data object OnErrorDismiss : WelcomeIntent
 
+    /** Import from a repository: its panel opens. */
+    data object OnImportClick : WelcomeIntent
+
+    /** Cancel on the import panel: an import under way stops, else the panel closes. */
+    data object OnImportCancel : WelcomeIntent
+
+    data object OnImportConfirm : WelcomeIntent
+
+    data object OnImportLocationClick : WelcomeIntent
+
+    data class OnImportNameChange(val name: String) : WelcomeIntent
+
+    data class OnImportTokenChange(val token: String) : WelcomeIntent
+
+    data class OnImportUrlChange(val url: String) : WelcomeIntent
+
     data class OnLocateVaultClick(val missingPath: String) : WelcomeIntent
 
     data object OnNewVaultCancel : WelcomeIntent
