@@ -45,8 +45,8 @@ internal class WelcomeImport(
 
             is WelcomeIntent.OnImportUrlChange -> update { form ->
                 // The folder is named after the repository until the person names it.
-                val name =
-                    if (form.isNamed) form.name else ImportVaultUseCase.nameOf(remoteUrl = intent.url)
+                val followed = ImportVaultUseCase.nameOf(remoteUrl = intent.url)
+                val name = if (form.isNamed) form.name else followed
 
                 form.copy(
                     url = intent.url,
