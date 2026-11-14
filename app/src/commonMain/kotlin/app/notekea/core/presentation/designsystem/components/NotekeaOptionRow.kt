@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -106,7 +107,9 @@ fun NotekeaOptionRow(
             Text(
                 text = it,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isSuggested) colors.primary else colors.onSurfaceVariant
+                color = if (isSuggested) colors.primary else colors.onSurfaceVariant,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }
@@ -119,9 +122,12 @@ private fun OptionTitle(
 ) {
     val colors = MaterialTheme.colorScheme
 
-    Row(
+    // Where the two do not fit on a line the badge goes under the title, whole: squeezed beside it, its word broke
+    // in two (the developer's smoke of 2026-11-14).
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(space = 2.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
@@ -145,7 +151,9 @@ private fun OptionTitle(
                         vertical = 1.dp
                     ),
                 style = MaterialTheme.typography.labelSmall,
-                color = colors.onPrimary
+                color = colors.onPrimary,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

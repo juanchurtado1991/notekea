@@ -150,7 +150,7 @@ private fun ChatEntryView(
             },
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
-        QuestionHeading(text = entry.question)
+        QuestionBubble(text = entry.question)
 
         CompositionLocalProvider(LocalReplyLanguage provides entry.language) {
             Answer(
@@ -162,18 +162,33 @@ private fun ChatEntryView(
     }
 }
 
-/** The question as the turn's heading, in bold over the answer (macOS redesign 7B): no bubble, no avatar. */
+/**
+ * The question in a bubble at the right, the answer under it at the left across the panel: who said what is told at
+ * a glance (the developer's request of 2026-11-14; 7B's bold heading over the answer read as one voice).
+ */
 @Composable
-private fun QuestionHeading(text: String) {
-    Text(
-        text = text,
-        modifier = Modifier.fillMaxWidth(),
-        style = MaterialTheme
-            .typography
-            .bodyMedium
-            .copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.onSurface
-    )
+private fun QuestionBubble(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = NotekeaDimensions.SpacingXl),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(
+                    horizontal = NotekeaDimensions.SpacingM,
+                    vertical = NotekeaDimensions.SpacingS
+                ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
 
 @Composable
