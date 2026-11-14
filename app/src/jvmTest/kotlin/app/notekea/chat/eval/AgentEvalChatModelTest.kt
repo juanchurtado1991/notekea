@@ -123,62 +123,10 @@ class AgentEvalChatModelTest {
         runBlocking {
             assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
 
-            val indexed = EvalVault.of(
+            val (share, report) = measured(
                 vault = VAULT,
-                embedder = embedder,
-                dispatchers = dispatchers
-            )
-
-            val notes = withMetadata(indexed = indexed)
-            val agent = agentOf(indexed = indexed)
-            val slots = Semaphore(permits = setup.slots)
-
-            val results = coroutineScope {
-                AgentEvalCases
-                    .all
-                    .map { case ->
-                        async {
-                            slots.withPermit {
-                                val start = System.nanoTime()
-
-                                val steps = agent(
-                                    task = case.task,
-                                    vaultPath = indexed.path,
-                                    notes = notes,
-                                    context = contextOf(notes = notes),
-                                    openNote = null
-                                ).toList()
-
-                                val seconds = (System.nanoTime() - start) / NANOS_PER_SECOND
-
-                                AgentResult(case, steps, seconds, case.check(steps.last()))
-                            }
-                        }
-                    }
-                    .awaitAll()
-            }
-
-            val right = results.count {
-                it.problem == null
-            }
-
-            val share = right.toDouble() / results.size
-
-            val report = report(
-                results = results,
-                right = right
-            )
-
-            File("build/reports/agent-eval-${size.id}.md").run {
-                parentFile.mkdirs()
-                writeText(text = report)
-            }
-
-            println(
-                report
-                    .lines()
-                    .take(n = 3)
-                    .joinToString(separator = "\n")
+                cases = AgentEvalCases.all,
+                name = "agent-eval"
             )
 
             assertTrue(
@@ -186,6 +134,86 @@ class AgentEvalChatModelTest {
                 message = report
             )
         }
+
+    // The wider tasks of docs/agent-loop.md, step 0: today's agent on them is the mark the one loop must pass.
+    @Test
+    fun `agent mode is measured on documents, long notes and requests read two ways`() =
+        runBlocking {
+            assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+            measured(
+                vault = AgentWideCases.VAULT,
+                cases = AgentWideCases.all.map { it.forToday() },
+                name = "agent-wide"
+            )
+
+            Unit
+        }
+
+    /** The share of [cases] done right on [vault], and the report written to `build/reports/[name]-<size>.md`. */
+    private suspend fun measured(
+        vault: String,
+        cases: List<AgentEvalCase>,
+        name: String
+    ): Pair<Double, String> {
+        val indexed = EvalVault.of(
+            vault = vault,
+            embedder = embedder,
+            dispatchers = dispatchers
+        )
+
+        val notes = withMetadata(indexed = indexed)
+        val agent = agentOf(indexed = indexed)
+        val slots = Semaphore(permits = setup.slots)
+
+        val results = coroutineScope {
+            cases
+                .map { case ->
+                    async {
+                        slots.withPermit {
+                            val start = System.nanoTime()
+
+                            val steps = agent(
+                                task = case.task,
+                                vaultPath = indexed.path,
+                                notes = notes,
+                                context = contextOf(notes = notes),
+                                openNote = null
+                            ).toList()
+
+                            val seconds = (System.nanoTime() - start) / NANOS_PER_SECOND
+
+                            AgentResult(case, steps, seconds, case.check(steps.last()))
+                        }
+                    }
+                }
+                .awaitAll()
+        }
+
+        val right = results.count {
+            it.problem == null
+        }
+
+        val report = report(
+            vault = vault,
+            results = results,
+            right = right
+        )
+
+        File("build/reports/$name-${size.id}.md").run {
+            parentFile.mkdirs()
+            writeText(text = report)
+        }
+
+        println(
+            report
+                .lines()
+                .take(n = 3)
+                .joinToString(separator = "\n")
+        )
+
+        return right.toDouble() / results.size to report
+    }
 
     private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
         val cache = NoteTextCache(
@@ -278,6 +306,7 @@ class AgentEvalChatModelTest {
     )
 
     private fun report(
+        vault: String,
         results: List<AgentResult>,
         right: Int
     ): String = buildString {
@@ -287,7 +316,7 @@ class AgentEvalChatModelTest {
             }
         }
 
-        append("# Agent mode on the Sample Vault (${size.id})\n\n")
+        append("# Agent mode on $vault (${size.id})\n\n")
         append("$right of ${results.size} right (${right * PERCENT / results.size} %), ")
         append("moves ${moves.average().toInt()} on average (${moves.max()} at most), ")
         append("${results.map { it.seconds }.average().toInt()} s a task on average (${results.maxOf { it.seconds }} s at most)\n")

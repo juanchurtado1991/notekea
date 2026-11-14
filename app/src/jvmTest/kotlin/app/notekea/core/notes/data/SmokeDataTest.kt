@@ -24,8 +24,8 @@ class SmokeDataTest {
         )
 
         assertEquals(
-            expected = mapOf(PERSONAL to 12, WORK to 6, EMPTY to 0, SAMPLE to 40, GHOST to 371),
-            actual = listOf(PERSONAL, WORK, EMPTY, SAMPLE, GHOST).associateWith {
+            expected = COUNTS,
+            actual = COUNTS.keys.associateWith {
                 val listing = scanner.scan(vaultPath = (VAULTS_DIRECTORY.toPath() / it).toString())
                 (listing as Outcome.Success).value.files.size
             }
@@ -33,11 +33,21 @@ class SmokeDataTest {
     }
 
     companion object {
+        private const val AGENT = "Agent Eval"
         private const val EMPTY = "Empty Vault"
         private const val GHOST = "Ghost Serializer"
         private const val PERSONAL = "Personal Notes"
         private const val SAMPLE = "Sample Vault"
         private const val VAULTS_DIRECTORY = "../smoke-data/vaults"
         private const val WORK = "Work Obsidian"
+
+        private val COUNTS = mapOf(
+            PERSONAL to 12,
+            WORK to 6,
+            EMPTY to 0,
+            SAMPLE to 40,
+            GHOST to 371,
+            AGENT to 9
+        )
     }
 }
