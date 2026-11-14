@@ -217,6 +217,8 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         git
             .fetch()
             .setRemote(ORIGIN)
+            // A network that stopped answering ends the sync with an error, never a ring that turns for good.
+            .setTimeout(NETWORK_SECONDS)
             .setCredentialsProvider(credentialsOf(token = token))
             .call()
 
@@ -246,6 +248,7 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         val updates = git
             .push()
             .setRemote(ORIGIN)
+            .setTimeout(NETWORK_SECONDS)
             .setRefSpecs(RefSpec("refs/heads/$branch:refs/heads/$branch"))
             .setCredentialsProvider(credentialsOf(token = token))
             .call()
@@ -304,6 +307,8 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
     }
 
     private companion object {
+        // As long as a slow connection may stay silent in the middle of a fetch or a push.
+        const val NETWORK_SECONDS = 60
         const val MAIN = "main"
         const val CORE = "core"
         const val AUTO_CRLF = "autocrlf"

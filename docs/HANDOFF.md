@@ -157,9 +157,31 @@ pasted documentation page asks its question in the chat again.
   at most); `ActOnRequestUseCase.composed` leaves out a note that backs none. Agent mode makes no cards.
 - **A move cut short:** `AgentTaskUseCase.readMove` asks again with `AgentTaskPrompt.CUT_SHORT` and more room, then
   ends on what it found (`unread`).
-- **Still open from the code review of 2026-11-13:** the YouTube player's window and cleanup, the chat's
-  presentation findings (undo, rollback, guards), and the medium findings of the editor, Settings, the tree, Git
-  and the rest.
+- **Fixed since from the code review of 2026-11-13:** an action never writes outside the vault
+  (`RelativePath.isInside`, `NoteWriter`); a button of an older turn starts no second turn mid-answer; Undo says
+  when it could not take the action back (`ActionProblem.CannotUndo`); the YouTube player releases its
+  configuration, keeps nothing on disk, waits for the window at startup and keeps its callback alive; Windows
+  opens a file without a shell (`ProcessFileOpener`); a file already gone is not trashed twice; Git's fetch and
+  push time out after 60 s.
+- **Still open from that review** (none of them loses a note; the list with its files is in the session of
+  2026-11-13):
+  - **YouTube:** the player is added to the key window, not surely Notekea's own; the first responder is not
+    handed back to the window; element full screen is not followed; `TabKind.YOUTUBE` is not a `WorkPlace`.
+  - **Chat:** Clear history does not cancel a compaction under way; a failed action is not rolled back; an undo
+    of a created note trashes it even when the person changed it; the section question is not shown again after a
+    reload; `AnswerPrompt.isNotFound` reads some real answers as not found; token budgets over the model's window.
+  - **Editor:** "Locate…" inside an embedded note; posters restarted on every keystroke and never cleaned;
+    full-resolution image decoding; two compressions at once.
+  - **Settings › Files:** empty folders are not offered; the lists are not reloaded on reopen; DD-MM and MM-DD
+    read alike. Design: unset color roles, contrast of the warning and success colors, keyboard access of the
+    video bars.
+  - **Tree:** a rename that changes only the case leaves a ghost; heavy work on the interface's thread; an
+    unclosed `---` drops tags and tasks; cache rows never deleted.
+  - **Git:** a merge or rebase left half way; files over 100 MB; token and keyring errors; a URL with its token.
+    **AI:** the hardware probe is not cached; cancelling an install can delete an installed model.
+  - **Core, tests, CI, DI:** two instances overwrite settings.properties; link rewrite does not escape `#` and
+    parentheses; `NoteTextCache` unbounded; reserved Windows names; `expectNoText`'s meaning; an empty `-Pcases`
+    passes; the release workflow runs no tests; no Koin graph check.
 
 ## The release run
 
