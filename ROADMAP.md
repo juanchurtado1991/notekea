@@ -347,7 +347,10 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      model's own format); ten tools at most in a toolset; and a loop of our own, not Koog.
    - **Step 0, the net:** the model's replies to the action evaluation are fixtures replayed in `check`, and a wider
      agent evaluation of 21 tasks (documents, long notes, ambiguous requests) on which today's agent does 7.
-     Step 0 is done; step 1 is next.
+     Step 0 is done.
+   - **Step 2 (2026-11-14), done:** the engine shares its context among the slots and admits calls by tokens;
+     the chat counts in the model's tokens (`ModelProfile`, `ContextBudget`) in place of character constants.
+     The evaluations stand where they stood (27 of 30, 7 of 21). Step 3 is next.
 
 ## Out of scope for the MVP
 

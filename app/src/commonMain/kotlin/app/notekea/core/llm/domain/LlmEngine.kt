@@ -18,6 +18,12 @@ interface LlmEngine {
         options: GenerationOptions = GenerationOptions()
     ): Flow<String>
 
+    /**
+     * How many tokens [text] is to the model in use, counted by its own tokenizer; an estimate from its length
+     * when no model can be loaded to count.
+     */
+    suspend fun countTokens(text: String): Int
+
     /** The model in use, or why there is none that can answer now; nothing is loaded to tell. */
     suspend fun readiness(): Outcome<LlmModelInfo, LlmError>
 

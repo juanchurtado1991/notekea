@@ -37,6 +37,9 @@ class FakeLlmEngine : LlmEngine {
 
     override suspend fun readiness(): Outcome<LlmModelInfo, LlmError> = readiness
 
+    // Four characters a token, as English is on average: enough to test a budget.
+    override suspend fun countTokens(text: String): Int = (text.length + 3) / 4
+
     override suspend fun rerank(
         query: String,
         texts: List<String>

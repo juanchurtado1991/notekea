@@ -18,6 +18,7 @@ import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
+import app.notekea.core.llm.domain.LlmModelInfo
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
@@ -377,6 +378,54 @@ class GroundedWorkTest {
             actual = listOf(engine.options.size - 1, digests <= 2_200, written + read <= 4_096)
         )
     }
+
+    // `docs/agent-loop.md`, step 2: 12,000 characters are 3,000 tokens, more than a 4,096 context reads at once and
+    // well within the 8,192 the loop is given where the machine has them.
+    @Test
+    fun `a document the model's context holds is read whole, and digested only where it does not fit`() =
+        runTest {
+            val long = RelativePath(value = "Folder/Long.md")
+            store.texts[long] = "A fact about the lease. ".repeat(n = 500)
+            script(written = listOf("A digest.", "A digest.", "A summary.", "A summary."))
+
+            val step = ActionStep(
+                kind = ActionKind.WRITE_FROM_NOTES,
+                notes = listOf(long),
+                title = "Summary",
+                text = "a summary"
+            )
+
+            compose(step, "summarize it", VAULT, listOf(entry(path = long.value)))
+            val narrow = engine.generated.size
+
+            engine.readiness = Outcome.Success(
+                value = LlmModelInfo(
+                    isSmall = false,
+                    contextTokens = 16_384
+                )
+            )
+
+            compose(step, "summarize it", VAULT, listOf(entry(path = long.value)))
+
+            assertEquals(
+                expected = listOf(3, 1, true),
+                actual = listOf(
+                    narrow,
+                    engine.generated.size - narrow,
+                    engine
+                        .generated
+                        .last()
+                        .last()
+                        .text
+                        .contains(
+                            other = store
+                                .texts
+                                .getValue(long)
+                                .trim()
+                        )
+                )
+            )
+        }
 
     @Test
     fun `placeholders and unbacked figures are told from a text taken from the notes`() {

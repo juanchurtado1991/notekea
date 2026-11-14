@@ -405,6 +405,37 @@ step 5. `ToolResult`'s other faces (`forPerson`, `passages`) come with the tools
 (Medium): the 30 tasks of 4.7, 27 right (90 %; the bar to offer agent mode is 80 %), 35 s a task; the wider
 evaluation, 7 of 21 (33 %), the same seven as before, 42 s a task against 39.
 
+## Step 2, done — 2026-11-14
+
+**The engine.** The four slots share one context (`setKvUnified(true)`), and `TokenRoom` admits calls by their
+tokens: a call waits while the calls under way and it would pass the total, a lone call is admitted whenever it
+fits, and one longer than the whole context fails at once and is logged, where it used to fail inside llama.
+`LlmEngine` gained `countTokens(text)` (the model's own tokenizer) and `LlmModelInfo.contextTokens` (the slots'
+context together: 16,384 on a machine with four slots, 4,096 with one).
+
+**The domain** (`chat/domain/context`). `ModelProfile` says what the loop may use of the model: its context, and
+of it 8,192 tokens at most for the loop, so a move is read in seconds. `ContextBudget`, one a turn, fits what the
+turn found beside the prompt's fixed part and the reply: whole entries, the oldest dropped first and several at
+once (down to three quarters of the room, so the prompt's start is not rewritten at every move), the newest
+always kept, a line said in place of what was dropped, and what was dropped stays dropped (`FittedContext`).
+
+**What it replaced.** The agent kept the last 9,000 characters of what it found, cut wherever they fell: it now
+fits it by tokens. `NotesWriter` assumed a 4,096-token context and three characters a token: it counts, so a
+document that fits the context is read whole and digested only where it does not (12,000 characters: three calls
+in a 4,096 context, one in 16,384). The other character constants of the chat are sizes of one result or belong
+to what later steps remove, and go with them: `ChatMemory` and `WorkRecord` in step 3, the look-ups' own caps
+(`ReadTool` 2,500, `FetchTool` 3,000) with `read` by section in step 4, the question agent's and the
+conversation's in step 6.
+
+**Tests.** `TokenRoomTest` (admission by tokens), `ContextBudgetTest`, `ContextBudgetPropertyTest` (300 turns made
+at random: what is kept fits, whole and in order, the newest stays, what was dropped never comes back),
+`AgentContextTest` (twelve long notes read one after another: no prompt longer than the context) and
+`GroundedWorkTest` (a fitting document read whole).
+
+**The gate.** Every test of the chat passes. With the real model (Medium, four slots over the shared context):
+the 30 tasks of 4.7, 27 right (90 %), 30 s a task against 35; the wider evaluation, 7 of 21 (33 %), the same
+count as before, 42 s a task. No call was refused for its length.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
