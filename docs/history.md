@@ -229,3 +229,13 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   - **Tests and CI:** `expectNoText` passes at once by design (`expectTextStaysAway` waits); milestone builds are
     versioned 1.M.K, above 1.0.0, which the first release will not install over; Koin's own `verify()` is not
     used (it needs koin-test).
+
+
+## One agent loop on `feature/one-agent-loop`: what the handoff said of step 0 as it went
+
+- **2026-11-14, night (after the first experiment):** the first experiment is done and written in
+  `docs/agent-loop.md` ("Step 0, what was measured"): one slot of 16,384 tokens costs the memory of today's four of
+  4,096 and reads a 27,000-character document right. Next, in this order: the shared context
+  (`setKvUnified(true)`) against fewer slots; the model's own tool-calling format against our JSON; a grammar per
+  tool against the flat schema; how many tools the model chooses well among; Koog's current documentation against a
+  loop of our own; then the fixtures and the wider agent evaluation.
