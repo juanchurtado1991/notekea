@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.links.LinkUpdateResult
 import app.notekea.tree.domain.TrashLocation
+import app.notekea.tree.domain.VaultChange
 import app.notekea.tree.presentation.model.RenameDraft
 import app.notekea.tree.presentation.model.TreeNotice
 import app.notekea.tree.presentation.model.VaultTreeEffect
@@ -74,6 +75,27 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
                 viewModel.state.value.renaming to contents.texts[path("$PROJECTS/Untitled.md")]
             )
         }
+
+    // The code review of 2026-11-13: a tree read a moment before a rename put the old name back in the tree.
+    @Test
+    fun `a tree read before a rename does not bring the old name back`() = runTreeTest {
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+
+        // The scan still lists the old name: it began before the rename reached the disk.
+        watcher.emit(change = VaultChange.Overflow)
+        advanceUntilIdle()
+
+        val names = viewModel.state.value.tree.notes.keys
+
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(path("Start here.md") in names, path(WELCOME) in names)
+        )
+    }
 
     @Test
     fun `confirming a rename twice at once moves the entry once`() = runTreeTest {

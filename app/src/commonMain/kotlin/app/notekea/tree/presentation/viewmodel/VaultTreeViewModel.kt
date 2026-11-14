@@ -412,7 +412,7 @@ class VaultTreeViewModel(
                     updateTree {
                         reduceTreeLoaded(
                             state = it,
-                            tree = outcome.value
+                            tree = renaming.withPending(tree = outcome.value)
                         )
                     }
                 }

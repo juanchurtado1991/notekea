@@ -3,6 +3,7 @@ package app.notekea.tree.presentation.viewmodel
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.notes.domain.links.LinkUpdateResult
 import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
 import app.notekea.tree.presentation.model.VaultTreeEffect
@@ -53,6 +54,33 @@ internal class TreeRenaming(
         }
     }
 
+    // Renames done on disk that a tree read before them does not show yet.
+    private val pending = mutableListOf<Pair<RelativePath, RelativePath>>()
+
+    /**
+     * [tree] with the renames it was read too early to show: a tree scanned a moment before a rename put the old
+     * name back until the next change (the code review of 2026-11-13). A rename is forgotten once a tree no longer
+     * holds its old name.
+     */
+    fun withPending(tree: VaultTree): VaultTree {
+        pending.removeAll { (from, _) ->
+            !tree.holds(path = from)
+        }
+
+        return pending
+            .fold(initial = tree) { current, (from, to) ->
+                current.renamed(
+                    from = from,
+                    to = to
+                )
+            }
+    }
+
+    private fun VaultTree.holds(path: RelativePath): Boolean =
+        (notes.keys + attachments.keys + folders).any {
+            it == path || it.isWithin(folder = path)
+        }
+
     fun confirm() {
         val draft = host.state.value.renaming ?: return
         if (job?.isActive == true) return
@@ -85,6 +113,7 @@ internal class TreeRenaming(
 
             if (isMoved) {
                 renames++
+                pending += draft.path to outcome.value
 
                 bookmarks.change {
                     it.renamed(

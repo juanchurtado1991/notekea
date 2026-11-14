@@ -51,6 +51,7 @@ import kotlin.time.Instant
 abstract class VaultTreeViewModelTestBase {
     protected val testDispatcher = StandardTestDispatcher()
     protected val scanner = FakeNoteScanner()
+    protected val watcher = FakeFileWatcher()
     protected val operations = FakeNoteFileOperations()
     protected val trash = FakeTrash()
     protected val revealer = FakeFileRevealer()
@@ -132,7 +133,7 @@ abstract class VaultTreeViewModelTestBase {
             observeVaultTree = ObserveVaultTreeUseCase(
                 noteScanner = scanner,
                 noteMetadataReader = FakeNoteMetadataReader(),
-                fileWatcher = FakeFileWatcher(),
+                fileWatcher = watcher,
                 noteMetadataCache = FakeNoteMetadataCache()
             ),
             flattenTree = FlattenTreeUseCase(naturalNameComparator = NaturalNameComparator()),
