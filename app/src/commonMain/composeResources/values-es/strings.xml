@@ -1009,7 +1009,7 @@
     <string name="chat_step_finding_es">Siguiendo los enlaces: %1$d páginas hasta ahora…</string>
     <string name="chat_step_clipping">Clipping page %1$d of %2$d: %3$s</string>
     <string name="chat_step_clipping_es">Recortando la página %1$d de %2$d: %3$s</string>
-    <string name="chat_step_clipping_label">Pages clipped</string>
+    <string name="chat_step_clipping_label">Páginas recortadas</string>
     <string name="chat_section_only">Only this page</string>
     <string name="chat_section_only_es">Solo esta página</string>
     <string name="chat_page_address_es">Esa no es una dirección web que pueda abrir. Escríbela completa, empezando por https://.</string>

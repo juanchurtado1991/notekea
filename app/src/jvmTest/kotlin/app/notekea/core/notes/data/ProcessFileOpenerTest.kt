@@ -51,7 +51,8 @@ class ProcessFileOpenerTest {
                 expected = listOf(
                     listOf("xdg-open", file),
                     listOf("open", file),
-                    listOf("cmd", "/c", "start", "\"\"", file),
+                    // Never through cmd, which would run what a file name like "a & calc.exe" says.
+                    listOf("rundll32", "url.dll,FileProtocolHandler", file),
                     listOf("xdg-open", file)
                 ),
                 actual = commands

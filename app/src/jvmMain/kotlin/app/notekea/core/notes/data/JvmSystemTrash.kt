@@ -29,6 +29,9 @@ class JvmSystemTrash(
         canUseTrash && Desktop.getDesktop().moveToTrash(file)
     } catch (_: SecurityException) {
         false
+    } catch (_: IllegalArgumentException) {
+        // The file is gone already (trashed twice, or by another program): there is nothing to move.
+        false
     } catch (_: UnsupportedOperationException) {
         false
     }

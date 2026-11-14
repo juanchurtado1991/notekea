@@ -12,8 +12,8 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 /**
- * [FileOpener] with each system's own command, as a double click in the file manager: `open` on macOS, `start` on
- * Windows and `xdg-open` on Linux. A file that no longer exists is reported instead.
+ * [FileOpener] with each system's own command, as a double click in the file manager: `open` on macOS, the
+ * file handler on Windows and `xdg-open` on Linux. A file that no longer exists is reported instead.
  * [runCommand] runs a command and returns its exit code, or null when it could not run (see `ProcessCommands.kt`).
  */
 class ProcessFileOpener(
@@ -35,8 +35,11 @@ class ProcessFileOpener(
 
         val command = when (operatingSystem) {
             OperatingSystem.LINUX -> listOf(XDG_OPEN, file.toString())
+
             OperatingSystem.MACOS -> listOf(OPEN, file.toString())
-            OperatingSystem.WINDOWS -> listOf(CMD, CMD_RUN, START, START_TITLE, file.toString())
+
+            // Never through cmd: a file named "a & calc.exe" would run what its name says (2026-11-13).
+            OperatingSystem.WINDOWS -> listOf(RUNDLL, FILE_HANDLER, file.toString())
         }
 
         if (runCommand(command) == SUCCESS) {
@@ -47,13 +50,11 @@ class ProcessFileOpener(
     }
 
     companion object {
-        private const val CMD = "cmd"
-        private const val CMD_RUN = "/c"
         private const val OPEN = "open"
-        private const val START = "start"
 
-        // `start` takes its first quoted argument as the window title, so an empty one comes before the file.
-        private const val START_TITLE = "\"\""
+        // What a double click runs, given the file as one argument no shell reads.
+        private const val RUNDLL = "rundll32"
+        private const val FILE_HANDLER = "url.dll,FileProtocolHandler"
         private const val SUCCESS = 0
         private const val XDG_OPEN = "xdg-open"
     }
