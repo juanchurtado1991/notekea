@@ -40,7 +40,7 @@ class OkioNoteMetadataReader(
                 .source(file = vaultPath.toPath() / path.value)
                 .buffer()
                 .use { source ->
-                    val firstLine = source.readUtf8Line()?.removePrefix(prefix = BYTE_ORDER_MARK)
+                    val firstLine = lineOf(source = source)?.removePrefix(prefix = BYTE_ORDER_MARK)
 
                     // What the frontmatter's search read: when it is never closed these are the note's text, and
                     // were lost with its tags and tasks (the code review of 2026-11-13).
@@ -101,7 +101,7 @@ class OkioNoteMetadataReader(
         var length = 0
 
         while (length <= MAX_FRONTMATTER_CHARACTERS) {
-            val line = source.readUtf8Line() ?: return null
+            val line = lineOf(source = source) ?: return null
 
             if (line.trimEnd() in CLOSING_FENCES) {
                 return lines.joinToString(separator = LINE_SEPARATOR)
@@ -114,6 +114,36 @@ class OkioNoteMetadataReader(
         return null
     }
 
+    /**
+     * The next line of [source], at most [MAX_LINE_BYTES] of it: a file that is one line of hundreds of megabytes
+     * was read whole into memory to find its tags (the code review of 2026-11-13). The rest of such a line is skipped.
+     */
+    private fun lineOf(source: BufferedSource): String? {
+        val end = source.indexOf(NEW_LINE, 0, MAX_LINE_BYTES)
+        val isShort = end != -1L || !source.request(byteCount = MAX_LINE_BYTES)
+        if (isShort) return source.readUtf8Line()
+
+        val start = source.readUtf8(byteCount = MAX_LINE_BYTES)
+
+        while (true) {
+            val next = source.indexOf(NEW_LINE, 0, MAX_LINE_BYTES)
+
+            if (next != -1L) {
+                source.skip(byteCount = next + 1)
+                break
+            }
+
+            if (!source.request(byteCount = MAX_LINE_BYTES)) {
+                source.skip(byteCount = source.buffer.size)
+                break
+            }
+
+            source.skip(byteCount = MAX_LINE_BYTES)
+        }
+
+        return start
+    }
+
     /** The lines left in [source], up to [MAX_TEXT_CHARACTERS]. */
     private fun linesOf(source: BufferedSource): Sequence<String> {
         var read = 0
@@ -121,7 +151,7 @@ class OkioNoteMetadataReader(
         return generateSequence {
             source.takeIf {
                 read < MAX_TEXT_CHARACTERS
-            }?.readUtf8Line()
+            }?.let { lineOf(source = it) }
         }
             .onEach { read += it.length + 1 }
     }
@@ -129,6 +159,8 @@ class OkioNoteMetadataReader(
     companion object {
         const val MAX_FRONTMATTER_CHARACTERS = 64 * 1024
         const val MAX_TEXT_CHARACTERS = 1024 * 1024
+        private const val MAX_LINE_BYTES = 1024L * 1024
+        private const val NEW_LINE = '\n'.code.toByte()
         private const val BYTE_ORDER_MARK = "\uFEFF"
         private const val LINE_SEPARATOR = "\n"
         private const val OPENING_FENCE = "---"

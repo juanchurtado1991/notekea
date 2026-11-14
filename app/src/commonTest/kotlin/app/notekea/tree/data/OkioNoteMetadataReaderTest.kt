@@ -125,6 +125,17 @@ class OkioNoteMetadataReaderTest {
         }
 
     @Test
+    fun `a line longer than the reader takes is cut, and the lines after it are still read`() =
+        runReaderTest {
+            writeNote(content = "#first " + "x".repeat(n = LONG_LINE) + " #lost\nThen #later.\n")
+
+            assertEquals(
+                expected = listOf("first", "later"),
+                actual = readNote()?.textTags
+            )
+        }
+
+    @Test
     fun `windows line endings, a byte order mark and a dots closing fence are accepted`() =
         runReaderTest {
             writeNote(content = "\uFEFF---\r\ntitle: Arepas\r\n...\r\nBody\r\n")
@@ -190,6 +201,7 @@ class OkioNoteMetadataReaderTest {
     }
 
     companion object {
+        const val LONG_LINE = 3 * 1024 * 1024
         private const val NOTE = "Note.md"
         private const val VAULT = "/home/ana/Notes"
     }
