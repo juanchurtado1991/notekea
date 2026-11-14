@@ -1,0 +1,251 @@
+package app.notekea.chat.domain.tool.app
+
+import app.notekea.core.domain.time.CalendarDate
+
+/**
+ * The day a phrase names, counted from today by the app: "tomorrow", "next Friday", "in 3 weeks", "end of month",
+ * in English or Spanish. The model gets weekdays and month lengths wrong; the calendar does not.
+ */
+internal object DatePhrases {
+    private const val WEEK = 7L
+    private val ISO = Regex(pattern = "(\\d{4})-(\\d{1,2})-(\\d{1,2})")
+    private val AHEAD = Regex(pattern = "(?:in|en|dentro de) (\\d+) ([a-z]+)")
+    private val BACK = Regex(pattern = "(\\d+) ([a-z]+) ago|hace (\\d+) ([a-z]+)")
+    private val ACCENTS =
+        mapOf('á' to 'a', 'é' to 'e', 'í' to 'i', 'ó' to 'o', 'ú' to 'u', 'ñ' to 'n')
+
+    private val WEEKDAYS = listOf(
+        listOf("monday", "lunes"),
+        listOf("tuesday", "martes"),
+        listOf("wednesday", "miercoles"),
+        listOf("thursday", "jueves"),
+        listOf("friday", "viernes"),
+        listOf("saturday", "sabado"),
+        listOf("sunday", "domingo")
+    )
+
+    private val NAMES =
+        listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+    private val FIXED = listOf(
+        listOf("day after tomorrow", "pasado manana") to 2L,
+        listOf("tomorrow", "manana") to 1L,
+        listOf("yesterday", "ayer") to -1L,
+        listOf("today", "hoy") to 0L,
+        listOf("next week", "proxima semana", "semana que viene") to WEEK
+    )
+
+    /** The day [phrase] names, counted from [today]; null when it names none this reads. */
+    fun of(
+        phrase: String,
+        today: CalendarDate
+    ): CalendarDate? {
+        val said = phrase
+            .lowercase()
+            .map {
+                ACCENTS[it] ?: it
+            }
+            .joinToString(separator = "")
+
+        val fixed = FIXED.firstOrNull { (words, _) ->
+            words.any {
+                it in said
+            }
+        }
+
+        val weekday = WEEKDAYS.indexOfFirst { names ->
+            names.any {
+                it in said
+            }
+        }
+
+        return written(said = said)
+            ?: moved(
+                said = said,
+                today = today
+            )
+            ?: ended(
+                said = said,
+                today = today
+            )
+            ?: fixed?.let { today.plusDays(days = it.second) }
+            ?: weekday.takeIf {
+                it >= 0
+            }?.let {
+                coming(
+                    weekday = it + 1,
+                    today = today
+                )
+            }
+    }
+
+    /** [date] as `2026-11-20 (Friday)`. */
+    fun written(date: CalendarDate): String {
+        val month = date
+            .month
+            .toString()
+            .padStart(
+                length = 2,
+                padChar = '0'
+            )
+
+        val day = date
+            .day
+            .toString()
+            .padStart(
+                length = 2,
+                padChar = '0'
+            )
+
+        return "${date.year}-$month-$day (${NAMES[date.dayOfWeek - 1]})"
+    }
+
+    private fun written(said: String): CalendarDate? = ISO.find(input = said)?.let { match ->
+        CalendarDate(
+            year = match.groupValues[1].toInt(),
+            month = match.groupValues[2].toInt(),
+            day = match.groupValues[3].toInt()
+        ).takeIf { it.isValid }
+    }
+
+    // "in 3 weeks", "hace 2 meses", "next month".
+    private fun moved(
+        said: String,
+        today: CalendarDate
+    ): CalendarDate? {
+        val ahead = AHEAD.find(input = said)?.groupValues
+
+        val back = BACK
+            .find(input = said)
+            ?.groupValues
+            ?.filter { it.isNotEmpty() }
+
+        val isNextMonth =
+            "next month" in said ||
+                "proximo mes" in said ||
+                "mes que viene" in said
+
+        val isNextYear =
+            "next year" in said ||
+                "proximo ano" in said ||
+                "ano que viene" in said
+
+        return when {
+            ahead != null -> shifted(
+                today = today,
+                count = ahead[1].toLong(),
+                unit = ahead[2]
+            )
+
+            back != null -> shifted(
+                today = today,
+                count = -back[1].toLong(),
+                unit = back[2]
+            )
+
+            isNextMonth -> plusMonths(
+                date = today,
+                months = 1
+            )
+
+            isNextYear -> plusMonths(
+                date = today,
+                months = CalendarDate.MONTHS.toLong()
+            )
+
+            else -> null
+        }
+    }
+
+    private fun shifted(
+        today: CalendarDate,
+        count: Long,
+        unit: String
+    ): CalendarDate? = when {
+        unit.startsWith(prefix = "day") || unit.startsWith(prefix = "dia") ->
+            today.plusDays(days = count)
+
+        unit.startsWith(prefix = "week") || unit.startsWith(prefix = "semana") ->
+            today.plusDays(days = count * CalendarDate.DAYS_IN_WEEK)
+
+        unit.startsWith(prefix = "month") || unit.startsWith(prefix = "mes") ->
+            plusMonths(
+                date = today,
+                months = count
+            )
+
+        unit.startsWith(prefix = "year") || unit.startsWith(prefix = "ano") ->
+            plusMonths(
+                date = today,
+                months = count * CalendarDate.MONTHS
+            )
+
+        else -> null
+    }
+
+    private fun ended(
+        said: String,
+        today: CalendarDate
+    ): CalendarDate? {
+        val isEnd =
+            "end of" in said ||
+                "fin de" in said ||
+                "final de" in said
+
+        val isYear = "year" in said || " ano" in said
+        val isMonth = "month" in said || "mes" in said
+
+        return when {
+            !isEnd -> null
+
+            isYear -> today.copy(
+                month = CalendarDate.MONTHS,
+                day = LAST_DAY_OF_YEAR
+            )
+
+            isMonth -> today.copy(
+                day = CalendarDate.lengthOfMonth(
+                    year = today.year,
+                    month = today.month
+                )
+            )
+
+            else -> null
+        }
+    }
+
+    // The next day that is [weekday] (1 for Monday), never today itself.
+    private fun coming(
+        weekday: Int,
+        today: CalendarDate
+    ): CalendarDate {
+        val ahead = (weekday - today.dayOfWeek).mod(other = CalendarDate.DAYS_IN_WEEK)
+
+        val days = if (ahead == 0) WEEK else ahead.toLong()
+
+        return today.plusDays(days = days)
+    }
+
+    // The same day [months] later, or the month's last day when it has no such day (31 January, a month on).
+    private fun plusMonths(
+        date: CalendarDate,
+        months: Long
+    ): CalendarDate {
+        val index = date.year * CalendarDate.MONTHS + (date.month - 1) + months
+        val year = index.floorDiv(other = CalendarDate.MONTHS).toInt()
+        val month = index.mod(other = CalendarDate.MONTHS) + 1
+
+        val length = CalendarDate.lengthOfMonth(
+            year = year,
+            month = month
+        )
+
+        return CalendarDate(
+            year = year,
+            month = month,
+            day = date.day.coerceAtMost(maximumValue = length)
+        )
+    }
+
+    private const val LAST_DAY_OF_YEAR = 31
+}

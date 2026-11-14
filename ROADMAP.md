@@ -353,7 +353,10 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      The evaluations stand where they stood (27 of 30, 7 of 21). 
    - **Step 3 (2026-11-14), done:** the chat is a `Conversation` in the domain (turns with their calls, results,
      text and proposals), kept in the history from the moment a turn is asked; a chat opened again knows what it
-     did. Step 4 is next.
+     did. 
+   - **Step 4 (2026-11-14), done:** the reading tools (outline, read by section, list, links, digest), what the
+     app does itself (calculate, count, date), the working memory (plan, note), ask_user, the skills and the
+     vault's instructions; built and tested, called by the loop of step 5, which is next.
 
 ## Out of scope for the MVP
 

@@ -231,6 +231,14 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
     used (it needs koin-test).
 
 
+## One agent loop, step 4 (2026-11-14): the tools, before the loop
+
+- The handoff said until then: "Next: step 4 (the reading and working tools, skills, the vault's instructions)".
+  Built as classes with their tests and left uncalled: today's agent names its moves in a hand-written prompt and
+  a flat schema, and giving it eleven more would have gone against step 0's measure (ten tools at most, a grammar
+  per tool). The setting for where the vault's instructions and skills live was left for step 5, with what reads
+  them; until then `Notekea.md` and `Skills/`.
+
 ## One agent loop, step 3 (2026-11-14): the conversation in the domain
 
 - The handoff said until then: "Next: step 3 (`Conversation` in the domain, persisted)". Before it the history
