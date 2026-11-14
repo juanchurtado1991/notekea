@@ -5,9 +5,7 @@ import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
 import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.plan.ActionContext
-import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.PlanRequestUseCase
-import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -122,15 +120,10 @@ class ActionEvalChatModelTest {
         val millis = (System.nanoTime() - start) / NANOS_PER_MILLI
         val expected = request.get("steps").toList()
 
-        val merged = merged(steps = steps)
-
-        val isRight = merged.size == expected.size &&
-            merged.zip(expected).all { (step, wanted) ->
-                matches(
-                    step = step,
-                    wanted = wanted
-                )
-            }
+        val isRight = ActionGrade.isRight(
+            steps = steps,
+            expected = expected
+        )
 
         val written = steps
             .joinToString(separator = " | ") { step ->
@@ -146,58 +139,6 @@ class ActionEvalChatModelTest {
             }
 
         return Triple(isRight, "$isRight\t${asked.lines().first().take(n = 80)}\t$written", millis)
-    }
-
-    /** Steps of one action in a row, each on one note, as one step on all of them: the same plan. */
-    private fun merged(steps: List<PlannedStep>): List<PlannedStep> = steps
-        .fold(emptyList()) { kept, step ->
-            val last = kept.lastOrNull()
-
-            val isSame =
-                last != null &&
-                    last.kind == step.kind &&
-                    last.kind.isConfirmed &&
-                    last.fields - ActionField.NOTE == step.fields - ActionField.NOTE
-
-            if (!isSame) {
-                kept + step
-            } else {
-                kept.dropLast(n = 1) + last.copy(
-                    fields = last.fields - ActionField.NOTE,
-                    notes = last.notes +
-                        listOfNotNull(last[ActionField.NOTE], step[ActionField.NOTE]) +
-                        step.notes
-                )
-            }
-        }
-
-    private fun matches(
-        step: PlannedStep,
-        wanted: com.fasterxml.jackson.databind.JsonNode
-    ): Boolean {
-        if (step.kind.written != wanted.get("action").asText()) return false
-
-        return wanted
-            .get("fields")
-            .properties()
-            .all { (name, value) ->
-                val field = ActionField.entries.first {
-                    it.written == name
-                }
-
-                val listed = if (field == ActionField.NOTE) step.notes else emptyList()
-                val planned = listOfNotNull(step[field]) + listed
-
-                val expected = value.asText().lowercase()
-
-                // A folder's notes, listed one by one, are that folder.
-                val isFolderListed =
-                    field == ActionField.FOLDER &&
-                        step.notes.isNotEmpty() &&
-                        step.notes.all { it.lowercase().startsWith(prefix = "$expected/") }
-
-                isFolderListed || planned.any { expected.isEmpty() || expected in it.lowercase() }
-            }
     }
 
     private companion object {
@@ -226,7 +167,7 @@ class ActionEvalChatModelTest {
 }
 
 /** What the Sample Vault names, as committed (local edits to `smoke-data` change no number), for the plan's context. */
-private object SampleVaultNames {
+internal object SampleVaultNames {
     private const val ROOT = "smoke-data/vaults/Sample Vault/"
 
     private val files = git("ls-files", "-z", "--", ROOT)

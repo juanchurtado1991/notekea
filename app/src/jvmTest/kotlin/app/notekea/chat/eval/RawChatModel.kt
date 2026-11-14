@@ -1,6 +1,7 @@
 package app.notekea.chat.eval
 
 import app.notekea.core.llm.domain.ChatMessage
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -79,6 +80,13 @@ class RawChatModel(
     /** [text] as the tree it is, for a `tools` or `json_schema` written as a string. */
     fun tree(text: String): JsonNode = json.readTree(text)
 
+    /** [text] as a tree, or null when it is not whole JSON: a reply cut at its token limit. */
+    fun parsed(text: String): JsonNode? = try {
+        json.readTree(text)
+    } catch (_: JsonProcessingException) {
+        null
+    }
+
     private fun read(reply: JsonNode): RawReply {
         val message = reply.at("/choices/0/message")
         val call = message.at("/tool_calls/0/function")
@@ -96,7 +104,7 @@ class RawChatModel(
                 .path("arguments")
                 .asText()
                 .ifEmpty { null }
-                ?.let { json.readTree(it) },
+                ?.let { parsed(text = it) },
             calls = message.path("tool_calls").size(),
             promptTokens = reply.at("/usage/prompt_tokens").asInt(),
             cachedTokens = reply.at("/timings/cache_n").asInt(),
