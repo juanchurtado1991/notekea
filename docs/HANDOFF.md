@@ -208,13 +208,25 @@ figure check catches figures the notes lack, not a figure put beside the wrong t
 sets, with the real model, and time). Step 0 is under way: fixtures, a wider agent evaluation and four experiments
 whose results are written into that document before anything is built.
 
-**Where step 0 stands (2026-11-14, night):** the first experiment is done and written in `docs/agent-loop.md`
-("Step 0, what was measured"): one slot of 16,384 tokens costs the memory of today's four of 4,096 and reads a
-27,000-character document right. Next, in this order: the shared context (`setKvUnified(true)`) against fewer
-slots; the model's own tool-calling format against our JSON; a grammar per tool against the flat schema; how many
-tools the model chooses well among; Koog's current documentation against a loop of our own; then the fixtures
-(today's requests with the model's raw replies, replayed through `FakeLlmEngine`) and the wider agent evaluation.
-Nothing of step 1 is started.
+**Where step 0 stands (2026-11-14):** two experiments are done and written in `docs/agent-loop.md` ("Step 0, what
+was measured"). One slot of 16,384 tokens costs the memory of today's four of 4,096 and reads a 27,000-character
+document right; and four slots over one shared context (`setKvUnified(true)`) give a lone call that whole context
+while short calls still run side by side, with one danger: calls that together pass the total all fail, so the
+engine must admit calls by their tokens (step 2). Next, in this order: the model's own tool-calling format against
+our JSON; a grammar per tool against the flat schema; how many tools the model chooses well among; Koog's current
+documentation against a loop of our own; then the fixtures (today's requests with the model's raw replies, replayed
+through `FakeLlmEngine`) and the wider agent evaluation. Nothing of step 1 is started.
+
+**Measuring on a Mac left alone:** it falls asleep in the middle of a run (a 3-minute test took 20). Run model
+tests as `caffeinate -is ./gradlew …`; `RawChatModel` (the test helper of these experiments, the model as llama.cpp
+gives it) reports the model's own times, which sleep does not stretch.
+
+**The commit hook's "BUILD FAILED" of 2026-11-14 had a cause, fixed in the hook:** git gives its hooks
+`GIT_INDEX_FILE`, JGit reads it, and so `JGitRepositoryTest` (which makes repositories of its own) used this
+repository's index: its import case counted 2 pending changes, and the index was left holding the test's file
+(`git status` then says "unable to read"; `git reset` with no arguments rebuilds it and touches no file). The hook
+now runs Gradle without git's variables. Left open: the app itself would follow a `GIT_INDEX_FILE` or `GIT_DIR` of
+its environment the same way; `JGitRepository` could open its repositories without reading the environment.
 
 Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
 is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted

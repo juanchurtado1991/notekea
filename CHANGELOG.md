@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- One agent loop, step 0 (`docs/agent-loop.md`): measured that four slots over one shared context let a lone call
+  read the whole 16,384 tokens while short calls still run side by side. Nothing changes in the app yet.
 - The commit hook runs lint and the unit tests, in about two minutes; the cases that drive the real app and the
   coverage run in CI and with `./gradlew check koverVerify`.
 - Settings → General starts with Web sources: how often they are updated on their own, when they were last updated
@@ -46,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The commit hook no longer fails, nor rewrites the repository's index, when the sync tests run in it: Gradle runs
+  there without the variables git gives its hooks.
 - Connecting or importing a repository that can only be read (someone else's public notes, a read-only token) no
   longer fails: with nothing to push, nothing is pushed.
 - A token the repository refuses is not kept in the keychain.

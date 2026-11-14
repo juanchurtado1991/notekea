@@ -210,9 +210,46 @@ to be measured next: load the model with fewer slots when the work is a loop (De
 today each slot has its own), so a lone call may use it whole and four still run side by side when each is short.
 The second keeps both if it holds; the 3.0 spike chose separate caches, for a reason to be read there first.
 
+### The shared context — measured 2026-11-14, Medium, Apple silicon, 16 GB
+
+The same test, with a second case (`build/reports/context-shared.md`): four slots over one context of 16,384
+tokens (`setKvUnified(true)`), against today's four of 4,096 each. Times are the model's own (reading and writing),
+not the clock's; the first table's were the clock's, through the app's engine.
+
+| Calls at once (tokens each) | A context per slot (today) | One shared context |
+|---|---|---|
+| 1 × 2,328 / 5,328 / 11,078 | 5 s / fails / fails | 5 s / 7.5 s / 14 s, as one slot of 16,384 |
+| 4 × 2,328 | all right, 19 s | all right, 12 to 19 s |
+| 1 × 11,078, when every slot holds an earlier call | fails | right, 20 s: the idle slots are emptied for it |
+| 2 × 5,328 | both fail (over 4,096) | both right, 12 and 15 s |
+| 4 × 5,328 (21,312 in all) | all fail at once | **all four fail**, after 11 s of work |
+| 11,078 + 3 × 2,328 (18,062 in all) | the long one fails at once, the three short are right | **all four fail** |
+
+- **It holds.** A lone call reads the whole context with four slots loaded (the 27,000-character document, 14 s),
+  and four short calls still run side by side. Memory: about 170 MB more than separate caches (3.87 against 3.70 GB
+  resident).
+- **Its one danger: calls that together pass the total all fail**, the short ones with the long one, and only
+  after working for seconds. With a context per slot a call too long fails alone and at once. llama.cpp does not
+  queue or refuse the call that does not fit; whoever calls it must.
+- **A slot's kept prompt is lost when another call needs its room.** The loop's own slot is reused while it runs
+  (its start is not read again), but a long call after others have run reads everything again.
+- **Reading side by side saves no time on Metal:** four prompts of 2,328 tokens take 19 s together and 5 s each
+  alone. What slots side by side save is the writing (the 3.0 spike), so they pay for many short calls, not for
+  long reads.
+- **Why 3.0 chose separate caches:** the spike gives no reason of its own. It measured the slots that way
+  (`setKvUnified(false)`, every call a short one of the same size), and the engine kept the setting. Nothing
+  measured then speaks against sharing.
+
+**What it changes in the design.** The engine keeps four slots and shares the context among them; fewer slots are
+not needed. In exchange the engine admits calls **by their tokens, not by a count of slots**: a call waits while
+its tokens and those of the calls running would pass the context (today's `Semaphore` of slots becomes a budget of
+tokens, fed by `countTokens`, step 2). `ContextBudget` then bounds the loop's prompt to what a lone call may use,
+and the short calls of the pipeline, Deep thinking's drafts and `digest`'s parts go on side by side as today. The
+change to the engine belongs to step 2, with a test of calls that together pass the total.
+
 Still to measure: the model's own format for calling tools against our JSON; a grammar that picks the tool and
-then only its arguments against the flat schema; how many tools the model chooses well among; the shared context;
-and Koog against a loop of our own.
+then only its arguments against the flat schema; how many tools the model chooses well among; and Koog against a
+loop of our own.
 
 ## Risks, said plainly
 

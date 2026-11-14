@@ -339,6 +339,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    loop with tools in place of the planner and the two agents, the conversation kept in the domain, a budget in
    tokens and one last verification. The design, approved on 2026-11-14, its eight steps and their gates are in
    `docs/agent-loop.md`; under way on `feature/one-agent-loop`.
+   - **Step 0 (2026-11-14), measured so far:** a slot of 16,384 tokens costs the memory of four of 4,096; four
+     slots over one shared context give a lone call all of it, if the engine admits calls by their tokens.
 
 ## Out of scope for the MVP
 
