@@ -180,7 +180,7 @@ class ChatProbeChatModelTest {
         val report = StringBuilder("# Chat probe (${size.id})\n")
 
         probes.forEachIndexed { index, probe ->
-            val vault = ownVault() ?: CommittedVault.copy()
+            val vault = CommittedVault.own() ?: CommittedVault.copy()
 
             val lines = probe
                 .lines()
@@ -225,20 +225,16 @@ class ChatProbeChatModelTest {
                     .orEmpty()
             )
 
-            report.append("\n<!-- ${memoryOf(chat = chat.second)} -->")
+            report.append("\n<!-- ${ProbeMemory.of(chat = chat.second)} -->")
             plans.forEach { report.append("\n<!-- plan: $it -->") }
 
-            // The notes the conversation wrote, to read what a card's Do it put in the vault.
-            vault
-                .walkTopDown()
-                .filter {
-                    it.isFile &&
-                        it.extension == "md" &&
-                        it.lastModified() > started
-                }
-                .forEach { report.append("\n<!-- wrote ${it.name}:\n${it.readText()}\n-->") }
+            report.append(
+                CommittedVault.writtenSince(
+                    vault = vault,
+                    started = started
+                )
+            )
 
-            plans.clear()
             vault.deleteRecursively()
         }
 
@@ -293,23 +289,6 @@ class ChatProbeChatModelTest {
         delay(timeMillis = SETTLE_MILLIS)
         while (chat.state.value.isAnswering) delay(timeMillis = SETTLE_MILLIS)
         delay(timeMillis = SETTLE_MILLIS)
-    }
-
-    /** The chat's memory once a compaction under way ends, or after [COMPACT_SECONDS] if it never does. */
-    private suspend fun memoryOf(chat: ChatViewModel): String {
-        val start = System.nanoTime()
-        val limit = COMPACT_SECONDS * NANOS_PER_SECOND
-
-        while (chat.state.value.isCompacting) {
-            val isLate = System.nanoTime() - start >= limit
-            if (isLate) break
-            delay(timeMillis = SETTLE_MILLIS)
-        }
-
-        val state = chat.state.value
-        val waited = (System.nanoTime() - start) / NANOS_PER_SECOND
-
-        return "memory: ${(state.contextUsage * PERCENT).toInt()} %, compacting: ${state.isCompacting}, waited $waited s"
     }
 
     private suspend fun chatOf(
@@ -441,20 +420,6 @@ class ChatProbeChatModelTest {
         } + documents.map { NoteEntry(it, NoteMetadata.NONE) }
     }
 
-    // `-PchatVault=<folder>` probes a copy of that vault instead of the Sample Vault (a PDF pasted in a note).
-    private fun ownVault(): File? = System
-        .getProperty(VAULT_PROPERTY)
-        ?.takeIf { it.isNotBlank() }
-        ?.let { folder ->
-            val copy = Files
-                .createTempDirectory("notekea-probe")
-                .resolve(File(folder).name)
-                .toFile()
-
-            File(folder).copyRecursively(target = copy)
-            copy
-        }
-
     private companion object {
         const val GPU_SLOTS = 4
         const val SETTLE_MILLIS = 300L
@@ -463,10 +428,7 @@ class ChatProbeChatModelTest {
         const val OPEN = "@open"
         const val CONFIRM = "@confirm"
         const val HISTORY = "@history"
-        const val COMPACT_SECONDS = 120L
-        const val PERCENT = 100
         const val PROBES_PROPERTY = "notekea.chat.probes"
-        const val VAULT_PROPERTY = "notekea.chat.vault"
         const val DEFAULT_PROBES = "../smoke-data/eval/chat-probes.txt"
         const val GUIDE = "src/commonMain/composeResources/files/guide/guide.md"
 

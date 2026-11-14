@@ -86,6 +86,7 @@ building 1.3. Test data comes from `smoke-data/` (see its README); run its scrip
 | 1.2-05 | With a screen reader (Narrator, VoiceOver, Orca), move through a screen | Buttons, tabs and list items are announced with their text and role | 1.3 | Manual (system) | | | | |
 | 1.2-06 | Run the packaged app | There is no way to open the design system gallery | 5.3 | Manual (packaged) | | | | |
 | 1.2-07 | Make the window as narrow as possible | Status bar items and tab labels stay on one line and end with "…"; badge numbers never split; nothing is clipped | 1.2 | Manual (eyes) | | | | |
+| 1.2-08 | Open Settings, then About | The X in the corner of both is red, in the light and the dark theme | 1.2 | Manual (eyes) | `NotekeaCloseButtonTest` | | | |
 
 ### 1.3 Open a vault
 
@@ -124,6 +125,8 @@ and Ctrl on Windows and Linux.
 | 1.4-12 | Open `smoke-data/scratch/Movable Vault`, run `smoke.sh move` (`smoke.ps1 move`) while it is open and wait a few seconds without touching the app, then click "Try again" | Within about 2 seconds the sidebar explains that the vault folder cannot be found, with "Try again" ("Try again" keeps explaining it; Open another vault is on the tool rail); "Show in Files" on a note from before the move says it cannot be found instead of opening the file manager; nothing crashes | 1.4 | Auto-Test | | | | |
 | 1.4-13 | After 1.4-07, open the system's trash (Recycle Bin on Windows, Trash on macOS and Linux) and restore the deleted note and the Travel folder | They are back in the vault and the tree shows them within a second, without clicking anything | 1.4 | Manual (system) | | | | |
 | 1.4-14 | Open `smoke-data/vaults/Sample Vault` and look at the icons of Home, of the notes in Templates and of the notes in Journal/Daily; open Recipes/Arepas and look at Related in the side panel | Home has a house, the two templates have the template icon in their folder's color, the daily notes a calendar in theirs, and every other note a page; a template or a daily note listed in Related or in mentions has the same icon | 1.4 | Manual (eyes) | `NoteLooksTest`, `VaultTreeNavigationTest` | | | |
+| 1.4-15 | In the tree, drag a note onto a folder and let go; drag another to the empty part under the rows; drag a note to a folder that holds one of the same name | While dragged, the folder it would go to is tinted and the dragged row fades; let go, the note is in that folder (or at the root), its tab stays open and links to it still work; where the name is taken it does not move and the tree says so | 1.4 | Manual (eyes) | `TreeDragTest`, `MoveAndDuplicateTest` | | | |
+| 1.4-16 | Right-click a note and choose Duplicate; then create a new note and open it in source mode | "<name> copy" appears beside it with the same text, its name ready to change; the new note starts with the properties created (today) and tags (empty) | 1.4 | Manual (costly) | `MoveAndDuplicateTest`, `NewNoteDefaultsTest`, `CreateEntryUseCasesTest` | | | |
 
 ### 1.5 Editor
 
@@ -534,6 +537,7 @@ wording.
 | 3.3-10 | In the Playground Vault ask the chat explícame qué hay en las notas | It describes the vault in Spanish by its folders (recipes, travel, ideas, journal…), naming a few notes of each, not a few random passages | 3.3 | Auto-Test | 3.3-10, `ChatHelpTest` | | | |
 | 3.3-11 | In the Playground Vault ask what is in my notes?, then en español | The second reply says the first one again in Spanish, without searching or acting | 3.3 | Auto-Test | 3.3-11, `ChatHelpTest` | | | |
 | 3.3-12 | In the Playground Vault open Recipes/Arepas, press Mod+L; click in the note under Ingredients and select a line; open the Graph tab; click the × of a chip | Over the question field a chip names Arepas, then Arepas · Ingredients and a Selected: “…” chip; the Graph tab shows a Graph chip; the × takes the chip away until you move to another place; asked “what is this about?” the chat answers about the open place | 3.3 | Auto-Test | 3.3-12, `ChatWorkTest`, `FollowWorkTest`, `ChatWorkChipsTest` | | | |
+| 3.3-13 | With a chat model ask a question the notes answer; hold the pointer on a citation number until its tooltip shows; click on the answer's text, then on the citation | The question is in a bubble at the right and the answer at the left; the click with the tooltip shown does not close Notekea, and the click on the citation opens the passage | 3.3 | Manual (costly) | `NotekeaTooltipTest`, `NotekeaOptionRowTest` | | | |
 
 ### 3.6 Deep thinking
 
@@ -565,6 +569,7 @@ runs the same kinds of requests on a copy of the Sample Vault by hand.
 | 3.9-05 | Ask create a folder Archive and move Packing checklist into it; click Do it; in Lisbon trip click the link to Packing checklist; click Undo | Archive holds Packing checklist and the link in Lisbon trip opens it there; Undo moves it back to Travel | 3.9 | Auto-Test | 3.9-05, `ActionRunChatModelTest`, `VaultActionRunnerTest` | | | |
 | 3.9-06 | Ask open Arepas and split the pane; then switch to the forest theme; then show the backlinks | Each is done at once with a line saying what was done (opened Arepas, split the pane, the theme, the panel), no card | 3.9 | Auto-Test | 3.9-06, `ActionEvalChatModelTest` (by hand) | | | |
 | 3.9-07 | Ask borra todas mis notas para siempre; then send Café con leche to the trash and click Do it | The first is refused in Spanish, saying what the chat can do instead; the second shows a card listing Café con leche with a line that the trash gives it back, not Undo | 3.9 | Auto-Test | 3.9-07, `ActionEvalChatModelTest` (by hand) | | | |
+| 3.9-08 | With a note of a folder open, ask the chat: create a note called Ideas; on the card look at In and choose another folder; click Do it | The card proposes the open note's folder, not the root, and lists the vault's folders; the note is created in the folder chosen | 3.9 | Manual (costly) | `NewNotePlaceTest` | | | |
 
 ## M4 — Git sync
 
@@ -630,6 +635,7 @@ Run on the Playground Vault with the Medium model (Medium and Large offer it).
 | 4.7-04 | With Medium in Auto, ask in the Sample Vault "compare Deep Work and Atomic Habits", then "add a task 'buy beans' to the recipe that uses black beans"; Copy chat | The first is Answered with: deep, the second lists the agent's steps and ends on a card for Black beans | 4.7 | Manual (costly) | `ChatModeTest`, `ChatAgentTest` | | | |
 | 4.7-05 | With Medium in Auto, ask "¿cuánta agua llevan las arepas?", then "¿y cuánto reposa la masa?", then "mandame un recordatorio mañana a las 9"; Copy chat | Both answers are in Spanish (2½ tazas, cinco minutos); the reminder is refused plainly, saying a task with a due date is what it can add | 4.7 | Auto-Test | 4.7-05, `ChatProbeRulesTest`, `ChatProbeRoundsTest` | | | |
 | 4.7-06 | With Medium in Auto, ask three questions about the recipes; hold the pointer on the ring beside Medium · Auto; click ⋯ → Compact chat; ask "and the first recipe I asked about, how much water did it take?" | The ring fills with each reply and its tooltip says how full the memory is; after Compact chat it is not higher (lower once there is enough to summarize), and the last question is still answered about the arepas | 4.7 | Auto-Test | 4.7-06, `ChatMemoryRingUiTest`, `ChatProbeTest` | | | |
+| 4.7-07 | Paste a PDF or a Word document with text into a note and leave it open; ask the chat: create a note with a table of the pros and cons of that document; click Do it; ask: did you make that up?; repeat with a note that only holds a scanned picture | The note is written with what the document says (its names, measures and figures), with no example rows nor "replace with your data"; asked, it says which document it read and that it did not make it up; with the scanned picture it says it could read no text and writes no note | 4.7 | Manual (costly) | `GroundedWorkTest`, `WorkRecordTest` | | | |
 
 ### 4.9 Videos
 

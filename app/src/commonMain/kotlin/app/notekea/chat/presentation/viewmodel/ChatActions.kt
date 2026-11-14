@@ -17,6 +17,7 @@ import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatAction
 import app.notekea.chat.presentation.model.ChatEffect
 import app.notekea.chat.presentation.model.ChatEntry
+import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.domain.Outcome
@@ -237,22 +238,26 @@ internal class ChatActions(
     }
 
     /** The card's step [step] creates its note in [folder], while the card still waits for Do it. */
-    fun place(
-        entry: ChatEntry,
-        step: Int,
-        folder: RelativePath
-    ) {
-        val action = entry.action?.takeIf {
+    fun place(intent: ChatIntent.OnActionPlace) {
+        val entry = host
+            .state
+            .value
+            .entries
+            .firstOrNull {
+                it.id == intent.id
+            }
+
+        val action = entry?.action?.takeIf {
             it.status == ActionStatus.PROPOSED
         } ?: return
 
         val placed = action.steps.mapIndexed { index, planned ->
-            val isPlaced = index == step && NewNotePlace.isChosenFor(step = planned)
+            val isPlaced = index == intent.step && NewNotePlace.isChosenFor(step = planned)
 
             if (isPlaced) {
                 NewNotePlace.placed(
                     step = planned,
-                    folder = folder
+                    folder = intent.folder
                 )
             } else {
                 planned
@@ -260,6 +265,13 @@ internal class ChatActions(
         }
 
         host.update(entry.id) { it.copy(action = action.copy(steps = placed)) }
+    }
+
+    /** The vault now holds [notes]: the state lists the folders a new note can go to; returns them as given. */
+    fun holding(notes: Collection<NoteEntry>): Collection<NoteEntry> {
+        host.reduce { it.holding(notes) }
+
+        return notes
     }
 
     fun cancel(entry: ChatEntry) {

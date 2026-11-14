@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- In the chat, the question is a bubble at the right and the answer stays at the left across the panel.
+- The X that closes Settings and About is red.
 - Six new color themes replace seven of the eight before, each a 60/30/10 palette in light and dark: Polar, Desert,
   Storm, Forest, Ocean and Lavender. Workspace Blue stays, and Notekea still starts with it. The note takes the first color, the sidebar and the tabs
   the second, and buttons, links and the chosen row the third. A theme that is gone becomes the closest new one.
@@ -40,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A click on a chat answer while a citation's tooltip is shown no longer closes Notekea.
+- The chat no longer writes a note of examples "to replace with your data" for a document it did not read: a note is
+  read with the PDF or Word file pasted in it, a note written from notes is written only from what they say and
+  checked before its card (placeholders, or figures the notes do not hold, have it written again), and with no text
+  to read (a scanned picture) the chat says so and writes nothing. Asked whether it made something up, it answers
+  from a record of what it read and wrote, not by searching the vault.
+- A file of the vault is no longer planned as a web page to clip, and a table's last row cut short is left out.
+- In a narrow chat panel an option's "Recommended" badge no longer breaks in two lines.
 - A cancelled video compression stops FFmpeg instead of leaving it writing, and a copy that fails or is cancelled is
   deleted instead of staying in the app's folder.
 - The Study tab says the day the next card comes back as a date ("Nov 12, 2026"), not in its code form.
@@ -58,6 +68,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- In the tree, a note, a file or a folder is dragged onto a folder (or the empty part, for the vault's root) and moves
+  there, its tab, its bookmark and the links to it following; a note's menu has Duplicate.
+- A new note starts with the properties `created` (today) and `tags` (empty), as do the notes the chat creates.
+- The chat's card says where its new note will be created, beside the open note unless a folder was asked for, and a
+  pop-up button there chooses another folder before Do it.
 - **Notekea in Spanish** (5.2): the whole interface, chosen in Settings → General (System, English, Español) and
   switched at once, without losing what the screens hold. The chat keeps answering in the language of each question.
   Dates in the interface read in its language. Notekea QA's manager, its manual cases and the testers' guides are in
@@ -71,7 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     title row. Windows and Linux keep their title bar, and the window buttons stay the system's own everywhere.
   - On macOS, a menu bar (File, Note, View, Go, Help) of the app's shortcuts, and confirmations as macOS's alert,
     with stacked buttons.
-  - The chat as a document: the question in bold, the answer as text, the sources as lines.
+  - The chat as a document: the answer as text, the sources as lines (the question, first in bold, is now a
+    bubble at the right).
   - Under the note's title, when it was last edited and its word count.
   - Panels move on a spring without bounce.
   - Optionally, the system's accent color (macOS and Windows), always readable at WCAG AA.

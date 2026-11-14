@@ -146,25 +146,13 @@ internal fun TreeList(
                     val itemModifier =
                         if (LocalReduceMotion.current) Modifier else Modifier.animateItem()
 
-                    val dragModifier = itemModifier
-                        .dropLook(
-                            isTarget = drag.target == row.path,
-                            isDragged = drag.dragged == row.path
-                        )
-                        .treeDrag(
-                            row = row,
-                            rows = { stateNow().rows },
-                            list = listState,
-                            drag = drag,
-                            onDrop = { path, folder ->
-                                onIntent(
-                                    VaultTreeIntent.OnMoveInto(
-                                        path = path,
-                                        folder = folder
-                                    )
-                                )
-                            }
-                        )
+                    val dragModifier = itemModifier.dragged(
+                        row = row,
+                        drag = drag,
+                        list = listState,
+                        stateNow = stateNow,
+                        onIntent = onIntent
+                    )
 
                     Box(modifier = dragModifier) {
                         ListedEntry(
@@ -184,6 +172,32 @@ internal fun TreeList(
         }
     }
 }
+
+// A row that can be dragged onto a folder, looking as its part in the drag under way.
+@Composable
+private fun Modifier.dragged(
+    row: TreeRow,
+    drag: TreeDragState,
+    list: LazyListState,
+    stateNow: () -> VaultTreeState,
+    onIntent: (VaultTreeIntent) -> Unit
+): Modifier = dropLook(
+    isTarget = drag.target == row.path,
+    isDragged = drag.dragged == row.path
+).treeDrag(
+    row = row,
+    rows = { stateNow().rows },
+    list = list,
+    drag = drag,
+    onDrop = { path, folder ->
+        onIntent(
+            VaultTreeIntent.OnMoveInto(
+                path = path,
+                folder = folder
+            )
+        )
+    }
+)
 
 // The folder a dragged row would drop into is tinted, and the row dragged fades while it is held.
 @Composable

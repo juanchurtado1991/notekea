@@ -39,6 +39,33 @@ internal object CommittedVault {
         return vault
     }
 
+    /** `-PchatVault=<folder>` probes a copy of that vault instead of the Sample Vault (a PDF pasted in a note). */
+    fun own(): File? = System
+        .getProperty(VAULT_PROPERTY)
+        ?.takeIf { it.isNotBlank() }
+        ?.let { folder ->
+            val copy = Files
+                .createTempDirectory("notekea-probe")
+                .resolve(File(folder).name)
+                .toFile()
+
+            File(folder).copyRecursively(target = copy)
+            copy
+        }
+
+    /** The notes of [vault] written since [started], to read what a card's Do it put in it. */
+    fun writtenSince(
+        vault: File,
+        started: Long
+    ): String = vault
+        .walkTopDown()
+        .filter {
+            it.isFile &&
+                it.extension == "md" &&
+                it.lastModified() > started
+        }
+        .joinToString(separator = "") { "\n<!-- wrote ${it.name}:\n${it.readText()}\n-->" }
+
     private fun git(vararg arguments: String): ByteArray {
         val process =
             ProcessBuilder(listOf("git") + arguments).directory(File("..").canonicalFile).start()
@@ -69,5 +96,6 @@ internal object CommittedVault {
     private const val EARLIER_ANSWER =
         "You wrote that the arepas need 2½ cups of warm water and rest five minutes. "
     private const val EARLIER_REPEATS = 6
+    private const val VAULT_PROPERTY = "notekea.chat.vault"
     private const val MILLIS_PER_SECOND = 1_000L
 }

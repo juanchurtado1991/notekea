@@ -33,6 +33,7 @@ fun SuiteBuilder.sourceCases() {
     webUpdateCases()
     clipDepthCases()
     lookFurtherCases()
+    solidChatCases()
 }
 
 private fun SuiteBuilder.document() {

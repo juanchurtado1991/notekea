@@ -27,6 +27,10 @@ Everything written into this repository (code, comments, commits, pull requests,
   branch, push a new one). Check CI is green before asking for a review.
 - **Commits:** Conventional Commits, small and granular, rebase merging. No `Co-Authored-By` or other AI attribution
   trailers in commits.
+- **Everything done is tracked, in the same change (the developer, 2026-11-14):** every change, a fix as much as a
+  feature, updates `CHANGELOG.md` (an entry under Unreleased), the roadmap (the feature's spec, in `ROADMAP.md` or
+  `docs/roadmap/` for a done milestone: what changed, when and why) and `docs/HANDOFF.md` (where the work stands and
+  what is left open). A change is not done while one of the three does not say it.
 - **Ask before** anything outward-facing that is not part of the task (closing issues, deleting branches or
   releases, publishing a tag).
 - **UI is shown, never committed:** render screens headless (`ImageComposeScene`, in a temporary test you delete

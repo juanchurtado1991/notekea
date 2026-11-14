@@ -3,8 +3,10 @@ package app.notekea.chat.presentation.model
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.answer.DeepQuestion
 import app.notekea.chat.domain.context.WorkContext
+import app.notekea.chat.domain.plan.NewNotePlace
 import app.notekea.chat.presentation.viewmodel.ChatReply
 import app.notekea.core.llm.domain.ModelTier
+import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 
 /**
@@ -33,6 +35,10 @@ data class ChatState(
     // The folders a note the chat creates can go to, the vault's root first.
     val folders: List<RelativePath> = emptyList()
 ) {
+    /** The state for a vault that holds [notes]: the folders a new note can go to. */
+    fun holding(notes: Collection<NoteEntry>): ChatState =
+        copy(folders = NewNotePlace.foldersOf(notes = notes))
+
     val isAnswering: Boolean get() = entries.lastOrNull()?.isAnswering == true
 
     /** The modes the model in use offers: Auto and Fast always, Deep thinking and the agent where they help. */

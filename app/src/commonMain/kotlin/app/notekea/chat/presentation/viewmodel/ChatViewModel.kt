@@ -19,7 +19,6 @@ import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.FoundRow
-import app.notekea.chat.domain.plan.NewNotePlace
 import app.notekea.chat.presentation.model.ChatEffect
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatIntent
@@ -214,18 +213,9 @@ class ChatViewModel(
 
             ChatIntent.OnShown -> checkModel()
 
-            is ChatIntent.OnNotesChange -> {
-                notes = intent.notes
-                reduce { it.copy(folders = NewNotePlace.foldersOf(notes = intent.notes)) }
-            }
+            is ChatIntent.OnNotesChange -> notes = actions.holding(notes = intent.notes)
 
-            is ChatIntent.OnActionPlace -> entryOf(id = intent.id)?.let {
-                actions.place(
-                    entry = it,
-                    step = intent.step,
-                    folder = intent.folder
-                )
-            }
+            is ChatIntent.OnActionPlace -> actions.place(intent = intent)
 
             is ChatIntent.OnIndexChange -> reduce { it.copy(isIndexReady = intent.isReady) }
 

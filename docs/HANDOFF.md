@@ -196,6 +196,42 @@ pasted documentation page asks its question in the chat again.
     versioned 1.M.K, above 1.0.0, which the first release will not install over; Koin's own `verify()` is not
     used (it needs koin-test).
 
+### The smoke of 2026-11-14: the chat's work stands on what it read
+
+The developer asked for a table of the pros and cons of a contract pasted into a note. The chat read the note, which
+held only the embed, and wrote a table of examples "to replace with the real points"; asked whether it had made it up,
+it searched the vault and cited its own note. The fix is the base the chat's work now stands on, not a patch:
+
+- **Reading.** A note is read with the documents it attaches (`AttachedTexts`: `![[x.pdf]]`, a Word file, a link to
+  one). A note of unreadable embeds alone holds no text. The agent's `read`, the note written from notes and talk
+  about a note all read this way.
+- **Writing.** `NotesWriter` writes a note only from what was read: read whole when it fits, else part by part into
+  digests (ten parts, 60,000 characters). With nothing to read it writes nothing (`ActionProblem.NothingToRead`).
+- **Checking.** Before the card, the body is checked as a person rereads their work: placeholders (`Placeholders`)
+  or figures the notes do not hold (`BackedFigures`) have it written again, told what was wrong; placeholders twice
+  are refused (`ActionProblem.NotBacked`). A table's last row cut by the token cap is left out.
+- **Plan and agent as one.** The plan a request was handed to the agent with goes with it (`ToAgent.planned`). A
+  note the agent creates after reading is written from what it read (`GroundedSteps`), and a request to write a note
+  ends on the card even when the model ends without a proposal. A file of the vault planned as a page to clip is
+  left to the step that reads it.
+- **Memory.** The chat's memory keeps a record of what it did (`WorkRecord`): what it looked up, what it proposed,
+  how that ended, and whether a note's text came from notes it read or from the request alone. A question about its
+  own work is talk, answered from that record.
+- **Probing it.** `./gradlew :app:chatModelTest --tests '*ChatProbeChatModelTest*' -PchatVault=<folder>` probes a
+  copy of any vault, documents included, and writes the notes the conversation made into the report.
+
+Also from that smoke: a press on an answer with a citation's tooltip shown crashed (the tooltip's text was selectable
+in another layer; `NotekeaTooltip` now disables selection); the question is a bubble at the right (7B's bold heading
+read as one voice); an option's badge stays whole in a narrow panel; the card says where a new note goes and lets it
+be changed (`NewNotePlace`, beside the open note by default); a new note starts with `created` and `tags`
+(`NewNoteDefaults`); the tree moves an entry dragged onto a folder and duplicates a note; a dialog's X is red.
+
+**Not done, and the next step for the agent:** it is still two engines, a planner and a loop of moves, joined at the
+plan. One loop with tools, whose results are kept as a transcript across turns (not a record written afterwards),
+is the design to move to; the 4,096-token context of the local model is what bounds it. The local model also still
+writes more than asked and gets a detail wrong now and then (the probe: a ceiling of 2.40 m written as 2 m): the
+figure check catches figures the notes lack, not a figure put beside the wrong thing.
+
 ## The release run
 
 Decided on 2026-11-04: there is no M2, M3 or M4 QA run. The only run left comes after 5.4 and before 5.5, on Windows,

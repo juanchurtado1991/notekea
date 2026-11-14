@@ -105,12 +105,7 @@ class VaultActionRunner(
                 }
             }
         } catch (thrown: Throwable) {
-            withContext(context = NonCancellable) {
-                takenBack(
-                    journal = journal,
-                    vaultPath = vaultPath
-                )
-            }
+            withContext(context = NonCancellable) { takenBack(journal, vaultPath) }
 
             throw thrown
         }

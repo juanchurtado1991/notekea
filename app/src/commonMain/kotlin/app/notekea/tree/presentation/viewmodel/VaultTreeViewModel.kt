@@ -158,11 +158,8 @@ class VaultTreeViewModel(
                 isFolder = true
             )
 
-            is VaultTreeIntent.OnMoveInto -> renaming.moveInto(
-                path = intent.path,
-                folder = intent.folder,
-                moveEntry = newNotes.moveEntry
-            )
+            is VaultTreeIntent.OnMoveInto ->
+                renaming.moveInto(intent.path, intent.folder, newNotes.moveEntry)
 
             is VaultTreeIntent.OnDuplicate -> duplicate(intent = intent)
 

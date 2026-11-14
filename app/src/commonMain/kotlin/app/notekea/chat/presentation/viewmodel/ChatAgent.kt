@@ -44,7 +44,7 @@ internal class ChatAgent(
                 )
             }
 
-        work(id, task, notes, history, openNote, planned)
+        work(id, task, notes, history, planned, openNote)
     }
 
     private suspend fun work(
@@ -52,8 +52,8 @@ internal class ChatAgent(
         task: String,
         notes: Collection<NoteEntry>,
         history: List<ChatExchange>,
-        openNote: RelativePath?,
-        planned: List<PlannedStep>
+        planned: List<PlannedStep>,
+        openNote: RelativePath?
     ) {
         host.update(id) { it.copy(step = ChatStep.WORKING) }
 

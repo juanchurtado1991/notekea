@@ -38,6 +38,18 @@ internal class AgentLookUp(
     /** The notes read so far that held no text to work from, by name. */
     val unreadable: List<String> get() = empty.distinct()
 
+    /** The notes read that held no text, when none read held any: what a note would be written blind from. */
+    val blind: List<String> get() = unreadable.takeIf { read.isEmpty() }.orEmpty()
+
+    /** What tells a move made again: a note is the same however the model names it ("contrato" or its path). */
+    fun keyOf(move: AgentTaskMove): String {
+        val note = move.note?.let {
+            pathOf(name = it) ?: it
+        }
+
+        return "${move.move}:${move.query ?: note ?: move.url}".lowercase()
+    }
+
     suspend fun result(
         move: AgentTaskMove,
         task: String

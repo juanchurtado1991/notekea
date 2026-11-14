@@ -40,7 +40,7 @@ class ActOnRequestUseCase(
             openNote = openNote
         )
 
-        routed(agentUse, reply, planned)?.let {
+        routed(agentUse, planned, reply)?.let {
             return@flow emit(value = it)
         }
 
@@ -161,8 +161,8 @@ class ActOnRequestUseCase(
     // Help, the overview and talk stay the plan's; questions and actions go to the agent if asked. Null: act on it.
     private fun routed(
         agentUse: AgentUse,
-        reply: ActionTurnStep?,
-        planned: List<PlannedStep>
+        planned: List<PlannedStep>,
+        reply: ActionTurnStep?
     ): ActionTurnStep? {
         val isWork = reply == null || reply is ActionTurnStep.Answer
         val isForAgent = isWork && agentUse == AgentUse.FOR_WORK

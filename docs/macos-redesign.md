@@ -17,7 +17,7 @@ This file is the dependency audit the developer asked for before anything was ap
 | 5A | Push buttons | Buttons 24 dp tall with radius 5, and a white secondary button with a fine border. The pop-up button gets a double arrow. |
 | 1A | Unified title bar on macOS | The sidebar reaches the top, and the tabs share the title row with the system's own traffic lights. Windows and Linux keep their title bar. |
 | 6A | The note's page | More space at the top, the folder above the title, and one line with the date, the word count and the tags. |
-| 7B | Chat as a document | The question in bold, the answer as note text, and sources as file · line. |
+| 7B | Chat as a document | The answer as note text, and sources as file · line. The question was in bold over it; since 2026-11-14 it is a bubble at the right, at the developer's request: one voice read as two. |
 | 8A | Compact alert | On macOS, Return chooses the safe button and the buttons are stacked. Windows and Linux keep a row. |
 | 9A | Springs without bounce | `motionSpring()` beside `motionTween()`, which snaps when motion is reduced. |
 

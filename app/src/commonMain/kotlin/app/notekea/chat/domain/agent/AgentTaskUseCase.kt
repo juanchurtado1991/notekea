@@ -75,51 +75,26 @@ class AgentTaskUseCase(
                 movesLeft = MAX_MOVES - number + 1,
                 mustEnd = mustEnd || number == MAX_MOVES
             )
-                ?: return@flow emit(
-                    value = unread(
-                        task = task,
-                        found = found
-                    )
-                )
+                ?: return@flow emit(unread(task, found))
 
             when (move.move) {
-                AgentTaskPrompt.FINISH -> {
-                    // Asked to write a note, and having read what to write it from, it ends on the card: the
-                    // person asked for the note and decides, not a model's doubt (the smoke of 2026-11-14).
-                    val asked = GroundedSteps.asked(
+                AgentTaskPrompt.FINISH -> return@flow finished(
+                    move = move,
+                    task = task,
+                    found = found,
+                    asked = GroundedSteps.asked(
                         planned = planned,
                         read = lookUp.read
-                    )
-
-                    if (asked != null) {
-                        return@flow proposed(
-                            move = asked,
-                            unreadable = emptyList(),
-                            task = task,
-                            vaultPath = vaultPath,
-                            notes = notes,
-                            openNote = openNote
-                        )
-                    }
-
-                    val answer = finalAnswer.written(
-                        task = task,
-                        found = found,
-                        summary = move.summary.orEmpty()
-                    )
-
-                    return@flow emit(value = AgentStep.Finished(summary = answer))
-                }
+                    ),
+                    vault = VaultAt(vaultPath, notes, openNote)
+                )
 
                 AgentTaskPrompt.PROPOSE -> return@flow proposed(
                     move = GroundedSteps.of(
                         move = move,
                         read = lookUp.read
                     ),
-                    unreadable = lookUp
-                        .unreadable
-                        .takeIf { lookUp.read.isEmpty() }
-                        .orEmpty(),
+                    unreadable = lookUp.blind,
                     task = task,
                     vaultPath = vaultPath,
                     notes = notes,
@@ -127,12 +102,7 @@ class AgentTaskUseCase(
                 )
 
                 else -> {
-                    // A note is the same note however the model writes its name ("contrato", "Contrato/contrato").
-                    val note = move.note?.let {
-                        lookUp.pathOf(name = it) ?: it
-                    }
-
-                    val key = "${move.move}:${move.query ?: note ?: move.url}".lowercase()
+                    val key = lookUp.keyOf(move = move)
 
                     emit(
                         value = AgentStep.Moving(
@@ -162,6 +132,41 @@ class AgentTaskUseCase(
 
         emit(value = AgentStep.Stopped(problem = null))
     }
+
+    // Asked to write a note, and having read what to write it from, it ends on the card ([asked]): the person
+    // asked for the note and decides, not a model's doubt (the smoke of 2026-11-14). Else it ends on its answer.
+    private suspend fun FlowCollector<AgentStep>.finished(
+        move: AgentTaskMove,
+        task: String,
+        found: List<String>,
+        vault: VaultAt,
+        asked: AgentTaskMove?
+    ) {
+        if (asked != null) {
+            return proposed(
+                move = asked,
+                unreadable = emptyList(),
+                task = task,
+                vaultPath = vault.path,
+                notes = vault.notes,
+                openNote = vault.openNote
+            )
+        }
+
+        val answer = finalAnswer.written(
+            task = task,
+            found = found,
+            summary = move.summary.orEmpty()
+        )
+
+        emit(value = AgentStep.Finished(summary = answer))
+    }
+
+    private class VaultAt(
+        val path: String,
+        val notes: Collection<NoteEntry>,
+        val openNote: RelativePath?
+    )
 
     // A move that cannot be read was cut short (a whole note written inside it): it is asked again, told so, with
     // more room; then the task ends on what it found, not on a failure (the developer's smoke of 2026-11-13).

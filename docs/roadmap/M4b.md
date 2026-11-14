@@ -65,6 +65,11 @@ of them, so it is built to be safe when they get it wrong, and 3.0 and 3.4 decid
   a size offers agent mode at 80 % right.
 - **Done when:** the model sizes that offer it reach the threshold set in 3.4 on those tasks, and a failed run ends with
   no change to the vault. A model size that falls short does not offer it; the rest of the chat is unaffected.
+- **Changed on 2026-11-14, after the developer's smoke (`feature/videos`, #142):** `read` gives a note with the text
+  of the documents pasted in it; the plan a request was handed over with goes to the agent, a note it creates after
+  reading is written from what it read (`GroundedSteps`), and a request to write a note ends on the card even when
+  the model ends without a proposal; having read no text, it says so and proposes no note. Case 4.7-07. What is left
+  is the post-MVP item "One agent loop" in `ROADMAP.md`.
 
 ### ↪ 4.8 M4b performance pass — moved into 5.4
 
