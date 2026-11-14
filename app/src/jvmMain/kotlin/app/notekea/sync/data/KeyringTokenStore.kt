@@ -2,6 +2,7 @@ package app.notekea.sync.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.sync.domain.TokenStore
+import co.touchlab.kermit.Logger
 import com.github.javakeyring.Keyring
 import kotlinx.coroutines.withContext
 
@@ -31,11 +32,14 @@ class KeyringTokenStore(private val dispatchers: AppDispatchers) : TokenStore {
                 Keyring.create().use { block(it) }
             } catch (exception: Exception) {
                 if (exception is kotlinx.coroutines.CancellationException) throw exception
+                // Said in the log, never with the token: a keychain that refuses looked like a wrong token.
+                logger.w { "The system's keychain could not be used: ${exception::class.simpleName}" }
                 null
             }
         }
 
     private companion object {
         const val SERVICE = "Notekea sync"
+        val logger = Logger.withTag(tag = "Sync")
     }
 }

@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.ConflictChoice
 import app.notekea.sync.domain.GitRepository
+import app.notekea.sync.domain.RemoteAddress
 import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncSettingsStore
@@ -84,10 +85,22 @@ class SyncEngine(
     override suspend fun connect(
         settings: SyncSettings,
         token: String?
+    ): Outcome<Unit, SyncError> = connectTo(
+        address = RemoteAddress.of(written = settings.remoteUrl),
+        written = settings,
+        token = token
+    )
+
+    // The address without the token it may carry, which is kept as the token when none was typed.
+    private suspend fun connectTo(
+        address: RemoteAddress,
+        written: SyncSettings,
+        token: String?
     ): Outcome<Unit, SyncError> = cycle.withLock {
+        val settings = written.copy(remoteUrl = address.url)
         mutableStatus.value = SyncStatus.Syncing
 
-        token?.takeIf { it.isNotBlank() }?.let {
+        (token?.takeIf { it.isNotBlank() } ?: address.secret)?.let {
             tokens.save(
                 remoteUrl = settings.remoteUrl,
                 token = it
