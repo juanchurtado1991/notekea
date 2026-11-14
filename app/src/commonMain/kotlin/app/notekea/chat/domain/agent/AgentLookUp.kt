@@ -4,6 +4,7 @@ import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.AttachedTexts
 import app.notekea.chat.domain.plan.NoteProperties
 import app.notekea.chat.domain.plan.PageReader
 import app.notekea.chat.domain.plan.UrlsNamed
@@ -27,6 +28,16 @@ internal class AgentLookUp(
     private val notes: Collection<NoteEntry>,
     private val openNote: RelativePath?
 ) {
+    private val attachedTexts = AttachedTexts(noteTextCache = noteTextCache)
+    private val readNotes = mutableListOf<RelativePath>()
+    private val empty = mutableListOf<String>()
+
+    /** The notes read so far that held text: what a note the task writes is written from. */
+    val read: List<RelativePath> get() = readNotes.distinct()
+
+    /** The notes read so far that held no text to work from, by name. */
+    val unreadable: List<String> get() = empty.distinct()
+
     suspend fun result(
         move: AgentTaskMove,
         task: String
@@ -106,25 +117,51 @@ internal class AgentLookUp(
     private suspend fun read(name: String): String {
         val path = noteNamed(name = name) ?: return "read \"$name\": no note of that name."
 
-        // The open tab is no note when it is a PDF, a folder or a view: it reads as a name nothing matches.
+        // The open tab is no note when it is a folder or a view: it reads as a name nothing matches.
         val note = notes.firstOrNull {
             it.file.path == path
         } ?: return "read \"$name\": no note of that name."
 
-        val body = noteTextCache
-            .textsOf(
-                vaultPath = vaultPath,
-                notes = listOf(note)
-            )[path]
-            ?.body
+        val read = attachedTexts.of(
+            vaultPath = vaultPath,
+            note = note,
+            notes = notes
+        )
+
+        val shown = path.nameWithoutExtension
+
+        val unread = read
+            .unread
+            .takeIf { it.isNotEmpty() }
+            ?.let { " It attaches ${it.joinToString()}, which holds no text that can be read." }
             .orEmpty()
 
+        if (read.text.isBlank()) {
+            empty += shown
+
+            return "read \"$shown\": $NO_TEXT$unread"
+        }
+
+        readNotes += path
         val properties = NoteProperties.of(note = note).joinToString(separator = "") { "$it\n" }
 
         // Counted here, not by the model: "how many words does Arepas have?" got 109, 128 and 63 (the chat probe).
-        val words = WORDS.findAll(input = body).count()
+        val words = WORDS.findAll(input = read.text).count()
 
-        return "read \"${path.nameWithoutExtension}\" ($words words):\n$properties${body.take(n = NOTE_CHARS)}"
+        val more = if (read.text.length > NOTE_CHARS) {
+            "\n(Its first $NOTE_CHARS of ${read.text.length} characters. A write_from_notes step that names " +
+                "this note reads all of it.)"
+        } else {
+            ""
+        }
+
+        val with = read
+            .attached
+            .takeIf { it.isNotEmpty() }
+            ?.let { ", with its attached ${it.joinToString()}" }
+            .orEmpty()
+
+        return "read \"$shown\" ($words words$with):\n$properties${read.text.take(n = NOTE_CHARS)}$more$unread"
     }
 
     private suspend fun found(step: ActionStep): String {
@@ -175,6 +212,7 @@ internal class AgentLookUp(
         val WORDS = Regex(pattern = "[\\p{L}\\p{N}]+(['’-][\\p{L}\\p{N}]+)*")
         const val PASSAGES = 4
         const val MIN_WORD = 3
+        const val NO_TEXT = "nothing found: this note holds no text to work from."
         const val PROPERTY_NOTES = 8
         const val PASSAGE_CHARS = 400
         const val NOTE_CHARS = 2_500

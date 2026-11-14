@@ -44,7 +44,19 @@ internal object UrlsNamed {
             )
         }
 
-        return steps.map { step ->
+        // A clip of no address the request writes, beside other steps, is a file of the vault taken for a page
+        // ("a note from the PDF I pasted"): the other steps read it, and the clip is left out.
+        val isFileClipped = written.isEmpty() && steps.any { it.kind != ActionKind.CLIP_URL }
+
+        val kept = if (isFileClipped) {
+            steps.filter {
+                it.kind != ActionKind.CLIP_URL
+            }
+        } else {
+            steps
+        }
+
+        return kept.map { step ->
             if (step.kind != ActionKind.CLIP_URL) return@map step
 
             val url = step[ActionField.URL]?.takeIf {

@@ -1075,6 +1075,10 @@
     <string name="chat_action_make_cards_es">Crear tarjetas de estudio</string>
     <string name="chat_action_cards_count_es">%1$d tarjetas</string>
     <string name="chat_problem_no_cards_es">No pude crear tarjetas que la nota respalde. Prueba con una nota con más datos.</string>
+    <string name="chat_problem_nothing_to_read">I could not read any text in %1$s, so I wrote nothing rather than make it up. A scanned PDF or a picture has no text I can read.</string>
+    <string name="chat_problem_nothing_to_read_es">No pude leer ningún texto en %1$s, así que no escribí nada en vez de inventarlo. Un PDF escaneado o una imagen no tienen texto que pueda leer.</string>
+    <string name="chat_problem_not_backed">I could not write it from what your notes say alone, so I wrote nothing rather than fill it with examples.</string>
+    <string name="chat_problem_not_backed_es">No pude escribirla solo con lo que dicen tus notas, así que no escribí nada en vez de rellenarla con ejemplos.</string>
     <string name="rail_study">Tarjetas de estudio</string>
     <string name="chat_step_working">Working on it, step by step…</string>
     <string name="chat_mode_label">%1$s · %2$s</string>

@@ -1,6 +1,7 @@
 package app.notekea.chat.presentation.viewmodel
 
 import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.core.notes.domain.RelativePath
 
 /** What is left to do once a request is planned: nothing more, answer it, talk, explain the app or the vault. */
@@ -26,5 +27,5 @@ internal sealed interface ChatReply {
     ) : ChatReply
 
     /** Agent mode works on it (4.7): its moves are listed on the entry, its end is a card or what it found. */
-    data object Agent : ChatReply
+    data class Agent(val planned: List<PlannedStep> = emptyList()) : ChatReply
 }

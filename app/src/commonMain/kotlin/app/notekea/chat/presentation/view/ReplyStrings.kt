@@ -140,8 +140,12 @@ import app.notekea.resources.chat_problem_missing
 import app.notekea.resources.chat_problem_missing_es
 import app.notekea.resources.chat_problem_no_cards
 import app.notekea.resources.chat_problem_no_cards_es
+import app.notekea.resources.chat_problem_not_backed
+import app.notekea.resources.chat_problem_not_backed_es
 import app.notekea.resources.chat_problem_note
 import app.notekea.resources.chat_problem_note_es
+import app.notekea.resources.chat_problem_nothing_to_read
+import app.notekea.resources.chat_problem_nothing_to_read_es
 import app.notekea.resources.chat_problem_query
 import app.notekea.resources.chat_problem_query_es
 import app.notekea.resources.chat_problem_query_failed
@@ -246,6 +250,8 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_action_make_cards to Res.string.chat_action_make_cards_es,
     Res.string.chat_action_cards_count to Res.string.chat_action_cards_count_es,
     Res.string.chat_problem_no_cards to Res.string.chat_problem_no_cards_es,
+    Res.string.chat_problem_nothing_to_read to Res.string.chat_problem_nothing_to_read_es,
+    Res.string.chat_problem_not_backed to Res.string.chat_problem_not_backed_es,
     Res.string.chat_action_clip_url to Res.string.chat_action_clip_url_es,
     Res.string.chat_step_clipping to Res.string.chat_step_clipping_es,
     Res.string.chat_step_finding to Res.string.chat_step_finding_es,

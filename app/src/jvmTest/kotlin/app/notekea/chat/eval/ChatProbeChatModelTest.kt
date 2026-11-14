@@ -30,6 +30,9 @@ import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
+import app.notekea.core.documents.data.DocumentAwareContentStore
+import app.notekea.core.documents.data.TikaDocumentReader
+import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.embedding.data.LlamaTextEmbedder
@@ -177,7 +180,7 @@ class ChatProbeChatModelTest {
         val report = StringBuilder("# Chat probe (${size.id})\n")
 
         probes.forEachIndexed { index, probe ->
-            val vault = CommittedVault.copy()
+            val vault = ownVault() ?: CommittedVault.copy()
 
             val lines = probe
                 .lines()
@@ -197,6 +200,7 @@ class ChatProbeChatModelTest {
                 earlier = earlier
             )
 
+            val started = System.currentTimeMillis()
             val start = System.nanoTime()
 
             lines.filterNot { it.startsWith(HISTORY) }.forEach { line ->
@@ -223,6 +227,17 @@ class ChatProbeChatModelTest {
 
             report.append("\n<!-- ${memoryOf(chat = chat.second)} -->")
             plans.forEach { report.append("\n<!-- plan: $it -->") }
+
+            // The notes the conversation wrote, to read what a card's Do it put in the vault.
+            vault
+                .walkTopDown()
+                .filter {
+                    it.isFile &&
+                        it.extension == "md" &&
+                        it.lastModified() > started
+                }
+                .forEach { report.append("\n<!-- wrote ${it.name}:\n${it.readText()}\n-->") }
+
             plans.clear()
             vault.deleteRecursively()
         }
@@ -303,7 +318,8 @@ class ChatProbeChatModelTest {
     ): Triple<File, ChatViewModel, FakeTextClipboard> {
         val store = OkioNoteContentStore(fileSystem, dispatchers, NioNoteFileAttributes())
         val scanner = OkioNoteScanner(fileSystem, dispatchers)
-        val cache = NoteTextCache(store, TextFolder())
+        val texts = DocumentAwareContentStore(store, TikaDocumentReader(dispatchers = dispatchers))
+        val cache = NoteTextCache(texts, TextFolder())
 
         val notes = notesOf(
             vault = vault,
@@ -317,7 +333,7 @@ class ChatProbeChatModelTest {
         IndexVaultUseCase(
             planIndex = PlanIndexUseCase(),
             chunkNote = ChunkNoteUseCase(noteSections = sections),
-            noteContentStore = store,
+            noteContentStore = texts,
             textEmbedder = embedder,
             vectorIndex = index,
             indexStateStore = FakeIndexStateStore()
@@ -384,7 +400,7 @@ class ChatProbeChatModelTest {
                 runner
             ),
             agentTask = AgentTaskUseCase(
-                llmEngine = engine,
+                llmEngine = planning,
                 planReader = GhostActionPlanReader(),
                 answerFromNotes = answer,
                 noteTextCache = cache,
@@ -416,10 +432,28 @@ class ChatProbeChatModelTest {
         val listing = (scanner.scan(vaultPath = vault.path) as Outcome.Success).value
         val reader = OkioNoteMetadataReader(fileSystem, dispatchers, GhostFrontmatterParser())
 
+        val documents = listing.attachments.filter {
+            DocumentFormat.of(path = it.path) != null
+        }
+
         return listing.files.map {
             NoteEntry(it, reader.read(vault.path, it.path) ?: NoteMetadata.NONE)
-        }
+        } + documents.map { NoteEntry(it, NoteMetadata.NONE) }
     }
+
+    // `-PchatVault=<folder>` probes a copy of that vault instead of the Sample Vault (a PDF pasted in a note).
+    private fun ownVault(): File? = System
+        .getProperty(VAULT_PROPERTY)
+        ?.takeIf { it.isNotBlank() }
+        ?.let { folder ->
+            val copy = Files
+                .createTempDirectory("notekea-probe")
+                .resolve(File(folder).name)
+                .toFile()
+
+            File(folder).copyRecursively(target = copy)
+            copy
+        }
 
     private companion object {
         const val GPU_SLOTS = 4
@@ -432,6 +466,7 @@ class ChatProbeChatModelTest {
         const val COMPACT_SECONDS = 120L
         const val PERCENT = 100
         const val PROBES_PROPERTY = "notekea.chat.probes"
+        const val VAULT_PROPERTY = "notekea.chat.vault"
         const val DEFAULT_PROBES = "../smoke-data/eval/chat-probes.txt"
         const val GUIDE = "src/commonMain/composeResources/files/guide/guide.md"
 

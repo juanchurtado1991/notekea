@@ -6,6 +6,7 @@ import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.AgentTaskUseCase
 import app.notekea.chat.domain.language.SpokenLanguage
 import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.AgentMoveLine
@@ -32,7 +33,8 @@ internal class ChatAgent(
         task: String,
         notes: Collection<NoteEntry>,
         history: List<ChatExchange>,
-        openNote: RelativePath?
+        openNote: RelativePath?,
+        planned: List<PlannedStep> = emptyList()
     ) {
         host
             .update(id) {
@@ -42,7 +44,7 @@ internal class ChatAgent(
                 )
             }
 
-        work(id, task, notes, history, openNote)
+        work(id, task, notes, history, openNote, planned)
     }
 
     private suspend fun work(
@@ -50,7 +52,8 @@ internal class ChatAgent(
         task: String,
         notes: Collection<NoteEntry>,
         history: List<ChatExchange>,
-        openNote: RelativePath?
+        openNote: RelativePath?,
+        planned: List<PlannedStep>
     ) {
         host.update(id) { it.copy(step = ChatStep.WORKING) }
 
@@ -71,7 +74,8 @@ internal class ChatAgent(
             vaultPath = vaultPath,
             notes = notes,
             context = context,
-            openNote = openNote
+            openNote = openNote,
+            planned = planned
         )
             .collect { step ->
                 host.update(id) { entry -> entry.after(step = step) }

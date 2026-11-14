@@ -77,7 +77,8 @@ internal class ChatReplies(
             },
             language = language,
             today = todayIn(notes),
-            working = working()?.described()
+            working = working()?.described(),
+            notes = notes
         )
 
         is ChatReply.Question -> answered(
@@ -111,7 +112,7 @@ internal class ChatReplies(
             today = today()
         )
 
-        ChatReply.Acted, ChatReply.Agent -> flow { }
+        ChatReply.Acted, is ChatReply.Agent -> flow { }
     }
 
     private fun answered(

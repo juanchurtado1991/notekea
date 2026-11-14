@@ -77,7 +77,7 @@ internal class ChatActions(
 
                 ActionTurnStep.Overview -> reply = ChatReply.Overview
 
-                ActionTurnStep.ToAgent -> reply = ChatReply.Agent
+                is ActionTurnStep.ToAgent -> reply = ChatReply.Agent(planned = step.planned)
 
                 else -> {
                     if (step is ActionTurnStep.Found) found += step.found
@@ -124,7 +124,7 @@ internal class ChatActions(
                     is ActionTurnStep.Answer,
                     is ActionTurnStep.Chat,
                     is ActionTurnStep.Help,
-                    ActionTurnStep.ToAgent,
+                    is ActionTurnStep.ToAgent,
                     ActionTurnStep.Overview -> entry.copy(step = ChatStep.PLANNING)
 
                     is ActionTurnStep.Progress -> entry.copy(progress = step.progress)

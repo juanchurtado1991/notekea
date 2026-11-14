@@ -21,7 +21,10 @@ object WritePrompt {
 
     private const val FROM_NOTES =
         "You write the body of a Markdown note for a notes app, in the language of the request. Use only what the " +
-            "notes below say; never invent. Write about %d words, with short headings and lists where they help, " +
+            "notes below say; never invent: every fact, name, number and table row comes from them, never an " +
+            "example or a row to fill in later, and never tell the reader to read the document themselves. What " +
+            "the notes do not say, leave out. Write what the request asks for and little else: a " +
+            "table asked for is the note, with at most two sentences before it. Write about %d words, with short headings and lists where they help, " +
             "in your own words (do not paste whole paragraphs). After each point, name the note it comes from as a " +
             "link, like [[Note name]]. Do not write a title. $FORMATTING"
 
@@ -30,27 +33,48 @@ object WritePrompt {
             "and well organized. Write at most %d words. Do not write a title. $FORMATTING"
 
     private const val DIGEST =
-        "Write in two or three sentences what this note says that matters for the request, in the language of the " +
-            "request. Keep names, numbers and dates."
+        "Write, as a short list, what this part of the note says that matters for the request, in the language of " +
+            "the request. Keep names, numbers, dates and conditions; add nothing it does not say."
 
     private const val BASE_WORDS = 120
     private const val WORDS_PER_NOTE = 20
+    private const val CHARS_PER_WORD = 40
     private const val MAX_WORDS = 600
     private const val FREE_WORDS = 250
 
-    /** How long a note written from [notes] notes should be: 120 words, 20 more per note, at most 600. */
-    fun wordsFor(notes: Int): Int =
-        (BASE_WORDS + WORDS_PER_NOTE * notes).coerceAtMost(maximumValue = MAX_WORDS)
+    /** What was wrong with a body: placeholders in place of the notes' content. */
+    const val PLACEHOLDERS = "Your text held placeholders or examples to replace."
+
+    /** What was wrong with a body: these figures, which the notes do not write. */
+    const val FIGURES = "Your text held figures the notes do not write: "
+
+    /** Said when a body's last check found a [problem], before it is written again. */
+    fun again(problem: String): ChatMessage = ChatMessage(
+        role = ChatRole.USER,
+        text = "$problem Write it again with only what the notes above say, each point and figure taken from " +
+            "them; leave out what they do not say."
+    )
+
+    /**
+     * How long a note written from [notes] notes of [chars] characters should be: 120 words, 20 more per note and
+     * one more per [CHARS_PER_WORD] characters read, at most 600.
+     */
+    fun wordsFor(
+        notes: Int,
+        chars: Int = 0
+    ): Int = (BASE_WORDS + WORDS_PER_NOTE * notes + chars / CHARS_PER_WORD)
+        .coerceAtMost(maximumValue = MAX_WORDS)
 
     /** A body written from [sources] (each a note's name and its text, or a digest of it) for [what]. */
     fun fromNotes(
         request: String,
         what: String,
-        sources: List<Pair<String, String>>
+        sources: List<Pair<String, String>>,
+        words: Int = wordsFor(notes = sources.size)
     ): List<ChatMessage> = listOf(
         ChatMessage(
             role = ChatRole.SYSTEM,
-            text = FROM_NOTES.replace("%d", wordsFor(notes = sources.size).toString())
+            text = FROM_NOTES.replace("%d", words.toString())
         ),
         ChatMessage(
             role = ChatRole.USER,

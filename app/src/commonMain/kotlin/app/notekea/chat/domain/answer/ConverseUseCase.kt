@@ -3,6 +3,7 @@ package app.notekea.chat.domain.answer
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.language.inLanguage
+import app.notekea.chat.domain.plan.AttachedTexts
 import app.notekea.chat.domain.prompt.ConversePrompt
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
@@ -20,6 +21,8 @@ class ConverseUseCase(
     private val llmEngine: LlmEngine,
     private val noteTextCache: NoteTextCache
 ) {
+    private val attachedTexts = AttachedTexts(noteTextCache = noteTextCache)
+
     operator fun invoke(
         message: String,
         history: List<ChatExchange>,
@@ -27,14 +30,17 @@ class ConverseUseCase(
         note: NoteEntry?,
         language: String? = null,
         today: String? = null,
-        working: String? = null
+        working: String? = null,
+        notes: Collection<NoteEntry> = emptyList()
     ): Flow<AnswerStep> = flow {
+        // With the documents it attaches: talk about a note that holds a pasted PDF is about the PDF's text.
         val body = note
             ?.let {
-                noteTextCache.textsOf(
+                attachedTexts.of(
                     vaultPath = vaultPath,
-                    notes = listOf(it)
-                )[it.file.path]?.body
+                    note = it,
+                    notes = notes
+                ).text
             }
             .orEmpty()
 

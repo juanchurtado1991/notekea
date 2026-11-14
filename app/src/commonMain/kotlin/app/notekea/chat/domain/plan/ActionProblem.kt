@@ -40,6 +40,12 @@ sealed interface ActionProblem {
     /** No study card could be made from the note: the note backs none the model proposed (4.6). */
     data object NoCards : ActionProblem
 
+    /** The notes to write from hold no text Notekea can read (a scanned PDF): nothing is written, not a guess. */
+    data class NothingToRead(val names: List<String>) : ActionProblem
+
+    /** The text written twice held placeholders in place of what the notes say: it is not shown as their content. */
+    data object NotBacked : ActionProblem
+
     /** What was done can no longer be taken back: the app was closed since, or a step of the undo failed. */
     data object CannotUndo : ActionProblem
 

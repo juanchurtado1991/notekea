@@ -47,7 +47,9 @@ import app.notekea.resources.chat_problem_long
 import app.notekea.resources.chat_problem_many
 import app.notekea.resources.chat_problem_missing
 import app.notekea.resources.chat_problem_no_cards
+import app.notekea.resources.chat_problem_not_backed
 import app.notekea.resources.chat_problem_note
+import app.notekea.resources.chat_problem_nothing_to_read
 import app.notekea.resources.chat_problem_query
 import app.notekea.resources.chat_problem_query_failed
 import app.notekea.resources.chat_problem_refused
@@ -247,6 +249,11 @@ private fun problemText(problem: ActionProblem): String = when (problem) {
             ?: replyString(resource = Res.string.chat_problem_refused)
 
     ActionProblem.NoCards -> replyString(resource = Res.string.chat_problem_no_cards)
+
+    is ActionProblem.NothingToRead ->
+        replyString(Res.string.chat_problem_nothing_to_read, problem.names.joinToString())
+
+    ActionProblem.NotBacked -> replyString(resource = Res.string.chat_problem_not_backed)
 
     ActionProblem.CannotUndo -> replyString(resource = Res.string.chat_problem_cannot_undo)
 

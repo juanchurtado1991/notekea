@@ -49,8 +49,8 @@ internal class ChatAnswering(
         }
 
         // The agent ends on a card or with what it found, never in an answer of 3.2.
-        if (reply == ChatReply.Agent) {
-            return agent.takeOver(id, question, host.notes, history, host.activeNote)
+        if (reply is ChatReply.Agent) {
+            return agent.takeOver(id, question, host.notes, history, host.activeNote, reply.planned)
         }
 
         if (reply == ChatReply.Acted) return

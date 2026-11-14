@@ -40,7 +40,7 @@ class ActOnRequestUseCase(
             openNote = openNote
         )
 
-        routed(agentUse, reply)?.let {
+        routed(agentUse, reply, planned)?.let {
             return@flow emit(value = it)
         }
 
@@ -161,12 +161,18 @@ class ActOnRequestUseCase(
     // Help, the overview and talk stay the plan's; questions and actions go to the agent if asked. Null: act on it.
     private fun routed(
         agentUse: AgentUse,
-        reply: ActionTurnStep?
+        reply: ActionTurnStep?,
+        planned: List<PlannedStep>
     ): ActionTurnStep? {
         val isWork = reply == null || reply is ActionTurnStep.Answer
         val isForAgent = isWork && agentUse == AgentUse.FOR_WORK
 
-        return if (isForAgent) ActionTurnStep.ToAgent else reply
+        // Only a plan of changes is handed on: a question's plan proposes nothing.
+        val changes = planned.takeIf {
+            reply == null
+        }.orEmpty()
+
+        return if (isForAgent) ActionTurnStep.ToAgent(planned = changes) else reply
     }
 
     // A plan that names what the vault does not hold goes to the agent where Auto allows it, else says so.
@@ -176,7 +182,7 @@ class ActOnRequestUseCase(
     ): ActionTurnStep {
         val isStuck = agentUse.isStuckOn(problem = problem)
 
-        return if (isStuck) ActionTurnStep.ToAgent else ActionTurnStep.Problem(problem = problem)
+        return if (isStuck) ActionTurnStep.ToAgent() else ActionTurnStep.Problem(problem = problem)
     }
 
     // Each step with its text written. Cards asked of several notes ("study cards of WordPress"): a note that

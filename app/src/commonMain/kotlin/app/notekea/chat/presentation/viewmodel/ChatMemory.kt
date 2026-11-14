@@ -127,13 +127,21 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
         compactedThrough = NONE
     }
 
+    // An answer, or what the chat did for a request: asked later why it wrote something, it knows what it did.
     private fun remembered(entries: List<ChatEntry>): List<ChatEntry> = entries.filter {
-        it.id > compactedThrough && it.answer.isNotBlank()
+        it.id > compactedThrough && it.replied().isNotBlank()
+    }
+
+    private fun ChatEntry.replied(): String = answer.take(n = REPLY_CHARS).ifBlank {
+        WorkRecord
+            .of(entry = this)
+            ?.take(n = RECORD_CHARS)
+            .orEmpty()
     }
 
     private fun ChatEntry.exchange() = ChatExchange(
         question = question,
-        reply = answer.take(n = REPLY_CHARS)
+        reply = replied()
     )
 
     private val ChatExchange.size: Int get() = question.length + reply.length
@@ -145,6 +153,7 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
         val IDLE = 30.minutes
         const val KEPT = 2
         const val REPLY_CHARS = 400
+        const val RECORD_CHARS = 900
         const val BUDGET_CHARS = 6_000
         const val EARLIER = "(Earlier in this chat)"
     }

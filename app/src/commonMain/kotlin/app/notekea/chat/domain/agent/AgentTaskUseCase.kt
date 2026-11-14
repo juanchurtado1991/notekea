@@ -3,10 +3,12 @@ package app.notekea.chat.domain.agent
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.ActionPlanReader
+import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageReader
+import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.core.domain.Outcome
@@ -45,7 +47,8 @@ class AgentTaskUseCase(
         vaultPath: String,
         notes: Collection<NoteEntry>,
         context: ActionContext,
-        openNote: RelativePath?
+        openNote: RelativePath?,
+        planned: List<PlannedStep> = emptyList()
     ): Flow<AgentStep> = flow {
         val found = mutableListOf<String>()
         val made = mutableSetOf<String>()
@@ -81,6 +84,24 @@ class AgentTaskUseCase(
 
             when (move.move) {
                 AgentTaskPrompt.FINISH -> {
+                    // Asked to write a note, and having read what to write it from, it ends on the card: the
+                    // person asked for the note and decides, not a model's doubt (the smoke of 2026-11-14).
+                    val asked = GroundedSteps.asked(
+                        planned = planned,
+                        read = lookUp.read
+                    )
+
+                    if (asked != null) {
+                        return@flow proposed(
+                            move = asked,
+                            unreadable = emptyList(),
+                            task = task,
+                            vaultPath = vaultPath,
+                            notes = notes,
+                            openNote = openNote
+                        )
+                    }
+
                     val answer = finalAnswer.written(
                         task = task,
                         found = found,
@@ -91,7 +112,14 @@ class AgentTaskUseCase(
                 }
 
                 AgentTaskPrompt.PROPOSE -> return@flow proposed(
-                    move = move,
+                    move = GroundedSteps.of(
+                        move = move,
+                        read = lookUp.read
+                    ),
+                    unreadable = lookUp
+                        .unreadable
+                        .takeIf { lookUp.read.isEmpty() }
+                        .orEmpty(),
                     task = task,
                     vaultPath = vaultPath,
                     notes = notes,
@@ -99,7 +127,12 @@ class AgentTaskUseCase(
                 )
 
                 else -> {
-                    val key = "${move.move}:${move.query ?: move.note ?: move.url}".lowercase()
+                    // A note is the same note however the model writes its name ("contrato", "Contrato/contrato").
+                    val note = move.note?.let {
+                        lookUp.pathOf(name = it) ?: it
+                    }
+
+                    val key = "${move.move}:${move.query ?: note ?: move.url}".lowercase()
 
                     emit(
                         value = AgentStep.Moving(
@@ -205,6 +238,7 @@ class AgentTaskUseCase(
     // The proposal as the card shows it: the plan checked against the vault, its text written out.
     private suspend fun FlowCollector<AgentStep>.proposed(
         move: AgentTaskMove,
+        unreadable: List<String>,
         task: String,
         vaultPath: String,
         notes: Collection<NoteEntry>,
@@ -219,6 +253,14 @@ class AgentTaskUseCase(
 
         val summary = move.summary.orEmpty()
         if (confirmed.isEmpty()) return emit(value = AgentStep.Finished(summary = summary))
+
+        // The notes it read to write from held no text: it says so, and writes no note from what it knows.
+        val isWrittenBlind =
+            unreadable.isNotEmpty() && confirmed.any { it.kind in GroundedSteps.WRITTEN }
+
+        if (isWrittenBlind) {
+            return emit(AgentStep.Stopped(ActionProblem.NothingToRead(names = unreadable)))
+        }
 
         val checked =
             when (val plan = checkPlan(steps = confirmed, notes = notes, openNote = openNote)) {

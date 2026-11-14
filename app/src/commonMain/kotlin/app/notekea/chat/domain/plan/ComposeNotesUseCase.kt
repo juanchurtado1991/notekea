@@ -12,9 +12,6 @@ import app.notekea.core.llm.domain.LlmException
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 
 /**
  * Writes the text a step will add before its card is shown (3.9), so the person confirms the real text: a new note's
@@ -28,6 +25,11 @@ class ComposeNotesUseCase(
     private val clipper: WebPageClipper? = null,
     private val cardMaker: CardMaker? = null
 ) {
+    private val notesWriter = NotesWriter(
+        llmEngine = llmEngine,
+        noteTextCache = noteTextCache
+    )
+
     suspend operator fun invoke(
         step: ActionStep,
         request: String,
@@ -211,45 +213,14 @@ class ComposeNotesUseCase(
         vaultPath: String,
         notes: Collection<NoteEntry>
     ): List<NoteDraft> {
-        val wanted = step.notes.toSet()
-
-        val read = noteTextCache.textsOf(
+        val body = notesWriter.bodyOf(
+            step = step,
+            request = request,
             vaultPath = vaultPath,
-            notes = notes.filter {
-                it.file.path in wanted
-            }
+            notes = notes
         )
-
-        val sources = step.notes.mapNotNull { path ->
-            read[path]?.let {
-                path.nameWithoutExtension to it.body.trim()
-            }
-        }
-
-        val noNotes = ActionProblem.Missing(step.kind, ActionField.NOTES)
-        if (sources.isEmpty()) throw ComposeProblem(noNotes)
-
-        val isTooLong = sources.sumOf { it.second.length } > READ_AT_ONCE_CHARS
-
-        val given = if (isTooLong) {
-            digested(
-                request = request,
-                sources = sources
-            )
-        } else {
-            sources
-        }
 
         val title = step.title.orEmpty()
-
-        val body = written(
-            messages = WritePrompt.fromNotes(
-                request = request,
-                what = step.text.orEmpty(),
-                sources = given
-            ),
-            maxTokens = WritePrompt.wordsFor(notes = sources.size) * TOKENS_PER_WORD
-        )
 
         // The note goes to the folder asked for, else beside the notes it comes from when they share one.
         val folder = step.folder ?: step
@@ -267,27 +238,6 @@ class ComposeNotesUseCase(
                 text = "# $title\n\n$body\n"
             )
         )
-    }
-
-    /** Each source read alone into a few sentences, several at once, when together they are too long to read. */
-    private suspend fun digested(
-        request: String,
-        sources: List<Pair<String, String>>
-    ): List<Pair<String, String>> = coroutineScope {
-        sources.map { (name, text) ->
-            async {
-                val messages = WritePrompt.digest(
-                    request = request,
-                    name = name,
-                    text = text.take(n = DIGEST_CHARS)
-                )
-
-                name to written(
-                    messages = messages,
-                    maxTokens = DIGEST_TOKENS
-                )
-            }
-        }.awaitAll()
     }
 
     private suspend fun fromText(
@@ -402,20 +352,12 @@ class ComposeNotesUseCase(
         .trim()
         .ifEmpty { UNTITLED }
 
-    private class ComposeProblem(val problem: ActionProblem) : RuntimeException()
-
     private companion object {
         const val MARKDOWN = ".md"
         const val UNTITLED = "Untitled"
         const val TEMPERATURE = 0.3f
-        const val TOKENS_PER_WORD = 2
         const val FREE_TOKENS = 600
-        const val DIGEST_TOKENS = 120
         const val PART_TOKENS = 1_400
-
-        // About 2,500 tokens of notes, which leaves room for the instructions and the answer in a 4,096 context.
-        const val READ_AT_ONCE_CHARS = 9_000
-        const val DIGEST_CHARS = 6_000
         const val MAX_PARTS = 5
         const val MAX_TEXT_NOTES = 15
         val TITLE_LINE = Regex(pattern = "^#\\s.*")

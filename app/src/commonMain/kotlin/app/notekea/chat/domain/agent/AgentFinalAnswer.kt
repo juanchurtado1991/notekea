@@ -34,7 +34,8 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
                 .generate(
                     messages = AgentTaskPrompt.answer(
                         task = task,
-                        found = looked
+                        found = looked,
+                        conclusion = summary
                     ),
                     options = GenerationOptions(
                         maxTokens = ANSWER_TOKENS,
