@@ -96,6 +96,29 @@ class OkioAttachmentStore(
             ) { write(source = bytes) }
     }
 
+    override suspend fun folders(vaultPath: String): List<RelativePath> =
+        withContext(context = dispatchers.io) {
+            val root = vaultPath.toPath()
+
+            try {
+                fileSystem
+                    .listRecursively(dir = root)
+                    .filter {
+                        fileSystem.metadataOrNull(path = it)?.isDirectory == true
+                    }
+                    .map { it.relativeTo(other = root).segments }
+                    .filter { segments ->
+                        segments.none { it.startsWith(prefix = HIDDEN_PREFIX) }
+                    }
+                    .map {
+                        RelativePath(value = it.joinToString(separator = RelativePath.SEPARATOR))
+                    }
+                    .toList()
+            } catch (_: IOException) {
+                emptyList()
+            }
+        }
+
     override suspend fun copy(
         vaultPath: String,
         absolutePath: String,
@@ -168,6 +191,17 @@ class OkioAttachmentStore(
             writeFile(target)
             Outcome.Success(value = Unit)
         } catch (_: IOException) {
+            // What was written before it failed is no file to keep: half a picture, and its name taken for good
+            // (the code review of 2026-11-13). Nothing was there before, so nothing of the person's is removed.
+            try {
+                fileSystem.delete(
+                    path = target,
+                    mustExist = false
+                )
+            } catch (_: IOException) {
+                // It could not be written, nor removed: the failure below is what is told.
+            }
+
             Outcome.Failure(error = NotesError.OperationFailed(path = path.value))
         }
     }

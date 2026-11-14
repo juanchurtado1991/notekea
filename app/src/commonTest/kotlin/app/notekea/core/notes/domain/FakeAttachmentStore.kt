@@ -30,6 +30,27 @@ class FakeAttachmentStore(
         }
     }
 
+    /** Folders with no file in them, which [folders] lists beside those of the files. */
+    val emptyFolders = mutableListOf<RelativePath>()
+
+    override suspend fun folders(vaultPath: String): List<RelativePath> {
+        val holding = contents.keys.flatMap { file ->
+            generateSequence(seed = file.parent) { it.parent }
+                .takeWhile {
+                    !it.isRoot
+                }
+                .toList()
+        }
+
+        // As the disk does: the hidden ones (.obsidian, .trash) are no folders to offer.
+        return (holding + emptyFolders).distinct().filterNot { folder ->
+            folder
+                .value
+                .split('/')
+                .any { it.startsWith(prefix = ".") }
+        }
+    }
+
     override suspend fun read(
         vaultPath: String,
         path: RelativePath

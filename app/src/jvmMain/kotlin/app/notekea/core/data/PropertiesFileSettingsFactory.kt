@@ -18,11 +18,17 @@ import java.util.Properties
 class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
+    // The settings as this Notekea last read or wrote them: what differs from it is what it changed.
+    private val written = Properties()
+
     fun create(): Settings {
         val file = Path.of(appDataDirectory, SETTINGS_FILE_NAME)
 
+        val loaded = load(file = file)
+        written.putAll(loaded)
+
         return PropertiesSettings(
-            delegate = load(file = file),
+            delegate = loaded,
             onModify = {
                 save(
                     properties = it,
@@ -70,8 +76,26 @@ class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
         Files.createDirectories(file.parent)
         val temporaryFile = Files.createTempFile(file.parent, SETTINGS_FILE_NAME, TEMPORARY_SUFFIX)
 
+        // Another Notekea running writes the same file: what this one changed since it last wrote goes over what
+        // is on disk now, never its whole memory, which would undo the other's settings (2026-11-13).
+        val merged = load(file = file)
+
+        (properties.stringPropertyNames() + written.stringPropertyNames()).forEach { key ->
+            val now = properties.getProperty(key)
+            val isChanged = now != written.getProperty(key)
+
+            when {
+                !isChanged -> Unit
+                now == null -> merged.remove(key)
+                else -> merged.setProperty(key, now)
+            }
+        }
+
+        written.clear()
+        written.putAll(properties)
+
         try {
-            Files.newOutputStream(temporaryFile).use { properties.store(it, null) }
+            Files.newOutputStream(temporaryFile).use { merged.store(it, null) }
 
             moveIntoPlace(
                 source = temporaryFile,

@@ -123,6 +123,9 @@ class FilesSettingsViewModelTest {
             listOf("Journal/Daily/2026-11-13.md", "attachments/plate.png", ".obsidian/app.json", "Welcome.md")
                 .forEach { attachmentStore.contents[RelativePath(value = it)] = byteArrayOf() }
 
+            // A folder with nothing in it yet: made to hold the attachments, it could not be chosen (2026-11-13).
+            attachmentStore.emptyFolders += RelativePath(value = "Media")
+
             val viewModel = FilesSettingsViewModel(
                 reader = FakeVaultSettingsReader(
                     dailyNotes = DailyNoteSettings(
@@ -143,8 +146,8 @@ class FilesSettingsViewModelTest {
 
             assertEquals(
                 expected = listOf<Any>(
-                    listOf("Journal", "Journal/Daily", "attachments"),
-                    listOf("Diario", "Journal", "Journal/Daily", "attachments"),
+                    listOf("Journal", "Journal/Daily", "Media", "attachments"),
+                    listOf("Diario", "Journal", "Journal/Daily", "Media", "attachments"),
                     listOf("2026-11-13", "13-11-2026", "11-13-2026", "2026.11.13", "13.11.2026", "20261113", "dddd D")
                 ),
                 actual = listOf(

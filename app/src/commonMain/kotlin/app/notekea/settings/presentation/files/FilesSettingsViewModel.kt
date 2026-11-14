@@ -68,7 +68,8 @@ class FilesSettingsViewModel(
         val daily = reader.dailyNotes(vaultPath = vault)
         val templates = reader.templates(vaultPath = vault)
 
-        val files = (attachmentStore.files(vaultPath = vault) as? Outcome.Success)?.value.orEmpty()
+        // Every folder, the empty ones too: a new folder made for the attachments could not be chosen.
+        val folders = attachmentStore.folders(vaultPath = vault)
 
         reduce {
             it.copy(
@@ -76,7 +77,7 @@ class FilesSettingsViewModel(
                 dailyFolder = daily?.folder.orEmpty(),
                 dailyFormat = daily?.format.orEmpty(),
                 templatesFolder = templates?.folder.orEmpty(),
-                folders = foldersOf(files = files),
+                folders = folders.map { it.value }.sorted(),
                 formats = DateFormatChoice.choicesOf(
                     today = localCalendar.momentOf(instant = clock.now()).date,
                     current = daily?.format.orEmpty()
@@ -84,21 +85,6 @@ class FilesSettingsViewModel(
             )
         }
     }
-
-    // Every folder that holds a file, and each above it, by its path; the hidden ones (.obsidian, .trash) left out.
-    private fun foldersOf(files: List<RelativePath>): List<String> = files
-        .flatMap { file ->
-            generateSequence(seed = file.parent) { it.parent }
-                .takeWhile {
-                    !it.isRoot
-                }
-                .map { it.value }
-        }
-        .distinct()
-        .filterNot { folder ->
-            folder.split('/').any { it.startsWith(prefix = ".") }
-        }
-        .sorted()
 
     private fun change(
         field: Field,

@@ -10,6 +10,9 @@ interface AttachmentStore {
     /** Every file of the vault, notes included, outside hidden folders (`.obsidian`, `.trash`). */
     suspend fun files(vaultPath: String): Outcome<List<RelativePath>, NotesError>
 
+    /** Every folder of the vault, the empty ones too, without the hidden ones (.obsidian, .trash). */
+    suspend fun folders(vaultPath: String): List<RelativePath>
+
     suspend fun read(
         vaultPath: String,
         path: RelativePath

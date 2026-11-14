@@ -47,6 +47,50 @@ class PropertiesFileSettingsFactoryTest {
         )
     }
 
+    // The code review of 2026-11-13: each Notekea wrote its whole memory, undoing what the other had saved.
+    @Test
+    fun `two apps running each keep what the other saved, and a key one removes stays removed`() {
+        val first = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+
+        first.putString(
+            key = "theme",
+            value = "forest"
+        )
+
+        first.putString(
+            key = "old",
+            value = "x"
+        )
+
+        val second = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+
+        second.putString(
+            key = "language",
+            value = "es"
+        )
+
+        first.putString(
+            key = "theme",
+            value = "ocean"
+        )
+
+        first.remove(key = "old")
+
+        second.putString(
+            key = "size",
+            value = "large"
+        )
+
+        val now = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+
+        assertEquals(
+            expected = listOf("ocean", "es", "large", null),
+            actual = listOf("theme", "language", "size", "old").map {
+                now.getStringOrNull(key = it)
+            }
+        )
+    }
+
     @Test
     fun `an unreadable settings file starts empty instead of failing`() {
         Files.createDirectories(appData)
