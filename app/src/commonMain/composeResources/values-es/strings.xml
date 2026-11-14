@@ -249,6 +249,8 @@
     <string name="rail_settings">Ajustes</string>
     <string name="rail_graph">Grafo</string>
     <string name="rail_side_panel">Panel lateral</string>
+    <string name="settings_chat_loop">Modo agente con el nuevo bucle</string>
+    <string name="settings_chat_loop_hint">Una vista previa de la nueva forma de trabajar del chat: en modo Agente lee los documentos largos por partes, hace él mismo sumas y fechas, y pregunta cuando una petición se puede entender de dos maneras. Acierta más y tarda más. Apagado, el modo Agente funciona como antes.</string>
     <string name="settings_close">Cerrar</string>
     <string name="settings_section_about">Acerca de</string>
     <string name="settings_language">Idioma</string>

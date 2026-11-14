@@ -17,6 +17,7 @@ import app.notekea.chat.domain.answer.DescribeVaultUseCase
 import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.conversation.ConversationMemory
 import app.notekea.chat.domain.help.AnswerHelpUseCase
+import app.notekea.chat.domain.loop.ChatLoop
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.FoundRow
@@ -68,7 +69,8 @@ class ChatViewModel(
     private val historyStore: ChatHistoryStore,
     private val clipboard: TextClipboard,
     private val llmEngine: LlmEngine,
-    sources: ChatSources
+    sources: ChatSources,
+    loop: ChatLoop? = null
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
@@ -128,8 +130,6 @@ class ChatViewModel(
         host = host
     )
 
-    private val memory = ConversationMemory(compactChat = compactChat)
-
     private val siteSearch = ChatSiteSearch(
         vaultPath = vaultPath,
         sources = sources,
@@ -140,7 +140,7 @@ class ChatViewModel(
     private val keeping = ChatKeeping(
         vaultPath = vaultPath,
         historyStore = historyStore,
-        memory = memory,
+        memory = ConversationMemory(compactChat = compactChat),
         clock = clock,
         host = host
     )
@@ -149,7 +149,8 @@ class ChatViewModel(
         vaultPath = vaultPath,
         agentTask = agentTask,
         actions = actions,
-        host = host
+        host = host,
+        loop = loop
     )
 
     private val answering = ChatAnswering(

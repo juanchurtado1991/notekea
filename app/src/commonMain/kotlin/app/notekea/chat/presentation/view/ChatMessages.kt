@@ -274,7 +274,8 @@ private fun AnswerContent(
             isWriting = isWriting,
             isSourcesFirst = isSmall,
             onSourceClick = onSourceClick,
-            onOfferedClick = { onIntent(ChatIntent.OnOfferedClick(id = entry.id)) }
+            onOfferedClick = { onIntent(ChatIntent.OnOfferedClick(id = entry.id)) },
+            onOptionChoose = { onIntent(ChatIntent.OnFollowUp(text = it)) }
         )
     }
 }
@@ -285,7 +286,8 @@ private fun Written(
     isWriting: Boolean,
     isSourcesFirst: Boolean,
     onSourceClick: (AnswerSource) -> Unit,
-    onOfferedClick: () -> Unit
+    onOfferedClick: () -> Unit,
+    onOptionChoose: (String) -> Unit
 ) {
     val isDone = !entry.isAnswering && entry.sources.isNotEmpty()
     val isOffered = !entry.isAnswering && entry.offered != null
@@ -309,6 +311,13 @@ private fun Written(
 
         if (entry.outcome == TurnOutcome.STOPPED) {
             Quiet(text = replyString(resource = Res.string.chat_stopped))
+        }
+
+        if (entry.options.isNotEmpty()) {
+            ChatAskedOptions(
+                options = entry.options,
+                onChoose = onOptionChoose
+            )
         }
 
         if (isOffered) {

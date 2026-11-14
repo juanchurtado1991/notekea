@@ -5,17 +5,22 @@ import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.agent.AgentAnswerUseCase
 import app.notekea.chat.domain.agent.AgentTaskUseCase
+import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.help.HelpGuideSource
+import app.notekea.chat.domain.loop.ChatLoop
+import app.notekea.chat.domain.loop.LoopTools
+import app.notekea.chat.domain.loop.RunTurnUseCase
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionPlanReader
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
 import app.notekea.chat.presentation.viewmodel.ChatSources
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
@@ -44,6 +49,12 @@ val chatModule = module {
     factoryOf(::AnswerFromPagesUseCase)
     factoryOf(::AgentAnswerUseCase)
     factoryOf(::AgentTaskUseCase)
+    factoryOf(::VaultGuide)
+    factoryOf(::ProposalCheck)
+    factoryOf(::LoopTools)
+    factory { get<LoopTools>().toolsets() }
+    factoryOf(::RunTurnUseCase)
+    factoryOf(::ChatLoop)
     factoryOf(::AnswerHelpUseCase)
     factoryOf(::DescribeVaultUseCase)
     factoryOf(::CompactChatUseCase)
@@ -73,7 +84,8 @@ val chatModule = module {
             sources = ChatSources(
                 answerFromPages = get(),
                 sourceSites = getOrNull()
-            )
+            ),
+            loop = get()
         )
     }
 }

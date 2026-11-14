@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Settings → General → Agent mode with the new loop: a preview that has Agent mode work with the one loop. When a
+  request can be read two ways the chat asks back with a button for each answer.
+- The agent is measured on 150 more tasks written after the loop was tuned (70 over the Sample Vault, 80 over the
+  Agent Eval vault, which gains 25 notes: a Spanish lease, a handbook, an audit, long journals and minutes).
+
 ### Changed
 
 - Inside the chat, the one loop works (`docs/agent-loop.md`, step 5): it chooses its kind of work, calls one tool at

@@ -5,6 +5,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AgentWideCasesTest {
+    // The held-out tasks are checked as the others: what they expect is written in the vault.
+    private val everyCase = AgentWideCases.all + AgentWideHeldOutCases.all
+
     private val vault = File("../smoke-data/vaults/${AgentWideCases.VAULT}")
         .walkTopDown()
         .filter {
@@ -17,7 +20,7 @@ class AgentWideCasesTest {
     fun `what a task's answer must hold is written in the vault, or the task says it is worked out`() {
         assertEquals(
             expected = emptyList(),
-            actual = AgentWideCases.all.flatMap { case ->
+            actual = everyCase.flatMap { case ->
                 // A note the task writes is named by the task, not by the vault.
                 case.holds.filterNot {
                     it in vault || it in case.task
@@ -30,15 +33,14 @@ class AgentWideCasesTest {
     fun `every task names tools of the design and how it ends, and every kind has tasks`() {
         assertEquals(
             expected = emptyList(),
-            actual = AgentWideCases.all.flatMap {
+            actual = everyCase.flatMap {
                 it.tools - AgentWideCases.TOOLS
             }
         )
 
         assertEquals(
             expected = AgentWideCase.Kind.entries.toSet(),
-            actual = AgentWideCases
-                .all
+            actual = everyCase
                 .map { it.kind }
                 .toSet()
         )
