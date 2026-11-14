@@ -2,6 +2,7 @@ package app.notekea.core.presentation.designsystem.components.feedback
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -36,8 +37,12 @@ fun NotekeaTooltip(
             positioning = if (isBeside) TooltipAnchorPosition.End else TooltipAnchorPosition.Below
         ),
         tooltip = {
-            PlainTooltip {
-                Text(text = listOfNotNull(label, shortcutHint).joinToString(TOOLTIP_SEPARATOR))
+            // Its text is in another layer of the window: left selectable inside selectable text, a press there
+            // crashed while the selection sorted texts of two layers (crash report of 2026-11-14).
+            DisableSelection {
+                PlainTooltip {
+                    Text(text = listOfNotNull(label, shortcutHint).joinToString(TOOLTIP_SEPARATOR))
+                }
             }
         },
         state = rememberTooltipState(),
