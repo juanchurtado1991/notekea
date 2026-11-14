@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.designsystem.components.NotekeaCloseButton
 import app.notekea.core.presentation.designsystem.components.NotekeaDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -114,11 +115,9 @@ fun SettingsDialog(
                     .padding(all = NotekeaDimensions.SpacingS)
 
                 Box(modifier = corner) {
-                    NotekeaIconButton(
-                        icon = NotekeaIcons.Close,
+                    NotekeaCloseButton(
                         label = stringResource(resource = Res.string.settings_close),
-                        onClick = onDismiss,
-                        takesFocus = false
+                        onClick = onDismiss
                     )
                 }
             }

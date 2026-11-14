@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaCloseButton
 import app.notekea.core.presentation.designsystem.components.NotekeaDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaKeycaps
@@ -114,11 +115,9 @@ private fun AboutContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                NotekeaIconButton(
-                    icon = NotekeaIcons.Close,
+                NotekeaCloseButton(
                     label = stringResource(resource = Res.string.about_close),
-                    onClick = onDismiss,
-                    takesFocus = false
+                    onClick = onDismiss
                 )
             }
 
