@@ -179,6 +179,41 @@ Each step is its own set of commits and leaves the app working; the work can sto
 loop use a scripted model, including replies that are wrong on purpose: an unknown tool, bad arguments, a call cut
 short. The loop feeds the error back and recovers, twice at most.
 
+## Step 0, what was measured
+
+Written as each experiment ends; the design above is changed where a result says so.
+
+### A larger context for the loop — measured 2026-11-14, Medium (Qwen3.5 4B), Apple silicon, 16 GB
+
+`ContextSizeChatModelTest` (`./gradlew :app:chatModelTest --tests '*ContextSizeChatModelTest*'
+-PchatModels=<folder>`): a document of numbered clauses, asked for its second and its last, with the same memory
+for the context (16,384 tokens) split among 4, 2 or 1 slots.
+
+| Slots | Tokens a slot | Longest document read right | Seconds | Resident memory |
+|---|---|---|---|---|
+| 4 | 4,096 | 5,900 characters (100 clauses) | 8 | 4.3 GB |
+| 2 | 8,192 | 13,200 characters (220 clauses) | 13 | 4.3 GB |
+| 1 | 16,384 | 27,200 characters (450 clauses) | 25 | 4.2 GB |
+
+- **The memory is the same.** The context's memory is its total, however it is split: a slot of 16,384 tokens
+  costs what four of 4,096 cost today. What is given up is replies side by side.
+- **It reads right to the end**: the last clause of a 27,000-character document, four and a half times what a
+  slot reads today, with no fact confused.
+- **Time grows with what is read**, about 1,100 characters a second: 25 seconds to read all of it once. The
+  budget's trimming in blocks, so the prompt's start is not read again at every move, matters as much as its size.
+- **Past its context a call fails at once** (`EngineFailed`, in a second), it is not cut short. The loop can count
+  on that, and `ContextBudget` must never let it happen.
+
+**What it changes in the design.** The loop is given one wide slot, not a narrow one of four. Two ways to have it,
+to be measured next: load the model with fewer slots when the work is a loop (Deep thinking's three drafts and
+`digest`'s parts then run one after another), or keep four slots over one shared context (`setKvUnified(true)`;
+today each slot has its own), so a lone call may use it whole and four still run side by side when each is short.
+The second keeps both if it holds; the 3.0 spike chose separate caches, for a reason to be read there first.
+
+Still to measure: the model's own format for calling tools against our JSON; a grammar that picks the tool and
+then only its arguments against the flat schema; how many tools the model chooses well among; the shared context;
+and Koog against a loop of our own.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
