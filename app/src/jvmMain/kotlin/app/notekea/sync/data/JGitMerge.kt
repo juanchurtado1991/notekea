@@ -98,6 +98,35 @@ internal class JGitMerge(
             )
         }
 
+        // A step that fails here would leave the vault half merged, its notes full of conflict marks, and the
+        // next sync would commit them: everything goes back to what was committed before the merge instead.
+        val kept = try {
+            bothKept(
+                clashing = clashing,
+                before = before,
+                theirs = theirs
+            )
+        } catch (exception: Exception) {
+            git
+                .reset()
+                .setMode(ResetCommand.ResetType.HARD)
+                .setRef(before.name)
+                .call()
+
+            throw exception
+        }
+
+        return PullResult(
+            changed = changedBetween(before),
+            conflicts = kept
+        )
+    }
+
+    private fun bothKept(
+        clashing: Set<String>,
+        before: ObjectId,
+        theirs: ObjectId
+    ): List<RelativePath> {
         val kept = clashing.mapNotNull { path ->
             keepBoth(
                 path = path,
@@ -125,10 +154,7 @@ internal class JGitMerge(
 
         commit("$MERGE_MESSAGE, both versions kept of ${clashing.size}")
 
-        return PullResult(
-            changed = changedBetween(before),
-            conflicts = kept
-        )
+        return kept
     }
 
     /** The remote's [theirs] in the note and our [ours] beside it; the note, when both still have it. */
@@ -147,7 +173,15 @@ internal class JGitMerge(
         }
 
         file.writeBytes(theirs)
-        File(repository.workTree, ConflictCopies.copyOf(path = note).value).writeBytes(ours)
+        val copy = File(repository.workTree, ConflictCopies.copyOf(path = note).value)
+
+        // An older conflict of this note not settled yet: its copy is the person's too, set aside and not lost.
+        if (copy.exists()) {
+            val mine = File(repository.workTree, ConflictCopies.mineOf(path = note).value)
+            copy.renameTo(FreeFile.beside(file = mine))
+        }
+
+        copy.writeBytes(ours)
 
         return note
     }

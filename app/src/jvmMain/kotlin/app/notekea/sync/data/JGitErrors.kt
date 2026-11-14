@@ -11,6 +11,7 @@ import java.net.UnknownHostException
 /** What JGit threw, as the [SyncError] the app shows: a refused token, no network, a bad address, or its message. */
 internal object JGitErrors {
     private val AUTH_WORDS = listOf("not authorized", "authentication", "401", "403", "auth fail")
+    private val SECRET = Regex(pattern = "://[^@/\\s]+@")
 
     fun of(throwable: Throwable): SyncError {
         val causes = generateSequence(seed = throwable) { it.cause }.toList()
@@ -37,8 +38,13 @@ internal object JGitErrors {
 
             throwable is InvalidRemoteException -> SyncError.BadAddress
 
+            // An address written with its token ("https://token@host/…") is never shown or kept with it.
             else -> SyncError.Failed(
-                message = throwable.message ?: throwable::class.simpleName.orEmpty()
+                message = (throwable.message ?: throwable::class.simpleName.orEmpty())
+                    .replace(
+                        regex = SECRET,
+                        replacement = "://"
+                    )
             )
         }
     }

@@ -128,8 +128,9 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
             ConflictChoice.THEIRS -> Files.delete(copy)
 
             ConflictChoice.BOTH -> {
-                val mine = File(vaultPath, ConflictCopies.mineOf(path = note).value).toPath()
-                Files.move(copy, mine)
+                // "Note (mine).md" may be there from an earlier conflict: a free name, never a failure.
+                val wanted = File(vaultPath, ConflictCopies.mineOf(path = note).value)
+                Files.move(copy, FreeFile.beside(file = wanted).toPath())
             }
         }
 
