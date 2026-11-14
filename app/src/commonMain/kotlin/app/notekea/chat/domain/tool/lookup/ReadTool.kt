@@ -22,7 +22,7 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
 
     override val description =
         "a note's name; you get its text, with the text of the documents attached to it (a pasted PDF). " +
-            "With a section (a heading of its outline), only that part of a long note."
+            "Leave section out to read it whole; with a heading of its outline, only that part of a long note."
 
     override val arguments = listOf(
         ToolArgument(name = NOTE),
@@ -41,7 +41,14 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
     ): String {
         val named = call.text(name = NOTE)
 
-        return context.pathOf(name = named) ?: named
+        // A section is another read: the same note read by two of its sections is not a call made twice.
+        val section = call
+            .text(name = SECTION)
+            .takeIf { it.isNotEmpty() }
+            ?.let { " › $it" }
+            .orEmpty()
+
+        return (context.pathOf(name = named) ?: named) + section
     }
 
     override suspend fun run(

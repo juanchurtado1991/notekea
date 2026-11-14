@@ -15,7 +15,7 @@ class ToolContext(
     val vaultPath: String,
     val notes: Collection<NoteEntry>,
     val task: String,
-    openNote: RelativePath?,
+    val openNote: RelativePath?,
     val today: CalendarDate? = null
 ) {
     val reads = TurnReads()
@@ -30,6 +30,27 @@ class ToolContext(
     fun noteNamed(name: String): RelativePath? = runCatching {
         names.noteOf(name = name)
     }.getOrNull()
+
+    /** The notes that share the bare name [name], by their paths: more than one is a name the person must settle. */
+    fun sharing(name: String): List<String> {
+        val bare = name
+            .trim()
+            .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            .lowercase()
+
+        if ('/' in bare) return emptyList()
+
+        return notes
+            .map { it.file.path }
+            .filter {
+                it.isMarkdown && it.nameWithoutExtension.lowercase() == bare
+            }
+            .map { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            .takeIf {
+                it.size > 1
+            }
+            .orEmpty()
+    }
 
     /** The vault's path of the note [name] names, without its extension; null when no note has that name. */
     fun pathOf(name: String): String? = noteNamed(name = name)

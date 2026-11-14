@@ -274,6 +274,8 @@ tasks.register<Test>("chatModelTest") {
     systemProperty("notekea.chat.agent", providers.gradleProperty("chatAgent").getOrElse("false"))
     systemProperty("notekea.chat.probes", providers.gradleProperty("chatProbes").getOrElse(""))
     systemProperty("notekea.chat.vault", providers.gradleProperty("chatVault").getOrElse(""))
+    // Only the evaluation tasks whose text holds one of these words (comma separated): a quick rerun of the failures.
+    systemProperty("notekea.chat.tasks", providers.gradleProperty("chatTasks").getOrElse(""))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)

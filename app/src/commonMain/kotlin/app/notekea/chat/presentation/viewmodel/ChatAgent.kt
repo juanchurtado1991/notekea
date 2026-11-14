@@ -115,6 +115,13 @@ internal class ChatAgent(
             )
         }
 
+        is AgentStep.Asked -> copy(
+            step = ChatStep.DONE,
+            answer = step.question,
+            outcome = TurnOutcome.ANSWERED,
+            options = step.options
+        )
+
         is AgentStep.Stopped -> copy(
             step = ChatStep.DONE,
             outcome = TurnOutcome.ACTED,

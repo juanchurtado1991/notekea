@@ -43,6 +43,8 @@ data class ChatEntry(
     val pickedPages: Set<String> = emptySet(),
     val isLookingInSites: Boolean = false,
     val answeredWith: ChatMode? = null,
+    // The answers to choose from when the chat asked back in place of guessing: buttons under its question.
+    val options: List<String> = emptyList(),
     // A turn of an earlier session: what it proposed then and how that ended, said in a line in the card's place.
     val proposal: TurnItem.Proposal? = null
 ) {

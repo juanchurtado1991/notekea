@@ -16,6 +16,20 @@ class ToolRegistry(val tools: List<ChatTool>) {
         context: ToolContext
     ): String = "${call.name}:${byName[call.name]?.targetOf(call, context).orEmpty()}".lowercase()
 
+    /** The tools that change or end, none that looks: what a call may be once the turn has looked enough. */
+    fun ending(): ToolRegistry = ToolRegistry(
+        tools = tools.filter {
+            it.effect != ToolEffect.READS
+        }
+    )
+
+    /** These tools without the one named [name]: a call made again is not offered a third time. */
+    fun without(name: String): ToolRegistry = ToolRegistry(
+        tools = tools.filter {
+            it.name != name
+        }
+    )
+
     /** The tools as the prompt lists them: a line each, its name, its arguments and what it does. */
     fun described(): String = tools
         .joinToString(separator = "\n") { tool ->

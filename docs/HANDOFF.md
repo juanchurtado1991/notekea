@@ -264,9 +264,11 @@ still built in `ChatEntry` and turned into the conversation when kept (`EntryTur
 writes its items itself. Gate: 27 of 30 and 7 of 21, as before. Manual case 3.3-15. **Step 4 is done** (2026-11-14): the tools are built and
 tested, none called yet (`tool/reading`: outline, read by section, list, links, digest; `tool/app`: calculate,
 count, date; `tool/work`: plan, note, ask_user, with `TurnWork` in `ToolContext`; `chat/domain/skill`:
-`BuiltInSkills` and `VaultGuide`, which reads `Notekea.md` and `Skills/`). Next: step 5 (`RunTurnUseCase`, the
-router, the toolsets, the changing tools; agent mode only), with the setting for the instructions' and skills'
-place.
+`BuiltInSkills` and `VaultGuide`, which reads `Notekea.md` and `Skills/`). **Step 5 is under way** (2026-11-14):
+`chat/domain/loop` holds the loop (`RunTurnUseCase`, `TurnRouter`, `LoopTools`, `LoopPrompt`), measured at 20 of
+21 and 29 of 30 (the developer's marks: 19 and more than 27), at two to three times today's time. Not in the app
+yet. Next in step 5: fewer calls a task, the loop in agent mode behind a setting, ask_user's options as buttons,
+`write_note` by sections, `edit_note`. Measure a few tasks with `-PchatTasks="words,of,tasks"`.
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

@@ -231,6 +231,13 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
     used (it needs koin-test).
 
 
+## One agent loop, step 5 (2026-11-14): the loop measured
+
+- The handoff said until then: "Next: step 5 (`RunTurnUseCase`, the router, the toolsets, the changing tools)".
+  The first measure of the loop gave 6 of 21; nine rounds of measure and fix, each in `docs/agent-loop.md`,
+  brought it to 20 of 21 and 29 of 30. Step 0's limit of ten tools a set was lifted by the developer on seeing
+  that missing tools cost more than more tools; the marks of 19 and more than 27 were theirs too.
+
 ## One agent loop, step 4 (2026-11-14): the tools, before the loop
 
 - The handoff said until then: "Next: step 4 (the reading and working tools, skills, the vault's instructions)".

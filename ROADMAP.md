@@ -357,6 +357,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Step 4 (2026-11-14), done:** the reading tools (outline, read by section, list, links, digest), what the
      app does itself (calculate, count, date), the working memory (plan, note), ask_user, the skills and the
      vault's instructions; built and tested, called by the loop of step 5, which is next.
+   - **Step 5 (2026-11-14), the loop measured:** 20 of the 21 wider tasks and 29 of agent mode's 30 (today's agent:
+     7 and 27), at two to three times the time; next, fewer calls and the loop in the app.
 
 ## Out of scope for the MVP
 
