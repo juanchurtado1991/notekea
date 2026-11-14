@@ -149,9 +149,14 @@ pasted documentation page asks its question in the chat again.
 - **Agent answers:** written apart from the moves, from what they found only (`AgentFinalAnswer`): asked for
   Markdown inside the move's own summary, the model made up an answer (Auto-Test 3.3-05).
 - **Follow-ups:** `FollowUps`, `ChatFollowUps`, under the last answer.
-- **Agreed with the developer, not built yet:** when the notes do not hold the answer, offer to look for it in
-  the site the closest web sources came from, list up to five pages not clipped yet, clip the chosen ones into
-  their section and answer again.
+- **Not found, look in the site:** `ChatSiteSearch` (`ChatEntry.sites`, `sitePages`, `pickedPages`), the port
+  `SourceSites` with `SourceSitesForChat`, `WebSourceSearch` in clips (pages not clipped yet, ranked with the
+  embedding model, clipped into their section by `UpdatedSection.add`), and `AnswerFromPagesUseCase`, which answers
+  from the pages just clipped since the index has not read them yet.
+- **Study cards of a subject:** `CardsNamed` makes a request for cards a card step for each note it is about (five
+  at most); `ActOnRequestUseCase.composed` leaves out a note that backs none. Agent mode makes no cards.
+- **A move cut short:** `AgentTaskUseCase.readMove` asks again with `AgentTaskPrompt.CUT_SHORT` and more room, then
+  ends on what it found (`unread`).
 - **Still open from the code review of 2026-11-13:** the YouTube player's window and cleanup, the chat's
   presentation findings (undo, rollback, guards), and the medium findings of the editor, Settings, the tree, Git
   and the rest.
