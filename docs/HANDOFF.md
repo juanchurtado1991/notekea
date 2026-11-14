@@ -208,6 +208,14 @@ figure check catches figures the notes lack, not a figure put beside the wrong t
 sets, with the real model, and time). Step 0 is under way: fixtures, a wider agent evaluation and four experiments
 whose results are written into that document before anything is built.
 
+**Where step 0 stands (2026-11-14, night):** the first experiment is done and written in `docs/agent-loop.md`
+("Step 0, what was measured"): one slot of 16,384 tokens costs the memory of today's four of 4,096 and reads a
+27,000-character document right. Next, in this order: the shared context (`setKvUnified(true)`) against fewer
+slots; the model's own tool-calling format against our JSON; a grammar per tool against the flat schema; how many
+tools the model chooses well among; Koog's current documentation against a loop of our own; then the fixtures
+(today's requests with the model's raw replies, replayed through `FakeLlmEngine`) and the wider agent evaluation.
+Nothing of step 1 is started.
+
 Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
 is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted
 once, the vault gets its instructions note and the person's own skills in step 4, and the repair of a repository left
