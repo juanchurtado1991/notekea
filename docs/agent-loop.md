@@ -29,7 +29,7 @@ RunTurnUseCase(conversation, message): Flow<TurnEvent>
     toolset = Route(message, conversation)            // one cheap call: which kind of work this is
     loop:
         prompt  = ContextBudget.fit(system + skill + toolset + plan + notes + conversation)
-        call    = model(prompt, grammar = toolset.grammar)      // first the tool, then only its arguments
+        call    = model(prompt, grammar = toolset.grammar)      // our JSON: first the tool, then only its arguments
         result  = toolset[call.name].run(call.arguments, context)   // an error is a result it can correct
         conversation += ToolCall(call) + ToolResult(result)
         emit(TurnEvent.Step(...))
@@ -43,12 +43,14 @@ RunTurnUseCase(conversation, message): Flow<TurnEvent>
   ends the turn), and `suspend fun run(arguments, context): ToolResult`. Shaped as an MCP tool is (name,
   description, JSON schema of its input), so the roadmap's extensions (post-MVP item 1), web search (item 8) and
   OCR (item 9) plug in later as tools and not as new engines. The prompt's list of tools and the grammar are
-  **generated** from the registered tools: adding a tool is adding one class.
+  **generated** from the registered tools: adding a tool is adding one class. Measured in step 0: a generated
+  prompt and a grammar per tool beat today's hand-written prompt and flat schema.
 - **`ToolResult`** — three faces of one result: `forModel` (compact text, a budget of its own), `forPerson` (the
   step's line, and what opens when the step is expanded), and `passages` (what can be cited, with note and range).
   An error is a result too, written to be corrected: "no note named X; the closest are Y and Z". Every result
   carries where it came from: the person's notes, or **untrusted** text (a web page, a clipped source).
-- **`Toolset`** — the few tools given for one kind of work (below). A 4B model chooses worse the more it is offered.
+- **`Toolset`** — the few tools given for one kind of work (below), **ten at most** (step 0: the 4B model chooses
+  right 98 % of the time among 5 tools, 96 % among 10, 91 % among 20, 84 % among 33).
 - **`Conversation`** — typed turns: `UserMessage`, `AssistantText`, `ToolCall`, `ToolResult`, `Proposal` and its
   `Outcome` (done, cancelled, undone, failed). Persisted by `ChatHistoryStore` as the turn goes, so a chat reopened
   knows what it read and did, and a turn cut by closing the app is shown as stopped where it was. `ChatEntry`
@@ -247,9 +249,87 @@ tokens, fed by `countTokens`, step 2). `ContextBudget` then bounds the loop's pr
 and the short calls of the pipeline, Deep thinking's drafts and `digest`'s parts go on side by side as today. The
 change to the engine belongs to step 2, with a test of calls that together pass the total.
 
-Still to measure: the model's own format for calling tools against our JSON; a grammar that picks the tool and
-then only its arguments against the flat schema; how many tools the model chooses well among; and Koog against a
-loop of our own.
+### The format of a tool call — measured 2026-11-14, Medium
+
+`ToolFormatChatModelTest` (`build/reports/tool-format.md`, and a `.tsv` of every reply): the 126 requests of
+`smoke-data/eval/actions.json`, each asked once in every format, graded on the first step **as the model wrote it**,
+with none of the planner's repairs (with them today's planner gets 92 %). Today's 33 actions stand in for the
+loop's tools, written as tools are (`EvalTools`: a name, a description, the fields it takes).
+
+| Format | Right tool | Tool and fields right | Prompt tokens | Tokens written | Time a call |
+|---|---|---|---|---|---|
+| Today: the plan, one flat schema (any action, any field) | 115 | 107 of 126 | 3,011 | 42 | 1.9 s |
+| The plan, **a grammar per tool** (the action, then only its fields) | 115 | 111 | 3,011 | 41 | 1.9 s |
+| **One call in our JSON, a grammar per tool**, the prompt generated from the tools' descriptions | 115 | **113** | **1,492** | 25 | 1.4 s |
+| The model's own tool calls, the same descriptions | 101 | 100 | 3,528 | 30 | 1.6 s |
+| The model's own tool calls, with today's instructions and examples | 108 | 108 | 5,974 | 30 | 1.7 s |
+
+- **Our JSON beats the model's own format**, 113 against 100 with the very same descriptions. Qwen3.5's template
+  writes every tool out as its JSON schema, which costs 2.4 times the prompt (3,528 tokens against 1,492) and reads
+  worse: with its own format the model opens the note a question is about instead of answering (19 of its 26
+  misses are `open_note` or `search`, 15 of them for a question). It also wrote prose where a call was required,
+  once, and twice with today's instructions.
+- **A grammar per tool is better than the flat schema**, 111 against 107 on the same prompt: the misses it removes
+  are fields a tool does not have (a folder written under `notes` for `create_note`, three times).
+- **A prompt generated from the tools' descriptions is as good as today's hand-written one**, with half the
+  tokens and none of its examples (about sixty): 113 against 111. What the examples buy is no longer visible once the grammar
+  holds the shape. The misses left are choices between near tools (`append` or `add_task`, `answer` or
+  `open_note`), which is the router's and the toolsets' work, not the format's.
+
+**What it changes in the design.** Nothing in its shape, and two open points close: `ModelProfile`'s format for
+this model is **our JSON under a grammar generated from the registered tools** (`{"tool": …}` first, then only
+that tool's arguments), not the model's own tool calls; and the list of tools in the prompt is generated from
+each tool's name, arguments and description, as the design says. The model's own format stays a property of the
+profile for a model that is better at it (an installed Ollama, a larger model): the loop must not know which is in
+use. A tool's description is its whole instruction, so it is written and tested as a prompt is.
+
+### How many tools — measured 2026-11-14, Medium
+
+`ToolCountChatModelTest` (`build/reports/tool-count.md`): the 45 requests whose tool is one of five (`answer`,
+`find_notes`, `write_from_notes`, `help`, `show_tasks`), asked with 5, 10, 20 and 33 tools on offer.
+
+| Tools on offer | Our JSON, a grammar per tool | The model's own calls | Prompt tokens (ours / its own) |
+|---|---|---|---|
+| 5 | 44 of 45 | 42 | 789 / 1,280 |
+| 10 | 43 | 26 | 926 / 1,640 |
+| 20 | 41 | 26 | 1,132 / 2,315 |
+| 33 | 38 | 24 | 1,492 / 3,528 |
+
+- **Each doubling costs a little, and it adds up:** 98 % right among 5, 96 % among 10, 91 % among 20, 84 % among
+  33. Time does not change (the prompt's start is kept between calls); the prompt grows by about 25 tokens a tool.
+- **Which tools are offered matters more than how many:** the model's own format falls from 42 to 26 the moment
+  `open_note` is on offer beside `answer`. Two tools that can both be read as "do something with this note" must
+  not be in one toolset unless their descriptions say which is which.
+
+**What it changes in the design.** The toolsets stay, and get a number: **ten tools at most in a toolset**, the
+ending tools counted. The design's *ask*, *web* and *app* sets are under it; *write* and *organize* (every changing
+tool) are over it and are split in step 5: *organize* into the tools for notes' properties and
+tags and the tools for files and folders, *write* without the reading tools it does not need once the router has
+named the notes. The router's own choice is among five kinds, where the model is at its best.
+
+### Koog against a loop of our own — read 2026-11-14
+
+Koog's documentation as it is today (docs.koog.ai and the repository; version 1.3.0, stable since 1.0 with
+`agents-core` under a promise of no breaking change without a major version; `agents-mcp` is still beta):
+
+| What the loop needs | What Koog gives |
+|---|---|
+| The model in the app's own process, through llama.cpp | Clients for hosted models and Ollama (over HTTP). No llama.cpp or in-process client; one can be written against `LLMClient`, which the documentation names but does not describe |
+| Every call held by a grammar | Structured output through the provider's own support, or instructions in the prompt and a second model call that repairs the reply (three tries by default). No grammar is passed down |
+| A choice of tool forced on the model | Marked as not supported for Ollama, its one local route |
+| A budget in tokens, old tool results dropped first | History compression by summarizing with the model (the whole history, the last N messages, in chunks), started by a count of messages. A strategy of our own can be written; dropping results by tokens is not built in |
+| Nothing changes without the card | No confirmation before a tool acts; a rollback after it has |
+| The conversation persisted as the turn goes | Checkpoints after each node, to memory or to files, with a storage of our own possible: the nearest fit |
+| Steps shown as they happen | Events for a tool call starting and ending: a fit |
+| MCP servers as tools, later | `agents-mcp` (beta): stdio and SSE |
+
+**Decided: a loop of our own.** What makes this loop hard is what Koog leaves to the caller: a 4B model in
+process, a grammar on every call (measured above: it is worth 13 requests in 126 against the model's own format,
+which is what Koog would drive), a budget counted in tokens, and a card before any change. Its graph of nodes,
+its hosted clients and its Ktor stack would come along unused. What is taken from it is the shape, so the door
+stays open: a tool is a name, a description, typed arguments and a result with a text for the model, as Koog's
+`Tool<Args, Result>` and MCP both have it. When extensions arrive (post-MVP item 1) the question is asked again
+for the MCP client alone, Koog's module or the MCP Kotlin SDK directly; `LIBRARIES.md` does not change now.
 
 ## Risks, said plainly
 

@@ -208,14 +208,18 @@ figure check catches figures the notes lack, not a figure put beside the wrong t
 sets, with the real model, and time). Step 0 is under way: fixtures, a wider agent evaluation and four experiments
 whose results are written into that document before anything is built.
 
-**Where step 0 stands (2026-11-14):** two experiments are done and written in `docs/agent-loop.md` ("Step 0, what
-was measured"). One slot of 16,384 tokens costs the memory of today's four of 4,096 and reads a 27,000-character
-document right; and four slots over one shared context (`setKvUnified(true)`) give a lone call that whole context
-while short calls still run side by side, with one danger: calls that together pass the total all fail, so the
-engine must admit calls by their tokens (step 2). Next, in this order: the model's own tool-calling format against
-our JSON; a grammar per tool against the flat schema; how many tools the model chooses well among; Koog's current
-documentation against a loop of our own; then the fixtures (today's requests with the model's raw replies, replayed
-through `FakeLlmEngine`) and the wider agent evaluation. Nothing of step 1 is started.
+**Where step 0 stands (2026-11-14):** the five experiments are done and written in `docs/agent-loop.md` ("Step 0,
+what was measured"), each with what it changes in the design:
+
+- **Context:** four slots over one shared context (`setKvUnified(true)`) give a lone call the whole 16,384 tokens
+  while short calls still run side by side; calls that together pass the total all fail, so the engine admits
+  calls by their tokens (step 2).
+- **Format:** one call in our JSON under a grammar per tool, with the prompt generated from the tools'
+  descriptions, gets 113 of 126 requests right as written; today's flat schema 107, the model's own tool calls 100
+  at 2.4 times the prompt. The loop uses our JSON.
+- **How many tools:** 98 % right among 5, 96 % among 10, 91 % among 20, 84 % among 33: ten tools at most in a
+  toolset, so *write* and *organize* are split in step 5.
+- **Koog:** read in its documentation of today (1.3.0); a loop of our own, with tools shaped as Koog's and MCP's.
 
 **Measuring on a Mac left alone:** it falls asleep in the middle of a run (a 3-minute test took 20). Run model
 tests as `caffeinate -is ./gradlew …`; `RawChatModel` (the test helper of these experiments, the model as llama.cpp

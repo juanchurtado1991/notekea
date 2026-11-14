@@ -239,3 +239,7 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   (`setKvUnified(true)`) against fewer slots; the model's own tool-calling format against our JSON; a grammar per
   tool against the flat schema; how many tools the model chooses well among; Koog's current documentation against a
   loop of our own; then the fixtures and the wider agent evaluation.
+- **2026-11-14, after the shared context:** two experiments done (a slot of 16,384 tokens; four slots over one
+  shared context, with the engine to admit calls by their tokens). Next: the model's own tool-calling format
+  against our JSON; a grammar per tool against the flat schema; how many tools the model chooses well among;
+  Koog's documentation against a loop of our own; then the fixtures and the wider agent evaluation.
