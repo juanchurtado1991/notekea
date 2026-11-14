@@ -5,6 +5,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.NativeLibrary
 import com.sun.jna.Pointer
+import java.lang.ref.Reference
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -60,6 +61,8 @@ internal object CocoaMainThread {
             )
 
         done.await()
+        // Kept alive until the main thread has run it, whatever the compiler makes of a variable read no more.
+        Reference.reachabilityFence(callback)
 
         failure?.let {
             throw it

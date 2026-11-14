@@ -8,7 +8,6 @@ package app.notekea.video.player
 internal object YouTubePage {
     const val ORIGIN = "https://app.notekea"
     const val TITLE_PREFIX = "Notekea:"
-    const val PLAYING = 1
     private val ID = Regex(pattern = "^[A-Za-z0-9_-]{6,20}$")
 
     /** The page for the video [id]; null for an id YouTube never gives, which is not written into the page. */

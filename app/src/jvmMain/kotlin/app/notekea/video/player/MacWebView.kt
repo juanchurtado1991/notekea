@@ -38,14 +38,6 @@ internal class MacWebView private constructor(
         ObjC.tell(view, "setHidden:", if (isHidden) 1 else 0)
     }
 
-    /** The page's title, which [YouTubePage] sets to what the player is doing. */
-    fun title(): String? {
-        var title: String? = null
-        CocoaMainThread.run { title = ObjC.textOf(string = ObjC.send(view, "title")) }
-
-        return title
-    }
-
     /** Stops the page and takes the web view out of the window. */
     fun close() = CocoaMainThread.run {
         ObjC.tell(view, "stopLoading")
@@ -90,7 +82,10 @@ internal class MacWebView private constructor(
             } ?: return null
 
             val create = "initWithFrame:configuration:"
-            val view = ObjC.send(allocated, create, CocoaRect(), configuration) ?: return null
+            val view = ObjC.send(allocated, create, CocoaRect(), configuration)
+            // The view keeps its own copy: ours is let go either way, or each video played would leave one behind.
+            ObjC.tell(configuration, "release")
+            view ?: return null
 
             val url = ObjC
                 .classOf(name = "NSURL")
@@ -126,6 +121,13 @@ internal class MacWebView private constructor(
                 ?.let { ObjC.send(it, "new") } ?: return null
 
             ObjC.tell(configuration, "setMediaTypesRequiringUserActionForPlayback:", NO_USER_ACTION)
+
+            // What the player's page stores (cookies, what was watched) lives only while it plays, never on disk.
+            ObjC
+                .classOf(name = "WKWebsiteDataStore")
+                ?.let { ObjC.send(it, "nonPersistentDataStore") }
+                ?.let { ObjC.tell(configuration, "setWebsiteDataStore:", it) }
+
             val preferences = ObjC.send(configuration, "preferences") ?: return configuration
             val fullscreen = "setElementFullscreenEnabled:"
 

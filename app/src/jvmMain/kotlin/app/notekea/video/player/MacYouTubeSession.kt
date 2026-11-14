@@ -15,11 +15,19 @@ internal class MacYouTubeSession(private val id: String) {
     private var view: MacWebView? = null
 
     fun open() = worker.execute {
-        view = YouTubePage.of(id = id)?.let {
-            MacWebView.show(
-                html = it,
+        val page = YouTubePage.of(id = id) ?: return@execute
+
+        // The window may not be there yet when the tab is restored at startup: it is tried again for a moment
+        // rather than leaving an empty tab (the code review of 2026-11-13).
+        repeat(times = TRIES) {
+            if (view != null) return@repeat
+
+            view = MacWebView.show(
+                html = page,
                 origin = YouTubePage.ORIGIN
             )
+
+            if (view == null) Thread.sleep(TRY_MILLIS)
         }
     }
 
@@ -50,5 +58,7 @@ internal class MacYouTubeSession(private val id: String) {
 
     private companion object {
         const val THREAD_NAME = "notekea-youtube"
+        const val TRIES = 15
+        const val TRY_MILLIS = 200L
     }
 }
