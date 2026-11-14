@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeVaultSync : VaultSync {
     override val status = MutableStateFlow<SyncStatus>(value = SyncStatus.NotConfigured)
     val calls = mutableListOf<String>()
+    var connectFailure: SyncError? = null
 
     override fun start() {
         calls += "start"
@@ -24,7 +25,11 @@ class FakeVaultSync : VaultSync {
     override suspend fun connect(
         settings: SyncSettings,
         token: String?
-    ): Outcome<Unit, SyncError> = Outcome.Success(value = Unit)
+    ): Outcome<Unit, SyncError> {
+        calls += "connect ${settings.remoteUrl} $token"
+
+        return connectFailure?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = Unit)
+    }
 
     override suspend fun disconnect() {
         calls += "disconnect"
