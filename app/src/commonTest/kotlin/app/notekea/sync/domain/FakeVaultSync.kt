@@ -45,4 +45,8 @@ class FakeVaultSync : VaultSync {
     ) {
         calls += "resolve ${note.value} $choice"
     }
+
+    override suspend fun repair(choice: RepairChoice) {
+        calls += "repair $choice"
+    }
 }

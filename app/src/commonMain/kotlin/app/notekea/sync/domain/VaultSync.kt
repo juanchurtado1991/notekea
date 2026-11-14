@@ -30,4 +30,7 @@ interface VaultSync {
         note: RelativePath,
         choice: ConflictChoice
     )
+
+    /** Repairs a vault left in the middle of a merge as [choice] says, then syncs. */
+    suspend fun repair(choice: RepairChoice)
 }

@@ -35,6 +35,15 @@ interface GitRepository {
     /** The files changed here and not on the remote: uncommitted, or in commits not pushed. */
     suspend fun pendingChanges(vaultPath: String): Int
 
+    /** What a merge or a rebase cut short left to repair; null for a vault that is not in the middle of one. */
+    suspend fun unfinished(vaultPath: String): UnfinishedSync?
+
+    /** Ends the merge or the rebase cut short as [choice] says; a vault that is in none is left as it is. */
+    suspend fun repair(
+        vaultPath: String,
+        choice: RepairChoice
+    ): Outcome<Unit, SyncError>
+
     /** The notes whose conflict copy waits beside them ([ConflictCopies]). */
     suspend fun conflicts(vaultPath: String): List<RelativePath>
 

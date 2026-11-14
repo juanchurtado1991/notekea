@@ -15,6 +15,8 @@ import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.presentation.ConflictBanner
 import app.notekea.sync.presentation.ConflictDialog
+import app.notekea.sync.presentation.RepairBanner
+import app.notekea.sync.presentation.RepairDialog
 import app.notekea.sync.presentation.SyncStatusEffect
 import app.notekea.sync.presentation.SyncStatusIntent
 import app.notekea.sync.presentation.SyncStatusItem
@@ -72,6 +74,19 @@ internal fun SyncConflictsOf(sync: SyncStatusViewModel) {
         notes = state.conflicts,
         onReview = { sync.onIntent(SyncStatusIntent.OnReview(note = it)) }
     )
+
+    RepairBanner(
+        isShown = state.unfinished != null,
+        onRepair = { sync.onIntent(SyncStatusIntent.OnRepairShow) }
+    )
+
+    if (state.isRepairShown) {
+        RepairDialog(
+            changedHere = state.unfinished.orEmpty(),
+            onChoose = { sync.onIntent(SyncStatusIntent.OnRepair(choice = it)) },
+            onDismiss = { sync.onIntent(SyncStatusIntent.OnRepairDismiss) }
+        )
+    }
 
     state.review?.let { review ->
         ConflictDialog(

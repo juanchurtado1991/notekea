@@ -10,5 +10,8 @@ import app.notekea.sync.domain.SyncStatus
 data class SyncStatusState(
     val status: SyncStatus = SyncStatus.NotConfigured,
     val conflicts: List<RelativePath> = emptyList(),
-    val review: ConflictReview? = null
+    val review: ConflictReview? = null,
+    // The files changed here while the vault is left in the middle of a merge; null when it is not.
+    val unfinished: List<RelativePath>? = null,
+    val isRepairShown: Boolean = false
 )

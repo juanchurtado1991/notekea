@@ -957,6 +957,17 @@
         <item quantity="other">Conflict in %1$d notes</item>
     </plurals>
     <string name="sync_status_failed">Sync failed</string>
+    <string name="sync_status_interrupted">Sync was cut short</string>
+    <string name="sync_repair_banner">The last sync was cut short and left this vault half merged. Nothing syncs until it is repaired.</string>
+    <string name="sync_repair_open">Repair…</string>
+    <string name="sync_repair_title">Repair the vault</string>
+    <string name="sync_repair_explain">Notekea was closed in the middle of a sync, and some notes may show Git’s conflict marks. Choose how to put it right; either way, what you wrote is kept.</string>
+    <string name="sync_repair_keep">Keep my changes</string>
+    <string name="sync_repair_keep_hint">Undo the unfinished merge and keep everything written on this computer. The next sync brings the other computer’s changes; a note changed in both is kept twice, to review.</string>
+    <string name="sync_repair_remote">Go back to the repository</string>
+    <string name="sync_repair_remote_hint">Make this vault what the repository has. The files changed here are copied to the vault’s trash first.</string>
+    <string name="sync_repair_changed">Changed on this computer: %1$s</string>
+    <string name="sync_repair_later">Not now</string>
     <string name="sync_status_tooltip">Sync: click for Settings → Sync</string>
     <string name="sync_conflict_banner">Changed here and on another computer: %1$s</string>
     <string name="sync_conflict_review">Review</string>

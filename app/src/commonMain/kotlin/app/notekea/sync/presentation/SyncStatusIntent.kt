@@ -2,6 +2,7 @@ package app.notekea.sync.presentation
 
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.ConflictChoice
+import app.notekea.sync.domain.RepairChoice
 
 sealed interface SyncStatusIntent {
     /** The status bar's entry was clicked: Settings opens at Sync. */
@@ -14,4 +15,11 @@ sealed interface SyncStatusIntent {
     data class OnChoose(val choice: ConflictChoice) : SyncStatusIntent
 
     data object OnReviewDismiss : SyncStatusIntent
+
+    /** Repair on the banner of a vault left in the middle of a merge: the two ways to put it right. */
+    data object OnRepairShow : SyncStatusIntent
+
+    data object OnRepairDismiss : SyncStatusIntent
+
+    data class OnRepair(val choice: RepairChoice) : SyncStatusIntent
 }
