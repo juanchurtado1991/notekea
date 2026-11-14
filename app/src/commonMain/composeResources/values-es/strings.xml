@@ -801,6 +801,8 @@
     <string name="chat_action_done_title">Done:</string>
     <string name="chat_action_undone">Undone.</string>
     <string name="chat_action_cancelled">Cancelled. Nothing was changed.</string>
+    <string name="chat_action_unconfirmed">Proposed, not confirmed. Nothing was changed.</string>
+    <string name="chat_action_not_done">It could not be done.</string>
     <string name="chat_action_confirm">Do it</string>
     <string name="chat_action_cancel">Cancel</string>
     <string name="chat_action_undo">Undo</string>
@@ -885,6 +887,8 @@
     <string name="chat_action_done_title_es">Hecho:</string>
     <string name="chat_action_undone_es">Deshecho.</string>
     <string name="chat_action_cancelled_es">Cancelado. No se cambió nada.</string>
+    <string name="chat_action_unconfirmed_es">Propuesto, sin confirmar. No se cambió nada.</string>
+    <string name="chat_action_not_done_es">No se pudo hacer.</string>
     <string name="chat_action_confirm_es">Hacerlo</string>
     <string name="chat_action_cancel_es">Cancelar</string>
     <string name="chat_action_undo_es">Deshacer</string>

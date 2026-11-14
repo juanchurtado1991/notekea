@@ -15,6 +15,7 @@ import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
 import app.notekea.chat.domain.context.WorkContext
+import app.notekea.chat.domain.conversation.ConversationMemory
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionRunner
@@ -127,7 +128,7 @@ class ChatViewModel(
         host = host
     )
 
-    private val memory = ChatMemory(compactChat = compactChat)
+    private val memory = ConversationMemory(compactChat = compactChat)
 
     private val siteSearch = ChatSiteSearch(
         vaultPath = vaultPath,
@@ -152,7 +153,7 @@ class ChatViewModel(
     )
 
     private val answering = ChatAnswering(
-        memory = memory,
+        keeping = keeping,
         actions = actions,
         agent = agent,
         replies = replies,
@@ -166,16 +167,10 @@ class ChatViewModel(
 
     init {
         launchGuarded(onError = ::logError) {
-            val turns = historyStore.load(vaultPath = vaultPath)
-
-            val entries = turns.map {
-                ChatEntry.of(
-                    turn = it,
-                    id = nextId++
-                )
+            val entries = keeping.load {
+                nextId++
             }
 
-            if (entries.isNotEmpty()) memory.resume()
             reduce { it.copy(entries = entries + it.entries) }
         }
 
@@ -357,6 +352,7 @@ class ChatViewModel(
         )
 
         reduce { it.copy(entries = it.entries + entry) }
+        keeping.keep()
 
         answer = launchGuarded(onError = {
             failed(

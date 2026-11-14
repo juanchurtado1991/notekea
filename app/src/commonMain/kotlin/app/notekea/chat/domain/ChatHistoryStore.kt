@@ -1,13 +1,15 @@
 package app.notekea.chat.domain
 
-/** The chat history of each vault, kept in the app's data, never inside the vault. */
+import app.notekea.chat.domain.conversation.Conversation
+
+/** The chat of each vault, kept in the app's data, never inside the vault. */
 interface ChatHistoryStore {
-    /** The turns of the vault at [vaultPath], oldest first; none when there are none or they cannot be read. */
-    suspend fun load(vaultPath: String): List<ChatTurn>
+    /** The conversation of the vault at [vaultPath]; empty when there is none or it cannot be read. */
+    suspend fun load(vaultPath: String): Conversation
 
     suspend fun save(
         vaultPath: String,
-        turns: List<ChatTurn>
+        conversation: Conversation
     )
 
     suspend fun clear(vaultPath: String)

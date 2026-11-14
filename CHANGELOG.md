@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The chat is kept as a conversation: opened again, a request shows the steps it made and how its proposal ended
+  (done, cancelled, undone, not confirmed), a question cut by closing Notekea is there marked Stopped, and the
+  chat still knows what it did and what it had summarized. A history written before is read as it is
+  (`docs/agent-loop.md`, step 3).
 - The chat counts what it reads in the model's own tokens and uses the whole context the machine gives it: a long
   document that fits is read whole when a note is written from it, and the agent keeps whole results of what it
   looked up, the oldest left out first, where it kept the last 9,000 characters cut wherever they fell

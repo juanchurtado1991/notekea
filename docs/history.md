@@ -231,6 +231,17 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
     used (it needs koin-test).
 
 
+## One agent loop, step 3 (2026-11-14): the conversation in the domain
+
+- The handoff said until then: "Next: step 3 (`Conversation` in the domain, persisted)". Before it the history
+  kept, for each turn, the question, the answer and its sources (`ChatTurn`, file version 1); what the chat did
+  (its moves, its card) lived in the screen's `ChatEntry` while the chat was open, and the model's memory of it
+  was built in the view model (`ChatMemory`, `WorkRecord`, both removed). A request cancelled, undone or refused
+  was not kept at all (`ChatEntry.isKept`), and a reloaded request said "Done in this vault" whatever it had done.
+- Decided while building it: the turn under way stays in `ChatEntry` and is turned into the conversation when it
+  is kept, since today's three paths (planner, question agent, task agent) each write the entry their own way and
+  all go in step 6; the loop of step 5 writes the conversation itself.
+
 ## One agent loop, step 2 (2026-11-14): tokens in place of characters
 
 - The handoff said until then: "Next: step 2 (tokens counted, `ModelProfile`, `ContextBudget`)". Done the same

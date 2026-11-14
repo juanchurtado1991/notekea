@@ -3,6 +3,9 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.conversation.Conversation
+import app.notekea.chat.domain.conversation.ConversationMemory
+import app.notekea.chat.domain.conversation.TurnRecord
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
@@ -12,8 +15,6 @@ import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatAction
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatStep
-import app.notekea.chat.presentation.viewmodel.ChatMemory
-import app.notekea.chat.presentation.viewmodel.WorkRecord
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
@@ -24,7 +25,8 @@ import kotlin.test.assertEquals
  * had made a note up, it searched the vault and cited the made-up note as its source).
  */
 class WorkRecordTest {
-    private val memory = ChatMemory(compactChat = CompactChatUseCase(llmEngine = FakeLlmEngine()))
+    private val memory =
+        ConversationMemory(compactChat = CompactChatUseCase(llmEngine = FakeLlmEngine()))
     private val contract = RelativePath(value = "Contract/contract.md")
 
     private fun acted(
@@ -56,10 +58,7 @@ class WorkRecordTest {
     )
 
     private fun remembered(entry: ChatEntry): String = memory
-        .historyBefore(
-            entries = listOf(entry),
-            id = 2
-        )
+        .historyOf(conversation = Conversation(turns = listOf(entry.toTurn())))
         .single()
         .reply
 
@@ -84,7 +83,7 @@ class WorkRecordTest {
         assertEquals(
             expected = listOf(true, true, true, true),
             actual = listOf(
-                reply.startsWith(prefix = WorkRecord.MARK),
+                reply.startsWith(prefix = TurnRecord.MARK),
                 "I looked up: read Contract/contract." in reply,
                 "I read contract.md and wrote its text from what they say" in reply,
                 "A lease of 12 months." in reply
@@ -125,7 +124,7 @@ class WorkRecordTest {
             expected = listOf(true, true, true),
             actual = listOf(
                 reply.startsWith(prefix = "I made the table."),
-                WorkRecord.MARK in reply,
+                TurnRecord.MARK in reply,
                 "my own example" in reply
             )
         )

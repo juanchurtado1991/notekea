@@ -16,7 +16,7 @@ import app.notekea.core.notes.domain.RelativePath
  * or a folder, written step by step, and handed to the agent when it asks for it or when Auto found no answer.
  */
 internal class ChatAnswering(
-    private val memory: ChatMemory,
+    private val keeping: ChatKeeping,
     private val actions: ChatActions,
     private val agent: ChatAgent,
     private val replies: ChatReplies,
@@ -27,10 +27,7 @@ internal class ChatAnswering(
         question: String,
         scope: ChatScope
     ) {
-        val history = memory.historyBefore(
-            entries = host.state.value.entries,
-            id = id
-        )
+        val history = keeping.historyBefore(id = id)
 
         val current = host.state.value
 

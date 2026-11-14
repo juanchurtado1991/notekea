@@ -436,6 +436,38 @@ at random: what is kept fits, whole and in order, the newest stays, what was dro
 the 30 tasks of 4.7, 27 right (90 %), 30 s a task against 35; the wider evaluation, 7 of 21 (33 %), the same
 count as before, 42 s a task. No call was refused for its length.
 
+## Step 3, done — 2026-11-14
+
+**The conversation** (`chat/domain/conversation`). `Conversation` is a vault's chat: its turns, the summary of
+the first of them and how many it stands for. A `ChatTurn` is a question and its items in order (`TurnItem`): a
+tool called (`Call`), what it gave back and where from (`Result`), what was said with its passages (`Text`), and
+a `Proposal` with its changes and how it ended (`ProposalOutcome`: proposed, done, cancelled, undone, failed).
+`ConversationMemory` says what the model is given of it (the summary, the chat's start, the last exchanges, each
+with `TurnRecord`, what the chat did) and compacts it; both are functions of the conversation, in the domain.
+`ChatMemory` and `WorkRecord`, which did this in the view model over what the screen showed, are gone.
+
+**Persisted.** `ChatHistoryStore` loads and saves a `Conversation`. The file is version 2: a turn holds its
+items, the chat its summary. A file of version 1 (a question, its answer and sources) is read as turns that only
+answered, and written in the new form at the next save: no migration step, nothing to lose. A turn is written
+when it is asked, as stopped, and again as it ends: closed in the middle, the app shows it stopped. Opened again,
+a turn shows the steps it made and a line for how its proposal ended, where it used to say only "Done in this
+vault" and forgot a proposal cancelled or undone; the summary survives too, where a new session started without it.
+
+**What waits for step 5.** The screen's `ChatEntry` is still what a turn under way is built in, and the
+conversation is made from it when it is kept (`EntryTurns`); a chat opened again is projected from the
+conversation. The loop of step 5 writes its items straight into the conversation, results included (today's
+paths keep no result, only the call), and saves at every item; `EntryTurns.turnOf` goes with the old paths in
+step 6.
+
+**Tests.** `FileChatHistoryStoreTest` (items, proposal and summary read back as written; a version 1 file read),
+`ChatReopenedTest` (a chat opened again shows and keeps what it did; the model is told the summary and the
+record; a question is kept from the moment it is asked), `ChatMemoryTest` and `WorkRecordTest` on the domain's
+memory.
+
+**The gate.** Every test passes. With the real model (Medium): 27 of 30 (90 %), 30 s a task; the wider
+evaluation 7 of 21 (33 %), 42 s: where they stood. Not run: the chat probe, which is a transcript read by eye and
+has no score; and `ChatMemoryChatModelTest`, which measures RAM with the Small model, not installed here.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
