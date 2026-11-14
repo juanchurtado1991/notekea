@@ -335,13 +335,10 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
 11. **Spell check** — in English and Spanish, in Settings → Editor. Moved out of 5.2 by the developer on 2026-11-11:
    Compose Desktop has none, and its dictionaries are a new download.
 
-12. **One agent loop** — asked for by the developer on 2026-11-14: the chat's work as solid as Claude Code's. Today a
-   planner (3.9) and a loop of moves (4.7) are two engines joined at the plan. The design to move to is one loop:
-   the model calls a tool (search, read, find, write a draft, check it), sees its real result, and goes on until the
-   work is checked; the tools' results are kept as a transcript across the turns of a chat, compacted like its
-   memory, instead of a record written afterwards. The local model's context (4,096 tokens) is what bounds it, so
-   the design comes first, with an evaluation set of tasks over documents, and it is shown to the developer before
-   it is built.
+12. **One agent loop** — asked for by the developer on 2026-11-14: the chat's work as solid as Claude Code's. One
+   loop with tools in place of the planner and the two agents, the conversation kept in the domain, a budget in
+   tokens and one last verification. The design, approved on 2026-11-14, its eight steps and their gates are in
+   `docs/agent-loop.md`; under way on `feature/one-agent-loop`.
 
 ## Out of scope for the MVP
 
