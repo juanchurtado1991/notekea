@@ -178,6 +178,7 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         message: String
     ): Boolean {
         if (git.status().call().isClean) return false
+        LargeFiles.leaveOut(git = git)
 
         git
             .add()

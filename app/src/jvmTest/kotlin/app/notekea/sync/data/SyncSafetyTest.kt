@@ -1,6 +1,8 @@
 package app.notekea.sync.data
 
 import app.notekea.sync.domain.SyncError
+import org.eclipse.jgit.api.Git
+import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.createFile
 import kotlin.test.Test
@@ -36,5 +38,40 @@ class SyncSafetyTest {
             expected = SyncError.Failed(message = "https://github.com/me/notes.git: not found"),
             actual = error
         )
+    }
+
+    // A file over the host's limit, once committed, had every push refused for good.
+    @Test
+    fun `a new file over the limit is left out of the repository, and the rest is still seen`() {
+        val folder = Files.createTempDirectory("notekea-large").toFile()
+
+        val untracked = Git
+            .init()
+            .setDirectory(folder)
+            .call()
+            .use { git ->
+                File(folder, "Big [1].mp4").writeBytes(ByteArray(size = BIG))
+                File(folder, "Note.md").writeText("A note.")
+
+                val left = LargeFiles.leaveOut(
+                    git = git,
+                    maxBytes = LIMIT
+                )
+
+                left to git
+                    .status()
+                    .call()
+                    .untracked
+            }
+
+        assertEquals(
+            expected = listOf("Big [1].mp4") to setOf("Note.md"),
+            actual = untracked
+        )
+    }
+
+    private companion object {
+        const val BIG = 2_000
+        const val LIMIT = 1_000L
     }
 }
