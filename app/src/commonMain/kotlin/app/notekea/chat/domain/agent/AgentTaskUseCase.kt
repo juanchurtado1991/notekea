@@ -1,6 +1,8 @@
 package app.notekea.chat.domain.agent
 
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.context.ContextBudget
+import app.notekea.chat.domain.context.ModelProfile
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.ActionPlanReader
 import app.notekea.chat.domain.plan.ActionProblem
@@ -80,23 +82,34 @@ class AgentTaskUseCase(
             openNote = openNote
         )
 
+        val budget = budgetOf(
+            task = task,
+            context = context
+        )
+
+        var dropped = 0
+
         for (number in 1..MAX_MOVES) {
             if (clock.now() > deadline) break
+
+            val fitted = budget.fit(found, dropped)
+            dropped = fitted.dropped
+            val seen = fitted.entries
 
             val move = readMove(
                 task = task,
                 context = context,
-                found = found,
+                found = seen,
                 movesLeft = MAX_MOVES - number + 1,
                 mustEnd = mustEnd || number == MAX_MOVES
             )
-                ?: return@flow emit(unread(task, found))
+                ?: return@flow emit(unread(task, seen))
 
             when (move.move) {
                 AgentTaskPrompt.FINISH -> return@flow finished(
                     move = move,
                     task = task,
-                    found = found,
+                    found = seen,
                     asked = GroundedSteps.asked(
                         planned = planned,
                         read = tools.reads.read
@@ -180,6 +193,21 @@ class AgentTaskUseCase(
 
     // A move that cannot be read was cut short (a whole note written inside it): it is asked again, told so, with
     // more room; then the task ends on what it found, not on a failure (the developer's smoke of 2026-11-13).
+    // What was found is given to the model as far as its context goes, counted in its tokens: whole results, the
+    // oldest dropped first (`docs/agent-loop.md`, step 2).
+    private suspend fun budgetOf(
+        task: String,
+        context: ActionContext
+    ): ContextBudget = ContextBudget(
+        llmEngine = llmEngine,
+        tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,
+        fixed = AgentTaskPrompt.fixedOf(
+            task = task,
+            context = context
+        ),
+        replyTokens = RETRY_TOKENS
+    )
+
     private suspend fun readMove(
         task: String,
         context: ActionContext,

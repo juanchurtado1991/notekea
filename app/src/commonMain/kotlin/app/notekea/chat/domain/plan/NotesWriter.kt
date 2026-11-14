@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.plan
 
+import app.notekea.chat.domain.context.ModelProfile
 import app.notekea.chat.domain.prompt.WritePrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.GenerationOptions
@@ -70,7 +71,12 @@ internal class NotesWriter(
 
         val chars = sources.sumOf { it.second.length }
 
-        val given = if (chars > READ_AT_ONCE_CHARS) {
+        // Counted in the model's own tokens, against the context this machine gives it (`docs/agent-loop.md`,
+        // step 2): a document that fits is read whole, not digested.
+        val tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens
+        val isTooLong = tokensOf(sources = sources) > tokens - PROMPT_TOKENS - ANSWER_TOKENS
+
+        val given = if (isTooLong) {
             digested(
                 request = request,
                 sources = sources
@@ -92,9 +98,7 @@ internal class NotesWriter(
         )
 
         // The answer's room is what the context has left after what it reads: asked for more, the model fails.
-        val givenTokens = given.sumOf { it.second.length } / CHARS_PER_TOKEN
-
-        val room = (CONTEXT_TOKENS - PROMPT_TOKENS - givenTokens)
+        val room = (tokens - PROMPT_TOKENS - tokensOf(sources = given))
             .coerceAtLeast(minimumValue = MIN_OUTPUT_TOKENS)
 
         val maxTokens = (words * TOKENS_PER_WORD).coerceAtMost(maximumValue = room)
@@ -119,6 +123,9 @@ internal class NotesWriter(
 
         return whole(text = again)
     }
+
+    private suspend fun tokensOf(sources: List<Pair<String, String>>): Int =
+        sources.sumOf { llmEngine.countTokens(text = it.second) }
 
     // What is wrong with a body, as the model is told before it writes it again; null when nothing is.
     private fun problemsOf(
@@ -208,15 +215,11 @@ internal class NotesWriter(
         // What the digests may take together, about what is read at once.
         const val DIGESTS_TOKENS = 2_200
 
-        // The model's context (`ModelSetup.CONTEXT_TOKENS`), the instructions' share of it, and Spanish's and
-        // English's characters a token, low on purpose so the room is not overestimated.
-        const val CONTEXT_TOKENS = 4_096
+        // The instructions' share of the context, the least an answer is given, and what is kept for the answer
+        // when deciding whether the notes are read at once: about 2,600 tokens of notes in a 4,096 context.
         const val PROMPT_TOKENS = 500
-        const val CHARS_PER_TOKEN = 3
         const val MIN_OUTPUT_TOKENS = 300
-
-        // About 2,500 tokens of notes, which leaves room for the instructions and the answer in a 4,096 context.
-        const val READ_AT_ONCE_CHARS = 9_000
+        const val ANSWER_TOKENS = 1_000
         const val DIGEST_CHARS = 6_000
 
         // The digests together still fit in what is read at once: ten parts are 60,000 characters of notes.

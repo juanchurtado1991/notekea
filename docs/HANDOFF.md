@@ -252,7 +252,11 @@ list and the grammar, and today's five look-ups as tools; `AgentLookUp` is gone.
 untouched, 27 of 30 on the agent's tasks and the same 7 of 21 on the wider evaluation with the real model. The repair of a
 repository left half merged, open since 2026-11-13, is done too (`JGitRepair`, `SyncStatus.Interrupted`,
 `RepairBanner`, `RepairDialog`; tested on real repositories left in a merge and in a rebase, not yet seen in the
-app). Next: step 2 (tokens counted, `ModelProfile`, `ContextBudget`).
+app). **Step 2 is done** (2026-11-14): the
+slots share one context and the engine admits calls by their tokens (`TokenRoom`); `LlmEngine.countTokens` and
+`LlmModelInfo.contextTokens`; `chat/domain/context` holds `ModelProfile` and `ContextBudget`, which the agent and
+`NotesWriter` use in place of their character constants. Gate: 27 of 30 and 7 of 21, as before, 30 s and 42 s a
+task ("Step 2, done" in `docs/agent-loop.md`). Next: step 3 (`Conversation` in the domain, persisted).
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

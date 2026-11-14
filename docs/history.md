@@ -231,6 +231,15 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
     used (it needs koin-test).
 
 
+## One agent loop, step 2 (2026-11-14): tokens in place of characters
+
+- The handoff said until then: "Next: step 2 (tokens counted, `ModelProfile`, `ContextBudget`)". Done the same
+  day: the shared context with admission by tokens in the engine, `countTokens`, `ModelProfile` and
+  `ContextBudget`, used by the agent (which kept the last 9,000 characters of what it found) and by `NotesWriter`
+  (which assumed 4,096 tokens and three characters a token). `ContextBudget` first held what it had dropped in a
+  `var`; the architecture test refuses mutable state in the domain, so a fit returns it (`FittedContext`) and the
+  turn hands it to the next fit. Gate: 27 of 30 and 7 of 21, unchanged.
+
 ## One agent loop on `feature/one-agent-loop`: what the handoff said of step 0 as it went
 
 - **2026-11-14, night (after the first experiment):** the first experiment is done and written in

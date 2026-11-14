@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import net.ladenthin.llama.LlamaModel
@@ -72,7 +71,13 @@ class LlamaLlmEngine(
         messages: List<ChatMessage>,
         options: GenerationOptions
     ): Flow<String> = channelFlow {
-        withModels { models ->
+        withModels(tokensOf = {
+            tokensOf(
+                models = it,
+                messages = messages,
+                options = options
+            )
+        }) { models ->
             withContext(context = dispatchers.io) {
                 val reply = models.chat.generateChat(
                     parametersOf(
@@ -109,7 +114,8 @@ class LlamaLlmEngine(
                         isSmall = isSmall,
                         tier = TIERS.getValue(found.value.size),
                         hasDeepAnswer = hasDeepAnswer,
-                        hasAgent = found.value.size in AGENT_SIZES
+                        hasAgent = found.value.size in AGENT_SIZES,
+                        contextTokens = found.value.contextTokens * found.value.slots
                     )
                 )
             }
@@ -117,11 +123,37 @@ class LlamaLlmEngine(
             is Outcome.Failure -> found
         }
 
+    override suspend fun countTokens(text: String): Int = try {
+        withModels(tokensOf = null) { models ->
+            withContext(context = dispatchers.io) {
+                models
+                    .chat
+                    .encode(text)
+                    .size
+            }
+        }
+    } catch (_: LlmException) {
+        (text.length + CHARS_PER_TOKEN - 1) / CHARS_PER_TOKEN
+    }
+
+    // What a call takes of the context: its messages as the model counts them, the template's own tokens around
+    // each, and the reply it may write.
+    private fun tokensOf(
+        models: LoadedLlama,
+        messages: List<ChatMessage>,
+        options: GenerationOptions
+    ): Int = messages.sumOf {
+        models
+            .chat
+            .encode(it.text)
+            .size + MESSAGE_TOKENS
+    } + options.maxTokens
+
     override suspend fun rerank(
         query: String,
         texts: List<String>
     ): Outcome<List<Float>, LlmError> = try {
-        withModels { models ->
+        withModels(tokensOf = { 0 }) { models ->
             withContext(context = dispatchers.io) {
                 val json = models.reranker.handleRerank(query, *texts.toTypedArray())
 
@@ -169,8 +201,15 @@ class LlamaLlmEngine(
         } ?: false
     }
 
-    /** Runs [block] with the models loaded and a slot of their own; fails with [LlmException] when they cannot load. */
-    private suspend fun <T> withModels(block: suspend (LoadedLlama) -> T): T {
+    /**
+     * Runs [block] with the models loaded, once the tokens it takes ([tokensOf]) have room in the context beside the
+     * calls running (none is waited for when null: a count of tokens); fails with [LlmException] when the models
+     * cannot load, or when the call is longer than the whole context.
+     */
+    private suspend fun <T> withModels(
+        tokensOf: ((LoadedLlama) -> Int)?,
+        block: suspend (LoadedLlama) -> T
+    ): T {
         if (isClosing) throw LlmException(error = LlmError.EngineFailed)
 
         val models = mutex.withLock {
@@ -187,7 +226,19 @@ class LlamaLlmEngine(
         }
 
         try {
-            return models.slots.withPermit { block(models) }
+            val tokens = tokensOf?.let { count ->
+                withContext(context = dispatchers.io) { count(models) }
+            } ?: return block(models)
+
+            if (!models.room.fits(tokens = tokens)) {
+                logger.e {
+                    TOO_LONG_MESSAGE + tokens
+                }
+
+                throw LlmException(error = LlmError.EngineFailed)
+            }
+
+            return models.room.withRoom(tokens = tokens) { block(models) }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (exception: LlmException) {
@@ -297,6 +348,11 @@ class LlamaLlmEngine(
         )
 
         private const val ALL_LAYERS = -1
+
+        // The chat template's tokens around a message, and the estimate of a text's tokens with no model to count.
+        private const val MESSAGE_TOKENS = 8
+        private const val CHARS_PER_TOKEN = 4
+        private const val TOO_LONG_MESSAGE = "A call longer than the model's context, tokens: "
         private const val RERANKER_CONTEXT = 4_096
 
         // llama.cpp's default level logs every prompt: the notes' words stay out of the logs.
@@ -312,7 +368,10 @@ class LlamaLlmEngine(
         private const val LOAD_FAILED_MESSAGE = "The chat model failed to load"
         private const val ENGINE_FAILED_MESSAGE = "The chat model failed"
 
-        /** Each slot keeps its own cache (3.0), and the CPU reads the weights without mmap. */
+        /**
+         * The slots share one context (2026-11-14, `docs/agent-loop.md`, step 0): a lone call may use it whole, and
+         * [TokenRoom] keeps the calls side by side within it. The CPU reads the weights without mmap.
+         */
 
         // These parameters with no GPU device in use, unless the model runs on the GPU.
         private fun ModelParameters.cpuOnlyUnless(isOnGpu: Boolean): ModelParameters =
@@ -322,7 +381,7 @@ class LlamaLlmEngine(
             .setModel(setup.modelPath)
             .setParallel(setup.slots)
             .setCtxSize(setup.contextTokens * setup.slots)
-            .setKvUnified(false)
+            .setKvUnified(true)
             .setGpuLayers(if (setup.onGpu) ALL_LAYERS else 0)
             .setLoadMode(if (setup.onGpu) LoadMode.AUTO else LoadMode.NONE)
             .cpuOnlyUnless(isOnGpu = setup.onGpu)
