@@ -254,6 +254,16 @@ repository left half merged, open since 2026-11-13, is done too (`JGitRepair`, `
 `RepairBanner`, `RepairDialog`; tested on real repositories left in a merge and in a rebase, not yet seen in the
 app). Next: step 2 (tokens counted, `ModelProfile`, `ContextBudget`).
 
+**How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
+
+- **What is seen on screen** (the agent's question with buttons, the setting of the vault's instructions, an edit
+  shown as what changes): the agent chooses, with the components there are, and leaves the renders to be reviewed.
+- **A gate that does not pass:** find the cause and try fixes in earnest; if it still does not pass, stop at that
+  step, leave the app working on the old path, and write what happened. No later step is started.
+- **Step 6** (the planner, the question agent and the menu of modes removed) is done only if the loop equals or
+  betters the old path on every evaluation set and on the real-app cases; otherwise it waits for the developer.
+- Each step ends with its gate's numbers written in `docs/agent-loop.md` and this section brought up to date.
+
 Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
 is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted
 once, the vault gets its instructions note and the person's own skills in step 4, and the repair of a repository left
