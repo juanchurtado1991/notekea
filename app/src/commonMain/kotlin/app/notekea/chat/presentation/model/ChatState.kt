@@ -5,6 +5,7 @@ import app.notekea.chat.domain.answer.DeepQuestion
 import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.presentation.viewmodel.ChatReply
 import app.notekea.core.llm.domain.ModelTier
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The chat panel: its [entries] (oldest first), the [question] being written, the [scope] it will be asked of (the
@@ -28,7 +29,9 @@ data class ChatState(
     val folderName: String? = null,
     val working: WorkContext? = null,
     val isPlaceHidden: Boolean = false,
-    val isSelectedHidden: Boolean = false
+    val isSelectedHidden: Boolean = false,
+    // The folders a note the chat creates can go to, the vault's root first.
+    val folders: List<RelativePath> = emptyList()
 ) {
     val isAnswering: Boolean get() = entries.lastOrNull()?.isAnswering == true
 

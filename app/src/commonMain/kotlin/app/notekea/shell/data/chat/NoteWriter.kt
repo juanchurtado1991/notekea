@@ -3,6 +3,7 @@ package app.notekea.shell.data.chat
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NewNoteDefaults
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFileOperations
@@ -22,7 +23,8 @@ internal class NoteWriter(
     private val finder: VaultActionFinder,
     private val vaultPath: String,
     val journal: ActionJournal,
-    private val notes: Collection<NoteEntry>
+    private val notes: Collection<NoteEntry>,
+    private val defaults: NewNoteDefaults? = null
 ) {
     suspend fun createNote(step: ActionStep): Outcome<Unit, ActionProblem> {
         val draft = step.content.firstOrNull()
@@ -30,9 +32,11 @@ internal class NoteWriter(
         val path =
             draft?.path ?: (step.folder ?: RelativePath.ROOT).child(name = "${fileName(step.title)}.md")
 
+        val text = draft?.text ?: "# ${step.title}\n"
+
         val created = create(
             path = path,
-            text = draft?.text ?: "# ${step.title}\n"
+            text = defaults?.on(text = text) ?: text
         )
 
         if (created is Outcome.Failure) return created

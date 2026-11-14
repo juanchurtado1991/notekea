@@ -53,7 +53,15 @@ val treeModule = module {
     factoryOf(::DailyNoteTools)
     factoryOf(::NewNoteTools)
     factoryOf(::CreateFolderUseCase)
-    factoryOf(::CreateNoteUseCase)
+
+    factory {
+        CreateNoteUseCase(
+            noteFileOperations = get(),
+            noteContentStore = get(),
+            defaults = get()
+        )
+    }
+
     factoryOf(::FlattenTreeUseCase)
     factoryOf(::FollowLinkUseCase)
     factoryOf(::ObserveVaultTreeUseCase)

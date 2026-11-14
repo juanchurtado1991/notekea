@@ -93,7 +93,8 @@ val shellModule = module {
     single<ActionRunner> {
         VaultActionRunner(
             get(), get(), get(), get(), get(), get(),
-            get(), get(), get(), get(), get(), get()
+            get(), get(), get(), get(), get(), get(),
+            get()
         )
     }
 

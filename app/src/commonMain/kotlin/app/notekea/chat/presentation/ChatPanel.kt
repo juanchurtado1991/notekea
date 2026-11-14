@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,6 +44,7 @@ import app.notekea.chat.presentation.view.ChatMessages
 import app.notekea.chat.presentation.view.ChatModeMenu
 import app.notekea.chat.presentation.view.ChatNotice
 import app.notekea.chat.presentation.view.ChatWorkChips
+import app.notekea.chat.presentation.view.LocalVaultFolders
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaPromptField
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
@@ -99,11 +101,13 @@ fun ChatPanel(
 
         Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth()) {
             if (isReady && state.entries.isNotEmpty()) {
-                ChatMessages(
-                    entries = state.entries,
-                    isSmall = state.isSmall,
-                    onIntent = onIntent
-                )
+                CompositionLocalProvider(LocalVaultFolders provides state.folders) {
+                    ChatMessages(
+                        entries = state.entries,
+                        isSmall = state.isSmall,
+                        onIntent = onIntent
+                    )
+                }
             } else {
                 ChatNotice(
                     status = state.model,

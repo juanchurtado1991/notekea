@@ -30,11 +30,15 @@ internal class VaultNames(
 
         return when (kind) {
             ActionKind.CREATE_NOTE, ActionKind.NOTES_FROM_TEXT -> StepTargets(
+                // With no folder asked for, a new note goes beside the open one, not to the vault's root; the
+                // card says where and lets the person change it.
                 folder = folderName?.let {
                     newOrExisting(
                         name = it,
                         isNew = kind == ActionKind.NOTES_FROM_TEXT
                     )
+                } ?: openNote?.parent?.takeIf {
+                    kind == ActionKind.CREATE_NOTE && !it.isRoot
                 },
                 template = step[ActionField.TEMPLATE]?.let { noteOf(name = it) }
             ).also {

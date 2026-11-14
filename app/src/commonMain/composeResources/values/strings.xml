@@ -854,6 +854,10 @@
     <string name="chat_step_planning_es">Entendiendo tu petición…</string>
     <string name="chat_step_composing_es">Escribiendo las notas…</string>
     <string name="chat_action_will_es">Notekea hará:</string>
+    <string name="chat_action_in">In</string>
+    <string name="chat_action_in_es">En</string>
+    <string name="chat_action_root">Vault root</string>
+    <string name="chat_action_root_es">Raíz de la bóveda</string>
     <string name="chat_action_done_title_es">Hecho:</string>
     <string name="chat_action_undone_es">Deshecho.</string>
     <string name="chat_action_cancelled_es">Cancelado. No se cambió nada.</string>

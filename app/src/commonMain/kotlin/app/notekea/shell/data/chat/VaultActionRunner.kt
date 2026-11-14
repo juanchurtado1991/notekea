@@ -10,6 +10,7 @@ import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NewNoteDefaults
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFileOperations
@@ -47,7 +48,8 @@ class VaultActionRunner(
     private val bookmarkStore: BookmarkStore,
     private val trash: Trash,
     private val finder: VaultActionFinder,
-    private val appearanceStore: AppearanceStore
+    private val appearanceStore: AppearanceStore,
+    private val newNoteDefaults: NewNoteDefaults? = null
 ) : ActionRunner {
     private val lock = Mutex()
     private val journals = mutableMapOf<Long, ActionJournal>()
@@ -79,7 +81,8 @@ class VaultActionRunner(
             finder = finder,
             vaultPath = vaultPath,
             journal = journal,
-            notes = notes
+            notes = notes,
+            defaults = newNoteDefaults
         )
 
         // A plan is done whole or not at all: what it did before the step that failed, threw or was cancelled is

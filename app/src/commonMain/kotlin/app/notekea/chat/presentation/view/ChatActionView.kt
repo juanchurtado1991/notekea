@@ -92,7 +92,16 @@ internal fun ChatActionView(
                 action = action,
                 onConfirm = { onIntent(ChatIntent.OnActionConfirm(id = entryId)) },
                 onCancel = { onIntent(ChatIntent.OnActionCancel(id = entryId)) },
-                onUndo = { onIntent(ChatIntent.OnActionUndo(id = entryId)) }
+                onUndo = { onIntent(ChatIntent.OnActionUndo(id = entryId)) },
+                onPlace = { step, folder ->
+                    onIntent(
+                        ChatIntent.OnActionPlace(
+                            id = entryId,
+                            step = step,
+                            folder = folder
+                        )
+                    )
+                }
             )
         }
 

@@ -1,13 +1,18 @@
 package app.notekea.tree.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.FakeLocalCalendar
+import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.NewNoteDefaults
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class CreateEntryUseCasesTest {
     private val operations = FakeNoteFileOperations()
@@ -36,6 +41,34 @@ class CreateEntryUseCasesTest {
                 success(path = "Ideas/Untitled 2.md")
             ),
             actual = listOf(first, second)
+        )
+    }
+
+    // The developer's request of 2026-11-14: a new note starts with the day it was created and its tags.
+    @Test
+    fun `a new note is written with its default properties`() = runTest {
+        val store = FakeNoteContentStore()
+
+        val create = CreateNoteUseCase(
+            noteFileOperations = operations,
+            noteContentStore = store,
+            defaults = NewNoteDefaults(
+                localCalendar = FakeLocalCalendar(),
+                clock = object : Clock {
+                    override fun now(): Instant = Instant.parse(input = "2026-11-14T09:00:00Z")
+                }
+            )
+        )
+
+        create(
+            vaultPath = VAULT,
+            folder = IDEAS,
+            baseName = UNTITLED
+        )
+
+        assertEquals(
+            expected = "---\ncreated: 2026-11-14\ntags: []\n---\n",
+            actual = store.texts[IDEAS.child(name = "Untitled.md")]
         )
     }
 

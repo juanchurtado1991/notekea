@@ -12,6 +12,7 @@ import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.ActionTurnStep
 import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.NewNotePlace
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatAction
 import app.notekea.chat.presentation.model.ChatEffect
@@ -233,6 +234,32 @@ internal class ChatActions(
                         )
                     }
         }
+    }
+
+    /** The card's step [step] creates its note in [folder], while the card still waits for Do it. */
+    fun place(
+        entry: ChatEntry,
+        step: Int,
+        folder: RelativePath
+    ) {
+        val action = entry.action?.takeIf {
+            it.status == ActionStatus.PROPOSED
+        } ?: return
+
+        val placed = action.steps.mapIndexed { index, planned ->
+            val isPlaced = index == step && NewNotePlace.isChosenFor(step = planned)
+
+            if (isPlaced) {
+                NewNotePlace.placed(
+                    step = planned,
+                    folder = folder
+                )
+            } else {
+                planned
+            }
+        }
+
+        host.update(entry.id) { it.copy(action = action.copy(steps = placed)) }
     }
 
     fun cancel(entry: ChatEntry) {

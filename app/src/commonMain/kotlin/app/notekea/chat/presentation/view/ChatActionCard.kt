@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.NewNotePlace
 import app.notekea.chat.domain.plan.NoteDraft
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatAction
@@ -90,7 +91,8 @@ internal fun ChatActionCard(
     action: ChatAction,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
-    onUndo: () -> Unit
+    onUndo: () -> Unit,
+    onPlace: (step: Int, folder: RelativePath) -> Unit = { _, _ -> }
 ) {
     val fade = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
 
@@ -116,7 +118,16 @@ internal fun ChatActionCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        action.steps.forEach { StepLine(step = it) }
+        val isProposed = action.status == ActionStatus.PROPOSED
+
+        action.steps.forEachIndexed { index, step ->
+            StepLine(
+                step = step,
+                onPlace = { folder: RelativePath -> onPlace(index, folder) }.takeIf {
+                    isProposed && NewNotePlace.isChosenFor(step = step)
+                }
+            )
+        }
 
         val isTrashing = action.steps.any {
             it.kind == ActionKind.TRASH
@@ -188,7 +199,10 @@ private fun CardFooter(
 
 /** One step: its icon and verb, what it acts on, and the start of what it writes. */
 @Composable
-private fun StepLine(step: ActionStep) {
+private fun StepLine(
+    step: ActionStep,
+    onPlace: ((RelativePath) -> Unit)?
+) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
@@ -215,6 +229,14 @@ private fun StepLine(step: ActionStep) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+        }
+
+        if (onPlace != null) {
+            ChatNotePlace(
+                folder = NewNotePlace.of(step = step),
+                folders = LocalVaultFolders.current,
+                onChoose = onPlace
+            )
         }
 
         step.content.forEach { DraftPreview(draft = it) }

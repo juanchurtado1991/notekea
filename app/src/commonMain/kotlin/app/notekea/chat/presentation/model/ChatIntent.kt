@@ -55,6 +55,13 @@ sealed interface ChatIntent {
     /** The action card of [id]: Do it, Cancel, or Undo once done (3.9). */
     data class OnActionConfirm(val id: Long) : ChatIntent
 
+    /** The card's step [step] is to create its note in [folder]. */
+    data class OnActionPlace(
+        val id: Long,
+        val step: Int,
+        val folder: RelativePath
+    ) : ChatIntent
+
     data class OnActionCancel(val id: Long) : ChatIntent
 
     data class OnActionUndo(val id: Long) : ChatIntent

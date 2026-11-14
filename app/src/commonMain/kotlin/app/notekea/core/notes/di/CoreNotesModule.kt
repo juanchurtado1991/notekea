@@ -5,6 +5,7 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NewNoteDefaults
 import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
@@ -38,5 +39,6 @@ val coreNotesModule = module {
     factoryOf(::PlanLinkUpdatesUseCase)
     factoryOf(::UpdateLinksAfterRenameUseCase)
     factoryOf(::RenameEntryUseCase)
+    factoryOf(::NewNoteDefaults)
     factoryOf(::TextFolder)
 }
