@@ -5,6 +5,8 @@ import app.notekea.resources.chat_follow_up_about
 import app.notekea.resources.chat_follow_up_about_es
 import app.notekea.resources.chat_follow_up_title
 import app.notekea.resources.chat_follow_up_title_es
+import app.notekea.resources.chat_problem_cannot_undo
+import app.notekea.resources.chat_problem_cannot_undo_es
 import app.notekea.resources.chat_section_clip
 import app.notekea.resources.chat_section_clip_es
 import app.notekea.resources.chat_section_clip_hint
@@ -68,6 +70,7 @@ import org.jetbrains.compose.resources.StringResource
 // The question of a page's links and the follow-ups in Spanish ([replyString]): apart from the chat's other
 // replies for the file's length.
 internal val SECTION_SPANISH: Map<StringResource, StringResource> = mapOf(
+    Res.string.chat_problem_cannot_undo to Res.string.chat_problem_cannot_undo_es,
     Res.string.chat_site_search to Res.string.chat_site_search_es,
     Res.string.chat_site_search_hint to Res.string.chat_site_search_hint_es,
     Res.string.chat_site_sources to Res.string.chat_site_sources_es,

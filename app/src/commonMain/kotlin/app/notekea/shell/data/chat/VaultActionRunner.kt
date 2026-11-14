@@ -23,6 +23,7 @@ import app.notekea.tree.domain.ApplyTemplateUseCase
 import app.notekea.tree.domain.BookmarkStore
 import app.notekea.tree.domain.OpenDailyNoteUseCase
 import app.notekea.tree.domain.Trash
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -149,14 +150,28 @@ class VaultActionRunner(
         vaultPath: String,
         done: DonePlan
     ): Outcome<Unit, ActionProblem> = lock.withLock {
-        val journal = journals.remove(done.id) ?: return@withLock Outcome.Success(value = Unit)
+        // The steps are kept while the app runs: after it was closed there is nothing to take back with, and
+        // saying "undone" would be untrue (the code review of 2026-11-13).
+        val journal = journals.remove(done.id)
+            ?: return@withLock Outcome.Failure(error = ActionProblem.CannotUndo)
+
+        var failed = 0
 
         journal
             .undoSteps
             .asReversed()
-            .forEach { it(vaultPath) }
+            .forEach { step ->
+                try {
+                    step(vaultPath)
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    failed++
+                }
+            }
 
-        Outcome.Success(value = Unit)
+        val cannot = Outcome.Failure(error = ActionProblem.CannotUndo)
+        if (failed == 0) Outcome.Success(value = Unit) else cannot
     }
 
     private suspend fun runStep(

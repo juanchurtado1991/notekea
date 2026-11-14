@@ -39,6 +39,7 @@ import app.notekea.resources.chat_page_offline
 import app.notekea.resources.chat_page_refused
 import app.notekea.resources.chat_page_slow
 import app.notekea.resources.chat_problem_agent_stopped
+import app.notekea.resources.chat_problem_cannot_undo
 import app.notekea.resources.chat_problem_exists
 import app.notekea.resources.chat_problem_failed
 import app.notekea.resources.chat_problem_folder
@@ -246,6 +247,8 @@ private fun problemText(problem: ActionProblem): String = when (problem) {
             ?: replyString(resource = Res.string.chat_problem_refused)
 
     ActionProblem.NoCards -> replyString(resource = Res.string.chat_problem_no_cards)
+
+    ActionProblem.CannotUndo -> replyString(resource = Res.string.chat_problem_cannot_undo)
 
     ActionProblem.AgentStopped -> replyString(resource = Res.string.chat_problem_agent_stopped)
 

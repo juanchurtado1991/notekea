@@ -248,12 +248,22 @@ internal class ChatActions(
             action.status == ActionStatus.DONE
         } ?: return
 
-        actionRunner.undo(
+        val undone = actionRunner.undo(
             vaultPath = vaultPath,
             done = done
         )
 
-        host.update(entry.id) { it.copy(action = action.copy(status = ActionStatus.UNDONE)) }
+        // Only what was taken back is said to be: an undo that could not run says so, on the card.
+        val after = when (undone) {
+            is Outcome.Success -> action.copy(status = ActionStatus.UNDONE)
+
+            is Outcome.Failure -> action.copy(
+                status = ActionStatus.FAILED,
+                problem = undone.error
+            )
+        }
+
+        host.update(entry.id) { it.copy(action = after) }
     }
 
     /** Today's date as the model reads it, YYYY-MM-DD. */

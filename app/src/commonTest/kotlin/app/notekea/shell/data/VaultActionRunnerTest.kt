@@ -1,6 +1,7 @@
 package app.notekea.shell.data
 
 import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.DonePlan
 import app.notekea.chat.domain.plan.NoteDraft
@@ -184,19 +185,28 @@ class VaultActionRunnerTest {
                 )
             }
 
-            runner.undo(
+            val oldest = runner.undo(
                 vaultPath = VAULT,
                 done = plans.first()
             )
 
             val afterOldest = store.texts[HOME]
 
-            runner.undo(
+            val newest = runner.undo(
                 vaultPath = VAULT,
                 done = plans.last()
             )
 
-            // The oldest journal was let go (memory leak hunt): undoing it does nothing; the newest still undoes.
+            // The oldest journal was let go (memory leak hunt): undoing it does nothing, and says it cannot (the
+            // code review of 2026-11-13: it said "undone"); the newest still undoes.
+            assertEquals(
+                expected = listOf<Any>(
+                    Outcome.Failure(error = ActionProblem.CannotUndo),
+                    Outcome.Success(value = Unit)
+                ),
+                actual = listOf<Any>(oldest, newest)
+            )
+
             assertEquals(
                 expected = listOf(true, false),
                 actual = listOf(

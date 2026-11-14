@@ -40,6 +40,9 @@ sealed interface ActionProblem {
     /** No study card could be made from the note: the note backs none the model proposed (4.6). */
     data object NoCards : ActionProblem
 
+    /** What was done can no longer be taken back: the app was closed since, or a step of the undo failed. */
+    data object CannotUndo : ActionProblem
+
     /** A web page could not be clipped (4.4), for [reason]; no note was written. */
     data class PageFailed(val reason: PageProblem) : ActionProblem
 

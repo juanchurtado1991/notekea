@@ -1160,4 +1160,6 @@
     <string name="chat_site_none_es">Ninguna página de %1$s que no hayas recortado parece responder esto.</string>
     <string name="chat_site_clip">Clip and answer (%1$d)</string>
     <string name="chat_site_clip_es">Recortar y responder (%1$d)</string>
+    <string name="chat_problem_cannot_undo">This can no longer be undone from here: Notekea was closed since, or a note changed. The notes are as the action left them.</string>
+    <string name="chat_problem_cannot_undo_es">Esto ya no se puede deshacer desde aquí: Notekea se cerró desde entonces, o una nota cambió. Las notas quedan como las dejó la acción.</string>
 </resources>
