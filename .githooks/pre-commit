@@ -4,10 +4,19 @@
 # Skip only in an emergency with `git commit --no-verify`.
 set -e
 
+# Gradle without the variables git gives its hooks (GIT_INDEX_FILE and its kin): JGit reads them, so the sync tests,
+# which make repositories of their own, wrote into this repository's index and failed (found on 2026-11-14).
+gradle() {
+    (
+        unset GIT_INDEX_FILE GIT_DIR GIT_WORK_TREE GIT_PREFIX
+        ./gradlew "$@"
+    )
+}
+
 staged_kotlin_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.kt' '*.kts')
 
 echo "pre-commit: running ktlintFormat"
-./gradlew ktlintFormat --quiet
+gradle ktlintFormat --quiet
 
 if [ -n "$staged_kotlin_files" ]; then
     # Re-stage the files ktlint may have reformatted so the commit contains the formatted version.
@@ -22,4 +31,4 @@ fi
 # the real app (`:auto-test:test`, about half an hour) and the coverage they complete run in CI and on demand
 # (`./gradlew check koverVerify`): a hook that slow was skipped on every commit (the developer, 2026-11-14).
 echo "pre-commit: running lint and the unit tests"
-./gradlew ktlintCheck :app:jvmTest :ktlint-rules:test :test-buddy:test :test-buddy-crash:test --quiet
+gradle ktlintCheck :app:jvmTest :ktlint-rules:test :test-buddy:test :test-buddy-crash:test --quiet
