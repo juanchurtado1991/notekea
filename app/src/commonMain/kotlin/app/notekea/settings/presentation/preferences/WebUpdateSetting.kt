@@ -86,9 +86,9 @@ internal fun WebUpdateSetting(
 
 @Composable
 private fun LastUpdate(
-    days: Int?,
     isUpdating: Boolean,
-    onUpdate: () -> Unit
+    onUpdate: () -> Unit,
+    days: Int?
 ) {
     val detail = when (days) {
         null -> stringResource(resource = Res.string.settings_web_last_never)
@@ -97,14 +97,14 @@ private fun LastUpdate(
         else -> stringResource(Res.string.settings_web_last_days, days)
     }
 
+    val button = if (isUpdating) Res.string.settings_web_updating else Res.string.settings_web_now
+
     NotekeaSettingsRow(
         label = stringResource(resource = Res.string.settings_web_last),
         detail = detail
     ) {
         NotekeaButton(
-            text = stringResource(
-                resource = if (isUpdating) Res.string.settings_web_updating else Res.string.settings_web_now
-            ),
+            text = stringResource(resource = button),
             onClick = onUpdate,
             style = NotekeaButtonStyle.SECONDARY,
             enabled = !isUpdating

@@ -62,7 +62,10 @@ class ImportVaultUseCaseTest {
         val folder = "${FakeVaultFileSystem.DEFAULT_PARENT}/notes"
 
         assertEquals(
-            expected = listOf<Any?>(Outcome.Failure(error = VaultError.RepositoryRefused), listOf(folder)),
+            expected = listOf<Any?>(
+                Outcome.Failure(error = VaultError.RepositoryRefused),
+                listOf(folder)
+            ),
             actual = listOf<Any?>(run(), fileSystem.discarded)
         )
     }

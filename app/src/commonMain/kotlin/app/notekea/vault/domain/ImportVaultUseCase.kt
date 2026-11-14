@@ -23,7 +23,8 @@ class ImportVaultUseCase(
         val folderName = name.trim()
         val address = remoteUrl.trim()
 
-        if (!validateFileName(name = folderName)) return Outcome.Failure(error = VaultError.InvalidName)
+        val isNamed = validateFileName(name = folderName)
+        if (!isNamed) return Outcome.Failure(error = VaultError.InvalidName)
         if (address.isEmpty()) return Outcome.Failure(error = VaultError.RepositoryBadAddress)
 
         val folder = when (

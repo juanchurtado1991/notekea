@@ -32,15 +32,14 @@ class SyncVaultImporter(private val vaultSyncs: VaultSyncs) : VaultImporter {
 
         return when (connected) {
             is Outcome.Success -> connected
-
-            is Outcome.Failure -> Outcome.Failure(
-                error = when (val error = connected.error) {
-                    SyncError.AuthFailed -> VaultError.RepositoryRefused
-                    SyncError.Offline -> VaultError.RepositoryOffline
-                    SyncError.BadAddress -> VaultError.RepositoryBadAddress
-                    is SyncError.Failed -> VaultError.RepositoryFailed(message = error.message)
-                }
-            )
+            is Outcome.Failure -> Outcome.Failure(error = problemOf(error = connected.error))
         }
+    }
+
+    private fun problemOf(error: SyncError): VaultError = when (error) {
+        SyncError.AuthFailed -> VaultError.RepositoryRefused
+        SyncError.Offline -> VaultError.RepositoryOffline
+        SyncError.BadAddress -> VaultError.RepositoryBadAddress
+        is SyncError.Failed -> VaultError.RepositoryFailed(message = error.message)
     }
 }
