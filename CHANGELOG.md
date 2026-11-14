@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from a record of what it read and wrote, not by searching the vault.
 - A file of the vault is no longer planned as a web page to clip, and a table's last row cut short is left out.
 - In a narrow chat panel an option's "Recommended" badge no longer breaks in two lines.
+- A setting changed at the very moment another was being saved is no longer lost.
 - A cancelled video compression stops FFmpeg instead of leaving it writing, and a copy that fails or is cancelled is
   deleted instead of staying in the app's folder.
 - The Study tab says the day the next card comes back as a date ("Nov 12, 2026"), not in its code form.

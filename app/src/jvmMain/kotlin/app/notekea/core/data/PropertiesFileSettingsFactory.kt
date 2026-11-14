@@ -80,8 +80,12 @@ class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
         // is on disk now, never its whole memory, which would undo the other's settings (2026-11-13).
         val merged = load(file = file)
 
-        (properties.stringPropertyNames() + written.stringPropertyNames()).forEach { key ->
-            val now = properties.getProperty(key)
+        // One picture of the settings for the whole save: a key another thread adds after its names were read
+        // would be taken as written without having been (one key of 400 was lost, the full check of 2026-11-14).
+        val saved = properties.clone() as Properties
+
+        (saved.stringPropertyNames() + written.stringPropertyNames()).forEach { key ->
+            val now = saved.getProperty(key)
             val isChanged = now != written.getProperty(key)
 
             when {
@@ -92,7 +96,7 @@ class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
         }
 
         written.clear()
-        written.putAll(properties)
+        written.putAll(saved)
 
         try {
             Files.newOutputStream(temporaryFile).use { merged.store(it, null) }

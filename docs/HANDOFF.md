@@ -162,6 +162,10 @@ read as one voice); an option's badge stays whole in a narrow panel; the card sa
 be changed (`NewNotePlace`, beside the open note by default); a new note starts with `created` and `tags`
 (`NewNoteDefaults`); the tree moves an entry dragged onto a folder and duplicates a note; a dialog's X is red.
 
+The full check of that day also caught a setting lost when two were saved at once (one key of 400, now and then):
+`PropertiesFileSettingsFactory.save` read the settings twice, and a key added in between was taken as written. It
+now works on one copy.
+
 **Not done, and the next step for the agent:** it is still two engines, a planner and a loop of moves, joined at the
 plan. One loop with tools, whose results are kept as a transcript across turns (not a record written afterwards),
 is the design to move to; the 4,096-token context of the local model is what bounds it. The local model also still
