@@ -46,6 +46,13 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "package=1.${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
 
+      # What is released passed its tests: once, on Linux, as CI runs them (the code review of 2026-11-13: a tag
+      # was packaged whatever its state).
+      - name: Test
+        if: runner.os == 'Linux'
+        shell: bash
+        run: ./gradlew :app:check --console=plain
+
       - name: Package Notekea and Notekea QA
         shell: bash
         run: >
@@ -61,6 +68,8 @@ jobs:
               -exec cp {} installers/ \;
           done
           ls -l installers
+          # No installer is a failed build, not an empty artifact.
+          [ -n "$(ls -A installers)" ] || { echo "No installer was built"; exit 1; }
 
       - name: Upload the installers
         uses: actions/upload-artifact@v7
