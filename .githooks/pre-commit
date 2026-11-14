@@ -1,5 +1,5 @@
 #!/bin/sh
-# Formats the staged Kotlin files with ktlint and blocks the commit when lint, tests or coverage fail.
+# Formats the staged Kotlin files with ktlint and blocks the commit when lint or the unit tests fail.
 # Installed automatically by the `installGitHooks` Gradle task (git config core.hooksPath .githooks).
 # Skip only in an emergency with `git commit --no-verify`.
 set -e
@@ -18,5 +18,8 @@ if [ -n "$staged_kotlin_files" ]; then
     done
 fi
 
-echo "pre-commit: running check and koverVerify"
-./gradlew check koverVerify --quiet
+# The fast checks: lint, the unit and architecture tests of the app, and the tools' own tests. The cases that drive
+# the real app (`:auto-test:test`, about half an hour) and the coverage they complete run in CI and on demand
+# (`./gradlew check koverVerify`): a hook that slow was skipped on every commit (the developer, 2026-11-14).
+echo "pre-commit: running lint and the unit tests"
+./gradlew ktlintCheck :app:jvmTest :ktlint-rules:test :test-buddy:test :test-buddy-crash:test --quiet

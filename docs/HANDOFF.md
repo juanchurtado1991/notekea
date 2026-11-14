@@ -201,6 +201,19 @@ is the design to move to; the 4,096-token context of the local model is what bou
 writes more than asked and gets a detail wrong now and then (the probe: a ceiling of 2.40 m written as 2 m): the
 figure check catches figures the notes lack, not a figure put beside the wrong thing.
 
+## One agent loop, on `feature/one-agent-loop` (2026-11-14)
+
+#142 is merged. The next work is the chat rebuilt as one loop with tools, whose design the developer approved on
+2026-11-14 after two reviews: `docs/agent-loop.md` holds it, with its eight steps and the gate of each (the evaluation
+sets, with the real model, and time). Step 0 is under way: fixtures, a wider agent evaluation and four experiments
+whose results are written into that document before anything is built.
+
+Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
+is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted
+once, the vault gets its instructions note and the person's own skills in step 4, and the repair of a repository left
+half merged comes after step 1. Before the design, an audit: 90,400 code lines in the app, no dead code to speak of,
+1,800 to 2,600 lines that reuse would save (the list is in the conversation of that day, not yet acted on).
+
 ## The release run
 
 Decided on 2026-11-04: there is no M2, M3 or M4 QA run. The only run left comes after 5.4 and before 5.5, on Windows,

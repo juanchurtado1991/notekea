@@ -302,13 +302,18 @@ It runs, in this order:
 
 ```bash
 ./gradlew ktlintFormat
-./gradlew check koverVerify
+./gradlew ktlintCheck :app:jvmTest :ktlint-rules:test :test-buddy:test :test-buddy-crash:test
 ```
 
 `ktlintFormat` applies the standard rules plus Notekea's custom rules (`:ktlint-rules`, listed in §6 *Layout* and in
-`.editorconfig`) and the reformatted files
-are re-staged; `check` runs lint and every test; `koverVerify` enforces the minimum line coverage (80% in every module, UI excluded).
-The commit is blocked if any step fails. `git commit --no-verify` is for emergencies only and CI will still fail.
+`.editorconfig`) and the reformatted files are re-staged; the second line runs lint, the app's unit and architecture
+tests and the tools' own tests, in about two minutes. The commit is blocked if any step fails.
+
+The whole verification is `./gradlew check koverVerify`: it adds the cases that drive the real app (`:auto-test`,
+about half an hour) and `koverVerify`, the minimum line coverage (80% in every module, UI excluded), which those
+cases complete. CI runs it on the three systems for every pull request; run it locally before pushing a large change.
+It left the hook on 2026-11-14, at the developer's decision: at that length every commit skipped it.
+`git commit --no-verify` is for emergencies only and CI will still fail.
 
 ## 10. Unit tests for every feature
 
