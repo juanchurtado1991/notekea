@@ -16,6 +16,8 @@ import app.notekea.chat.domain.plan.ActionPlanReader
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
+import app.notekea.chat.presentation.viewmodel.ChatSources
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -39,6 +41,7 @@ val chatModule = module {
 
     factoryOf(::ActOnRequestUseCase)
     factoryOf(::ConverseUseCase)
+    factoryOf(::AnswerFromPagesUseCase)
     factoryOf(::AgentAnswerUseCase)
     factoryOf(::AgentTaskUseCase)
     factoryOf(::AnswerHelpUseCase)
@@ -66,7 +69,11 @@ val chatModule = module {
             clock = get(),
             historyStore = get(),
             clipboard = get(),
-            llmEngine = get()
+            llmEngine = get(),
+            sources = ChatSources(
+                answerFromPages = get(),
+                sourceSites = getOrNull()
+            )
         )
     }
 }

@@ -119,9 +119,15 @@ class PlanRequestUseCase(
             )
         }
 
+        val withProperties = PropertiesNamed.added(
+            steps = shaped,
+            request = request,
+            context = context
+        )
+
         return Outcome.Success(
-            value = PropertiesNamed.added(
-                steps = shaped,
+            value = CardsNamed.shaped(
+                steps = withProperties,
                 request = request,
                 context = context
             )

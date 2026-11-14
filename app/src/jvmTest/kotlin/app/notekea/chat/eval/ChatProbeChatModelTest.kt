@@ -22,8 +22,10 @@ import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
 import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ChatMode
+import app.notekea.chat.presentation.viewmodel.ChatSources
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.data.JvmAppDispatchers
@@ -399,7 +401,11 @@ class ChatProbeChatModelTest {
             clock = Clock.System,
             historyStore = history,
             clipboard = clipboard,
-            llmEngine = engine
+            llmEngine = engine,
+            sources = ChatSources(
+                answerFromPages = AnswerFromPagesUseCase(llmEngine = engine),
+                sourceSites = null
+            )
         )
     }
 

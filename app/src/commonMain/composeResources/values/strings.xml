@@ -1146,4 +1146,18 @@
     <string name="chat_follow_up_title_es">Seguir preguntando</string>
     <string name="chat_follow_up_about">Tell me more about “%1$s”</string>
     <string name="chat_follow_up_about_es">Cuéntame más sobre «%1$s»</string>
+    <string name="chat_site_search">Look for it in %1$s</string>
+    <string name="chat_site_search_es">Buscarlo en %1$s</string>
+    <string name="chat_site_search_hint">Pages about this that you have not clipped yet. Nothing is clipped until you say so.</string>
+    <string name="chat_site_search_hint_es">Páginas sobre esto que aún no has recortado. No se recorta nada hasta que lo digas.</string>
+    <string name="chat_site_sources">your web sources</string>
+    <string name="chat_site_sources_es">tus fuentes web</string>
+    <string name="chat_site_looking">Looking through the site: %1$d pages so far…</string>
+    <string name="chat_site_looking_es">Revisando el sitio: %1$d páginas hasta ahora…</string>
+    <string name="chat_site_found">These pages may have it</string>
+    <string name="chat_site_found_es">Estas páginas pueden tenerlo</string>
+    <string name="chat_site_none">No page of %1$s that you have not clipped looks like it answers this.</string>
+    <string name="chat_site_none_es">Ninguna página de %1$s que no hayas recortado parece responder esto.</string>
+    <string name="chat_site_clip">Clip and answer (%1$d)</string>
+    <string name="chat_site_clip_es">Recortar y responder (%1$d)</string>
 </resources>

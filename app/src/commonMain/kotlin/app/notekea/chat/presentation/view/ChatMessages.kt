@@ -55,7 +55,6 @@ import app.notekea.resources.chat_acted
 import app.notekea.resources.chat_do_it_for_me
 import app.notekea.resources.chat_failed
 import app.notekea.resources.chat_failed_search
-import app.notekea.resources.chat_not_found
 import app.notekea.resources.chat_retry
 import app.notekea.resources.chat_small_hint
 import app.notekea.resources.chat_stopped
@@ -231,8 +230,9 @@ private fun AnswerContent(
         // Its list of tasks, above, says where it stands.
         entry.isAnswering && !isWriting -> Unit
 
-        entry.outcome == TurnOutcome.NOT_FOUND -> Quiet(
-            text = replyString(resource = Res.string.chat_not_found)
+        entry.outcome == TurnOutcome.NOT_FOUND -> ChatNotFound(
+            entry = entry,
+            onIntent = onIntent
         )
 
         entry.outcome == TurnOutcome.FAILED -> Failed(

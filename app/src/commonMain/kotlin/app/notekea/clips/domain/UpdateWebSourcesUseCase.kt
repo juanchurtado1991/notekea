@@ -140,7 +140,7 @@ class UpdateWebSourcesUseCase(
 
     // The clipped notes [target] names, by section: a page clipped alone is a section of one, and a note inside a
     // section's folder stands for its whole section, whose pages are cleaned of the site's menus together.
-    private suspend fun sectionsOf(
+    internal suspend fun sectionsOf(
         vaultPath: String,
         target: RelativePath
     ): List<SourceSection> {

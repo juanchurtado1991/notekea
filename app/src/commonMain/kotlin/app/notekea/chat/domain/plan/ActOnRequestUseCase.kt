@@ -102,22 +102,17 @@ class ActOnRequestUseCase(
 
         if (confirmed.any { it.kind in COMPOSED }) emit(value = ActionTurnStep.Writing)
 
-        val composed = confirmed.map { step ->
-            when (
-                val written = composeNotes(
-                    step = step,
-                    request = request,
-                    vaultPath = vaultPath,
-                    notes = notes,
-                    onProgress = { emit(value = ActionTurnStep.Progress(progress = it)) }
-                )
-            ) {
-                is Outcome.Success -> written.value
-                is Outcome.Failure -> return@flow problem(problem = written.error)
-            }
-        }
+        val composed = composed(
+            steps = confirmed,
+            request = request,
+            vaultPath = vaultPath,
+            notes = notes
+        )
 
-        emit(value = ActionTurnStep.Proposed(steps = composed + shown))
+        if (composed is Outcome.Failure) return@flow problem(problem = composed.error)
+        val written = (composed as Outcome.Success).value
+
+        emit(value = ActionTurnStep.Proposed(steps = written + shown))
     }
 
     /**
@@ -182,6 +177,43 @@ class ActOnRequestUseCase(
         val isStuck = agentUse.isStuckOn(problem = problem)
 
         return if (isStuck) ActionTurnStep.ToAgent else ActionTurnStep.Problem(problem = problem)
+    }
+
+    // Each step with its text written. Cards asked of several notes ("study cards of WordPress"): a note that
+    // backs none is left out, and the request fails only when none backs any.
+    private suspend fun kotlinx.coroutines.flow.FlowCollector<ActionTurnStep>.composed(
+        steps: List<ActionStep>,
+        request: String,
+        vaultPath: String,
+        notes: Collection<NoteEntry>
+    ): Outcome<List<ActionStep>, ActionProblem> {
+        val isOfSeveral = steps.count {
+            it.kind == ActionKind.MAKE_CARDS
+        } > 1
+
+        val composed = mutableListOf<ActionStep>()
+
+        steps.forEach { step ->
+            val written = composeNotes(
+                step = step,
+                request = request,
+                vaultPath = vaultPath,
+                notes = notes,
+                onProgress = { emit(value = ActionTurnStep.Progress(progress = it)) }
+            )
+
+            val failure = (written as? Outcome.Failure)?.error
+            val isLeftOut = isOfSeveral && failure == ActionProblem.NoCards
+
+            when {
+                written is Outcome.Success -> composed += written.value
+                failure != null && !isLeftOut -> return Outcome.Failure(error = failure)
+            }
+        }
+
+        if (composed.isEmpty()) return Outcome.Failure(error = ActionProblem.NoCards)
+
+        return Outcome.Success(value = composed)
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<ActionTurnStep>.problem(

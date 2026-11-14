@@ -8,6 +8,7 @@ import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.SectionRanker
 import app.notekea.clips.domain.SupportCheck
 import app.notekea.clips.domain.UpdateWebSourcesUseCase
+import app.notekea.clips.domain.WebSourceSearch
 import app.notekea.clips.presentation.ClipViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -22,6 +23,7 @@ val clipsModule = module {
     factoryOf(::FindSectionUseCase)
     factoryOf(::ClipSectionUseCase)
     factoryOf(::UpdateWebSourcesUseCase)
+    factoryOf(::WebSourceSearch)
 
     viewModel { parameters ->
         ClipViewModel(

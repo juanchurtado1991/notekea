@@ -245,6 +245,42 @@ class AgentTaskTest {
             )
         }
 
+    // The developer's smoke of 2026-11-13: asked for a long note, the model wrote it inside its move, which was
+    // cut short and could not be read; the task stopped with a failure after four moves.
+    @Test
+    fun `a move cut short is asked again, told so, and twice unread the task ends, never on a failure`() =
+        runTest {
+            script(
+                "{\"move\":\"search\",\"query\":\"sleep\"}",
+                "{\"move\":\"propose\",\"steps\":[{\"action\":\"create_note\",\"text\":\"# A long no",
+                "{\"move\":\"finish\",\"summary\":\"Done.\"}"
+            )
+
+            val retried = run(task = "write a long note about sleep")
+
+            val wasTold = engine.generated.any {
+                AgentTaskPrompt.CUT_SHORT in it.last().text
+            }
+
+            script(
+                "{\"move\":\"search\",\"query\":\"sleep\"}",
+                "{\"move\":\"propose\",\"steps\":[{\"action\":\"create_",
+                "{\"move\":\"propose\",\"steps\":[{\"action\":\"create_"
+            )
+
+            val unread = run(task = "write a long note about sleep")
+
+            // The search found nothing here, so both end on the not found reply (an empty summary).
+            assertEquals(
+                expected = listOf<Any?>(true, true, true),
+                actual = listOf(
+                    retried.last() is AgentStep.Finished,
+                    wasTold,
+                    unread.last() is AgentStep.Finished
+                )
+            )
+        }
+
     // Agent eval of 2026-11-11: "which meetings did Marta attend?" found nothing, her name being only in a property.
     @Test
     fun `a search also lists the notes whose properties hold its words`() = runTest {

@@ -4,11 +4,13 @@ import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.CardMaker
 import app.notekea.chat.domain.plan.PageReader
 import app.notekea.chat.domain.plan.WebPageClipper
+import app.notekea.chat.domain.sources.SourceSites
 import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.shell.data.SettingsWorkspaceStore
 import app.notekea.shell.data.chat.CardsForChat
 import app.notekea.shell.data.chat.ClipsForChat
 import app.notekea.shell.data.chat.SettingsHelpFromGuide
+import app.notekea.shell.data.chat.SourceSitesForChat
 import app.notekea.shell.data.chat.VaultActionFinder
 import app.notekea.shell.data.chat.VaultActionRunner
 import app.notekea.shell.domain.GetNoteCoverUseCase
@@ -58,6 +60,15 @@ val shellModule = module {
 
     single<PageReader> { get<ClipsForChat>() }
     single<WebPageClipper> { get<ClipsForChat>() }
+
+    single<SourceSites> {
+        SourceSitesForChat(
+            search = get(),
+            noteContentStore = get(),
+            localCalendar = get(),
+            clock = get()
+        )
+    }
 
     single<SettingsHelpSource> {
         SettingsHelpFromGuide(

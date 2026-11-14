@@ -65,6 +65,18 @@ sealed interface ChatIntent {
      */
     data class OnOfferedClick(val id: Long) : ChatIntent
 
+    /** "Look in wordpress.org": the pages of the vault's web sources' sites that may answer turn [id]. */
+    data class OnSiteSearch(val id: Long) : ChatIntent
+
+    /** A page found there, ticked or not, to be clipped. */
+    data class OnSitePageToggle(
+        val id: Long,
+        val url: String
+    ) : ChatIntent
+
+    /** "Clip and answer": the ticked pages join their section, and the question is answered from them. */
+    data class OnSiteClip(val id: Long) : ChatIntent
+
     /** A question the chat suggested under its last answer ([FollowUps]), asked of the whole vault. */
     data class OnFollowUp(val text: String) : ChatIntent
 

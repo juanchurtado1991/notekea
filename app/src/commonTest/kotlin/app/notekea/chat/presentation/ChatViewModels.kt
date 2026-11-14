@@ -18,6 +18,9 @@ import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
 import app.notekea.chat.domain.plan.PlanRequestUseCase
 import app.notekea.chat.domain.plan.WebPageClipper
+import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
+import app.notekea.chat.domain.sources.SourceSites
+import app.notekea.chat.presentation.viewmodel.ChatSources
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.FakeLocalCalendar
@@ -43,7 +46,8 @@ internal fun chatViewModel(
     clipboard: FakeTextClipboard,
     guide: HelpGuide = HelpGuide(topics = emptyList()),
     clock: Clock = Clock.System,
-    clipper: WebPageClipper? = null
+    clipper: WebPageClipper? = null,
+    sourceSites: SourceSites? = null
 ): ChatViewModel {
     val cache = NoteTextCache(
         contentStore = store,
@@ -112,6 +116,10 @@ internal fun chatViewModel(
         clock = clock,
         historyStore = history,
         clipboard = clipboard,
-        llmEngine = engine
+        llmEngine = engine,
+        sources = ChatSources(
+            answerFromPages = AnswerFromPagesUseCase(llmEngine = engine),
+            sourceSites = sourceSites
+        )
     )
 }

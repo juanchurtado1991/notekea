@@ -49,11 +49,32 @@ import app.notekea.resources.chat_section_pages
 import app.notekea.resources.chat_section_pages_es
 import app.notekea.resources.chat_section_recommended
 import app.notekea.resources.chat_section_recommended_es
+import app.notekea.resources.chat_site_clip
+import app.notekea.resources.chat_site_clip_es
+import app.notekea.resources.chat_site_found
+import app.notekea.resources.chat_site_found_es
+import app.notekea.resources.chat_site_looking
+import app.notekea.resources.chat_site_looking_es
+import app.notekea.resources.chat_site_none
+import app.notekea.resources.chat_site_none_es
+import app.notekea.resources.chat_site_search
+import app.notekea.resources.chat_site_search_es
+import app.notekea.resources.chat_site_search_hint
+import app.notekea.resources.chat_site_search_hint_es
+import app.notekea.resources.chat_site_sources
+import app.notekea.resources.chat_site_sources_es
 import org.jetbrains.compose.resources.StringResource
 
 // The question of a page's links and the follow-ups in Spanish ([replyString]): apart from the chat's other
 // replies for the file's length.
 internal val SECTION_SPANISH: Map<StringResource, StringResource> = mapOf(
+    Res.string.chat_site_search to Res.string.chat_site_search_es,
+    Res.string.chat_site_search_hint to Res.string.chat_site_search_hint_es,
+    Res.string.chat_site_sources to Res.string.chat_site_sources_es,
+    Res.string.chat_site_looking to Res.string.chat_site_looking_es,
+    Res.string.chat_site_found to Res.string.chat_site_found_es,
+    Res.string.chat_site_none to Res.string.chat_site_none_es,
+    Res.string.chat_site_clip to Res.string.chat_site_clip_es,
     Res.string.chat_follow_up_title to Res.string.chat_follow_up_title_es,
     Res.string.chat_follow_up_about to Res.string.chat_follow_up_about_es,
     Res.string.chat_section_clip to Res.string.chat_section_clip_es,

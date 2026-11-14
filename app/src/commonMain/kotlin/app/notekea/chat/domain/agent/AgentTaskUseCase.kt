@@ -65,14 +65,19 @@ class AgentTaskUseCase(
         for (number in 1..MAX_MOVES) {
             if (clock.now() > deadline) break
 
-            val move = nextMove(
+            val move = readMove(
                 task = task,
                 context = context,
                 found = found,
                 movesLeft = MAX_MOVES - number + 1,
                 mustEnd = mustEnd || number == MAX_MOVES
             )
-                ?: return@flow emit(value = AgentStep.Stopped(problem = null))
+                ?: return@flow emit(
+                    value = unread(
+                        task = task,
+                        found = found
+                    )
+                )
 
             when (move.move) {
                 AgentTaskPrompt.FINISH -> {
@@ -125,12 +130,37 @@ class AgentTaskUseCase(
         emit(value = AgentStep.Stopped(problem = null))
     }
 
-    private suspend fun nextMove(
+    // A move that cannot be read was cut short (a whole note written inside it): it is asked again, told so, with
+    // more room; then the task ends on what it found, not on a failure (the developer's smoke of 2026-11-13).
+    private suspend fun readMove(
         task: String,
         context: ActionContext,
         found: List<String>,
         movesLeft: Int,
         mustEnd: Boolean
+    ): AgentTaskMove? = nextMove(
+        task = task,
+        context = context,
+        found = found,
+        movesLeft = movesLeft,
+        mustEnd = mustEnd
+    )
+        ?: nextMove(
+            task = task,
+            context = context,
+            found = found + AgentTaskPrompt.CUT_SHORT,
+            movesLeft = movesLeft,
+            mustEnd = mustEnd,
+            tokens = RETRY_TOKENS
+        )
+
+    private suspend fun nextMove(
+        task: String,
+        context: ActionContext,
+        found: List<String>,
+        movesLeft: Int,
+        mustEnd: Boolean,
+        tokens: Int = MOVE_TOKENS
     ): AgentTaskMove? {
         val json = StringBuilder()
 
@@ -139,7 +169,7 @@ class AgentTaskUseCase(
                 .generate(
                     messages = AgentTaskPrompt.messages(task, context, found, movesLeft, mustEnd),
                     options = GenerationOptions(
-                        maxTokens = MOVE_TOKENS,
+                        maxTokens = tokens,
                         temperature = 0f,
                         jsonSchema = AgentTaskPrompt.schemaOf(mustEnd = mustEnd)
                     )
@@ -150,6 +180,26 @@ class AgentTaskUseCase(
         }
 
         return planReader.readTask(json = json.toString())
+    }
+
+    // No move could be read, twice: what it found is still worth an answer; with nothing found, it stopped.
+    private suspend fun unread(
+        task: String,
+        found: List<String>
+    ): AgentStep {
+        val hasLooked = found.any {
+            !it.startsWith(prefix = AgentFinalAnswer.AGAIN)
+        }
+
+        if (!hasLooked) return AgentStep.Stopped(problem = null)
+
+        val answer = finalAnswer.written(
+            task = task,
+            found = found,
+            summary = ""
+        )
+
+        return AgentStep.Finished(summary = answer)
     }
 
     // The proposal as the card shows it: the plan checked against the vault, its text written out.
@@ -210,5 +260,6 @@ class AgentTaskUseCase(
         const val MAX_MOVES = 30
         val TIME_LIMIT = 10.minutes
         private const val MOVE_TOKENS = 900
+        private const val RETRY_TOKENS = 1_600
     }
 }

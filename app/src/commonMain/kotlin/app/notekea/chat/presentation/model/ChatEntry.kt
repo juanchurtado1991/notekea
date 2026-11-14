@@ -8,6 +8,7 @@ import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.chat.domain.language.ReplyLanguage
 import app.notekea.chat.domain.plan.PageProgress
 import app.notekea.chat.domain.plan.SectionAsked
+import app.notekea.chat.domain.sources.SourcePage
 
 /**
  * A question of the chat and its answer, keyed by [id]: [step] says where it stands, [sources] are the passages its
@@ -34,6 +35,12 @@ data class ChatEntry(
     val moves: List<AgentMoveLine> = emptyList(),
     // The steps it already left, oldest first: the checked lines over the one it is on.
     val passed: List<PassedStep> = emptyList(),
+    // The notes did not hold the answer: the sites of the vault's web sources it may be looked for in ([sites]),
+    // then their pages that may hold it ([sitePages], null until looked for), the ones ticked [pickedPages].
+    val sites: List<String> = emptyList(),
+    val sitePages: List<SourcePage>? = null,
+    val pickedPages: Set<String> = emptySet(),
+    val isLookingInSites: Boolean = false,
     val answeredWith: ChatMode? = null
 ) {
     /**

@@ -51,6 +51,19 @@ internal class UpdatedSection(
         )
     }
 
+    /** The pages at [urls] clipped into the section as new notes, each told to [onPage] first; their paths. */
+    suspend fun add(
+        urls: List<String>,
+        onPage: suspend (url: String) -> Unit
+    ): List<RelativePath> {
+        val clips = urls.mapNotNull { url ->
+            onPage(url)
+            tools.clipOf(url = url)
+        }
+
+        return added(clips = clips)
+    }
+
     // Whether the note was rewritten with [article]; null when its page could not be read, or reads as gone. The
     // note is read again here, minutes after the update began: what the person wrote meanwhile is what is kept.
     private suspend fun rewritten(

@@ -66,7 +66,8 @@ class ChatViewModel(
     private val clock: Clock,
     private val historyStore: ChatHistoryStore,
     private val clipboard: TextClipboard,
-    private val llmEngine: LlmEngine
+    private val llmEngine: LlmEngine,
+    sources: ChatSources
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
@@ -127,6 +128,13 @@ class ChatViewModel(
     )
 
     private val memory = ChatMemory(compactChat = compactChat)
+
+    private val siteSearch = ChatSiteSearch(
+        vaultPath = vaultPath,
+        sources = sources,
+        host = host,
+        onAnswered = { keeping.save() }
+    )
 
     private val keeping = ChatKeeping(
         vaultPath = vaultPath,
@@ -252,6 +260,9 @@ class ChatViewModel(
 
             is ChatIntent.OnFollowUp -> offered(request = intent.text)
 
+            is ChatIntent.OnSiteSearch, is ChatIntent.OnSitePageToggle, is ChatIntent.OnSiteClip ->
+                siteSearch.on(intent = intent)?.let { answer = it }
+
             is ChatIntent.OnOfferedClick -> entryOf(id = intent.id)?.offered?.let {
                 offered(request = it)
             }
@@ -357,6 +368,7 @@ class ChatViewModel(
                 scope = scope
             )
 
+            siteSearch.offer(id = id)
             keeping.save()
         }
     }

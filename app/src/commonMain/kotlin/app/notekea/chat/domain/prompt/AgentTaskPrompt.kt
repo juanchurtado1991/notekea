@@ -20,6 +20,12 @@ object AgentTaskPrompt {
     const val PROPOSE = "propose"
     const val FINISH = "finish"
     private const val MAX_FOUND_CHARS = 9_000
+
+    /** Told to the model when its last move could not be read, before it is asked for it again. */
+    const val CUT_SHORT =
+        "(Your last move could not be read: it was cut short. Reply with a short JSON. In a step that writes a " +
+            "note, text is one sentence saying what the note must hold, never the note itself: the note is " +
+            "written afterwards, from the notes the step names.)"
     private const val MAX_NAMES = 120
 
     private val STEP_FIELDS = ActionField
