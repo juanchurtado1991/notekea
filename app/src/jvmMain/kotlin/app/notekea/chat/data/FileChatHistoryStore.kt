@@ -1,7 +1,7 @@
 package app.notekea.chat.data
 
 import app.notekea.chat.domain.ChatHistoryStore
-import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.domain.conversation.Conversation
 import app.notekea.core.domain.AppDispatchers
 import co.touchlab.kermit.Logger
 import com.ghost.serialization.Ghost
@@ -17,7 +17,7 @@ import java.security.MessageDigest
 /**
  * [ChatHistoryStore] as one JSON file per vault in [folder], named by a hash of the vault's path, written whole to a
  * file beside it and moved in place, so a crash never leaves half a history; writes go one at a time, as two at once
- * shared the partial file. A file that cannot be read is an empty history: the chat goes on.
+ * shared the partial file. A file that cannot be read is an empty chat: the chat goes on.
  */
 class FileChatHistoryStore(
     private val folder: Path,
@@ -26,10 +26,10 @@ class FileChatHistoryStore(
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val writing = Mutex()
 
-    override suspend fun load(vaultPath: String): List<ChatTurn> =
+    override suspend fun load(vaultPath: String): Conversation =
         withContext(context = dispatchers.io) {
             val file = fileOf(vaultPath = vaultPath)
-            if (!Files.isRegularFile(file)) return@withContext emptyList()
+            if (!Files.isRegularFile(file)) return@withContext Conversation()
 
             try {
                 val dto = Ghost.deserialize<ChatHistoryDto>(Files.readString(file))
@@ -37,32 +37,32 @@ class FileChatHistoryStore(
                 ChatHistoryMappers.toDomain(dto = dto)
             } catch (exception: IOException) {
                 logger.w(throwable = exception) { READ_FAILED_MESSAGE }
-                emptyList()
+                Conversation()
             } catch (exception: RuntimeException) {
                 // A file written by another version or damaged: its turns are lost, not the chat.
                 logger.w(throwable = exception) { READ_FAILED_MESSAGE }
-                emptyList()
+                Conversation()
             }
         }
 
     override suspend fun save(
         vaultPath: String,
-        turns: List<ChatTurn>
+        conversation: Conversation
     ) = withContext(context = dispatchers.io) {
         writing.withLock {
             write(
                 vaultPath = vaultPath,
-                turns = turns
+                conversation = conversation
             )
         }
     }
 
     private fun write(
         vaultPath: String,
-        turns: List<ChatTurn>
+        conversation: Conversation
     ) {
         val file = fileOf(vaultPath = vaultPath)
-        val json = Ghost.encodeToString(ChatHistoryMappers.toDto(turns = turns))
+        val json = Ghost.encodeToString(ChatHistoryMappers.toDto(conversation = conversation))
 
         try {
             Files.createDirectories(folder)

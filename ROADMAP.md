@@ -350,7 +350,10 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      Step 0 is done.
    - **Step 2 (2026-11-14), done:** the engine shares its context among the slots and admits calls by tokens;
      the chat counts in the model's tokens (`ModelProfile`, `ContextBudget`) in place of character constants.
-     The evaluations stand where they stood (27 of 30, 7 of 21). Step 3 is next.
+     The evaluations stand where they stood (27 of 30, 7 of 21). 
+   - **Step 3 (2026-11-14), done:** the chat is a `Conversation` in the domain (turns with their calls, results,
+     text and proposals), kept in the history from the moment a turn is asked; a chat opened again knows what it
+     did. Step 4 is next.
 
 ## Out of scope for the MVP
 

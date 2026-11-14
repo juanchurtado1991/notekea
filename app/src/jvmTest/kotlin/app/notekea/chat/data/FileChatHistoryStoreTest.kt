@@ -4,6 +4,12 @@ import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.conversation.Conversation
+import app.notekea.chat.domain.conversation.ProposalOutcome
+import app.notekea.chat.domain.conversation.ProposedChange
+import app.notekea.chat.domain.conversation.TurnItem
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.tool.ToolOrigin
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.LogWriter
@@ -47,24 +53,28 @@ class FileChatHistoryStoreTest {
     @Test
     fun `each vault keeps its own turns, read back as written, and clearing one leaves the other`() =
         runBlocking {
+            val unanswered = turn.copy(outcome = TurnOutcome.NOT_FOUND)
+
             store.save(
                 vaultPath = VAULT,
-                turns = listOf(turn)
+                conversation = Conversation(turns = listOf(turn))
             )
 
             store.save(
                 vaultPath = OTHER,
-                turns = listOf(turn.copy(outcome = TurnOutcome.NOT_FOUND))
+                conversation = Conversation(turns = listOf(unanswered))
             )
 
-            val saved =
-                store.load(vaultPath = VAULT) to store.load(vaultPath = OTHER).map { it.outcome }
+            val saved = store.load(vaultPath = VAULT).turns to store
+                .load(vaultPath = OTHER)
+                .turns
+                .map { it.outcome }
 
             store.clear(vaultPath = VAULT)
             val files = folder.listDirectoryEntries().size
 
             assertEquals(
-                expected = Triple(listOf(turn) to listOf(TurnOutcome.NOT_FOUND), emptyList(), 1),
+                expected = Triple(listOf(turn) to listOf(TurnOutcome.NOT_FOUND), Conversation(), 1),
                 actual = Triple(saved, store.load(vaultPath = VAULT), files)
             )
         }
@@ -73,7 +83,7 @@ class FileChatHistoryStoreTest {
     fun `a damaged file is an empty chat, and the next save replaces it`() = runBlocking {
         store.save(
             vaultPath = VAULT,
-            turns = listOf(turn)
+            conversation = Conversation(turns = listOf(turn))
         )
 
         folder
@@ -85,12 +95,86 @@ class FileChatHistoryStoreTest {
 
         store.save(
             vaultPath = VAULT,
-            turns = listOf(turn)
+            conversation = Conversation(turns = listOf(turn))
         )
 
         assertEquals(
-            expected = emptyList<ChatTurn>() to listOf(turn),
-            actual = damaged to store.load(vaultPath = VAULT)
+            expected = Conversation() to listOf(turn),
+            actual = damaged to store.load(vaultPath = VAULT).turns
+        )
+    }
+
+    // `docs/agent-loop.md`, step 3: a chat reopened knows what it read and did, and what was compacted.
+    @Test
+    fun `a turn's calls, results and proposal, and the chat's summary, are read back as written`() =
+        runBlocking {
+            val worked = ChatTurn(
+                question = "make a table of the contract",
+                scope = ChatScope.VAULT,
+                outcome = TurnOutcome.ACTED,
+                items = listOf(
+                    TurnItem.Call(
+                        name = "read",
+                        target = "Contract/contract"
+                    ),
+                    TurnItem.Result(
+                        text = "read \"contract\" (120 words)",
+                        origin = ToolOrigin.VAULT
+                    ),
+                    TurnItem.Proposal(
+                        changes = listOf(
+                            ProposedChange(
+                                kind = ActionKind.WRITE_FROM_NOTES,
+                                notes = listOf(RelativePath(value = "Contract/contract.md")),
+                                start = "| Pros | Cons |",
+                                title = "Pros and cons"
+                            )
+                        ),
+                        outcome = ProposalOutcome.CANCELLED,
+                        problem = null
+                    )
+                ) + turn.items,
+                scopeName = null
+            )
+
+            val conversation = Conversation(
+                turns = listOf(turn, worked),
+                summary = "They asked about the arepas.",
+                compacted = 1
+            )
+
+            store.save(
+                vaultPath = VAULT,
+                conversation = conversation
+            )
+
+            assertEquals(
+                expected = conversation,
+                actual = store.load(vaultPath = VAULT)
+            )
+        }
+
+    // A history written before step 3 holds, for each turn, only its answer and its sources.
+    @Test
+    fun `a history of the format before is read once as turns that only answered`() = runBlocking {
+        store.save(
+            vaultPath = VAULT,
+            conversation = Conversation()
+        )
+
+        folder
+            .listDirectoryEntries()
+            .single()
+            .writeText(
+                text = """{"version":1,"turns":[{"question":"¿Cuánta agua lleva la masa?","scope":"FOLDER",""" +
+                    """"scopeName":"Recipes","outcome":"ANSWERED","answer":"Dos tazas y media [1].","sources":""" +
+                    """[{"number":1,"note":"Recipes/Arepas.md","first":10,"last":42,"text":"2½ cups of warm """ +
+                    """water","headingPath":["Arepas","Ingredients"]}]}]}"""
+            )
+
+        assertEquals(
+            expected = Conversation(turns = listOf(turn)),
+            actual = store.load(vaultPath = VAULT)
         )
     }
 
@@ -119,7 +203,7 @@ class FileChatHistoryStoreTest {
                         async {
                             store.save(
                                 vaultPath = VAULT,
-                                turns = List(size = count) { turn }
+                                conversation = Conversation(turns = List(size = count) { turn })
                             )
                         }
                     }

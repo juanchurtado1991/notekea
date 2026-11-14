@@ -4,9 +4,10 @@ import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.conversation.Conversation
+import app.notekea.chat.domain.conversation.ConversationMemory
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatStep
-import app.notekea.chat.presentation.viewmodel.ChatMemory
 import app.notekea.chat.presentation.viewmodel.after
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.FakeLlmEngine
@@ -23,6 +24,11 @@ class ChatMemoryTest {
     private val engine = FakeLlmEngine().apply {
         reply = { "They asked about arepas and books." }
     }
+
+    private fun chatOf(
+        count: Long,
+        answer: String
+    ): Conversation = Conversation(turns = entriesOf(count, answer).map { it.toTurn() })
 
     private fun entriesOf(
         count: Long,
@@ -46,20 +52,20 @@ class ChatMemoryTest {
     // and was compacted again after every reply, the ring stuck on Compacting.
     @Test
     fun `a compaction that fails forgets the older exchanges, so the memory empties`() = runTest {
-        val memory = ChatMemory(compactChat = CompactChatUseCase(llmEngine = engine))
+        val memory = ConversationMemory(compactChat = CompactChatUseCase(llmEngine = engine))
 
-        val entries = entriesOf(
+        val chat = chatOf(
             count = 12,
             answer = "A long answer about the notes. ".repeat(n = 20)
         )
 
-        val before = memory.usageOf(entries = entries)
+        val before = memory.usageOf(conversation = chat)
         engine.failure = LlmError.EngineFailed
-        val isWritten = memory.compact(entries = entries)
+        val after = memory.compact(conversation = chat)
 
         assertEquals(
-            expected = listOf(false, true),
-            actual = listOf(isWritten, memory.usageOf(entries = entries) < before / 2)
+            expected = listOf(null, true),
+            actual = listOf(after.summary, memory.usageOf(conversation = after) < before / 2)
         )
     }
 
@@ -68,21 +74,21 @@ class ChatMemoryTest {
     fun `compacting a short chat never fills the memory more`() = runTest {
         engine.reply = { LONG_SUMMARY.repeat(n = 30) }
 
-        val memory = ChatMemory(compactChat = CompactChatUseCase(llmEngine = engine))
+        val memory = ConversationMemory(compactChat = CompactChatUseCase(llmEngine = engine))
 
-        val entries = entriesOf(
+        val chat = chatOf(
             count = 3,
             answer = "Two cups and a half."
         )
 
-        val before = memory.usageOf(entries = entries)
-        memory.compact(entries = entries)
+        val before = memory.usageOf(conversation = chat)
+        val after = memory.compact(conversation = chat)
 
         assertEquals(
             expected = listOf(true, true),
             actual = listOf(
-                memory.usageOf(entries = entries) <= before,
-                memory.summary?.endsWith(suffix = ".") ?: true
+                memory.usageOf(conversation = after) <= before,
+                after.summary?.endsWith(suffix = ".") ?: true
             )
         )
     }

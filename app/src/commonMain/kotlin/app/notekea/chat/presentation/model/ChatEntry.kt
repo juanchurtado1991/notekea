@@ -5,6 +5,7 @@ import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.conversation.TurnItem
 import app.notekea.chat.domain.language.ReplyLanguage
 import app.notekea.chat.domain.plan.PageProgress
 import app.notekea.chat.domain.plan.SectionAsked
@@ -41,29 +42,18 @@ data class ChatEntry(
     val sitePages: List<SourcePage>? = null,
     val pickedPages: Set<String> = emptySet(),
     val isLookingInSites: Boolean = false,
-    val answeredWith: ChatMode? = null
+    val answeredWith: ChatMode? = null,
+    // A turn of an earlier session: what it proposed then and how that ended, said in a line in the card's place.
+    val proposal: TurnItem.Proposal? = null
 ) {
     /**
-     * Whether the history keeps it: once answered, and for a request the chat acted on only once done, since one
-     * refused, cancelled or undone changed nothing.
+     * Whether the conversation keeps it, from the moment it is asked: a turn the app was closed on is shown again
+     * as stopped, and a proposal with how it ended. A question about a page's links is its buttons, which a reload
+     * does not bring back.
      */
-    val isKept: Boolean
-        get() {
-            // A question about a page's links is its buttons, which a reload does not bring back.
-            if (sectionAsked != null) return false
-            val status = action?.status ?: return !isAnswering
+    val isKept: Boolean get() = sectionAsked == null
 
-            return status == ActionStatus.DONE || status == ActionStatus.FINISHED
-        }
-
-    fun toTurn(): ChatTurn = ChatTurn(
-        question = question,
-        scope = scope,
-        outcome = outcome ?: TurnOutcome.STOPPED,
-        answer = answer,
-        sources = sources,
-        scopeName = scopeName
-    )
+    fun toTurn(): ChatTurn = EntryTurns.turnOf(entry = this)
 
     /** The language the chat replies to it in: the question's. */
     val language: ReplyLanguage by lazy { ReplyLanguage.of(text = question) }
@@ -75,17 +65,9 @@ data class ChatEntry(
         fun of(
             turn: ChatTurn,
             id: Long
-        ): ChatEntry = ChatEntry(
-            id = id,
-            question = turn.question,
-            scope = turn.scope,
-            step = ChatStep.DONE,
-            answer = turn.answer,
-            sources = turn.sources,
-            readNotes = 0,
-            scopeName = turn.scopeName,
-            outcome = turn.outcome,
-            error = null
+        ): ChatEntry = EntryTurns.entryOf(
+            turn = turn,
+            id = id
         )
     }
 }

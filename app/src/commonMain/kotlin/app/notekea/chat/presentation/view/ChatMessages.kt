@@ -235,7 +235,7 @@ private fun AnswerContent(
         )
 
         entry.outcome == TurnOutcome.ACTED ->
-            Quiet(text = replyString(resource = Res.string.chat_acted))
+            Quiet(text = replyString(resource = actedOf(outcome = entry.proposal?.outcome)))
 
         entry.isAnswering &&
             !isWriting &&

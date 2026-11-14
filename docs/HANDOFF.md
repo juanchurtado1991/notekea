@@ -256,7 +256,13 @@ app). **Step 2 is done** (2026-11-14): the
 slots share one context and the engine admits calls by their tokens (`TokenRoom`); `LlmEngine.countTokens` and
 `LlmModelInfo.contextTokens`; `chat/domain/context` holds `ModelProfile` and `ContextBudget`, which the agent and
 `NotesWriter` use in place of their character constants. Gate: 27 of 30 and 7 of 21, as before, 30 s and 42 s a
-task ("Step 2, done" in `docs/agent-loop.md`). Next: step 3 (`Conversation` in the domain, persisted).
+task ("Step 2, done" in `docs/agent-loop.md`). **Step 3 is done** (2026-11-14):
+`chat/domain/conversation` holds `Conversation`, `TurnItem` (call, result, text, proposal with its outcome),
+`ConversationMemory` and `TurnRecord`; `ChatHistoryStore` keeps a `Conversation` (file version 2, version 1 read
+as it is), written from the moment a turn is asked. `ChatMemory` and `WorkRecord` are gone. A turn under way is
+still built in `ChatEntry` and turned into the conversation when kept (`EntryTurns`), until the loop of step 5
+writes its items itself. Gate: 27 of 30 and 7 of 21, as before. Manual case 3.3-15. Next: step 4 (the reading and
+working tools, skills, the vault's instructions).
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

@@ -48,6 +48,8 @@ import app.notekea.resources.chat_action_more
 import app.notekea.resources.chat_action_more_es
 import app.notekea.resources.chat_action_move
 import app.notekea.resources.chat_action_move_es
+import app.notekea.resources.chat_action_not_done
+import app.notekea.resources.chat_action_not_done_es
 import app.notekea.resources.chat_action_notes_from_text
 import app.notekea.resources.chat_action_notes_from_text_es
 import app.notekea.resources.chat_action_open
@@ -76,6 +78,8 @@ import app.notekea.resources.chat_action_trash
 import app.notekea.resources.chat_action_trash_es
 import app.notekea.resources.chat_action_trash_note
 import app.notekea.resources.chat_action_trash_note_es
+import app.notekea.resources.chat_action_unconfirmed
+import app.notekea.resources.chat_action_unconfirmed_es
 import app.notekea.resources.chat_action_undo
 import app.notekea.resources.chat_action_undo_es
 import app.notekea.resources.chat_action_undone
@@ -278,6 +282,8 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_action_done_title to Res.string.chat_action_done_title_es,
     Res.string.chat_action_undone to Res.string.chat_action_undone_es,
     Res.string.chat_action_cancelled to Res.string.chat_action_cancelled_es,
+    Res.string.chat_action_unconfirmed to Res.string.chat_action_unconfirmed_es,
+    Res.string.chat_action_not_done to Res.string.chat_action_not_done_es,
     Res.string.chat_action_confirm to Res.string.chat_action_confirm_es,
     Res.string.chat_action_cancel to Res.string.chat_action_cancel_es,
     Res.string.chat_action_undo to Res.string.chat_action_undo_es,
