@@ -22,6 +22,7 @@ import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConvent
 import app.notekea.tree.domain.ApplyTemplateUseCase
 import app.notekea.tree.domain.CreateFolderUseCase
 import app.notekea.tree.domain.CreateNoteUseCase
+import app.notekea.tree.domain.DuplicateNoteUseCase
 import app.notekea.tree.domain.FakeBookmarkStore
 import app.notekea.tree.domain.FakeFileRevealer
 import app.notekea.tree.domain.FakeFileWatcher
@@ -32,6 +33,7 @@ import app.notekea.tree.domain.FakeTreePreferencesStore
 import app.notekea.tree.domain.FlattenTreeUseCase
 import app.notekea.tree.domain.FollowLinkUseCase
 import app.notekea.tree.domain.GetDailyNoteSettingsUseCase
+import app.notekea.tree.domain.MoveEntryUseCase
 import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import app.notekea.tree.domain.OpenDailyNoteUseCase
 import app.notekea.tree.presentation.model.VaultTreeIntent
@@ -87,7 +89,12 @@ abstract class VaultTreeViewModelTestBase {
             ),
             noteContentStore = contents
         ),
-        vaultSettings = vaultSettings
+        vaultSettings = vaultSettings,
+        duplicateNote = DuplicateNoteUseCase(
+            noteFileOperations = operations,
+            noteContentStore = contents
+        ),
+        moveEntry = MoveEntryUseCase(noteFileOperations = operations)
     )
 
     protected fun dailyNoteTools(): DailyNoteTools = DailyNoteTools(

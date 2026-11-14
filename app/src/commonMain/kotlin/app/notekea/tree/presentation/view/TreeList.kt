@@ -1,5 +1,6 @@
 package app.notekea.tree.presentation.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -20,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -59,6 +62,8 @@ import app.notekea.tree.presentation.model.VaultTreeState
 import org.jetbrains.compose.resources.stringResource
 
 private const val EMPTY_ROWS_BELOW = 2
+private const val DROP_TINT_ALPHA = 0.18f
+private const val DRAGGED_ALPHA = 0.5f
 private const val PREVIEW_HEIGHT_DP = 320
 private const val PREVIEW_WIDTH_DP = 260
 
@@ -100,6 +105,8 @@ internal fun TreeList(
 
     val currentState = rememberUpdatedState(newValue = state)
 
+    val drag = remember { TreeDragState() }
+
     val stateNow = remember<() -> VaultTreeState> {
         { currentState.value }
     }
@@ -139,7 +146,27 @@ internal fun TreeList(
                     val itemModifier =
                         if (LocalReduceMotion.current) Modifier else Modifier.animateItem()
 
-                    Box(modifier = itemModifier) {
+                    val dragModifier = itemModifier
+                        .dropLook(
+                            isTarget = drag.target == row.path,
+                            isDragged = drag.dragged == row.path
+                        )
+                        .treeDrag(
+                            row = row,
+                            rows = { stateNow().rows },
+                            list = listState,
+                            drag = drag,
+                            onDrop = { path, folder ->
+                                onIntent(
+                                    VaultTreeIntent.OnMoveInto(
+                                        path = path,
+                                        folder = folder
+                                    )
+                                )
+                            }
+                        )
+
+                    Box(modifier = dragModifier) {
                         ListedEntry(
                             row = row,
                             state = state,
@@ -155,6 +182,29 @@ internal fun TreeList(
                 }
             }
         }
+    }
+}
+
+// The folder a dragged row would drop into is tinted, and the row dragged fades while it is held.
+@Composable
+private fun Modifier.dropLook(
+    isTarget: Boolean,
+    isDragged: Boolean
+): Modifier {
+    val tint = MaterialTheme
+        .colorScheme
+        .primary
+        .copy(alpha = DROP_TINT_ALPHA)
+
+    return when {
+        isTarget -> background(
+            color = tint,
+            shape = MaterialTheme.shapes.small
+        )
+
+        isDragged -> alpha(alpha = DRAGGED_ALPHA)
+
+        else -> this
     }
 }
 

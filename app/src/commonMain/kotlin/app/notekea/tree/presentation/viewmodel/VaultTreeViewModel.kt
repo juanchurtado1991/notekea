@@ -158,6 +158,14 @@ class VaultTreeViewModel(
                 isFolder = true
             )
 
+            is VaultTreeIntent.OnMoveInto -> renaming.moveInto(
+                path = intent.path,
+                folder = intent.folder,
+                moveEntry = newNotes.moveEntry
+            )
+
+            is VaultTreeIntent.OnDuplicate -> duplicate(intent = intent)
+
             is VaultTreeIntent.OnNewNoteClick -> create(
                 baseName = intent.baseName,
                 isFolder = false
@@ -356,6 +364,25 @@ class VaultTreeViewModel(
             }
 
             if (!isFolder) open(path = (outcome as? Outcome.Success)?.value)
+        }
+    }
+
+    private fun duplicate(intent: VaultTreeIntent.OnDuplicate) {
+        launchGuarded(onError = ::showUnexpectedError) {
+            val outcome = newNotes.duplicateNote(
+                vaultPath = vaultPath,
+                note = intent.path,
+                suffix = intent.suffix
+            )
+
+            // As a new note: it shows in the tree with its name ready to change.
+            updateTree {
+                reduceCreated(
+                    state = it,
+                    outcome = outcome,
+                    isFolder = false
+                )
+            }
         }
     }
 

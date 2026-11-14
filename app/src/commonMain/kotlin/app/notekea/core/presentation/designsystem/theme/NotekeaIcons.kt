@@ -232,6 +232,7 @@ object NotekeaIcons {
     val ChatNotFound: ImageVector get() = Lucide.SearchX
     val ChatClear: ImageVector get() = Lucide.Eraser
     val ChatCopy: ImageVector get() = Lucide.Copy
+    val Duplicate: ImageVector get() = Lucide.Copy
     val ChatCompact: ImageVector get() = Lucide.FoldVertical
     val ChatError: ImageVector get() = Lucide.CircleAlert
     val Study: ImageVector get() = Lucide.GraduationCap

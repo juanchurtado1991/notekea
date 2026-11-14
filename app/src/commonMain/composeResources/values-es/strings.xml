@@ -415,6 +415,8 @@
     <string name="tree_unsaved_kept">No se pudo guardar “%1$s”, así que tu texto está en “%2$s”, a su lado.</string>
     <string name="tree_open_folder">Abrir o cerrar la carpeta</string>
     <string name="tree_rename">Renombrar</string>
+    <string name="tree_duplicate">Duplicar</string>
+    <string name="tree_copy_suffix">copia</string>
     <string name="tree_retry">Reintentar</string>
     <string name="tree_reveal_explorer">Mostrar en el Explorador de archivos</string>
     <string name="tree_reveal_files">Mostrar en Archivos</string>

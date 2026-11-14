@@ -6,6 +6,7 @@ import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.notes.domain.links.LinkUpdateResult
 import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
+import app.notekea.tree.domain.MoveEntryUseCase
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState
@@ -137,6 +138,71 @@ internal class TreeRenaming(
                         named = outcome.value
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * [path] dropped on [folder] in the tree: moved there as a rename moves it, its tabs, bookmarks and the links to
+     * it following; what stops it (a name taken there) is said as the tree's error.
+     */
+    fun moveInto(
+        path: RelativePath,
+        folder: RelativePath,
+        moveEntry: MoveEntryUseCase
+    ) {
+        if (job?.isActive == true) return
+
+        job = host.launch {
+            val outcome = moveEntry(
+                vaultPath = vaultPath,
+                path = path,
+                folder = folder
+            )
+
+            val to = when (outcome) {
+                is Outcome.Failure -> return@launch host.reduce {
+                    it.copy(actionError = outcome.error)
+                }
+
+                is Outcome.Success -> outcome.value
+            }
+
+            if (to == path) return@launch
+
+            host.emit(
+                effect = VaultTreeEffect.EntryRenamed(
+                    from = path,
+                    to = to
+                )
+            )
+
+            host.updateTree {
+                val moved = reduceRenameOutcome(
+                    state = it,
+                    from = path,
+                    outcome = outcome
+                )
+
+                // The folder opens, so what was dropped in it is seen there.
+                moved.copy(expandedFolders = moved.expandedFolders + folder)
+            }
+
+            renames++
+            pending += path to to
+
+            bookmarks.change {
+                it.renamed(
+                    from = path,
+                    to = to
+                )
+            }
+
+            host.launch {
+                updateLinks(
+                    from = path,
+                    to = to
+                )
             }
         }
     }

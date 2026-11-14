@@ -13,6 +13,18 @@ sealed interface VaultTreeIntent {
 
     data object OnDeleteCancel : VaultTreeIntent
 
+    /** A copy of the note [path] is made beside it, named with [suffix] (the localized "copy"). */
+    data class OnDuplicate(
+        val path: RelativePath,
+        val suffix: String
+    ) : VaultTreeIntent
+
+    /** The entry [path] was dragged in the tree and dropped on [folder] (the vault's root for the empty part). */
+    data class OnMoveInto(
+        val path: RelativePath,
+        val folder: RelativePath
+    ) : VaultTreeIntent
+
     data object OnDeleteConfirm : VaultTreeIntent
 
     data class OnDeleteRequest(val path: RelativePath? = null) : VaultTreeIntent

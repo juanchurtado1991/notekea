@@ -415,6 +415,8 @@
     <string name="tree_unsaved_kept">“%1$s” could not be saved, so your text is in “%2$s”, beside it.</string>
     <string name="tree_open_folder">Open or close folder</string>
     <string name="tree_rename">Rename</string>
+    <string name="tree_duplicate">Duplicate</string>
+    <string name="tree_copy_suffix">copy</string>
     <string name="tree_retry">Try again</string>
     <string name="tree_reveal_explorer">Show in File Explorer</string>
     <string name="tree_reveal_files">Show in Files</string>

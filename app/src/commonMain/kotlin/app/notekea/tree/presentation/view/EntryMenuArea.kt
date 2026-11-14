@@ -15,9 +15,11 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.resources.Res
 import app.notekea.resources.tree_bookmark_add
 import app.notekea.resources.tree_bookmark_remove
+import app.notekea.resources.tree_copy_suffix
 import app.notekea.resources.tree_delete_file
 import app.notekea.resources.tree_delete_folder
 import app.notekea.resources.tree_delete_note
+import app.notekea.resources.tree_duplicate
 import app.notekea.resources.tree_rename
 import app.notekea.resources.tree_update_web
 import app.notekea.tree.domain.FolderCard
@@ -143,7 +145,7 @@ private fun editSection(
     val bookmarkLabel =
         if (row.path in state.bookmarks) strings.tree_bookmark_remove else strings.tree_bookmark_add
 
-    return listOf(
+    return listOfNotNull(
         NotekeaMenuItem(
             label = stringResource(resource = bookmarkLabel),
             onClick = { onIntent(BookmarkIntent.OnToggle(path = row.path)) },
@@ -162,11 +164,39 @@ private fun editSection(
                 .renameShortcut
                 .label(operatingSystem = os)
         ),
+        duplicateItem(
+            row = row,
+            onIntent = onIntent
+        ),
         NotekeaMenuItem(
             label = stringResource(resource = revealLabel(operatingSystem = os)),
             onClick = { onIntent(VaultTreeIntent.OnRevealRequest(path = row.path)) },
             icon = NotekeaIcons.Reveal
         )
+    )
+}
+
+// A copy of a note beside it (the developer's request of 2026-11-14); a folder or another file has none.
+@Composable
+private fun duplicateItem(
+    row: TreeRow,
+    onIntent: (VaultTreeIntent) -> Unit
+): NotekeaMenuItem? {
+    val suffix = stringResource(resource = Res.string.tree_copy_suffix)
+    val label = stringResource(resource = Res.string.tree_duplicate)
+    if (row !is TreeRow.Note) return null
+
+    return NotekeaMenuItem(
+        label = label,
+        onClick = {
+            onIntent(
+                VaultTreeIntent.OnDuplicate(
+                    path = row.path,
+                    suffix = suffix
+                )
+            )
+        },
+        icon = NotekeaIcons.Duplicate
     )
 }
 

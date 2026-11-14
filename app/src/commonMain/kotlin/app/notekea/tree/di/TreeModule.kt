@@ -7,9 +7,11 @@ import app.notekea.tree.domain.ApplyTemplateUseCase
 import app.notekea.tree.domain.BookmarkStore
 import app.notekea.tree.domain.CreateFolderUseCase
 import app.notekea.tree.domain.CreateNoteUseCase
+import app.notekea.tree.domain.DuplicateNoteUseCase
 import app.notekea.tree.domain.FlattenTreeUseCase
 import app.notekea.tree.domain.FollowLinkUseCase
 import app.notekea.tree.domain.GetDailyNoteSettingsUseCase
+import app.notekea.tree.domain.MoveEntryUseCase
 import app.notekea.tree.domain.NoteMetadataCache
 import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import app.notekea.tree.domain.OpenDailyNoteUseCase
@@ -53,6 +55,8 @@ val treeModule = module {
     factoryOf(::DailyNoteTools)
     factoryOf(::NewNoteTools)
     factoryOf(::CreateFolderUseCase)
+    factoryOf(::DuplicateNoteUseCase)
+    factoryOf(::MoveEntryUseCase)
 
     factory {
         CreateNoteUseCase(
