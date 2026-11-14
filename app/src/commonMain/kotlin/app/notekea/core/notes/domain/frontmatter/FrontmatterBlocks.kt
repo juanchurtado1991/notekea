@@ -30,7 +30,7 @@ data class FrontmatterBlocks(
         val lines: List<String>,
         val key: String?
     ) {
-        /** What follows the key's colon on its first line, trimmed. */
+        /** What follows the key's colon on its first line, trimmed, without a comment after it. */
         val inlineValue: String
             get() = lines
                 .first()
@@ -39,6 +39,7 @@ data class FrontmatterBlocks(
                     missingDelimiterValue = ""
                 )
                 .trim()
+                .let { YamlValues.withoutComment(text = it) }
 
         /** The lines under the key's line. */
         val continuation: List<String>

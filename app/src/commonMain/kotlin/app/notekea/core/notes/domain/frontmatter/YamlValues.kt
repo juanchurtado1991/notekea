@@ -26,6 +26,35 @@ internal object YamlValues {
         pattern = "\\d{4}-\\d{2}-\\d{2}([Tt ]\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*(Z|[+-]\\d{2}(:?\\d{2})?)?)?"
     )
 
+    /**
+     * [text], a value as written after its key, without the comment that follows it ("draft # for now" is "draft"):
+     * a "#" after a space and outside quotes starts one, as YAML reads it. It stayed in the value, which then was
+     * no number, date or checkbox (the code review of 2026-11-13). A value that begins with "#" is kept whole.
+     */
+    fun withoutComment(text: String): String {
+        var quote: Char? = null
+
+        text.forEachIndexed { index, char ->
+            val isEscaped = index > 0 && text[index - 1] == ESCAPE
+
+            when {
+                quote != null -> if (char == quote && !isEscaped) quote = null
+
+                char in QUOTES -> quote = char
+
+                char == COMMENT_MARK.first() &&
+                    index > 0 &&
+                    text[index - 1].isWhitespace() ->
+                    return text.substring(
+                        startIndex = 0,
+                        endIndex = index
+                    ).trim()
+            }
+        }
+
+        return text
+    }
+
     fun isQuoted(text: String): Boolean =
         text.length >= 2 &&
             text.first() == text.last() &&

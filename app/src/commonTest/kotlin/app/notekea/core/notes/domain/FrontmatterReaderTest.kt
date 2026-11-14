@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
 import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.YamlValues
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -66,6 +67,18 @@ class FrontmatterReaderTest {
                 )
             ),
             actual = reader.read(header = header)
+        )
+    }
+
+    // The code review of 2026-11-13: "rating: 4 # of 5" was the text "4 # of 5", no number.
+    @Test
+    fun `a comment after a value is no part of it, a hash inside quotes or at its start is`() {
+        val values =
+            listOf("4 # of 5", "true   # for now", "\"Issue #12\" # the ticket", "#inbox", "C#")
+
+        assertEquals(
+            expected = listOf("4", "true", "\"Issue #12\"", "#inbox", "C#"),
+            actual = values.map { YamlValues.withoutComment(text = it) }
         )
     }
 
