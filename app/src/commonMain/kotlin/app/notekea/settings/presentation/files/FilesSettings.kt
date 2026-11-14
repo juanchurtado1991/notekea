@@ -3,6 +3,7 @@ package app.notekea.settings.presentation.files
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanner
@@ -39,6 +40,9 @@ internal fun FilesSettings(
     spotlight: SettingsSpotlight?,
     modifier: Modifier = Modifier
 ) {
+    // Read again each time the page shows: Obsidian may have changed these since, and a save writes them whole.
+    LaunchedEffect(Unit) { onIntent(FilesSettingsIntent.OnShown) }
+
     NotekeaSettingsPage(
         title = stringResource(resource = Res.string.settings_section_files),
         modifier = modifier

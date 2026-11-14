@@ -3,6 +3,7 @@ package app.notekea.core.presentation.designsystem.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
 import app.notekea.core.presentation.designsystem.theme.palette.WorkspaceBluePalette
 
 /** The light and dark schemes of the Workspace Blue theme, with the same roles as the app's theme roles. */
@@ -12,6 +13,17 @@ object WorkspaceBlueSchemes {
         onPrimary = WorkspaceBluePalette.OnColorDark,
         primaryContainer = WorkspaceBluePalette.PrimaryContainerDark,
         onPrimaryContainer = WorkspaceBluePalette.InkDark,
+        secondary = WorkspaceBluePalette.PrimaryDark,
+        onSecondary = WorkspaceBluePalette.OnColorDark,
+        secondaryContainer = WorkspaceBluePalette.SurfaceVariantDark,
+        onSecondaryContainer = WorkspaceBluePalette.InkDark,
+        // The containers the components ask for by name: without them Material's own purple-grey showed.
+        surfaceContainerLowest = WorkspaceBluePalette.BackgroundDark,
+        surfaceContainerLow = WorkspaceBluePalette.SurfaceDark,
+        surfaceContainer = WorkspaceBluePalette.SidebarDark,
+        surfaceContainerHigh = WorkspaceBluePalette.SurfaceVariantDark,
+        surfaceContainerHighest = WorkspaceBluePalette.SurfaceVariantDark,
+        scrim = Color.Black,
         tertiary = WorkspaceBluePalette.AccentDark,
         onTertiary = WorkspaceBluePalette.OnColorDark,
         background = WorkspaceBluePalette.BackgroundDark,
@@ -33,6 +45,17 @@ object WorkspaceBlueSchemes {
         onPrimary = WorkspaceBluePalette.OnColorLight,
         primaryContainer = WorkspaceBluePalette.PrimaryContainerLight,
         onPrimaryContainer = WorkspaceBluePalette.OnPrimaryContainerLight,
+        secondary = WorkspaceBluePalette.PrimaryLight,
+        onSecondary = WorkspaceBluePalette.OnColorLight,
+        secondaryContainer = WorkspaceBluePalette.SurfaceVariantLight,
+        onSecondaryContainer = WorkspaceBluePalette.InkLight,
+        // The containers the components ask for by name: without them Material's own purple-grey showed.
+        surfaceContainerLowest = WorkspaceBluePalette.BackgroundLight,
+        surfaceContainerLow = WorkspaceBluePalette.SurfaceLight,
+        surfaceContainer = WorkspaceBluePalette.SidebarLight,
+        surfaceContainerHigh = WorkspaceBluePalette.SurfaceVariantLight,
+        surfaceContainerHighest = WorkspaceBluePalette.SurfaceVariantLight,
+        scrim = Color.Black,
         tertiary = WorkspaceBluePalette.AccentLight,
         onTertiary = WorkspaceBluePalette.OnColorDark,
         background = WorkspaceBluePalette.BackgroundLight,

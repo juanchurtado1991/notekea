@@ -41,6 +41,10 @@ class FilesSettingsViewModel(
 
     override fun handleIntent(intent: FilesSettingsIntent) {
         when (intent) {
+            FilesSettingsIntent.OnShown -> vaultPath?.let { vault ->
+                launchGuarded(onError = ::logError) { load(vault = vault) }
+            }
+
             is FilesSettingsIntent.OnAttachmentsChange -> change(field = Field.ATTACHMENTS) {
                 it.copy(attachments = intent.folder)
             }

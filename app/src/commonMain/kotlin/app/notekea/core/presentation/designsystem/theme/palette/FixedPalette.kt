@@ -18,9 +18,11 @@ internal object FixedPalette {
     val FilePdfLight = Color(0xFFC5362B)
     val OnImage = Color(0xFFFFFFFF)
     val SuccessDark = Color(0xFF5FCB8E)
-    val SuccessLight = Color(0xFF1E8A4C)
+
+    // Dark enough on white to read as text (4.5:1) and as an icon (3:1): the code review of 2026-11-13.
+    val SuccessLight = Color(0xFF1A7F45)
     val WarningDark = Color(0xFFF5C542)
-    val WarningLight = Color(0xFFD99A00)
+    val WarningLight = Color(0xFF9A6700)
     val PrimaryContainerLight = Color(0xFFDCE7FD)
     val PrimaryLight = Color(0xFF1F5BD8)
 }

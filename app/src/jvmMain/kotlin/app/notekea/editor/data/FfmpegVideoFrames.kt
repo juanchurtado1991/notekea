@@ -35,8 +35,15 @@ internal class FfmpegVideoFrames(
 
             try {
                 val bytes = process.inputStream.readBytes()
-                process.waitFor(WAIT_SECONDS, TimeUnit.SECONDS)
-                bytes.takeIf { it.isNotEmpty() }
+                val hasEnded = process.waitFor(WAIT_SECONDS, TimeUnit.SECONDS)
+
+                // A picture FFmpeg did not finish is half a picture, kept for good as the video's poster.
+                val isWhole =
+                    hasEnded &&
+                        process.exitValue() == 0 &&
+                        bytes.isNotEmpty()
+
+                bytes.takeIf { isWhole }
             } finally {
                 // Stopped while it read (the note closed), FFmpeg is still running: end it here.
                 if (process.isAlive) process.destroyForcibly()

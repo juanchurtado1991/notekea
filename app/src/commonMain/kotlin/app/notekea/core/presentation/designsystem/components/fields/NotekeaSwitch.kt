@@ -67,14 +67,15 @@ fun NotekeaSwitch(
                 color = track,
                 shape = CircleShape
             )
+            // Before what takes the focus, which it then sees: after it the ring never showed.
+            .focusBorder(
+                color = colors.primary,
+                shape = CircleShape
+            )
             .toggleable(
                 value = isOn,
                 role = Role.Switch,
                 onValueChange = onToggle
-            )
-            .focusBorder(
-                color = colors.primary,
-                shape = CircleShape
             )
             .semantics { contentDescription = label }
             .padding(all = THUMB_INSET_DP.dp),

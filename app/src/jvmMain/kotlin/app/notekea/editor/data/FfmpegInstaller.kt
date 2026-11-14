@@ -9,6 +9,8 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -40,10 +42,29 @@ internal class FfmpegInstaller(
         }
     }
 
+    private val installing = Mutex()
+
     /** The FFmpeg program, installed first when needed with its progress on [onDownload]; null when it cannot be. */
     suspend fun program(onDownload: suspend (Float) -> Unit): String? {
         val tool = tool ?: return null
         val program = installed.resolve(tool.program)
+        if (Files.isRegularFile(installed.resolve(DONE))) return program.toString()
+
+        // A poster and a compression asking at once would both download it and unpack over each other.
+        return installing.withLock {
+            installedNow(
+                tool = tool,
+                program = program,
+                onDownload = onDownload
+            )
+        }
+    }
+
+    private suspend fun installedNow(
+        tool: FfmpegTool,
+        program: Path,
+        onDownload: suspend (Float) -> Unit
+    ): String? {
         if (Files.isRegularFile(installed.resolve(DONE))) return program.toString()
 
         return try {

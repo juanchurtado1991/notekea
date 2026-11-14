@@ -15,6 +15,8 @@ data class DateFormatChoice(
         val FORMATS =
             listOf("YYYY-MM-DD", "DD-MM-YYYY", "MM-DD-YYYY", "YYYY.MM.DD", "DD.MM.YYYY", "YYYYMMDD")
         private const val TWO = 2
+        private const val MONTHS = 12
+        private const val SAMPLE_DAY = 25
         private const val FOUR = 4
 
         /** [FORMATS] as [today] is written in each, and [current] too when it is none of them (kept as it is). */
@@ -27,10 +29,13 @@ data class DateFormatChoice(
             .map { format ->
                 val isKnown = format in FORMATS
 
+                // A day over 12 tells "25-11-2026" from "11-25-2026"; 03-04 and 04-03 read alike.
+                val sample = if (today.day > MONTHS) today else today.copy(day = SAMPLE_DAY)
+
                 val example = if (isKnown) {
                     written(
                         format = format,
-                        date = today
+                        date = sample
                     )
                 } else {
                     format

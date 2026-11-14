@@ -23,6 +23,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -49,6 +51,7 @@ internal class EditorFiles(
     )
     private var attachmentsJob: Job? = null
     private var compression: Job? = null
+    private val compressing = Mutex()
 
     fun onIntent(intent: EditorIntent.Attachment) {
         when (intent) {
@@ -284,6 +287,20 @@ internal class EditorFiles(
         )
 
         if (!isOver) return source
+
+        // One video at a time: two at once ran two FFmpegs, and Cancel stopped only the newest.
+        return compressing.withLock {
+            compressed(
+                source = source,
+                name = name
+            )
+        }
+    }
+
+    private suspend fun compressed(
+        source: AttachmentSource.File,
+        name: String
+    ): AttachmentSource? {
         var small: AttachmentSource? = null
 
         host.reduce {
@@ -364,11 +381,17 @@ internal class EditorFiles(
     private fun locate(embed: Embed) {
         val note = host.state.value.notePath ?: return
 
-        val written = host
+        val text = host
             .buffer
             .text
             .toString()
-            .substring(range = embed.range)
+
+        // An embed inside an embedded note is at a place of that note's text, not of this one: past its end it
+        // stopped the editor, and within it another text would be replaced (the code review of 2026-11-13).
+        val isHere = embed.range.first >= 0 && embed.range.last < text.length
+        if (!isHere) return
+        val written = text.substring(range = embed.range)
+        if (!written.startsWith(prefix = "![")) return
 
         host.launch {
             val picked = tools.attachmentPicker.pickFile() ?: return@launch

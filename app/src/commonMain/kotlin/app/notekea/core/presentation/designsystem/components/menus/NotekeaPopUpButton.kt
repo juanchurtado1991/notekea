@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
@@ -57,6 +59,10 @@ fun NotekeaPopUpButton(
         Surface(
             modifier = Modifier
                 .heightIn(min = NotekeaDimensions.PushButtonHeight)
+                .focusBorder(
+                    color = colors.primary,
+                    shape = shape
+                )
                 .clip(shape = shape)
                 .clickable(
                     onClickLabel = label,
@@ -78,10 +84,17 @@ fun NotekeaPopUpButton(
                 horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // A long folder's path ends in "…" rather than pushing the arrows out of the button.
                 Text(
                     text = choice,
+                    modifier = Modifier.weight(
+                        weight = 1f,
+                        fill = false
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onSurface
+                    color = colors.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 PopUpArrows()
