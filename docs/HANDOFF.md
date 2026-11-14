@@ -205,8 +205,10 @@ figure check catches figures the notes lack, not a figure put beside the wrong t
 
 #142 is merged. The next work is the chat rebuilt as one loop with tools, whose design the developer approved on
 2026-11-14 after two reviews: `docs/agent-loop.md` holds it, with its eight steps and the gate of each (the evaluation
-sets, with the real model, and time). Step 0 is under way: fixtures, a wider agent evaluation and four experiments
-whose results are written into that document before anything is built.
+sets, with the real model, and time). **Step 0 is done** (2026-11-14): the experiments, the fixtures and the wider agent evaluation, each written into
+that document with what it changes in the design. **Next is step 1** (`ChatTool`, `ToolResult` and the registry, with
+today's look-ups as tools behind `AgentTaskUseCase`; nothing visible changes), on a step branch from
+`feature/one-agent-loop`, after the developer has read step 0's results. Nothing of step 1 is started.
 
 **Where step 0 stands (2026-11-14):** the five experiments are done and written in `docs/agent-loop.md` ("Step 0,
 what was measured"), each with what it changes in the design:
@@ -223,6 +225,15 @@ what was measured"), each with what it changes in the design:
 - **Fixtures:** `smoke-data/eval/fixtures/actions-medium.json`, the model's raw replies to the 126 requests,
   replayed in `check` by `ActionFixturesTest`; `ActionFixturesChatModelTest` records them again when the planner's
   prompt changes on purpose.
+- **The wider agent evaluation:** 21 tasks over `smoke-data/vaults/Agent Eval` (`AgentWideCases`: documents, long
+  notes, requests that can be read two ways, several notes). Today's agent does 7 of them (33 %; none of the five
+  ambiguous ones, since it cannot ask): the mark the loop is measured against from step 4. Run it with
+  `./gradlew :app:chatModelTest -PchatSize=medium --tests '*AgentEvalChatModelTest.agent mode is measured*'`
+  (the vault is read as committed).
+
+**For the developer to decide before step 1** (the report of 2026-11-14 says why): the engine sharing its context
+among the slots and admitting calls by tokens (step 2); ten tools at most in a toolset, so *write* and *organize*
+are split; no Koog.
 
 **Measuring on a Mac left alone:** it falls asleep in the middle of a run (a 3-minute test took 20). Run model
 tests as `caffeinate -is ./gradlew …`; `RawChatModel` (the test helper of these experiments, the model as llama.cpp

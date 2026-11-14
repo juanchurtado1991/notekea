@@ -243,3 +243,6 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   shared context, with the engine to admit calls by their tokens). Next: the model's own tool-calling format
   against our JSON; a grammar per tool against the flat schema; how many tools the model chooses well among;
   Koog's documentation against a loop of our own; then the fixtures and the wider agent evaluation.
+- **2026-11-14, step 0 under way:** the handoff listed the five experiments' results as they came (the context, the
+  format of a tool call, how many tools, Koog) and the fixtures; all of it is in `docs/agent-loop.md`, "Step 0,
+  what was measured".

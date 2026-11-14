@@ -341,6 +341,36 @@ model's reply and the plan (the reader, the 74 regexes, the checks) is held in p
 steps 1 to 6 need while they move that work into tools and a router. `ActionFixturesChatModelTest` records them
 again (five minutes) when the planner's prompt changes on purpose; a recording shows as a diff a request a line.
 
+### The wider agent evaluation — today's agent on it, measured 2026-11-14, Medium
+
+`AgentWideCases`: 21 tasks over a vault made for them (`smoke-data/vaults/Agent Eval`: a 9,400-character service
+agreement with annexes of tables, 8,600 characters of reading notes on eight studies, and two budgets, two supplier
+meetings and two projects a request can mean either of). Each task names the tools of this design it should use,
+how the turn ends (an answer, a card, a question back) and what the answer or the card must hold; `AgentWideCasesTest`
+checks in `check` that every such value is in the vault. Today's agent on them
+(`AgentEvalChatModelTest`, "agent mode is measured on…", `build/reports/agent-wide-medium.md`):
+
+| Kind of task | Right today | What goes wrong |
+|---|---|---|
+| A document (8) | 3 | The answer comes from the document's start: a clause in the middle, a table in an annex or a sum over it is missed |
+| A long note (4) | 1 | The same: the last study, or a count over all eight, is not reached |
+| A request that can be read two ways (5) | 0 | It never asks: it picks one budget, one meeting, one project, or stops |
+| Several notes (4) | 3 | A difference between two notes' figures is not worked out |
+| **All (21)** | **7 (33 %)** | 39 s a task on average, 140 s at most |
+
+This is the mark steps 4 to 7 are measured against, beside the 30 tasks of 4.7 (83 %), which must not fall. Each
+kind points at its piece of the design: `outline`, `read` by section and `digest` with the wider context for the
+first two, `ask_user` for the third, `calculate` for the sums. Limits of the set, to know when reading its
+numbers: a task that writes a note is graded on the card naming it, not yet on what the note says (that is
+`TurnVerifier`'s backed-sentence check, step 7); the tools used are compared only once the loop exists (step 5);
+and the agreement is Markdown, where the smoke of 2026-11-14 used a PDF pasted in a note.
+
+### Step 0, closed — what is not measured
+
+Everything above is the Medium model on Apple silicon (Metal). Not measured: the shared context on Vulkan and on
+the CPU (step 2 measures it where it changes the engine); the Small and Large models in the tool formats (their
+profiles are measured when the loop reaches them, step 5 and 6); the model's reasoning turned on.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
