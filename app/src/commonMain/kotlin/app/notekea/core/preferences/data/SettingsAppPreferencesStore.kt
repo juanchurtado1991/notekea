@@ -68,6 +68,11 @@ class SettingsAppPreferencesStore(
                 key = WEB_UPDATE_KEY,
                 value = preferences.webUpdate.id
             )
+
+            settings.putBoolean(
+                key = CHAT_LOOP_KEY,
+                value = preferences.chatLoop
+            )
         }
 
         current.value = preferences
@@ -92,12 +97,17 @@ class SettingsAppPreferencesStore(
                 key = SEEN_WELCOME_KEY,
                 defaultValue = false
             ),
-            webUpdate = WebUpdateEvery.fromId(id = settings.getStringOrNull(key = WEB_UPDATE_KEY))
+            webUpdate = WebUpdateEvery.fromId(id = settings.getStringOrNull(key = WEB_UPDATE_KEY)),
+            chatLoop = settings.getBoolean(
+                key = CHAT_LOOP_KEY,
+                defaultValue = false
+            )
         )
     }
 
     private companion object {
         const val LANGUAGE_KEY = "app.language"
+        const val CHAT_LOOP_KEY = "chat.loop"
         const val OPENS_LAST_VAULT_KEY = "app.opens_last_vault"
         const val TEXT_SIZE_KEY = "app.editor_text_size"
         const val LINE_WIDTH_KEY = "app.editor_line_width"

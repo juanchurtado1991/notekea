@@ -5,6 +5,7 @@ import app.notekea.chat.domain.TurnOutcome
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.AgentTaskUseCase
 import app.notekea.chat.domain.language.SpokenLanguage
+import app.notekea.chat.domain.loop.ChatLoop
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.chat.domain.prompt.AnswerPrompt
@@ -25,7 +26,8 @@ internal class ChatAgent(
     private val vaultPath: String,
     private val agentTask: AgentTaskUseCase,
     private val actions: ChatActions,
-    private val host: ChatHost
+    private val host: ChatHost,
+    private val loop: ChatLoop?
 ) {
     /** The entry handed to the agent, its end to come: asked of agent mode, or a question Auto could not answer. */
     suspend fun takeOver(
@@ -69,14 +71,15 @@ internal class ChatAgent(
             )
         )
 
-        agentTask(
-            task = task,
-            vaultPath = vaultPath,
-            notes = notes,
-            context = context,
-            openNote = openNote,
-            planned = planned
-        )
+        val chosen = loop?.takeIf { it.isOn() }
+
+        val steps = if (chosen != null) {
+            chosen.runTurn(task, vaultPath, notes, context, openNote)
+        } else {
+            agentTask(task, vaultPath, notes, context, openNote, planned)
+        }
+
+        steps
             .collect { step ->
                 host.update(id) { entry -> entry.after(step = step) }
             }

@@ -152,7 +152,7 @@ object AgentEvalCases {
         )
     )
 
-    private fun tags(
+    internal fun tags(
         task: String,
         tag: String,
         names: Set<String>
@@ -164,7 +164,7 @@ object AgentEvalCases {
         if (tagged == names) null else "tagged $tagged with $tag, not $names: ${shown(end)}"
     }
 
-    private fun property(
+    internal fun property(
         task: String,
         property: String,
         note: String? = null,
@@ -177,7 +177,7 @@ object AgentEvalCases {
         if (set == names) null else "set $property on $set, not $names: ${shown(end)}"
     }
 
-    private fun writes(task: String, title: String) = AgentEvalCase(task = task) { end ->
+    internal fun writes(task: String, title: String) = AgentEvalCase(task = task) { end ->
         val steps = (end as? AgentStep.Proposed)?.steps.orEmpty()
 
         val written = steps.firstOrNull {
@@ -191,13 +191,13 @@ object AgentEvalCases {
         }
     }
 
-    private fun task(task: String, note: String) = AgentEvalCase(task = task) { end ->
+    internal fun task(task: String, note: String) = AgentEvalCase(task = task) { end ->
         val isAdded = note in namesIn(end, ActionKind.ADD_TASK)
 
         if (isAdded) null else "no task added to $note: ${shown(end)}"
     }
 
-    private fun links(task: String, note: String) = AgentEvalCase(task = task) { end ->
+    internal fun links(task: String, note: String) = AgentEvalCase(task = task) { end ->
         val steps = (end as? AgentStep.Proposed)?.steps.orEmpty()
 
         val isLinked = steps.any { it.kind == ActionKind.LINK_NOTES && note in it.names() } ||
@@ -210,7 +210,7 @@ object AgentEvalCases {
         if (isLinked) null else "$note links nothing: ${shown(end)}"
     }
 
-    private fun moves(
+    internal fun moves(
         task: String,
         note: String? = null,
         names: Set<String> = setOfNotNull(note)
@@ -220,7 +220,7 @@ object AgentEvalCases {
         if (moved == names) null else "moved $moved, not $names: ${shown(end)}"
     }
 
-    private fun says(task: String, words: List<String>) = AgentEvalCase(task = task) { end ->
+    internal fun says(task: String, words: List<String>) = AgentEvalCase(task = task) { end ->
         val summary = (end as? AgentStep.Finished)?.summary
         val missing = words.filterNot { summary.orEmpty().contains(it, ignoreCase = true) }
 

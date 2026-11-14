@@ -269,6 +269,9 @@ count, date; `tool/work`: plan, note, ask_user, with `TurnWork` in `ToolContext`
 21 and 29 of 30 (the developer's marks: 19 and more than 27), at two to three times today's time. Not in the app
 yet. Next in step 5: fewer calls a task, the loop in agent mode behind a setting, ask_user's options as buttons,
 `write_note` by sections, `edit_note`. Measure a few tasks with `-PchatTasks="words,of,tasks"`.
+The loop is in the app behind Settings → General → "Agent mode with the new loop" (`AppPreferences.chatLoop`,
+`ChatLoop`), with ask_user's options as buttons (`ChatAskedOptions`); manual case 4.7-08. 150 held-out tasks
+(`AgentHeldOutCases`, `AgentWideHeldOut*`) measure both paths; half may be used to tune if the loop falls short.
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

@@ -544,6 +544,13 @@ and the home renovation's notes (it tags the note `Home` too). **Time is the cos
 from more calls (11 and 7 on average, 30 at most). Bringing it down is the next work of this step, with the loop
 wired into the app behind a setting, ask_user's answers as buttons, `write_note` by sections and `edit_note`.
 
+### Step 5, the loop in the app and the held-out tasks — 2026-11-14
+
+The loop is reached from agent mode when Settings → General turns it on (`ChatLoop`); a question back shows its
+options as buttons (`ChatAskedOptions`), the one chosen sent as the next message. 150 tasks written after the loop
+was tuned, by agents that had not seen it, measure it on what it was not tuned on: 70 over the Sample Vault
+(`AgentHeldOutCases`) and 80 over 25 new notes of `Agent Eval` (`AgentWideHeldOutCases`). HELD_OUT_NUMBERS
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
@@ -559,6 +566,10 @@ wired into the app behind a setting, ask_user's answers as buttons, `write_note`
 
 - **The marks the loop must reach before it takes over** (2026-11-14): at least 19 of the 21 wider tasks, and
   more than today's 27 of agent mode's 30.
+- **Accuracy before time** (2026-11-14): the loop replaces today's path in step 6 when it is right more often,
+  even at two to three times the time; the time is brought down afterwards.
+- **The held-out tasks** (2026-11-14): the ~150 tasks written after the loop was tuned only measure it. If it
+  falls short on them, half may be used to tune and the other half stays unseen, to keep the final figure honest.
 - **The ten-tool limit of a toolset goes** (2026-11-14, on seeing step 5's first measures): "hagamos lo que
   funcione mejor; si más herramientas funciona mejor, que así sea". A toolset holds what its work needs, and the
   evaluation sets decide its size.

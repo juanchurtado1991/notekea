@@ -150,6 +150,39 @@ class AgentEvalChatModelTest {
             Unit
         }
 
+    // The held-out tasks (docs/agent-loop.md, step 5): never looked at while tuning the loop, so they say whether
+    // what was tuned holds on tasks it was not tuned on. Today's agent and the loop are measured on the same ones.
+    @Test
+    fun `today's agent is measured on the held-out tasks`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        measured(VAULT, AgentHeldOutCases.all, "agent-heldout")
+
+        measured(
+            AgentWideCases.VAULT,
+            AgentWideHeldOutCases.all.map { it.forToday() },
+            "agent-wide-heldout"
+        )
+
+        Unit
+    }
+
+    @Test
+    fun `the one loop is measured on the held-out tasks`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        measured(VAULT, AgentHeldOutCases.all, "loop-heldout", isLoop = true)
+
+        measured(
+            vault = AgentWideCases.VAULT,
+            all = AgentWideHeldOutCases.all.map { it.forLoop() },
+            name = "loop-wide-heldout",
+            isLoop = true
+        )
+
+        Unit
+    }
+
     // The one loop on agent mode's 30 tasks: it may not do worse than today's agent to take its place (step 6).
     @Test
     fun `the one loop is measured on the tasks of agent mode`() = runBlocking {

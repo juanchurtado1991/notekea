@@ -47,7 +47,7 @@ class SmokeDataTest {
             EMPTY to 0,
             SAMPLE to 40,
             GHOST to 371,
-            AGENT to 9
+            AGENT to 33
         )
     }
 }

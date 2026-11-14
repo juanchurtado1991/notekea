@@ -12,6 +12,7 @@ import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.help.HelpGuide
+import app.notekea.chat.domain.loop.ChatLoop
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
@@ -47,7 +48,8 @@ internal fun chatViewModel(
     guide: HelpGuide = HelpGuide(topics = emptyList()),
     clock: Clock = Clock.System,
     clipper: WebPageClipper? = null,
-    sourceSites: SourceSites? = null
+    sourceSites: SourceSites? = null,
+    loop: ChatLoop? = null
 ): ChatViewModel {
     val cache = NoteTextCache(
         contentStore = store,
@@ -120,6 +122,7 @@ internal fun chatViewModel(
         sources = ChatSources(
             answerFromPages = AnswerFromPagesUseCase(llmEngine = engine),
             sourceSites = sourceSites
-        )
+        ),
+        loop = loop
     )
 }

@@ -1,9 +1,9 @@
 package app.notekea.core.preferences.domain
 
 /**
- * Settings → General and Editor (5.2): the [language], whether the last vault opens at startup ([opensLastVault]),
- * the note's [textSize] (points) and [lineWidth], whether the first-run welcome was seen ([hasSeenWelcome]),
- * and how often the web sources are updated on their own ([webUpdate]).
+ * Settings → General and Editor (5.2): the [language], the last vault at startup, the note's [textSize] and
+ * [lineWidth], whether the welcome was seen, how often the web sources are updated ([webUpdate]), and whether agent
+ * mode works with the one loop ([chatLoop], a preview until it replaces today's agent: `docs/agent-loop.md`).
  */
 data class AppPreferences(
     val language: AppLanguage = AppLanguage.SYSTEM,
@@ -11,7 +11,8 @@ data class AppPreferences(
     val textSize: Int = DEFAULT_TEXT_SIZE,
     val lineWidth: LineWidth = LineWidth.WIDE,
     val hasSeenWelcome: Boolean = false,
-    val webUpdate: WebUpdateEvery = WebUpdateEvery.NEVER
+    val webUpdate: WebUpdateEvery = WebUpdateEvery.NEVER,
+    val chatLoop: Boolean = false
 ) {
     companion object {
         const val DEFAULT_TEXT_SIZE = 16
