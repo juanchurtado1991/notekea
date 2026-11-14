@@ -62,6 +62,10 @@ internal class NoteWriter(
     }
 
     suspend fun createFolder(folder: RelativePath): Outcome<Unit, ActionProblem> {
+        // A folder named "../.." would be made outside the vault.
+        val outside = ActionProblem.UnknownFolder(folder.value)
+        if (!folder.isInside) return Outcome.Failure(error = outside)
+
         val isNew = !noteFileOperations.exists(
             vaultPath = vaultPath,
             path = folder
@@ -81,6 +85,8 @@ internal class NoteWriter(
         path: RelativePath,
         text: String
     ): Outcome<Unit, ActionProblem> {
+        if (!path.isInside) return Outcome.Failure(error = ActionProblem.UnknownFolder(path.value))
+
         path
             .parent
             ?.takeUnless { it.isRoot }

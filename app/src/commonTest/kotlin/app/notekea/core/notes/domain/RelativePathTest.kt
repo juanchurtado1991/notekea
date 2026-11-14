@@ -64,4 +64,16 @@ class RelativePathTest {
             )
         )
     }
+
+    // The code review of 2026-11-13: a note the chat was asked to create at "../../x" was written outside the vault.
+    @Test
+    fun `a path that climbs, starts at the disk's root or names a drive is not inside the vault`() {
+        val paths =
+            listOf("Books/Dune.md", "", "../secrets.md", "Books/../../x.md", "/etc/hosts", "C:/x.md", "a\\..\\b")
+
+        assertEquals(
+            expected = listOf(true, true, false, false, false, false, false),
+            actual = paths.map { RelativePath(value = it).isInside }
+        )
+    }
 }

@@ -17,6 +17,24 @@ value class RelativePath(val value: String) {
     val isRoot: Boolean
         get() = value.isEmpty()
 
+    /**
+     * False for a path that would leave the vault it is relative to: one that climbs ("..", "."), starts at the
+     * disk's root, names a drive or holds an empty segment. What writes a path made of words a model or a page
+     * wrote checks it first (the code review of 2026-11-13).
+     */
+    val isInside: Boolean
+        get() {
+            val segments = value.split(SEPARATOR, "\\")
+
+            val isClimbing = segments.any {
+                it == ".." ||
+                    it == "." ||
+                    it.isEmpty()
+            }
+
+            return isRoot || (!isClimbing && ':' !in segments.first())
+        }
+
     /** The last segment: the file or folder name as it is on disk. */
     val name: String
         get() = value.substringAfterLast(delimiter = SEPARATOR)

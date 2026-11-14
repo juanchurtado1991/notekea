@@ -271,6 +271,8 @@ class ChatViewModel(
 
     /** A request offered by a help answer: asked of the whole vault, or left in the field to finish its "…". */
     private fun offered(request: String) {
+        // A button of an older turn clicked while one is answering starts no second turn beside it.
+        if (state.value.isAnswering) return
         if (UNFINISHED in request) return reduce { it.copy(question = request) }
 
         ask(

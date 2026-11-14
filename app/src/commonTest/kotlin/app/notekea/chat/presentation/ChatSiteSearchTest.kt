@@ -163,4 +163,32 @@ class ChatSiteSearchTest {
                 )
             )
         }
+
+    // The code review of 2026-11-13: a suggestion or a question's button clicked mid-answer ran two turns at once.
+    @Test
+    fun `a suggested question clicked while a turn is answering starts no second turn`() =
+        runTest(dispatcher) {
+            val viewModel = chatViewModel(
+                engine = engine,
+                store = FakeNoteContentStore(),
+                index = FakeVectorIndex(),
+                embedder = FakeTextEmbedder(),
+                runner = FakeActionRunner(),
+                history = FakeChatHistoryStore(),
+                clipboard = FakeTextClipboard()
+            )
+
+            send(viewModel, ChatIntent.OnIndexChange(isReady = true))
+            send(viewModel, ChatIntent.OnQuestionChange(text = "how do I open a store?"))
+            viewModel.onIntent(intent = ChatIntent.OnSend)
+            viewModel.onIntent(intent = ChatIntent.OnFollowUp(text = "Tell me more"))
+            val during = viewModel.state.value.entries.size
+            advanceUntilIdle()
+            send(viewModel, ChatIntent.OnFollowUp(text = "Tell me more"))
+
+            assertEquals(
+                expected = listOf(1, 2),
+                actual = listOf(during, viewModel.state.value.entries.size)
+            )
+        }
 }
