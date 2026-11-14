@@ -74,7 +74,15 @@ class ObsidianVaultSettingsWriter(
                     )
                 }
 
-            fileSystem.write(file = file) { writeUtf8(string = after) }
+            // Written whole beside it, then put in its place: a crash half way never leaves Obsidian a cut file.
+            val whole = file.parent!! / "${file.name}$TEMPORARY"
+            fileSystem.write(file = whole) { writeUtf8(string = after) }
+
+            fileSystem.atomicMove(
+                source = whole,
+                target = file
+            )
+
             Outcome.Success(value = Unit)
         } catch (_: IOException) {
             Outcome.Failure(error = NotesError.OperationFailed(path = "$SETTINGS_FOLDER/$fileName"))
@@ -82,6 +90,7 @@ class ObsidianVaultSettingsWriter(
     }
 
     private companion object {
+        private const val TEMPORARY = ".notekea-tmp"
         const val SETTINGS_FOLDER = ".obsidian"
         const val APP_FILE = "app.json"
         const val DAILY_NOTES_FILE = "daily-notes.json"

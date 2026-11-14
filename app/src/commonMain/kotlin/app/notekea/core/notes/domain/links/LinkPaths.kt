@@ -4,13 +4,23 @@ import app.notekea.core.notes.domain.RelativePath
 
 /*
  * Path arithmetic for Markdown links: decoding and encoding their targets, resolving them from a folder ("../" and
- * "./" included) and writing a path relative to a folder. Obsidian encodes only spaces in Markdown links (`%20`), so
- * that is all that is encoded here.
+ * "./" included) and writing a path relative to a folder. Obsidian encodes spaces in Markdown links (`%20`); what
+ * would break a link's target (`#`, parentheses, `%`) is encoded too.
  */
 
 private const val CURRENT = "."
 private const val ENCODED_BYTE_LENGTH = 3
 private const val ENCODED_SPACE = "%20"
+
+// What would end a Markdown link's target early or be read as part of it: "%" first, so the others' own "%"
+// is not encoded again. A note renamed "C# (draft)" broke every link to it (the code review of 2026-11-13).
+private val ENCODED = linkedMapOf(
+    "%" to "%25",
+    " " to ENCODED_SPACE,
+    "#" to "%23",
+    "(" to "%28",
+    ")" to "%29"
+)
 private const val HEX_RADIX = 16
 private const val PARENT = ".."
 private const val SPACE = " "
@@ -32,10 +42,14 @@ fun percentDecoded(target: String): String = PERCENT_RUN
             .decodeToString()
     }
 
-fun spacesEncoded(target: String): String = target.replace(
-    oldValue = SPACE,
-    newValue = ENCODED_SPACE
-)
+fun spacesEncoded(target: String): String = ENCODED
+    .entries
+    .fold(initial = target) { text, (plain, encoded) ->
+        text.replace(
+            oldValue = plain,
+            newValue = encoded
+        )
+    }
 
 /** [target] read from [folder], or null when it climbs above the vault. */
 fun resolvedFrom(

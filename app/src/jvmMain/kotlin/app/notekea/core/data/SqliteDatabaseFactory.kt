@@ -44,6 +44,19 @@ class SqliteDatabaseFactory(private val appDataDirectory: String) {
     private fun openOrRecreate(file: Path): SqlDriver = try {
         open(url = URL_PREFIX + file)
     } catch (exception: SQLException) {
+        // Only a file that is no database any more is made again: one another Notekea holds open, or a full
+        // disk, would otherwise cost the cache every time (the code review of 2026-11-13).
+        val isBroken = BROKEN.any {
+            exception
+                .message
+                .orEmpty()
+                .contains(
+                    other = it,
+                    ignoreCase = true
+                )
+        }
+
+        if (!isBroken) throw exception
         logger.w(throwable = exception) { RECREATE_MESSAGE }
         Files.deleteIfExists(file)
         open(url = URL_PREFIX + file)
@@ -51,6 +64,8 @@ class SqliteDatabaseFactory(private val appDataDirectory: String) {
 
     companion object {
         const val DATABASE_FILE_NAME = "notekea.db"
+        private val BROKEN =
+            listOf("SQLITE_CORRUPT", "SQLITE_NOTADB", "malformed", "not a database")
         private const val IN_MEMORY_MESSAGE = "Database unavailable; running without a cache"
         private const val LOG_TAG = "SqliteDatabaseFactory"
         private const val RECREATE_MESSAGE = "Database unreadable; creating it again"
