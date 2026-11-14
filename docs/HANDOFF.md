@@ -181,6 +181,20 @@ Two more from the developer that day: a source clicked in the chat shows its pas
 `## Original text`, which the index also holds: a citation must be the source's words. What the person writes
 above that heading in a clipped note is not cited either, the two cannot be told apart.
 
+A code review of that day's work, before the push, found ten things, all fixed with their tests: a click in the tree
+during which the mouse moved a pixel was taken for a drag (`detectDragGestures` consumes the move that passes the
+mouse's slop, a fraction of a pixel; the gesture is now written by hand and starts after 6 dp); importing a repository
+that can only be read failed after its notes were brought (`pushIn` pushes only what the remote lacks;
+`JGitRepositoryTest` serves one with Git's own daemon); a cancelled or failed import left notes without their Git
+folder (`discardImport` takes the whole folder, and the screen stays busy until Git's work really ends); a refused
+token stayed in the keychain; the work record was left out of the memory when an agent's proposal had a summary; the
+digests of thirty notes and a long source's answer could ask for more than the model's 4,096 tokens (`NotesWriter`
+shares the room); a note asked for empty was filled from what the agent had read; links to notes named with a dot and
+pictures were said to be unread attachments; Update now ended without a word when it could read no page; and the
+agent's read and a note written from notes still read a clipped page's model-written notes (`AttachedTexts` reads
+it from `## Original text`). Left as it was: an update over a vault with no web sources still marks today, and the
+bookmarks' drag (`BookmarksSection`) has the same click problem the tree had.
+
 **Not done, and the next step for the agent:** it is still two engines, a planner and a loop of moves, joined at the
 plan. One loop with tools, whose results are kept as a transcript across turns (not a record written afterwards),
 is the design to move to; the 4,096-token context of the local model is what bounds it. The local model also still

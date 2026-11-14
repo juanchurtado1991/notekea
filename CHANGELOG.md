@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Connecting or importing a repository that can only be read (someone else's public notes, a read-only token) no
+  longer fails: with nothing to push, nothing is pushed.
+- A token the repository refuses is not kept in the keychain.
 - The chat cites a clipped web page only from the page's own text (Original text), never from the notes the model
   wrote about it above, which may be wrong.
 - A source clicked in the chat shows its passage selected without putting its lines into editing: their Markdown
