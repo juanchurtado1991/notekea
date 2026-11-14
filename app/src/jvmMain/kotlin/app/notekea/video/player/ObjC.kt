@@ -47,6 +47,13 @@ internal object ObjC {
         return answer and BOOL_MASK != 0
     }
 
+    /** The objects of the NSArray [array], in its order. */
+    fun items(array: Pointer): List<Pointer> {
+        val count = messageSend.invokeLong(arrayOf(array, selectorOf(name = "count")))
+
+        return (0 until count).mapNotNull { send(array, "objectAtIndex:", it) }
+    }
+
     /** [text] as an NSString, autoreleased. */
     fun stringOf(text: String): Pointer? {
         val nsString = classOf(name = "NSString") ?: return null

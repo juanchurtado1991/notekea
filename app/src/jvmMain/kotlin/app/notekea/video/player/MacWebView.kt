@@ -35,11 +35,28 @@ internal class MacWebView private constructor(
 
     /** Hides the web view under a dialog of the window, which it would otherwise cover, or shows it again. */
     fun hide(isHidden: Boolean) = CocoaMainThread.run {
+        if (isHidden) yieldKeyboard()
         ObjC.tell(view, "setHidden:", if (isHidden) 1 else 0)
+    }
+
+    // The keyboard goes back to the window's own content when the player had it: hidden or gone, it kept the
+    // keys, and the shortcuts did nothing until a click (the code review of 2026-11-13).
+    private fun yieldKeyboard() {
+        val window = ObjC.send(view, "window") ?: return
+        val holder = ObjC.send(window, "firstResponder") ?: return
+
+        val isView =
+            ObjC.ask(holder, "respondsToSelector:", ObjC.selectorOf(name = "isDescendantOf:"))
+
+        val isPlayers = isView && ObjC.ask(holder, "isDescendantOf:", view)
+        if (!isPlayers) return
+
+        ObjC.send(window, "contentView")?.let { ObjC.tell(window, "makeFirstResponder:", it) }
     }
 
     /** Stops the page and takes the web view out of the window. */
     fun close() = CocoaMainThread.run {
+        yieldKeyboard()
         ObjC.tell(view, "stopLoading")
         ObjC.tell(view, "removeFromSuperview")
         ObjC.tell(view, "release")
@@ -51,18 +68,20 @@ internal class MacWebView private constructor(
 
         /**
          * A web view showing [html], as if it came from [origin] (what YouTube takes as the app's identity), in the
-         * window that has the keyboard; null when there is no such window or no WebKit.
+         * window titled [windowTitle], or else the one that has the keyboard; null with no window or no WebKit.
          */
         fun show(
             html: String,
-            origin: String
+            origin: String,
+            windowTitle: String? = null
         ): MacWebView? {
             var shown: MacWebView? = null
 
             CocoaMainThread.run {
                 shown = made(
                     html = html,
-                    origin = origin
+                    origin = origin,
+                    windowTitle = windowTitle
                 )
             }
 
@@ -71,10 +90,11 @@ internal class MacWebView private constructor(
 
         private fun made(
             html: String,
-            origin: String
+            origin: String,
+            windowTitle: String?
         ): MacWebView? {
             NativeLibrary.getInstance(WEBKIT)
-            val parent = contentView() ?: return null
+            val parent = contentView(title = windowTitle) ?: return null
             val configuration = configuration() ?: return null
 
             val allocated = ObjC.classOf(name = "WKWebView")?.let {
@@ -101,12 +121,24 @@ internal class MacWebView private constructor(
         }
 
         // The content of the window the person is in: the one with the keyboard, or else the app's main one.
-        private fun contentView(): Pointer? {
+        private fun contentView(title: String?): Pointer? {
             val app = ObjC
                 .classOf(name = "NSApplication")
                 ?.let { ObjC.send(it, "sharedApplication") } ?: return null
 
-            val window = ObjC.send(app, "keyWindow")
+            // Notekea's own window, by its title: the one with the keyboard may be a panel of the system's or
+            // another window of the program (the code review of 2026-11-13).
+            val titled = title?.let { wanted ->
+                ObjC
+                    .send(app, "orderedWindows")
+                    ?.let { ObjC.items(array = it) }
+                    ?.firstOrNull {
+                        ObjC.textOf(string = ObjC.send(it, "title")) == wanted
+                    }
+            }
+
+            val window = titled
+                ?: ObjC.send(app, "keyWindow")
                 ?: ObjC.send(app, "mainWindow")
                 ?: ObjC.send(app, "orderedWindows")?.let { ObjC.send(it, "firstObject") }
                 ?: return null

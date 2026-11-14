@@ -7,7 +7,10 @@ import java.util.concurrent.Executors
  * the order asked, on a thread of its own, so the interface never waits for Cocoa's main thread and a tab closed
  * before its player was ready still closes it.
  */
-internal class MacYouTubeSession(private val id: String) {
+internal class MacYouTubeSession(
+    private val id: String,
+    private val windowTitle: () -> String? = { null }
+) {
     private val worker = Executors.newSingleThreadExecutor { work ->
         Thread(work, THREAD_NAME).apply { isDaemon = true }
     }
@@ -24,7 +27,8 @@ internal class MacYouTubeSession(private val id: String) {
 
             view = MacWebView.show(
                 html = page,
-                origin = YouTubePage.ORIGIN
+                origin = YouTubePage.ORIGIN,
+                windowTitle = windowTitle()
             )
 
             if (view == null) Thread.sleep(TRY_MILLIS)

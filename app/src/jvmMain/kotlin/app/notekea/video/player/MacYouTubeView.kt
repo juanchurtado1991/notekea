@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import java.awt.Frame
 import java.awt.Window
 
 /**
@@ -30,7 +31,13 @@ fun MacYouTubeView(
     isCovered: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val session = remember(id) { MacYouTubeSession(id = id) }
+    val session = remember(id) {
+        MacYouTubeSession(
+            id = id,
+            windowTitle = ::notekeaWindowTitle
+        )
+    }
+
     var bounds by remember { mutableStateOf<Rect?>(value = null) }
     val contentHeight = LocalWindowInfo.current.containerSize.height
 
@@ -69,6 +76,14 @@ private fun MacYouTubeViewPreview() {
 }
 
 private const val PREVIEW_SIZE_DP = 240
+
+// The title of the window Notekea shows now, by which the player finds it among the program's windows.
+private fun notekeaWindowTitle(): String? = Window
+    .getWindows()
+    .filterIsInstance<Frame>()
+    .firstOrNull { it.isShowing }
+    ?.title
+    ?.takeIf { it.isNotBlank() }
 
 // The pixels a point of the window's screen: the window in use, or else any that shows.
 private fun screenScale(): Double {
