@@ -27,7 +27,8 @@ private val PLACES = mapOf(
     TabKind.GRAPH to WorkPlace.GRAPH,
     TabKind.QUERY to WorkPlace.QUERY,
     TabKind.TASKS to WorkPlace.TASKS,
-    TabKind.STUDY to WorkPlace.STUDY
+    TabKind.STUDY to WorkPlace.STUDY,
+    TabKind.YOUTUBE to WorkPlace.YOUTUBE
 )
 
 private val SETTINGS = mapOf(

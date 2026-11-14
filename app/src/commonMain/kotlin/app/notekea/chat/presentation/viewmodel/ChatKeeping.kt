@@ -59,6 +59,9 @@ internal class ChatKeeping(
 
     /** Nothing kept: the memory and the vault's history emptied. */
     fun clear() {
+        // A compaction still running would bring the cleared chat back as its summary.
+        compaction?.cancel()
+        compaction = null
         memory.clear()
         host.launch { historyStore.clear(vaultPath = vaultPath) }
     }

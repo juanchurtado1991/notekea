@@ -22,6 +22,7 @@ import app.notekea.resources.chat_work_selected
 import app.notekea.resources.chat_work_settings
 import app.notekea.resources.chat_work_study
 import app.notekea.resources.chat_work_tasks
+import app.notekea.resources.chat_work_youtube
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -34,6 +35,7 @@ private val VIEW_NAMES: Map<WorkPlace, StringResource> = mapOf(
     WorkPlace.QUERY to Res.string.chat_work_query,
     WorkPlace.TASKS to Res.string.chat_work_tasks,
     WorkPlace.STUDY to Res.string.chat_work_study,
+    WorkPlace.YOUTUBE to Res.string.chat_work_youtube,
     WorkPlace.SETTINGS to Res.string.chat_work_settings
 )
 

@@ -49,6 +49,8 @@ data class ChatEntry(
      */
     val isKept: Boolean
         get() {
+            // A question about a page's links is its buttons, which a reload does not bring back.
+            if (sectionAsked != null) return false
             val status = action?.status ?: return !isAnswering
 
             return status == ActionStatus.DONE || status == ActionStatus.FINISHED

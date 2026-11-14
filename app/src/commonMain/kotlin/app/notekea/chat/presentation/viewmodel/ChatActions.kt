@@ -155,6 +155,7 @@ internal class ChatActions(
                                 step = ChatStep.DONE,
                                 outcome = TurnOutcome.ANSWERED,
                                 action = null,
+                                progress = null,
                                 sectionAsked = it.section
                             )
                         } ?: acted(
@@ -179,7 +180,8 @@ internal class ChatActions(
     ): ChatEntry = entry.copy(
         step = ChatStep.DONE,
         outcome = TurnOutcome.ACTED,
-        action = action
+        action = action,
+        progress = null
     )
 
     /** Do it: the card's steps are carried out; the first note made opens. */

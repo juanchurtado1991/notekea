@@ -110,11 +110,19 @@ internal class NoteWriter(
 
         journal.created += path
 
+        // Taken back only as it was written: a note the person changed since is theirs, and stays.
         journal.undoSteps += { vault ->
-            trash.moveToTrash(
+            val now = noteContentStore.read(
                 vaultPath = vault,
                 path = path
             )
+
+            if (now == text) {
+                trash.moveToTrash(
+                    vaultPath = vault,
+                    path = path
+                )
+            }
         }
 
         return Outcome.Success(value = Unit)

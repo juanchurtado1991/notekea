@@ -24,9 +24,11 @@ import app.notekea.tree.domain.BookmarkStore
 import app.notekea.tree.domain.OpenDailyNoteUseCase
 import app.notekea.tree.domain.Trash
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * The chat's [ActionRunner], composed from the features' use cases (3.9): writes go through [NoteRewrite]s, which
@@ -80,22 +82,34 @@ class VaultActionRunner(
             notes = notes
         )
 
-        steps.forEach { step ->
-            val done = runStep(
-                vaultPath = vaultPath,
-                step = step,
-                writer = writer
-            )
+        // A plan is done whole or not at all: what it did before the step that failed, threw or was cancelled is
+        // taken back (the code review of 2026-11-13: only a step that said it failed was).
+        try {
+            steps.forEach { step ->
+                val done = runStep(
+                    vaultPath = vaultPath,
+                    step = step,
+                    writer = writer
+                )
 
-            // A plan is done whole or not at all: what it did before the step that failed is taken back.
-            if (done is Outcome.Failure) {
-                journal
-                    .undoSteps
-                    .asReversed()
-                    .forEach { it(vaultPath) }
+                if (done is Outcome.Failure) {
+                    takenBack(
+                        journal = journal,
+                        vaultPath = vaultPath
+                    )
 
-                return@withLock done
+                    return@withLock done
+                }
             }
+        } catch (thrown: Throwable) {
+            withContext(context = NonCancellable) {
+                takenBack(
+                    journal = journal,
+                    vaultPath = vaultPath
+                )
+            }
+
+            throw thrown
         }
 
         val id = nextId++
@@ -155,6 +169,20 @@ class VaultActionRunner(
         val journal = journals.remove(done.id)
             ?: return@withLock Outcome.Failure(error = ActionProblem.CannotUndo)
 
+        val failed = takenBack(
+            journal = journal,
+            vaultPath = vaultPath
+        )
+
+        val cannot = Outcome.Failure(error = ActionProblem.CannotUndo)
+        if (failed == 0) Outcome.Success(value = Unit) else cannot
+    }
+
+    // Each step of the journal undone, newest first, one that fails never stopping the rest; how many failed.
+    private suspend fun takenBack(
+        journal: ActionJournal,
+        vaultPath: String
+    ): Int {
         var failed = 0
 
         journal
@@ -170,8 +198,7 @@ class VaultActionRunner(
                 }
             }
 
-        val cannot = Outcome.Failure(error = ActionProblem.CannotUndo)
-        if (failed == 0) Outcome.Success(value = Unit) else cannot
+        return failed
     }
 
     private suspend fun runStep(
@@ -371,6 +398,9 @@ class VaultActionRunner(
         )
 
         val entries = listOfNotNull(step.folder).ifEmpty { step.notes }
+
+        // "Move it to .." would take the note out of the vault.
+        if (!folder.isInside) return Outcome.Failure(ActionProblem.UnknownFolder(folder.value))
 
         entries.forEach { from ->
             val to = folder.child(name = from.name)

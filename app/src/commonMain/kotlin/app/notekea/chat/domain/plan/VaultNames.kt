@@ -172,7 +172,14 @@ internal class VaultNames(
     /** A folder a step creates: an existing one is fine, and later steps may use it. */
     private fun newFolder(name: String): RelativePath {
         val wanted = name.trim().trim('/')
-        if (wanted.isEmpty()) throw ProblemFound(problem = ActionProblem.UnknownFolder(name = name))
+
+        // "..", "." or a hidden name ("../x", ".obsidian") is no folder of the vault a request may make.
+        val isRefused =
+            wanted.isEmpty() ||
+                !RelativePath(value = wanted).isInside ||
+                wanted.split('/').any { it.startsWith(prefix = ".") }
+
+        if (isRefused) throw ProblemFound(problem = ActionProblem.UnknownFolder(name = name))
 
         val existing = folders.firstOrNull { it.value.equals(wanted, ignoreCase = true) }
         if (existing != null) return existing

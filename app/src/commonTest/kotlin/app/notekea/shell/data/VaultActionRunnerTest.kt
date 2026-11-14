@@ -256,6 +256,53 @@ class VaultActionRunnerTest {
         )
     }
 
+    // The code review of 2026-11-13: Undo trashed a note the chat made even after the person wrote in it, and
+    // "move it to .." took a note out of the vault.
+    @Test
+    fun `a note made is not trashed by Undo once the person changed it, and nothing moves out of the vault`() =
+        runTest {
+            val made = runner.run(
+                vaultPath = VAULT,
+                steps = listOf(
+                    ActionStep(
+                        kind = ActionKind.CREATE_NOTE,
+                        title = "Summary",
+                        content = listOf(
+                            NoteDraft(
+                                path = SUMMARY,
+                                text = "Theirs"
+                            )
+                        )
+                    )
+                ),
+                notes = notes
+            ) as Outcome.Success
+
+            store.texts[SUMMARY] = "Theirs, and mine since"
+
+            runner.undo(
+                vaultPath = VAULT,
+                done = made.value
+            )
+
+            val outside = runner.run(
+                vaultPath = VAULT,
+                steps = listOf(
+                    ActionStep(
+                        kind = ActionKind.MOVE,
+                        notes = listOf(HOME),
+                        target = RelativePath(value = "..")
+                    )
+                ),
+                notes = notes
+            )
+
+            assertEquals(
+                expected = listOf<Any?>(emptyList<RelativePath>(), true),
+                actual = listOf(trash.trashed, outside is Outcome.Failure)
+            )
+        }
+
     @Test
     fun `a plan that fails halfway takes back what it did, and an append with no note fails`() =
         runTest {

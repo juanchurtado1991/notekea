@@ -9,5 +9,6 @@ enum class WorkPlace(val said: String) {
     QUERY(said = "the query view"),
     TASKS(said = "the tasks view"),
     STUDY(said = "the study cards"),
+    YOUTUBE(said = "a YouTube video"),
     SETTINGS(said = "Settings")
 }

@@ -566,6 +566,7 @@
     <string name="chat_work_query">Consulta</string>
     <string name="chat_work_tasks">Tareas</string>
     <string name="chat_work_study">Tarjetas de estudio</string>
+    <string name="chat_work_youtube">Vídeo de YouTube</string>
     <string name="chat_work_settings">Ajustes</string>
     <string name="chat_work_selected">Seleccionado: “%1$s”</string>
     <string name="chat_work_remove">No compartir con el chat</string>

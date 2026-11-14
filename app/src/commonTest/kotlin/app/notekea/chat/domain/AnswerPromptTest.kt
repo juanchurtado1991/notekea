@@ -15,11 +15,15 @@ class AnswerPromptTest {
     @Test
     fun `a reply that says what was asked was not found in the notes is not found`() {
         assertEquals(
-            expected = listOf(true, true, false),
+            // The code review of 2026-11-13: "No hay…", "There is no…" also begin answers, which cite.
+            expected = listOf(true, true, false, false, false, true),
             actual = listOf(
                 AnswerPrompt.isNotFound(text = "No dentist appointment was found in your notes or tasks."),
                 AnswerPrompt.isNotFound(text = "No trips are mentioned in the notes."),
-                AnswerPrompt.isNotFound(text = "No, the dough rests for five minutes [1].")
+                AnswerPrompt.isNotFound(text = "No, the dough rests for five minutes [1]."),
+                AnswerPrompt.isNotFound(text = "No hay azúcar en la lista de ingredientes [1]."),
+                AnswerPrompt.isNotFound(text = "There is no sugar in the list of ingredients [2]."),
+                AnswerPrompt.isNotFound(text = "No hay nada sobre el dentista en tus notas.")
             )
         )
     }
