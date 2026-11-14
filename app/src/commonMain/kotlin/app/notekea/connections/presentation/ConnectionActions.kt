@@ -10,5 +10,7 @@ class ConnectionActions(
     val onOpen: (RelativePath) -> Unit,
     val onReveal: (RelativePath, IntRange) -> Unit,
     val onOpenBeside: (RelativePath) -> Unit,
-    val onInsertLink: (RelativePath) -> Unit
+    val onInsertLink: (RelativePath) -> Unit,
+    // A passage shown to be read (a source cited in the chat): selected, its lines not put into editing.
+    val onShow: (RelativePath, IntRange) -> Unit = onReveal
 )

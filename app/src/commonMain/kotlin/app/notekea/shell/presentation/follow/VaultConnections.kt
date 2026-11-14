@@ -79,7 +79,8 @@ internal fun connectionActions(
 ): ConnectionActions {
     fun reveal(
         path: RelativePath,
-        range: IntRange
+        range: IntRange,
+        isShownOnly: Boolean = false
     ) {
         workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = path))
 
@@ -94,7 +95,8 @@ internal fun connectionActions(
         editors.of(path = path).onIntent(
             intent = EditorIntent.OnRevealRequest(
                 path = path,
-                range = range
+                range = range,
+                isShownOnly = isShownOnly
             )
         )
     }
@@ -111,7 +113,8 @@ internal fun connectionActions(
         onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
         onReveal = { path, range -> reveal(path, range) },
         onOpenBeside = { workspace.onIntent(intent = WorkspaceIntent.OnOpenBeside(path = it)) },
-        onInsertLink = { insertLink(it) }
+        onInsertLink = { insertLink(it) },
+        onShow = { path, range -> reveal(path, range, isShownOnly = true) }
     )
 }
 

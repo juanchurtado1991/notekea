@@ -118,7 +118,7 @@ internal fun FollowChat(
 
         chat.effects.collect { effect ->
             when (effect) {
-                is ChatEffect.Reveal -> actions.onReveal(effect.note, effect.range)
+                is ChatEffect.Reveal -> actions.onShow(effect.note, effect.range)
 
                 ChatEffect.OpenModelSettings -> dialogs.shown = WindowDialog.AI_MODEL
 

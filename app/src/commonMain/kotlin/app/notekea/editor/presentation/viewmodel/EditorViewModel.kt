@@ -250,7 +250,8 @@ class EditorViewModel(
 
             is EditorIntent.OnRevealRequest -> focus.reveal(
                 path = intent.path,
-                range = intent.range
+                range = intent.range,
+                isShownOnly = intent.isShownOnly
             )
 
             is EditorIntent.OnDayStep -> emit(effect = EditorEffect.DayStep(step = intent.step))

@@ -159,10 +159,15 @@ sealed interface EditorIntent {
     /** A heading of the outline was clicked or chosen with Enter: the editor goes to the [index]th heading. */
     data class OnHeadingClick(val index: Int) : Navigation
 
-    /** A mention was chosen in Connections: [range] of [path]'s body is selected once it is open. */
+    /**
+     * A mention was chosen in Connections: [range] of [path]'s body is selected once it is open. A passage only
+     * shown ([isShownOnly], a source cited in the chat) is selected to be read: its lines keep their Markdown marks
+     * hidden and the keyboard stays where it was.
+     */
     data class OnRevealRequest(
         val path: RelativePath,
-        val range: IntRange
+        val range: IntRange,
+        val isShownOnly: Boolean = false
     ) : Navigation
 
     /**

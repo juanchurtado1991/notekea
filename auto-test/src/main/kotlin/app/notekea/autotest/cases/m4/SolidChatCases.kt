@@ -132,4 +132,49 @@ private fun SuiteBuilder.solidChatManualCases() {
                 "que no pudo leer texto y no escribe ninguna nota."
         )
     }
+
+    citedSourceCases()
+}
+
+private fun SuiteBuilder.citedSourceCases() {
+    manual(
+        id = "3.3-14",
+        reason = ManualReason.COSTLY
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "Una fuente citada se muestra seleccionada, sin poner sus líneas en edición")
+
+        steps(
+            text =
+            "1. Con un modelo de chat instalado, pregunta algo que responda una nota con " +
+                "negritas o una lista.\n2. Haz clic en la cita o en la fuente bajo la respuesta."
+        )
+
+        expected(
+            text =
+            "La nota se abre con el pasaje seleccionado y dibujado como se lee (sin ** ni - a " +
+                "la vista), y lo que escribas sigue yendo al campo del chat. Un clic en la nota " +
+                "edita como siempre."
+        )
+    }
+
+    manual(
+        id = "4.4-08",
+        reason = ManualReason.COSTLY
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "Una página recortada se cita desde su texto original, no desde el resumen")
+
+        steps(
+            text =
+            "1. Con un modelo de chat instalado, recorta una página web.\n2. Pregunta al chat " +
+                "algo que la página responda y mira las fuentes."
+        )
+
+        expected(
+            text =
+            "Toda fuente de la nota recortada dice › Original text: el pasaje son palabras de " +
+                "la página, nunca una línea de las notas que el modelo escribió encima."
+        )
+    }
 }

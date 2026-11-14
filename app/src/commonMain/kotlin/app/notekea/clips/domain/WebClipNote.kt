@@ -12,7 +12,7 @@ object WebClipNote {
     val FOLDER = WebSourcesFolder.PATH
     private const val MAX_NAME = 80
     private val UNSAFE = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
-    const val ORIGINAL = "## Original text"
+    const val ORIGINAL = WebSourcesFolder.ORIGINAL_HEADING
     const val CLIPPED = "clipped: "
     const val LEVELS = "levels: "
     private const val VIDEOS = "## Videos"

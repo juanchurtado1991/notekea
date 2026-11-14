@@ -27,6 +27,9 @@ data class EditorState(
     val find: FindState? = null,
     val isSourceMode: Boolean = false,
     val isRevealing: Boolean = false,
+    // A passage selected only to be read (a source cited in the chat): while it is the selection, its lines do not
+    // show their Markdown marks.
+    val shownPassage: IntRange? = null,
     val attachments: List<AttachmentView> = emptyList(),
     val actionError: NotesError? = null,
     val videoCompression: VideoCompression? = null,

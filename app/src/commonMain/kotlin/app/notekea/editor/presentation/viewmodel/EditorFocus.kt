@@ -24,6 +24,9 @@ internal class EditorFocus(
     // instead.
     private var revealed: Pair<RelativePath, IntRange>? = null
 
+    // Whether the place waiting in [revealed] is only shown: selected to be read, without the keyboard.
+    private var isRevealedShownOnly = false
+
     /** Another note ([path]) is about to open: the open one's cursor is kept, and a request for a third one dropped. */
     fun leave(path: RelativePath?) {
         if (path != pending) pending = null
@@ -55,7 +58,12 @@ internal class EditorFocus(
     fun onShown(path: RelativePath) {
         revealed?.takeIf {
             it.first == path
-        }?.let { (_, range) -> select(range = range) }
+        }?.let { (_, range) ->
+            select(
+                range = range,
+                isShownOnly = isRevealedShownOnly
+            )
+        }
 
         if (pending == path) focusText()
     }
@@ -63,7 +71,8 @@ internal class EditorFocus(
     /** [range] of [path]'s body is selected, so the text scrolls to it, now if the note is open or once it opens. */
     fun reveal(
         path: RelativePath,
-        range: IntRange
+        range: IntRange,
+        isShownOnly: Boolean = false
     ) {
         textEdits.releasePickerSelection(isCancelled = false)
 
@@ -77,25 +86,44 @@ internal class EditorFocus(
             }
 
         if (isOpen) {
-            select(range = range)
-            focusText()
+            select(
+                range = range,
+                isShownOnly = isShownOnly
+            )
+
+            if (!isShownOnly) focusText()
         } else {
             revealed = path to range
-            pending = path
+            isRevealedShownOnly = isShownOnly
+
+            // A passage only shown leaves the keyboard where it is: in the chat, to go on asking.
+            pending = path.takeIf {
+                !isShownOnly
+            }
         }
     }
 
-    private fun select(range: IntRange) {
+    private fun select(
+        range: IntRange,
+        isShownOnly: Boolean
+    ) {
         revealed = null
 
-        host.reduce { it.copy(isRevealing = true) }
-
         val length = host.buffer.text.length
+        val start = range.first.coerceAtMost(length)
+        val end = (range.last + 1).coerceAtMost(length)
+
+        host.reduce {
+            it.copy(
+                isRevealing = true,
+                shownPassage = (start until end).takeIf { isShownOnly }
+            )
+        }
 
         host.buffer.edit {
             selection = TextRange(
-                start = range.first.coerceAtMost(length),
-                end = (range.last + 1).coerceAtMost(length)
+                start = start,
+                end = end
             )
         }
     }

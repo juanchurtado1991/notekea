@@ -13,6 +13,7 @@ import app.notekea.core.llm.domain.LlmException
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.notes.domain.index.SearchHit
 import app.notekea.core.notes.domain.index.VectorIndex
 import kotlinx.coroutines.async
@@ -283,6 +284,12 @@ class AnswerFromNotesUseCase(
     ): AnswerSource? {
         val isInBody = body != null && hit.range.last < body.length
         if (!isInBody) return null
+
+        // A clipped page is cited from its own text, never from the notes a model wrote about it above: a citation
+        // must hold what the source says, not a summary that may be wrong (the developer, 2026-11-14).
+        val original = WebSourcesFolder.originalStartIn(body = body)
+        val isSummary = original != null && hit.range.first < original
+        if (isSummary) return null
 
         return AnswerSource(
             number = 0,

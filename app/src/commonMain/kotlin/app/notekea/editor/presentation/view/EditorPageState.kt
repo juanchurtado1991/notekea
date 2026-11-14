@@ -31,7 +31,8 @@ internal class EditorPageState(
     val buffer: TextFieldState,
     val listState: LazyListState,
     val focusRequester: FocusRequester,
-    private val isSource: () -> Boolean
+    private val isSource: () -> Boolean,
+    private val shownPassage: () -> IntRange? = { null }
 ) {
     private val shownTexts = ShownTextBuilder()
     private val formats = ActiveFormats()
@@ -160,9 +161,15 @@ internal class EditorPageState(
     val shown: ShownText by derivedStateOf {
         val window = fieldRange
 
+        // A passage selected only to be read (a source cited in the chat) stays drawn as the note reads, until the
+        // person moves the cursor or selects something else (the developer's request of 2026-11-14).
+        val isPassage = shownPassage()?.let {
+            buffer.selection.min == it.first && buffer.selection.max == it.last + 1
+        } == true
+
         val revealed = when {
             isSource() || isBlockDrawn -> window
-            hasFocus -> buffer.selection
+            hasFocus && !isPassage -> buffer.selection
             else -> null
         }
 

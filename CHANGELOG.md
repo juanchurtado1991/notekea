@@ -44,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The chat cites a clipped web page only from the page's own text (Original text), never from the notes the model
+  wrote about it above, which may be wrong.
+- A source clicked in the chat shows its passage selected without putting its lines into editing: their Markdown
+  marks stay hidden and the keyboard stays in the chat.
 - A click on a chat answer while a citation's tooltip is shown no longer closes Notekea.
 - The chat no longer writes a note of examples "to replace with your data" for a document it did not read: a note is
   read with the PDF or Word file pasted in it, a note written from notes is written only from what they say and

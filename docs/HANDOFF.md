@@ -176,6 +176,11 @@ vault is brought from a Git repository from the welcome screen (`ImportVaultUseC
 logic and its tests are in, its screen waits for the developer's choice of design). The repair of a repository left
 half merged and the one agent loop go in the next pull request, as the developer decided.
 
+Two more from the developer that day: a source clicked in the chat shows its passage without editing its lines
+(`shownPassage`), and a clipped page is cited only from its own text, never from the model's notes above
+`## Original text`, which the index also holds: a citation must be the source's words. What the person writes
+above that heading in a clipped note is not cited either, the two cannot be told apart.
+
 **Not done, and the next step for the agent:** it is still two engines, a planner and a loop of moves, joined at the
 plan. One loop with tools, whose results are kept as a transcript across turns (not a record written afterwards),
 is the design to move to; the 4,096-token context of the local model is what bounds it. The local model also still

@@ -159,6 +159,53 @@ class EditorOutlineTest {
             )
         }
 
+    // The developer's request of 2026-11-14: a source clicked in the chat selected its passage and put its lines
+    // into editing, their Markdown marks shown.
+    @Test
+    fun `a passage only shown is selected without the keyboard, and marked so its lines are not edited`() =
+        runOutlineTest {
+            open(path = AREPAS)
+            val effects = collectEffects()
+
+            send(
+                intent = EditorIntent.OnRevealRequest(
+                    path = AREPAS,
+                    range = 2..7,
+                    isShownOnly = true
+                )
+            )
+
+            val shown = viewModel.state.value.shownPassage
+            val quiet = effects.toList()
+
+            send(
+                intent = EditorIntent.OnRevealRequest(
+                    path = AREPAS,
+                    range = 2..7
+                )
+            )
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    TextRange(
+                        start = 2,
+                        end = 8
+                    ),
+                    2..7,
+                    emptyList<EditorEffect>(),
+                    null,
+                    true
+                ),
+                actual = listOf<Any?>(
+                    viewModel.buffer.selection,
+                    shown,
+                    quiet,
+                    viewModel.state.value.shownPassage,
+                    effects.isNotEmpty()
+                )
+            )
+        }
+
     @Test
     fun `going back to a note puts the cursor where it was left`() = runOutlineTest {
         open(path = AREPAS)

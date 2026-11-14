@@ -225,6 +225,47 @@ class AnswerFromNotesUseCaseTest {
         drafts = drafts
     ).toList()
 
+    // The developer's doubt of 2026-11-14: a citation of a clipped page could be of the summary a model wrote about
+    // it, which may be wrong, and read as the page's own words.
+    @Test
+    fun `a clipped page is cited from its own text, never from the notes a model wrote about it`() =
+        runTest {
+            val clip = RelativePath(value = "Web sources/Outage.md")
+            val summary = "The outage lasted two hours.\n\n"
+            val original = "## Original text\n\nThe outage lasted nine hours, the company said."
+            val body = summary + original
+
+            store.texts[clip] = body
+            notes += entry(path = clip.value)
+
+            val chunks = listOf(
+                NoteChunk(clip, 0, emptyList(), summary.indices, summary, tokens = 8),
+                NoteChunk(
+                    clip,
+                    1,
+                    listOf("Original text"),
+                    summary.length until body.length,
+                    original,
+                    tokens = 8
+                )
+            )
+
+            val vectors = (embedder.embed(texts = chunks.map { it.text }) as Outcome.Success).value
+            index.put(VAULT, clip, chunks, vectors)
+            engine.scoreOf = { _, _ -> 4f }
+
+            val read = answer.excerpts(
+                vaultPath = VAULT,
+                notes = notes,
+                query = "How long did the outage last?"
+            )
+
+            assertEquals(
+                expected = listOf(original),
+                actual = (read as Outcome.Success).value.map { it.text }
+            )
+        }
+
     private suspend fun indexed(
         path: RelativePath,
         body: String
