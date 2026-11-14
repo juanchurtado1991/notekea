@@ -22,7 +22,9 @@ data class ClipState(
     val progress: SectionStep.Clipping? = null,
     // An update of the web sources: how far it is, then what it changed; shown in a dialog of its own when asked for.
     val update: UpdateStep? = null,
-    val isUpdateShown: Boolean = false
+    val isUpdateShown: Boolean = false,
+    // How many days ago the web sources were last updated (0 is today), null when never: Settings → General says it.
+    val daysSinceUpdate: Int? = null
 ) {
     val isAsking: Boolean get() =
         section != null &&

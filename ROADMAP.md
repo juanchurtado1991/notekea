@@ -207,6 +207,11 @@ Built in #142:
   `docs/macos-redesign.md`. It covers macOS's type scale, the sidebar's and chrome's colors, the source list, push
   buttons, a unified title bar and a menu bar on macOS, the chat as a document, macOS's alert, springs and the system's
   accent color. The window buttons stay the system's own on every platform.
+- **Web sources in General (the developer, 2026-11-14):** the update of the web sources was in General and was not
+  found, so it is General's first group, titled Web sources: Update on their own (Never, Every day, Every week,
+  Every month), Last update (Never, Today, Yesterday, N days ago) and Update now, which runs the folder's update
+  without its dialog, since Settings covers the window. The vault tells the window (`WindowWebSources`); with no
+  vault open only the frequency shows. Case 5.2-07.
 
 ### 🚧 5.3 Packaging — `feature/videos` (built, in [notekea#142](https://github.com/juanchurtado1991/notekea/pull/142): `.github/workflows/release.yml` and the README's Install and First launch)
 

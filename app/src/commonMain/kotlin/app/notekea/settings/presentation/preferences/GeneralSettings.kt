@@ -44,6 +44,11 @@ internal fun GeneralSettings(
         title = stringResource(resource = Res.string.settings_section_general),
         modifier = modifier
     ) {
+        WebUpdateSetting(
+            preferences = preferences,
+            onIntent = onIntent
+        )
+
         NotekeaSettingsGroup(
             rows = listOf(
                 {
@@ -62,11 +67,6 @@ internal fun GeneralSettings(
                 }
             ),
             footnote = stringResource(resource = Res.string.settings_language_hint)
-        )
-
-        WebUpdateSetting(
-            preferences = preferences,
-            onIntent = onIntent
         )
 
         NotekeaSettingsGroup(

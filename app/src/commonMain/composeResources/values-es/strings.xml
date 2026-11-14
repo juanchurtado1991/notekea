@@ -256,7 +256,15 @@
     <string name="settings_language_english">English</string>
     <string name="settings_language_spanish">Español</string>
     <string name="settings_language_hint">Sistema sigue el idioma de tu computadora. El chat siempre responde en el idioma en que escribes.</string>
-    <string name="settings_web_update">Actualizar las fuentes web</string>
+    <string name="settings_web_update">Actualizar por sí solas</string>
+    <string name="settings_web_group">Fuentes web</string>
+    <string name="settings_web_last">Última actualización</string>
+    <string name="settings_web_last_never">Nunca</string>
+    <string name="settings_web_last_today">Hoy</string>
+    <string name="settings_web_last_yesterday">Ayer</string>
+    <string name="settings_web_last_days">Hace %1$d días</string>
+    <string name="settings_web_now">Actualizar ahora</string>
+    <string name="settings_web_updating">Actualizando…</string>
     <string name="settings_web_update_never">Nunca</string>
     <string name="settings_web_update_daily">Cada día</string>
     <string name="settings_web_update_weekly">Cada semana</string>

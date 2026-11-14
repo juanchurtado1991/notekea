@@ -170,6 +170,12 @@ Verified on 2026-11-14 on macOS: `check koverVerify` green, and the Auto-Test ca
 3.9, 4.6 and 4.7 in the real app with the Medium model (97 cases). 1.4-04 pressed Enter before a new note's name was
 ready, now that its properties are written first; it waits for the name (`expectNaming`).
 
+Asked on 2026-11-14 before the pull request is merged: the web sources' update, which was in General and was not
+found, is General's first group with its last update and Update now (`WebUpdateSetting`, `WindowWebSources`); and a
+vault is brought from a Git repository from the welcome screen (`ImportVaultUseCase`, `SyncVaultImporter`: the
+logic and its tests are in, its screen waits for the developer's choice of design). The repair of a repository left
+half merged and the one agent loop go in the next pull request, as the developer decided.
+
 **Not done, and the next step for the agent:** it is still two engines, a planner and a loop of moves, joined at the
 plan. One loop with tools, whose results are kept as a transcript across turns (not a record written afterwards),
 is the design to move to; the 4,096-token context of the local model is what bounds it. The local model also still

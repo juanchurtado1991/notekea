@@ -48,6 +48,8 @@ class ClipViewModel(
     init {
         // While the vault is open, the web sources are updated when their turn comes (Settings → General).
         automatic?.let { due ->
+            launchGuarded(onError = ::logError) { showLastUpdate() }
+
             launchGuarded(onError = ::logError) {
                 due.turns(vaultPath = vaultPath).collect {
                     onIntent(
@@ -249,6 +251,12 @@ class ClipViewModel(
         if (done.updated.isNotEmpty()) emit(effect = ClipEffect.Rewritten(paths = done.updated))
         val read = done.updated.size + done.added.size + done.unchanged
         if (read > 0 || done.failed == 0) automatic?.done(vaultPath = vaultPath)
+        showLastUpdate()
+    }
+
+    private suspend fun showLastUpdate() {
+        val days = automatic?.daysSinceLast(vaultPath = vaultPath)
+        reduce { it.copy(daysSinceUpdate = days) }
     }
 
     private fun clipWhole(links: SectionLinks) {

@@ -38,6 +38,27 @@ class AutomaticWebUpdateTest {
         }
     }
 
+    // Settings → General says when the web sources were last updated (2026-11-14).
+    @Test
+    fun `the last update is told in days ago, today being none, and never when there was none`() =
+        runTest {
+            val automatic = AutomaticWebUpdate(
+                preferences = FakeAppPreferencesStore(initial = AppPreferences()),
+                log = log,
+                clock = clock
+            )
+
+            val never = automatic.daysSinceLast(vaultPath = "/vault")
+            automatic.done(vaultPath = "/vault")
+            val today = automatic.daysSinceLast(vaultPath = "/vault")
+            now = Instant.parse(input = "2026-11-16T09:00:00Z")
+
+            assertEquals(
+                expected = listOf(null, 0, 3),
+                actual = listOf(never, today, automatic.daysSinceLast(vaultPath = "/vault"))
+            )
+        }
+
     @Test
     fun `never gives no turn, a turn that read nothing comes again, the next a week after one that did`() =
         runTest {

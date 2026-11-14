@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Settings → General starts with Web sources: how often they are updated on their own, when they were last updated
+  and Update now, which updates them at once without leaving Settings.
 - In the chat, the question is a bubble at the right and the answer stays at the left across the panel.
 - The X that closes Settings and About is red.
 - Six new color themes replace seven of the eight before, each a 60/30/10 palette in light and dark: Polar, Desert,

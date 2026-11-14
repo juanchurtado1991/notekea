@@ -44,6 +44,11 @@ class AutomaticWebUpdate(
         day = today()
     )
 
+    /** How many days ago the vault at [vaultPath]'s web sources were last updated: 0 for today, null for never. */
+    suspend fun daysSinceLast(vaultPath: String): Int? = log
+        .lastDay(vaultPath = vaultPath)
+        ?.let { (today() - it).toInt().coerceAtLeast(minimumValue = 0) }
+
     private fun today(): Long = clock.now().epochSeconds / SECONDS_IN_DAY
 
     private companion object {

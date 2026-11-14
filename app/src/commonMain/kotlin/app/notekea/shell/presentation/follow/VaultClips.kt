@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
+import app.notekea.clips.domain.UpdateStep
 import app.notekea.clips.presentation.ClipDialog
 import app.notekea.clips.presentation.ClipEffect
 import app.notekea.clips.presentation.ClipIntent
@@ -15,11 +16,13 @@ import app.notekea.clips.presentation.ClipState
 import app.notekea.clips.presentation.ClipUpdateDialog
 import app.notekea.clips.presentation.ClipViewModel
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NoteLooks
 import app.notekea.core.presentation.platform.LocalWebSourceUpdater
 import app.notekea.core.presentation.platform.LocalWindowLoading
+import app.notekea.core.presentation.platform.LocalWindowWebSources
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.presentation.workspace.PaneEditors
@@ -45,6 +48,8 @@ internal fun FollowAssistants(
         isLoading = state.isLoading
     )
 
+    ReportWebSources(clip = clip)
+
     ClipsOf(
         clip = clip,
         workspace = viewModels.workspace,
@@ -55,6 +60,36 @@ internal fun FollowAssistants(
         }
     )
 }
+
+// Settings → General is drawn over the window: it is told when this vault's web sources were last updated and how
+// to update them now, without the update's own dialog, which Settings would cover.
+@Composable
+private fun ReportWebSources(clip: ClipViewModel) {
+    val sources = LocalWindowWebSources.current
+    val state by clip.state.collectAsState()
+
+    LaunchedEffect(state.daysSinceUpdate, state.update) {
+        sources.daysSinceUpdate = state.daysSinceUpdate
+        sources.isUpdating = state.update is UpdateStep.Reading
+    }
+
+    DisposableEffect(clip) {
+        sources.updateNow = { updateAll(clip = clip) }
+
+        onDispose {
+            sources.updateNow = null
+            sources.daysSinceUpdate = null
+            sources.isUpdating = false
+        }
+    }
+}
+
+private fun updateAll(clip: ClipViewModel) = clip.onIntent(
+    intent = ClipIntent.OnUpdate(
+        path = WebSourcesFolder.PATH,
+        isShown = false
+    )
+)
 
 // The window is told once this vault's first scan ended, and that it is gone when the vault closes.
 @Composable

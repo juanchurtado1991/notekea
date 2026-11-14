@@ -1,10 +1,15 @@
 package app.notekea.settings.presentation.preferences
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.core.presentation.platform.LocalWindowWebSources
+import app.notekea.core.presentation.platform.WindowWebSources
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -31,6 +36,78 @@ class GeneralSettingsTest {
                     text = WELCOME_HINT,
                     substring = true
                 ).fetchSemanticsNodes().size
+            )
+        )
+    }
+
+    // The developer's smoke of 2026-11-14: the web sources' update was in General and was not found.
+    @Test
+    fun `with a vault open the web sources lead the page, say their last update and update now`() =
+        runComposeUiTest {
+            var updates = 0
+
+            val sources = WindowWebSources().apply {
+                updateNow = {
+                    updates++
+                }
+
+                daysSinceUpdate = 3
+            }
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    CompositionLocalProvider(LocalWindowWebSources provides sources) {
+                        GeneralSettings(
+                            preferences = AppPreferences(),
+                            onIntent = {},
+                            spotlight = null
+                        )
+                    }
+                }
+            }
+
+            onNodeWithText(text = "Update now").performClick()
+            waitForIdle()
+
+            val titleTop = onNodeWithText(text = "Web sources")
+                .fetchSemanticsNode()
+                .boundsInRoot
+                .top
+
+            val languageTop = onNodeWithText(text = "Language")
+                .fetchSemanticsNode()
+                .boundsInRoot
+                .top
+
+            assertEquals(
+                expected = listOf<Any>(1, 1, true),
+                actual = listOf<Any>(
+                    updates,
+                    onAllNodesWithText(text = "3 days ago").fetchSemanticsNodes().size,
+                    titleTop < languageTop
+                )
+            )
+        }
+
+    @Test
+    fun `with no vault open there is nothing to update now`() = runComposeUiTest {
+        setContent {
+            NotekeaTheme(darkTheme = false) {
+                CompositionLocalProvider(LocalWindowWebSources provides WindowWebSources()) {
+                    GeneralSettings(
+                        preferences = AppPreferences(),
+                        onIntent = {},
+                        spotlight = null
+                    )
+                }
+            }
+        }
+
+        assertEquals(
+            expected = listOf(0, 1),
+            actual = listOf(
+                onAllNodesWithText(text = "Update now").fetchSemanticsNodes().size,
+                onAllNodesWithText(text = "Update on their own").fetchSemanticsNodes().size
             )
         )
     }
