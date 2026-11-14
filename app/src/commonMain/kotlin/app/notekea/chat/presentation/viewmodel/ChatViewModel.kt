@@ -250,6 +250,8 @@ class ChatViewModel(
                 )
             }
 
+            is ChatIntent.OnFollowUp -> offered(request = intent.text)
+
             is ChatIntent.OnOfferedClick -> entryOf(id = intent.id)?.offered?.let {
                 offered(request = it)
             }

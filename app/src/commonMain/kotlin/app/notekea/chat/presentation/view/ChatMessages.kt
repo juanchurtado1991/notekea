@@ -105,6 +105,15 @@ internal fun ChatMessages(
                     isSmall = isSmall,
                     onIntent = onIntent
                 )
+
+                // What to ask next, under the newest answer only.
+                if (index == entries.lastIndex) {
+                    ChatFollowUps(
+                        entry = entry,
+                        onAsk = { onIntent(ChatIntent.OnFollowUp(text = it)) },
+                        modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)
+                    )
+                }
             }
         }
     }

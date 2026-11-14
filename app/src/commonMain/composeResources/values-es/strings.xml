@@ -1142,4 +1142,8 @@
     <string name="chat_section_clip_es">Recortar %1$d páginas</string>
     <string name="chat_section_clip_hint">About %1$d minutes. Each page becomes a note in a folder.</string>
     <string name="chat_section_clip_hint_es">Unos %1$d minutos. Cada página será una nota en una carpeta.</string>
+    <string name="chat_follow_up_title">Keep asking</string>
+    <string name="chat_follow_up_title_es">Seguir preguntando</string>
+    <string name="chat_follow_up_about">Tell me more about “%1$s”</string>
+    <string name="chat_follow_up_about_es">Cuéntame más sobre «%1$s»</string>
 </resources>

@@ -1,6 +1,10 @@
 package app.notekea.chat.presentation.view
 
 import app.notekea.resources.Res
+import app.notekea.resources.chat_follow_up_about
+import app.notekea.resources.chat_follow_up_about_es
+import app.notekea.resources.chat_follow_up_title
+import app.notekea.resources.chat_follow_up_title_es
 import app.notekea.resources.chat_section_clip
 import app.notekea.resources.chat_section_clip_es
 import app.notekea.resources.chat_section_clip_hint
@@ -47,8 +51,11 @@ import app.notekea.resources.chat_section_recommended
 import app.notekea.resources.chat_section_recommended_es
 import org.jetbrains.compose.resources.StringResource
 
-// The question of a page's links in Spanish ([replyString]), apart from the chat's other replies for its length.
+// The question of a page's links and the follow-ups in Spanish ([replyString]): apart from the chat's other
+// replies for the file's length.
 internal val SECTION_SPANISH: Map<StringResource, StringResource> = mapOf(
+    Res.string.chat_follow_up_title to Res.string.chat_follow_up_title_es,
+    Res.string.chat_follow_up_about to Res.string.chat_follow_up_about_es,
     Res.string.chat_section_clip to Res.string.chat_section_clip_es,
     Res.string.chat_section_clip_hint to Res.string.chat_section_clip_hint_es,
     Res.string.chat_section_closest to Res.string.chat_section_closest_es,

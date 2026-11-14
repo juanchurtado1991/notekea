@@ -65,6 +65,9 @@ sealed interface ChatIntent {
      */
     data class OnOfferedClick(val id: Long) : ChatIntent
 
+    /** A question the chat suggested under its last answer ([FollowUps]), asked of the whole vault. */
+    data class OnFollowUp(val text: String) : ChatIntent
+
     /** The answer to "only this page, or the pages it links too?" ([ChatEntry.sectionAsked]), asked as a request. */
     data class OnSectionChoose(
         val id: Long,
