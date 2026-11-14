@@ -152,20 +152,6 @@ import app.notekea.resources.chat_problem_task
 import app.notekea.resources.chat_problem_task_es
 import app.notekea.resources.chat_retry
 import app.notekea.resources.chat_retry_es
-import app.notekea.resources.chat_section_all
-import app.notekea.resources.chat_section_all_es
-import app.notekea.resources.chat_section_deeper
-import app.notekea.resources.chat_section_deeper_es
-import app.notekea.resources.chat_section_every
-import app.notekea.resources.chat_section_every_es
-import app.notekea.resources.chat_section_levels
-import app.notekea.resources.chat_section_levels_es
-import app.notekea.resources.chat_section_more
-import app.notekea.resources.chat_section_more_es
-import app.notekea.resources.chat_section_only
-import app.notekea.resources.chat_section_only_es
-import app.notekea.resources.chat_section_question
-import app.notekea.resources.chat_section_question_es
 import app.notekea.resources.chat_shown_close_tabs
 import app.notekea.resources.chat_shown_close_tabs_es
 import app.notekea.resources.chat_shown_open_note
@@ -223,7 +209,8 @@ internal fun replyString(
     vararg arguments: Any
 ): String {
     val isSpanish = LocalReplyLanguage.current == ReplyLanguage.SPANISH
-    val chosen = if (isSpanish) SPANISH[resource] ?: resource else resource
+    val spanish = SPANISH[resource] ?: SECTION_SPANISH[resource] ?: resource
+    val chosen = if (isSpanish) spanish else resource
 
     return if (arguments.isEmpty()) {
         stringResource(resource = chosen)
@@ -260,15 +247,8 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_action_cards_count to Res.string.chat_action_cards_count_es,
     Res.string.chat_problem_no_cards to Res.string.chat_problem_no_cards_es,
     Res.string.chat_action_clip_url to Res.string.chat_action_clip_url_es,
-    Res.string.chat_section_question to Res.string.chat_section_question_es,
-    Res.string.chat_section_more to Res.string.chat_section_more_es,
-    Res.string.chat_section_only to Res.string.chat_section_only_es,
-    Res.string.chat_section_all to Res.string.chat_section_all_es,
     Res.string.chat_step_clipping to Res.string.chat_step_clipping_es,
     Res.string.chat_step_finding to Res.string.chat_step_finding_es,
-    Res.string.chat_section_deeper to Res.string.chat_section_deeper_es,
-    Res.string.chat_section_levels to Res.string.chat_section_levels_es,
-    Res.string.chat_section_every to Res.string.chat_section_every_es,
     Res.string.chat_page_address to Res.string.chat_page_address_es,
     Res.string.chat_page_local to Res.string.chat_page_local_es,
     Res.string.chat_page_offline to Res.string.chat_page_offline_es,

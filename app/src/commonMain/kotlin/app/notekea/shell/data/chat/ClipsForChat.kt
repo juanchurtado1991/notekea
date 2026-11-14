@@ -14,6 +14,7 @@ import app.notekea.clips.domain.ClipWebPageUseCase
 import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.PageFetcher
+import app.notekea.clips.domain.SectionLinks
 import app.notekea.clips.domain.SectionStep
 import app.notekea.clips.domain.WebClipNote
 import app.notekea.clips.domain.WebClipSection
@@ -78,6 +79,7 @@ class ClipsForChat(
                 count = found.value.urls.size,
                 more = found.value.more,
                 canGoDeeper = found.value.canGoDeeper,
+                isIndex = found.value.isIndex,
                 summary = found
                     .value
                     .urls
@@ -94,17 +96,86 @@ class ClipsForChat(
         is Outcome.Failure -> Outcome.Failure(error = problemOf(error = found.error))
     }
 
+    // The pages a count found, kept for the clip the person then confirms: a documentation is not read twice.
+    private var scanned: Triple<String, Int, SectionLinks>? = null
+
+    private suspend fun scan(
+        url: String,
+        depth: Int,
+        onProgress: suspend (PageProgress) -> Unit
+    ): Outcome<SectionLinks, ClipError> {
+        scanned
+            ?.takeIf {
+                it.first == url && it.second == depth
+            }
+            ?.let {
+                return Outcome.Success(value = it.third)
+            }
+
+        val isFull = depth >= SectionLinks.FULL_DEPTH
+
+        val most = if (isFull) SectionLinks.MAX_FULL_PAGES else SectionLinks.MAX_DEEP_PAGES
+
+        val found = findSection(
+            url = url,
+            depth = depth,
+            most = most,
+            onFound = { onProgress(PageProgress(found = it)) }
+        )
+
+        val links = when (found) {
+            is Outcome.Success -> found.value
+            is Outcome.Failure -> return found
+        }
+
+        // The whole documentation is every page an index of the site lists, not its closest thirty.
+        val every = links.everyPage().most(pages = most)
+
+        return Outcome.Success(value = if (isFull) every else links)
+    }
+
+    override suspend fun counted(
+        url: String,
+        depth: Int,
+        onProgress: suspend (PageProgress) -> Unit
+    ): Outcome<SectionAsked, PageProblem> = when (
+        val found = scan(
+            url = url,
+            depth = depth,
+            onProgress = onProgress
+        )
+    ) {
+        is Outcome.Success -> {
+            scanned = Triple(url, depth, found.value)
+
+            Outcome.Success(
+                value = SectionAsked(
+                    url = url,
+                    prefix = found.value.prefix,
+                    count = found.value.urls.size,
+                    more = found.value.more,
+                    depth = depth,
+                    isCounted = true
+                )
+            )
+        }
+
+        is Outcome.Failure -> Outcome.Failure(error = problemOf(error = found.error))
+    }
+
     override suspend fun clipSection(
         url: String,
         isEvery: Boolean,
         depth: Int,
         onProgress: suspend (PageProgress) -> Unit
     ): Outcome<List<NoteDraft>, PageProblem> {
-        val found = findSection(
+        val found = scan(
             url = url,
             depth = depth,
-            onFound = { onProgress(PageProgress(found = it)) }
+            onProgress = onProgress
         )
+
+        scanned = null
 
         val links = when (found) {
             is Outcome.Success -> if (isEvery) found.value.everyPage() else found.value
@@ -115,7 +186,9 @@ class ClipsForChat(
 
         clipSection(
             url = url,
-            links = links
+            links = links,
+            // The model writes each page's notes for a section it can read in minutes, not for a documentation.
+            withNotes = links.urls.size <= WITH_NOTES_PAGES
         ).collect { step ->
             last = step
 
@@ -166,5 +239,9 @@ class ClipsForChat(
         ClipError.TooLarge -> PageProblem.TOO_LARGE
         is ClipError.Refused -> PageProblem.REFUSED
         ClipError.NotArticle -> PageProblem.NOT_ARTICLE
+    }
+
+    private companion object {
+        const val WITH_NOTES_PAGES = 40
     }
 }

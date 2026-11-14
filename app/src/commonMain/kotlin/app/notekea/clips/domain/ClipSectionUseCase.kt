@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.flow
 /**
  * A page and the pages it links under its own path ([SectionLinks]), clipped one by one as [ClipWebPageUseCase] clips
  * one, the person told how far it is; a linked page that cannot be clipped is skipped and named, the page must not.
+ * The model writes each page's notes only [withNotes]: hundreds of pages take hours with them.
  */
 class ClipSectionUseCase(private val clipWebPage: ClipWebPageUseCase) {
     operator fun invoke(
         url: String,
-        links: SectionLinks
+        links: SectionLinks,
+        withNotes: Boolean = true
     ): Flow<SectionStep> = flow {
         val total = links.urls.size + 1
         val clips = mutableListOf<WebClip>()
@@ -26,7 +28,11 @@ class ClipSectionUseCase(private val clipWebPage: ClipWebPageUseCase) {
             )
 
             var last: ClipStep = ClipStep.Fetching
-            clipWebPage(url = page).collect { last = it }
+
+            clipWebPage(
+                url = page,
+                withNotes = withNotes
+            ).collect { last = it }
 
             when (val step = last) {
                 is ClipStep.Done -> clips += step.clip

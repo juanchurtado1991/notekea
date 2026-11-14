@@ -60,6 +60,15 @@ class CodeReviewChatTest {
             language: String?
         ): Outcome<SectionAsked, PageProblem> = Outcome.Failure(error = PageProblem.REFUSED)
 
+        override suspend fun counted(
+            url: String,
+            depth: Int,
+            onProgress: suspend (PageProgress) -> Unit
+        ): Outcome<SectionAsked, PageProblem> = sectionOf(
+            url = url,
+            language = null
+        )
+
         override suspend fun clipSection(
             url: String,
             isEvery: Boolean,

@@ -16,6 +16,16 @@ interface WebPageClipper {
     ): Outcome<SectionAsked, PageProblem>
 
     /**
+     * The pages [depth] levels of links give, counted before any is clipped ([SectionAsked.isCounted]), [onProgress]
+     * told how many so far.
+     */
+    suspend fun counted(
+        url: String,
+        depth: Int,
+        onProgress: suspend (PageProgress) -> Unit = {}
+    ): Outcome<SectionAsked, PageProblem>
+
+    /**
      * The page and the pages it links under its path, each a note, the page their index; [depth] levels of links
      * followed, [onProgress] told how far it is.
      */

@@ -122,4 +122,45 @@ class RobustClipTest {
             )
         )
     }
+
+    @Test
+    fun `the whole documentation follows every level, past what a deep clip takes, and a list of links is known`() =
+        runTest {
+            // A chain five levels down, and a page that is a line for each of its six links.
+            val chain = (0..5).associate { level ->
+                val page =
+                    if (level == 0) "https://x.com/docs/" else "https://x.com/docs/level-$level"
+
+                page to "<a href=\"/docs/level-${level + 1}\">Next</a>"
+            }
+
+            val list =
+                (1..6).joinToString(separator = "") { "<a href=\"/guide/page-$it\">Page $it</a> about it. " }
+
+            val finder =
+                FindSectionUseCase(fetcher = fetcher(chain + ("https://x.com/guide/" to list)))
+
+            val deep = finder(
+                url = "https://x.com/docs/",
+                depth = SectionLinks.MAX_DEPTH
+            ) as Outcome.Success
+
+            val full = finder(
+                url = "https://x.com/docs/",
+                depth = SectionLinks.FULL_DEPTH,
+                most = SectionLinks.MAX_FULL_PAGES
+            ) as Outcome.Success
+
+            val index = finder(url = "https://x.com/guide/") as Outcome.Success
+
+            assertEquals(
+                expected = listOf<Any>(3, 6, false, true),
+                actual = listOf(
+                    deep.value.urls.size,
+                    full.value.urls.size,
+                    deep.value.isIndex,
+                    index.value.isIndex
+                )
+            )
+        }
 }

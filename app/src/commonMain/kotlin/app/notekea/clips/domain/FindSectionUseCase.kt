@@ -15,11 +15,12 @@ class FindSectionUseCase(
 ) {
     /**
      * The pages under the page at [url]. With a [depth] over 1 and no index of the site to list them, the pages
-     * those link are followed too, [depth] levels in all, [onFound] told how many there are so far.
+     * those link are followed too, [depth] levels in all and at most [most] pages, [onFound] told how many so far.
      */
     suspend operator fun invoke(
         url: String,
         depth: Int = 1,
+        most: Int = SectionLinks.MAX_DEEP_PAGES,
         onFound: suspend (pages: Int) -> Unit = {}
     ): Outcome<SectionLinks, ClipError> {
         val page = when (val fetched = fetcher.fetch(url = url.trim())) {
@@ -53,7 +54,14 @@ class FindSectionUseCase(
         val most = SectionLinks.mostBeside(prefix = ownLinks.prefix)
         val isLoose = !ownLinks.isUnderPage && ownLinks.urls.size > most
 
-        val fromLinks = if (isLoose) ownLinks.copy(urls = emptyList()) else ownLinks
+        val shown = if (isLoose) ownLinks.copy(urls = emptyList()) else ownLinks
+
+        val fromLinks = shown.copy(
+            isIndex = isIndex(
+                html = page.html,
+                links = shown.urls.size
+            )
+        )
 
         // An index of the site counts when it lists pages under this page. WordPress's llms.txt lists the site's
         // general pages, none of its documentation: the page's own links are its section then (2026-11-13).
@@ -63,7 +71,7 @@ class FindSectionUseCase(
             else -> listed ?: fromLinks
         }
 
-        val levels = depth.coerceIn(1, SectionLinks.MAX_DEPTH)
+        val levels = depth.coerceIn(1, SectionLinks.FULL_DEPTH)
 
         val isDeepened =
             found.canGoDeeper &&
@@ -76,6 +84,7 @@ class FindSectionUseCase(
                     start = page.url,
                     found = found,
                     levels = levels,
+                    most = most,
                     onFound = onFound
                 )
             )
@@ -98,6 +107,7 @@ class FindSectionUseCase(
         start: String,
         found: SectionLinks,
         levels: Int,
+        most: Int,
         onFound: suspend (Int) -> Unit
     ): SectionLinks {
         val all = found.urls.toMutableList()
@@ -107,7 +117,7 @@ class FindSectionUseCase(
             val next = mutableListOf<String>()
 
             for (batch in level.chunked(size = AT_ONCE)) {
-                if (all.size >= SectionLinks.MAX_DEEP_PAGES) break
+                if (all.size >= most) break
 
                 val pages = coroutineScope {
                     batch
@@ -135,10 +145,26 @@ class FindSectionUseCase(
         }
 
         return found.copy(
-            urls = all.take(n = SectionLinks.MAX_DEEP_PAGES),
-            more = (all.size - SectionLinks.MAX_DEEP_PAGES).coerceAtLeast(minimumValue = 0),
-            rest = all.drop(n = SectionLinks.MAX_DEEP_PAGES)
+            urls = all.take(n = most),
+            more = (all.size - most).coerceAtLeast(minimumValue = 0),
+            rest = all.drop(n = most)
         )
+    }
+
+    // A page of few words for each page it links is a list of them (WordPress's documentation: 23 links, a line each).
+    private fun isIndex(
+        html: String,
+        links: Int
+    ): Boolean {
+        if (links < FEW_LINKS) return false
+
+        val words = html
+            .replace(NOT_TEXT, replacement = " ")
+            .replace(TAG, replacement = " ")
+            .split(SPACES)
+            .count { it.isNotEmpty() }
+
+        return words / links < WORDS_A_LINK
     }
 
     // The first index file [name] above the page that lists pages under its path; null when none does.
@@ -196,6 +222,16 @@ class FindSectionUseCase(
     private companion object {
         // The pages read at once for their links: a site answers a few at a time without slowing.
         const val AT_ONCE = 4
+        const val FEW_LINKS = 5
+        const val WORDS_A_LINK = 60
+
+        val NOT_TEXT = Regex(
+            pattern = "<(script|style|nav|header|footer|svg)\\b.*?</\\1>",
+            options = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+        )
+
+        val TAG = Regex(pattern = "<[^>]+>")
+        val SPACES = Regex(pattern = "\\s+")
         val ENTRY =
             Regex(pattern = "\\[([^\\]]+)\\]\\((https?://[^)\\s]+)\\)(?::[ \\t]*([^\\n]*))?")
         const val LLMS = "llms.txt"

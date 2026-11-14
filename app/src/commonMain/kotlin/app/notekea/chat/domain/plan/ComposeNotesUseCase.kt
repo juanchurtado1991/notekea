@@ -133,6 +133,21 @@ class ComposeNotesUseCase(
 
         val url = step.url.orEmpty()
 
+        val isCounted = ClipWords.isSection(request) && ClipWords.isCounted(request)
+
+        if (isCounted) {
+            val counted = clipping.counted(
+                url = url,
+                depth = ClipWords.depthOf(request = request),
+                onProgress = onProgress
+            )
+
+            return when (counted) {
+                is Outcome.Success -> problem(ActionProblem.SectionAsked(section = counted.value))
+                is Outcome.Failure -> problem(ActionProblem.PageFailed(reason = counted.error))
+            }
+        }
+
         if (ClipWords.isSection(request)) {
             return when (
                 val clips = clipping.clipSection(

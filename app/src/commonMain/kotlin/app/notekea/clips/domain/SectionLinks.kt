@@ -15,13 +15,22 @@ data class SectionLinks(
     // Found in the page's own links, not in an index of the site: the pages those link may be followed too.
     val canGoDeeper: Boolean = false,
     // The pages are under the page itself ("/documentation/…" for "/documentation"), not only beside it.
-    val isUnderPage: Boolean = false
+    val isUnderPage: Boolean = false,
+    // The page is a list of links more than a text: its pages are likely lists too, the articles a level down.
+    val isIndex: Boolean = false
 ) {
     /** Every page, the [rest] too: what "all of them" clips. */
     fun everyPage(): SectionLinks = copy(
         urls = urls + rest,
         more = 0,
         rest = emptyList()
+    )
+
+    /** At most [pages] of them, the others counted in [more]. */
+    fun most(pages: Int): SectionLinks = copy(
+        urls = urls.take(n = pages),
+        more = (urls.size - pages).coerceAtLeast(minimumValue = 0),
+        rest = urls.drop(n = pages)
     )
 
     /** What the page at [url] is: what the site says of it, or the words of its address. */
@@ -112,6 +121,10 @@ data class SectionLinks(
         private const val MOST_BESIDE_TOP = 60
         private const val MOST_BESIDE = 200
         const val MAX_DEEP_PAGES = 150
+
+        // "The whole documentation": every level, and far more pages.
+        const val FULL_DEPTH = 8
+        const val MAX_FULL_PAGES = 1_000
 
         /**
          * The pages [page] links under [prefix] that are not among [known] yet: what one more level of a section adds
