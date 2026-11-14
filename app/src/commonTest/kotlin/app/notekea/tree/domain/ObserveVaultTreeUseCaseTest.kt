@@ -82,6 +82,35 @@ class ObserveVaultTreeUseCaseTest {
         }
     }
 
+    // The code review of 2026-11-13: where the disk tells no case apart, the old name still answers after a rename
+    // that only changes case, and stayed in the tree beside the new one.
+    @Test
+    fun `a rename that only changes case leaves the new name alone, even when the old one still answers`() =
+        runTest {
+            scanner.addNote(file = file(path = AREPAS))
+
+            observeVaultTree(vaultPath = VAULT).test {
+                awaitItem()
+                val renamed = AREPAS.lowercase()
+                scanner.addNote(file = file(path = renamed))
+                watcher.emit(change = VaultChange.Deleted(path = RelativePath(value = AREPAS)))
+
+                watcher.emit(
+                    change = VaultChange.Created(
+                        path = RelativePath(value = renamed),
+                        isFolder = false
+                    )
+                )
+
+                assertEquals(
+                    expected = setOf(RelativePath(value = renamed)),
+                    actual = (awaitItem() as Outcome.Success).value.notes.keys
+                )
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
     @Test
     fun `changes that arrive together are applied in one update`() = runTest {
         scanner.addNote(file = file(path = AREPAS))

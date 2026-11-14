@@ -42,12 +42,23 @@ class OkioNoteMetadataReader(
                 .use { source ->
                     val firstLine = source.readUtf8Line()?.removePrefix(prefix = BYTE_ORDER_MARK)
 
+                    // What the frontmatter's search read: when it is never closed these are the note's text, and
+                    // were lost with its tags and tasks (the code review of 2026-11-13).
+                    val readAhead = mutableListOf<String>()
+
                     val yaml = firstLine?.takeIf {
                         it.trimEnd() == OPENING_FENCE
-                    }?.let { frontmatterOf(source = source) }
+                    }?.let {
+                        frontmatterOf(
+                            source = source,
+                            lines = readAhead
+                        )
+                    }
 
-                    val text = (if (yaml == null) sequenceOf(firstLine) else emptySequence()) +
-                        linesOf(source = source)
+                    val start =
+                        if (yaml == null) sequenceOf(firstLine) + readAhead else emptySequence()
+
+                    val text = start + linesOf(source = source)
 
                     val tasks = NoteTaskCollector()
 
@@ -83,8 +94,10 @@ class OkioNoteMetadataReader(
     }
 
     /** The frontmatter after its opening `---`, or null when it is not closed in time. */
-    private fun frontmatterOf(source: BufferedSource): String? {
-        val lines = mutableListOf<String>()
+    private fun frontmatterOf(
+        source: BufferedSource,
+        lines: MutableList<String>
+    ): String? {
         var length = 0
 
         while (length <= MAX_FRONTMATTER_CHARACTERS) {

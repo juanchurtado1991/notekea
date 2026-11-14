@@ -112,6 +112,18 @@ class OkioNoteMetadataReaderTest {
         )
     }
 
+    // The code review of 2026-11-13: a first line of "---" never closed took the whole note's tags with it.
+    @Test
+    fun `a note that opens with a rule and never closes it keeps the tags of its text`() =
+        runReaderTest {
+            writeNote(content = "---\nA rule, then #inbox to sort.\nAnd #later.\n")
+
+            assertEquals(
+                expected = listOf("inbox", "later"),
+                actual = readNote()?.textTags
+            )
+        }
+
     @Test
     fun `windows line endings, a byte order mark and a dots closing fence are accepted`() =
         runReaderTest {

@@ -91,7 +91,19 @@ class ObserveVaultTreeUseCase(
     ): VaultTree = batch
         .mapNotNull { pathOf(change = it) }
         .distinct()
-        .fold(initial = tree) { current, path ->
+        .fold(
+            initial = withoutRenamedCase(
+                tree = tree,
+                batch = batch
+            )
+        ) { current, path ->
+            val isOldCase = isOldCase(
+                path = path,
+                batch = batch
+            )
+
+            if (isOldCase) return@fold current
+
             val note = if (path.isMarkdown) {
                 noteScanner.stat(
                     vaultPath = vaultPath,
@@ -151,6 +163,39 @@ class ObserveVaultTreeUseCase(
     private fun needsRescan(batch: List<VaultChange>): Boolean = batch.any {
         it == VaultChange.Overflow || (it is VaultChange.Created && it.isFolder)
     }
+
+    // "Note.md" renamed "note.md" comes as a delete and a create; where the disk tells no case apart the old name
+    // still answers, and stayed in the tree beside the new one (the code review of 2026-11-13).
+    private fun isOldCase(
+        path: RelativePath,
+        batch: List<VaultChange>
+    ): Boolean {
+        val isDeleted = batch.any {
+            it is VaultChange.Deleted && it.path == path
+        }
+
+        return isDeleted && batch.any { change ->
+            val created = (change as? VaultChange.Created)?.path
+
+            created != null &&
+                created != path &&
+                created.value.equals(other = path.value, ignoreCase = true)
+        }
+    }
+
+    private fun withoutRenamedCase(
+        tree: VaultTree,
+        batch: List<VaultChange>
+    ): VaultTree = batch
+        .filterIsInstance<VaultChange.Deleted>()
+        .map { it.path }
+        .filter {
+            isOldCase(
+                path = it,
+                batch = batch
+            )
+        }
+        .fold(initial = tree) { current, path -> current.without(path = path) }
 
     private fun pathOf(change: VaultChange): RelativePath? = when (change) {
         is VaultChange.Created -> change.path

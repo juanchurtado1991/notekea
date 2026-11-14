@@ -62,6 +62,10 @@ class WelcomeViewModel(
     }
 
     override fun handleIntent(intent: WelcomeIntent) {
+        // While a vault opens, a second click (or a key) opens nothing beside it: the buttons only look disabled.
+        val isIgnored = state.value.isBusy && intent !is WelcomeIntent.OnErrorDismiss
+        if (isIgnored) return
+
         when (intent) {
             is WelcomeIntent.OnCreateVaultClick -> startNewVault(
                 suggestedName = intent.suggestedName

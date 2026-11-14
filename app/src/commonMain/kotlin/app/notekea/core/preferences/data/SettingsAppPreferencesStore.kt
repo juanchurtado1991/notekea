@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -35,7 +37,7 @@ class SettingsAppPreferencesStore(
         emitAll(current.filterNotNull())
     }
 
-    override suspend fun save(preferences: AppPreferences) {
+    override suspend fun save(preferences: AppPreferences) = saving.withLock {
         withContext(context = dispatchers.io) {
             settings.putString(
                 key = LANGUAGE_KEY,
@@ -70,6 +72,9 @@ class SettingsAppPreferencesStore(
 
         current.value = preferences
     }
+
+    // One save at a time, in the order asked: two quick changes could end with the older one kept.
+    private val saving = Mutex()
 
     private suspend fun read(): AppPreferences = withContext(context = dispatchers.io) {
         AppPreferences(
