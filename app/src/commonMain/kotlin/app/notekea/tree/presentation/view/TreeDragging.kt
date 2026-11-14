@@ -36,14 +36,7 @@ internal fun Modifier.treeDrag(
     var moved = Offset.Zero
 
     fun start(offset: Offset) {
-        val item = list
-            .layoutInfo
-            .visibleItemsInfo
-            .firstOrNull {
-                it.key == row.path.value
-            }
-
-        pressedAt = (item?.offset ?: 0) + offset.y
+        pressedAt = list.offsetOf(row = row) + offset.y
         moved = Offset.Zero
     }
 
@@ -119,3 +112,11 @@ internal fun Modifier.treeDrag(
         }
     }
 }
+
+// Where [row] starts down the list; 0 when it is not on screen.
+private fun LazyListState.offsetOf(row: TreeRow): Int = layoutInfo
+    .visibleItemsInfo
+    .firstOrNull {
+        it.key == row.path.value
+    }
+    ?.offset ?: 0
