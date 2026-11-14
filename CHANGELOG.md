@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   read the whole 16,384 tokens while short calls still run side by side; that a tool call written in our JSON
   under a grammar per tool is right more often than today's flat schema and than the model's own format; and
   that the model chooses well among ten tools at most. Nothing changes in the app yet.
+- The planner's work on the model's replies is held by a test that needs no model: the Medium model's replies to
+  the 126 evaluation requests are recorded and replayed in `check`.
 - The commit hook runs lint and the unit tests, in about two minutes; the cases that drive the real app and the
   coverage run in CI and with `./gradlew check koverVerify`.
 - Settings → General starts with Web sources: how often they are updated on their own, when they were last updated
