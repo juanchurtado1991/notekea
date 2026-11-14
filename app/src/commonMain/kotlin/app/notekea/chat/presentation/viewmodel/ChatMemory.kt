@@ -132,11 +132,17 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
         it.id > compactedThrough && it.replied().isNotBlank()
     }
 
-    private fun ChatEntry.replied(): String = answer.take(n = REPLY_CHARS).ifBlank {
-        WorkRecord
+    // What it said, and under it what it did: an agent's proposal has a summary of its own, which alone would
+    // leave out what it read and how the note's text was written (code review, 2026-11-14).
+    private fun ChatEntry.replied(): String {
+        val said = answer.take(n = REPLY_CHARS)
+
+        val did = WorkRecord
             .of(entry = this)
             ?.take(n = RECORD_CHARS)
             .orEmpty()
+
+        return listOf(said, did).filter { it.isNotBlank() }.joinToString(separator = "\n")
     }
 
     private fun ChatEntry.exchange() = ChatExchange(

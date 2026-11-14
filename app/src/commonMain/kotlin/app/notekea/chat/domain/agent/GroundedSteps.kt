@@ -28,8 +28,11 @@ internal object GroundedSteps {
 
         return move.copy(
             steps = move.steps.map { step ->
+                // A note asked for empty (no text to write) stays empty, whatever was read on the way.
                 val isFree =
-                    step.kind == ActionKind.CREATE_NOTE && step[ActionField.TEMPLATE] == null
+                    step.kind == ActionKind.CREATE_NOTE &&
+                        step[ActionField.TEMPLATE] == null &&
+                        step[ActionField.TEXT] != null
 
                 val isUnnamed = step.kind == ActionKind.WRITE_FROM_NOTES && step.notes.isEmpty()
 

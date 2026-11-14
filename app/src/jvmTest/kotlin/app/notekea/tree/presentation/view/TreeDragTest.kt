@@ -83,6 +83,56 @@ class TreeDragTest {
             )
         }
 
+    // Code review, 2026-11-14: a mouse moves a pixel or two during a click, and that was taken for a drag, which
+    // swallowed the click.
+    @Test
+    fun `a click during which the mouse moves a little still opens the note, and moves nothing`() =
+        runComposeUiTest {
+            val intents = mutableListOf<VaultTreeIntent>()
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    Box(
+                        modifier = Modifier.size(
+                            width = 300.dp,
+                            height = 500.dp
+                        )
+                    ) {
+                        TreeList(
+                            state = TreePreviewData.state(),
+                            onIntent = { intents += it }
+                        )
+                    }
+                }
+            }
+
+            waitForIdle()
+
+            onNodeWithText(text = "Welcome").performMouseInput {
+                moveTo(position = center)
+                press()
+
+                moveTo(
+                    position = center + Offset(
+                        x = 1f,
+                        y = 2f
+                    )
+                )
+
+                release()
+            }
+
+            waitForIdle()
+
+            assertEquals(
+                expected = listOf(1, 0),
+                actual = listOf(
+                    intents.filterIsInstance<VaultTreeIntent.OnRowClick>().size,
+                    intents.filterIsInstance<VaultTreeIntent.OnMoveInto>().size
+                )
+            )
+        }
+
     @Test
     fun `a right click on a row still opens its menu`() = runComposeUiTest {
         setContent {

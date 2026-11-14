@@ -109,6 +109,28 @@ class WorkRecordTest {
         )
     }
 
+    // Code review, 2026-11-14: an agent's proposal carries a summary, and with one the record was left out.
+    @Test
+    fun `a proposal with a summary of its own is remembered with what was read and written too`() {
+        val entry = acted(
+            step = ActionStep(
+                kind = ActionKind.CREATE_NOTE,
+                title = "Pros and cons"
+            )
+        ).copy(answer = "I made the table.")
+
+        val reply = remembered(entry = entry)
+
+        assertEquals(
+            expected = listOf(true, true, true),
+            actual = listOf(
+                reply.startsWith(prefix = "I made the table."),
+                WorkRecord.MARK in reply,
+                "my own example" in reply
+            )
+        )
+    }
+
     @Test
     fun `work that failed is remembered as having written nothing`() {
         val reply = remembered(

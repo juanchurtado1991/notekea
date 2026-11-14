@@ -178,6 +178,31 @@ class GroundedWorkTest {
             )
         }
 
+    // Code review, 2026-11-14: a note asked for empty was filled from whatever the agent had read.
+    @Test
+    fun `a note asked for with nothing to write stays empty, whatever was read on the way`() =
+        runTest {
+            store.texts[note] = TERMS
+
+            script(
+                "{\"move\":\"read\",\"note\":\"contract\"}",
+                "{\"move\":\"propose\",\"steps\":[{\"action\":\"create_note\",\"title\":\"Shopping\"}]}"
+            )
+
+            val proposed = run().last() as AgentStep.Proposed
+
+            assertEquals(
+                expected = listOf<Any>(ActionKind.CREATE_NOTE, emptyList<String>()),
+                actual = listOf<Any>(
+                    proposed
+                        .steps
+                        .single()
+                        .kind,
+                    bodyPrompts()
+                )
+            )
+        }
+
     @Test
     fun `asked to write a note, it ends on the card even when the model ends without a proposal`() =
         runTest {
@@ -208,6 +233,38 @@ class GroundedWorkTest {
                             .single()
                             .text
                         )
+            )
+        }
+
+    // Code review, 2026-11-14: a link to a note named with a dot, and a picture, were said to be attached files
+    // with no text; and a clipped page was read from the notes a model wrote about it.
+    @Test
+    fun `a read names only documents as unread, and reads a clipped page from its own text`() =
+        runTest {
+            store.texts[note] = "See [[Dr. Who]] and ![[photo.png]] and ![[scan.pdf]].\n\n" +
+                "The model's notes.\n\n## Original text\n\nThe page's own words."
+
+            script(
+                "{\"move\":\"read\",\"note\":\"contract\"}",
+                "{\"move\":\"finish\",\"summary\":\"Done.\"}"
+            )
+
+            run()
+
+            val read = engine
+                .generated[1]
+                .last()
+                .text
+
+            assertEquals(
+                expected = listOf(true, false, false, false, true),
+                actual = listOf(
+                    "The page's own words." in read,
+                    "The model's notes." in read,
+                    "Dr. Who" in read,
+                    "photo.png" in read,
+                    "It attaches scan.pdf" in read
+                )
             )
         }
 

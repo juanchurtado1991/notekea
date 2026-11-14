@@ -3,6 +3,7 @@ package app.notekea.chat.domain.plan
 import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.WebSourcesFolder
 
 /**
  * A note read with the documents it attaches (`![[contract.pdf]]`, a link to one): the chat works from what a pasted
@@ -16,12 +17,18 @@ internal class AttachedTexts(private val noteTextCache: NoteTextCache) {
         note: NoteEntry,
         notes: Collection<NoteEntry>
     ): ReadNote {
-        val body = textOf(
+        val whole = textOf(
             vaultPath = vaultPath,
             note = note
         )
 
-        val targets = targetsIn(body = body)
+        // A clipped page is read from the page's own text: the notes a model wrote about it above are no source
+        // to answer or write from either (code review, 2026-11-14).
+        val original = WebSourcesFolder.originalStartIn(body = whole)
+        val body = original?.let { whole.substring(startIndex = it) } ?: whole
+
+        // What it attaches is looked for in all of it: a document pasted above a clipped page's text is attached too.
+        val targets = targetsIn(body = whole)
 
         val documents = targets.mapNotNull { target ->
             notes.firstOrNull {
@@ -45,11 +52,12 @@ internal class AttachedTexts(private val noteTextCache: NoteTextCache) {
                     .lowercase()
             }
 
-        // A file attached that is no document Notekea reads, or one with no text in it.
+        // A document attached that is not in the vault, or one with no text in it. A link to a note whose name has
+        // a dot ("Dr. Who") and a picture are no documents, and are not said to be unread ones.
         val unread = targets
             .map { it.substringAfterLast(delimiter = '/') }
             .filter {
-                it.lowercase() !in known
+                isDocument(name = it) && it.lowercase() !in known
             } +
             read.filter { it.second.isBlank() }.map { it.first }
 
@@ -116,6 +124,14 @@ internal class AttachedTexts(private val noteTextCache: NoteTextCache) {
             }
             .distinct()
             .toList()
+    }
+
+    private fun isDocument(name: String): Boolean {
+        val extension = name.substringAfterLast(delimiter = '.').lowercase()
+
+        return DocumentFormat.entries.any {
+            extension in it.extensions
+        }
     }
 
     private fun isNamed(
