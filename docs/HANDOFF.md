@@ -247,8 +247,11 @@ now runs Gradle without git's variables. Left open: the app itself would follow 
 its environment the same way; `JGitRepository` could open its repositories without reading the environment.
 
 Decided on 2026-11-14 after step 0: a loop of our own and not Koog, and **the modes go** in step 6 (the router
-decides the effort; the menu leaves if it gets it right on the evaluation sets). Step 1 is next: `ChatTool`,
-`ToolResult` and the registry, with today's look-ups as tools behind `AgentTaskUseCase`, nothing visible changing.
+decides the effort; the menu leaves if it gets it right on the evaluation sets). **Step 1 is done** (2026-11-14): `chat/domain/tool` holds `ChatTool`, the registry that generates the prompt's
+list and the grammar, and today's five look-ups as tools; `AgentLookUp` is gone. Its gate passed: every chat test
+untouched, 27 of 30 on the agent's tasks and the same 7 of 21 on the wider evaluation with the real model. Next,
+as decided: the repair of a repository left half merged, then step 2 (tokens counted, `ModelProfile`,
+`ContextBudget`).
 
 Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
 is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted

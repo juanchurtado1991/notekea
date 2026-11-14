@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Inside the chat, what the agent can look up (search, read, find, tasks, a web page) is now a tool each, the
+  first step of the chat rebuilt as one loop (`docs/agent-loop.md`). Nothing it does or says changes yet.
 - One agent loop, step 0 (`docs/agent-loop.md`): measured that four slots over one shared context let a lone call
   read the whole 16,384 tokens while short calls still run side by side; that a tool call written in our JSON
   under a grammar per tool is right more often than today's flat schema and than the model's own format; and
