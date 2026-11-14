@@ -41,6 +41,10 @@ jobs:
             # The list goes in as a here-string: through a pipe, grep leaves at its first match and a long list then
             # fails the pipe (pipefail), which read as "only documents" and skipped the build of a large pull request.
             if [ -n "$changed" ] && ! grep -qvE "$docs" <<< "$changed"; then code=false; fi
+            # A document deleted or renamed is code too: KDocLinksTest fails when a KDoc names a file that is gone,
+            # and a pull request that removed one passed without it running.
+            gone=$(git diff --name-only --diff-filter=DR "origin/$GITHUB_BASE_REF...HEAD")
+            if [ -n "$gone" ]; then code=true; fi
           fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "Code changed: $code"

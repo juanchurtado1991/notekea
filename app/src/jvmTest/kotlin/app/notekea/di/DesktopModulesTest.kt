@@ -1,6 +1,9 @@
 package app.notekea.di
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import app.notekea.chat.domain.plan.WebPageClipper
+import app.notekea.chat.domain.sources.SourceSites
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.platform.domain.PlatformConventions
@@ -86,6 +89,17 @@ class DesktopModulesTest {
             expected = koin.get<Trash>(),
             actual = koin.get<Trash>()
         )
+    }
+
+    // The chat takes its site search with getOrNull: a binding missing there would only make the feature vanish,
+    // so it is asked for by name here (2026-11-13).
+    @Test
+    fun `the chat resolves with the web sources it looks further in and the page clipper`() {
+        val koin = koinApplication.koin
+
+        assertNotNull(actual = koin.get<SourceSites>())
+        assertNotNull(actual = koin.get<WebPageClipper>())
+        assertNotNull(actual = koin.get<ChatViewModel> { parametersOf(VAULT_PATH) })
     }
 
     @Test
