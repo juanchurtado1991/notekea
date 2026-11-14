@@ -166,6 +166,10 @@ The full check of that day also caught a setting lost when two were saved at onc
 `PropertiesFileSettingsFactory.save` read the settings twice, and a key added in between was taken as written. It
 now works on one copy.
 
+Verified on 2026-11-14 on macOS: `check koverVerify` green, and the Auto-Test cases 1.3, 1.4, 1.5, 1.12, 1.13, 3.3,
+3.9, 4.6 and 4.7 in the real app with the Medium model (97 cases). 1.4-04 pressed Enter before a new note's name was
+ready, now that its properties are written first; it waits for the name (`expectNaming`).
+
 **Not done, and the next step for the agent:** it is still two engines, a planner and a loop of moves, joined at the
 plan. One loop with tools, whose results are kept as a transcript across turns (not a record written afterwards),
 is the design to move to; the 4,096-token context of the local model is what bounds it. The local model also still

@@ -7,6 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
@@ -81,6 +82,30 @@ class TreeDragTest {
                 actual = intents.filterIsInstance<VaultTreeIntent.OnMoveInto>()
             )
         }
+
+    @Test
+    fun `a right click on a row still opens its menu`() = runComposeUiTest {
+        setContent {
+            NotekeaTheme(darkTheme = false) {
+                Box(
+                    modifier = Modifier.size(
+                        width = 300.dp,
+                        height = 500.dp
+                    )
+                ) {
+                    TreeList(
+                        state = TreePreviewData.state(),
+                        onIntent = {}
+                    )
+                }
+            }
+        }
+
+        waitForIdle()
+        onNodeWithText(text = "Recipes").performMouseInput { rightClick() }
+        waitForIdle()
+        onNodeWithText(text = "New note from template").assertExists()
+    }
 
     private companion object {
         const val STEPS = 8

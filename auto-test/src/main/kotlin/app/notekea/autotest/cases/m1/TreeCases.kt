@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.expectFolder
+import app.notekea.autotest.expectNaming
 import app.notekea.autotest.expectNotInTree
 import app.notekea.autotest.openVault
 import app.notekea.autotest.relaunch
@@ -119,6 +120,7 @@ private fun SuiteBuilder.newNotesAndFolders() {
         clickInTree(text = RECIPES)
         press(shortcut = Mod + Key.N)
         expectFile(path = "$PLAYGROUND/$RECIPES/Untitled.md")
+        expectNaming()
         press(key = Key.Enter)
         rightClickInTree(text = RECIPES)
         expectText(text = "New note from template")

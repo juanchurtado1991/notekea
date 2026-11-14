@@ -35,6 +35,7 @@ private const val WAIT_MILLIS = 10_000L
 private const val RELAUNCH_MILLIS = 30_000L
 private const val RENAME = "Rename"
 private const val MENU_TRIES = 3
+private const val NAMING_MILLIS = 5_000L
 private const val MENU_MILLIS = 2_000L
 
 // A busy machine (CI, several builds at once) indexes the Playground Vault in far more than a text's usual wait.
@@ -242,6 +243,18 @@ fun CaseScope.clickInTree(text: String) {
 /** Right-clicks the row of the tree that shows [text], for its menu. */
 fun CaseScope.rightClickInTree(text: String) {
     treeRow(text = text).performMouseInput { rightClick() }
+}
+
+/**
+ * Waits for the name of a new note or folder to be ready to type, as a person sees it before pressing Enter: the file
+ * is on disk a moment before its name is (a new note's properties are written in between, 2026-11-14), and an Enter
+ * pressed in that moment went to the tree, leaving the name open for the next click to close.
+ */
+fun CaseScope.expectNaming() {
+    ui.waitUntilAtLeastOneExists(
+        matcher = isFocused() and hasSetTextAction(),
+        timeoutMillis = NAMING_MILLIS
+    )
 }
 
 /** Renames the tree's [name] to [newName] from its menu, as a person would, and confirms with Enter. */
