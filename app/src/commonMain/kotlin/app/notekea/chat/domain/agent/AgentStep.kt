@@ -21,6 +21,12 @@ sealed interface AgentStep {
     /** Nothing to change: what it found. */
     data class Finished(val summary: String) : AgentStep
 
+    /** A question to the person in place of a guess, with the [options] to choose from as buttons. */
+    data class Asked(
+        val question: String,
+        val options: List<String>
+    ) : AgentStep
+
     /** Its proposal could not be checked against the vault, or it ran out of moves or time. */
     data class Stopped(val problem: ActionProblem?) : AgentStep
 }

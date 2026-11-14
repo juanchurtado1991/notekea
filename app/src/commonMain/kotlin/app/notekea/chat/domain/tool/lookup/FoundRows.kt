@@ -36,7 +36,7 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
         val lines = rows
             .take(n = ROWS)
             .joinToString(separator = "\n") {
-                "- ${it.note.nameWithoutExtension} ${it.cells.joinToString(separator = " · ")}" +
+                "- \"${it.note.value.removeSuffix(suffix = MARKDOWN)}\" ${cellsOf(row = it.cells)}" +
                     it
                         .due
                         ?.let { due -> " ($due)" }
@@ -46,7 +46,12 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
         return ToolResult(forModel = "${step.kind.written} ${step.request.orEmpty()}:\n$lines")
     }
 
+    private fun cellsOf(row: List<String>): String = row
+        .filter { it.isNotBlank() }
+        .joinToString(separator = " · ")
+
     private companion object {
+        const val MARKDOWN = ".md"
         const val ROWS = 30
     }
 }

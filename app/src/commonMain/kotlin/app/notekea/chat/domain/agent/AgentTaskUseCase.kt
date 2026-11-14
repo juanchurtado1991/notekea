@@ -51,6 +51,11 @@ class AgentTaskUseCase(
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
 
+    private val proposal = ProposalCheck(
+        checkPlan = checkPlan,
+        composeNotes = composeNotes
+    )
+
     // The look-ups a move may be, as tools (`docs/agent-loop.md`, step 1); the prompt still lists them by hand.
     private val lookUps = ToolRegistry(
         tools = listOf(
@@ -287,44 +292,16 @@ class AgentTaskUseCase(
         notes: Collection<NoteEntry>,
         openNote: RelativePath?
     ) {
-        // A page is clipped only from an address the task itself writes: a note or a page read on the way cannot
-        // have the agent fetch an address of its own, with what it read in it (code review, 2026-11-13).
-        val confirmed = UrlsNamed.shaped(
-            steps = move.steps.filter { it.kind.isConfirmed },
-            request = task
-        )
-
-        val summary = move.summary.orEmpty()
-        if (confirmed.isEmpty()) return emit(value = AgentStep.Finished(summary = summary))
-
-        // The notes it read to write from held no text: it says so, and writes no note from what it knows.
-        val isWrittenBlind =
-            unreadable.isNotEmpty() && confirmed.any { it.kind in GroundedSteps.WRITTEN }
-
-        if (isWrittenBlind) {
-            return emit(AgentStep.Stopped(ActionProblem.NothingToRead(names = unreadable)))
-        }
-
-        val checked =
-            when (val plan = checkPlan(steps = confirmed, notes = notes, openNote = openNote)) {
-                is Outcome.Success -> plan.value
-                is Outcome.Failure -> return emit(value = AgentStep.Stopped(problem = plan.error))
-            }
-
-        val composed = checked.map { step ->
-            when (
-                val written =
-                    composeNotes(step = step, request = task, vaultPath = vaultPath, notes = notes)
-            ) {
-                is Outcome.Success -> written.value
-                is Outcome.Failure -> return emit(AgentStep.Stopped(problem = written.error))
-            }
-        }
-
         emit(
-            value = AgentStep.Proposed(
-                steps = composed,
-                summary = summary
+            value = proposal.stepOf(
+                move = move,
+                unreadable = unreadable,
+                task = task,
+                vault = ProposalVault(
+                    path = vaultPath,
+                    notes = notes,
+                    openNote = openNote
+                )
             )
         )
     }

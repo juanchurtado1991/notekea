@@ -505,6 +505,45 @@ memory, the digest with a scripted model.
 `ReadTool`: 27 of 30 (90 %), 30 s a task; the wider evaluation 7 of 21 (33 %), 42 s. The tools themselves are
 measured with the model in step 5, when the loop calls them.
 
+## Step 5, the loop measured — 2026-11-14 (not yet in the app)
+
+**The loop** (`chat/domain/loop`). `RunTurnUseCase`: a first cheap call (`TurnRouter`) names the kind of work
+(`WorkKind`: write, organize, web, ask) and the skill that fits; the loop is given that kind's tools
+(`LoopTools`, `Toolsets`), the vault's instructions and the skill (`LoopPrompt`), and calls one tool at a time
+under the registry's grammar (`ToolCallJson` reads it) until it answers, proposes or asks (`AgentStep.Asked`). The
+changes are tools (`tool/change`: `ChangeTools`, each one of 3.9's actions; `ProposeTool` ends on the card, checked
+and written by `ProposalCheck`, shared with today's agent). `TurnState` holds a turn as it goes.
+
+**What the measures taught, and what the loop does for it.** Each was found in a report of the evaluation and
+fixed in general, not for its task:
+- A set that lacked the tool a task needed failed far more than a larger set chose wrong: sets hold what their
+  work needs, up to 24 tools (the developer lifted step 0's limit of ten: "if more tools work better, so be it").
+  Looking (search, read, find, tasks, list) is in every set, and write_note in organize too.
+- The model made the same call again and again: a call made again is told, and its tool is withdrawn for the next
+  call; three repeats and only changing or ending tools are left. A change asked again is told it is already in
+  the proposal.
+- It proposed with nothing added, or asked what to put in a note: told once, and asked again.
+- It asked when the task left nothing open ("my two budgets", "las recetas venezolanas"): a question is held back
+  once unless the task points at one thing it does not name ("the project", "tag it"; `SingularTask`).
+- It changed several notes when the task said "the" one: the change is held back once with the question to ask.
+- A bare name several notes share is told with their paths; found notes are listed by their quoted paths.
+- The router sent "find my recipes and tag them" to ask, which cannot tag: a request that changes anything is
+  never ask.
+- The answer is written from what was found as far as the context goes, and gives the figures it is worked out
+  from (also today's agent's answer).
+
+**Measured (Medium, 2026-11-14)**, `-PchatTasks=` runs a few tasks for a quick check:
+
+| | Today's agent | The loop | Mark (the developer) |
+|---|---|---|---|
+| Wider evaluation (21) | 7 (33 %), 42 s a task | 20 (95 %), 127 s a task | 19 |
+| Agent mode's tasks (30) | 27 (90 %), 30 s a task | 29 (96 %), 69 s a task | more than 27 |
+
+Left wrong: the reading notes' studies that used naps (it reads every section, then concludes only one used naps),
+and the home renovation's notes (it tags the note `Home` too). **Time is the cost:** two to three times today's,
+from more calls (11 and 7 on average, 30 at most). Bringing it down is the next work of this step, with the loop
+wired into the app behind a setting, ask_user's answers as buttons, `write_note` by sections and `edit_note`.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
@@ -517,6 +556,12 @@ measured with the model in step 5, when the loop calls them.
   old path stays switchable until step 6, so there is always a working chat to fall back to.
 
 ## Decided with the developer (2026-11-14)
+
+- **The marks the loop must reach before it takes over** (2026-11-14): at least 19 of the 21 wider tasks, and
+  more than today's 27 of agent mode's 30.
+- **The ten-tool limit of a toolset goes** (2026-11-14, on seeing step 5's first measures): "hagamos lo que
+  funcione mejor; si más herramientas funciona mejor, que así sea". A toolset holds what its work needs, and the
+  evaluation sets decide its size.
 
 1. **The commit hook** runs ktlint and the unit and architecture tests (about two minutes); the real-app suite
    stays in CI and on demand. Done.

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Inside the chat, the one loop works (`docs/agent-loop.md`, step 5): it chooses its kind of work, calls one tool at
+  a time, proposes changes on the card or asks the person when a request can be read two ways. Measured with the
+  Medium model it does 20 of the 21 harder tasks (today's agent does 7) and 29 of agent mode's 30 (today: 27),
+  taking two to three times as long. It is not in the app yet.
 - Inside the chat, the tools the one loop will work with are built (`docs/agent-loop.md`, step 4): a note's
   outline and reading by section, lists, links, digests of long documents, sums, counts and dates done by the app,
   a plan and notes for a long task, a question to the person, skills and a vault's own instructions

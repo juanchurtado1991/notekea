@@ -125,7 +125,7 @@ class AgentEvalChatModelTest {
 
             val (share, report) = measured(
                 vault = VAULT,
-                cases = AgentEvalCases.all,
+                all = AgentEvalCases.all,
                 name = "agent-eval"
             )
 
@@ -143,8 +143,39 @@ class AgentEvalChatModelTest {
 
             measured(
                 vault = AgentWideCases.VAULT,
-                cases = AgentWideCases.all.map { it.forToday() },
+                all = AgentWideCases.all.map { it.forToday() },
                 name = "agent-wide"
+            )
+
+            Unit
+        }
+
+    // The one loop on agent mode's 30 tasks: it may not do worse than today's agent to take its place (step 6).
+    @Test
+    fun `the one loop is measured on the tasks of agent mode`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        measured(
+            vault = VAULT,
+            all = AgentEvalCases.all,
+            name = "loop-eval",
+            isLoop = true
+        )
+
+        Unit
+    }
+
+    // The one loop on the same wider tasks (docs/agent-loop.md, step 5), asking where today's agent cannot.
+    @Test
+    fun `the one loop is measured on documents, long notes and requests read two ways`() =
+        runBlocking {
+            assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+            measured(
+                vault = AgentWideCases.VAULT,
+                all = AgentWideCases.all.map { it.forLoop() },
+                name = "loop-wide",
+                isLoop = true
             )
 
             Unit
@@ -153,8 +184,9 @@ class AgentEvalChatModelTest {
     /** The share of [cases] done right on [vault], and the report written to `build/reports/[name]-<size>.md`. */
     private suspend fun measured(
         vault: String,
-        cases: List<AgentEvalCase>,
-        name: String
+        all: List<AgentEvalCase>,
+        name: String,
+        isLoop: Boolean = false
     ): Pair<Double, String> {
         val indexed = EvalVault.of(
             vault = vault,
@@ -162,8 +194,29 @@ class AgentEvalChatModelTest {
             dispatchers = dispatchers
         )
 
+        // -PchatTasks="budget,reading challenge" runs only the tasks that hold one of those words.
+        val picked = System
+            .getProperty("notekea.chat.tasks")
+            .orEmpty()
+            .split(",")
+            .map { it.trim().lowercase() }
+            .filter { it.isNotEmpty() }
+
+        val cases = all.filter { case ->
+            picked.isEmpty() || picked.any { it in case.task.lowercase() }
+        }
+
+        if (cases.isEmpty()) return 1.0 to ""
+
         val notes = withMetadata(indexed = indexed)
         val agent = agentOf(indexed = indexed)
+
+        val runner = runnerOf(
+            indexed = indexed,
+            cache = NoteTextCache(indexed.store, TextFolder())
+        )
+
+        val loop = LoopEval.loopOf(recorded, embedder, indexed, runner)
         val slots = Semaphore(permits = setup.slots)
 
         val results = coroutineScope {
@@ -173,13 +226,13 @@ class AgentEvalChatModelTest {
                         slots.withPermit {
                             val start = System.nanoTime()
 
-                            val steps = agent(
-                                task = case.task,
-                                vaultPath = indexed.path,
-                                notes = notes,
-                                context = contextOf(notes = notes),
-                                openNote = null
-                            ).toList()
+                            val context = contextOf(notes = notes)
+
+                            val steps = if (isLoop) {
+                                loop(case.task, indexed.path, notes, context, null).toList()
+                            } else {
+                                agent(case.task, indexed.path, notes, context, null).toList()
+                            }
 
                             val seconds = (System.nanoTime() - start) / NANOS_PER_SECOND
 
@@ -215,12 +268,11 @@ class AgentEvalChatModelTest {
         return right.toDouble() / results.size to report
     }
 
-    private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
-        val cache = NoteTextCache(
-            contentStore = indexed.store,
-            textFolder = TextFolder()
-        )
-
+    // Nothing is ever run in the evaluation: the runner's find is the vault's, the rest a fake.
+    private fun runnerOf(
+        indexed: EvalVault,
+        cache: NoteTextCache
+    ): ActionRunner {
         val apply = ApplyLinkUpdatesUseCase(noteContentStore = indexed.store)
         val calendar = JvmLocalCalendar()
 
@@ -238,8 +290,7 @@ class AgentEvalChatModelTest {
             Clock.System
         )
 
-        // Agent mode only looks things up: the runner's find is the vault's, and nothing is ever run.
-        val runner = object : ActionRunner by FakeActionRunner() {
+        return object : ActionRunner by FakeActionRunner() {
             override suspend fun find(
                 vaultPath: String,
                 step: ActionStep,
@@ -250,6 +301,18 @@ class AgentEvalChatModelTest {
                 notes = notes
             )
         }
+    }
+
+    private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
+        val cache = NoteTextCache(
+            contentStore = indexed.store,
+            textFolder = TextFolder()
+        )
+
+        val runner = runnerOf(
+            indexed = indexed,
+            cache = cache
+        )
 
         return AgentTaskUseCase(
             llmEngine = recorded,
@@ -353,7 +416,7 @@ class AgentEvalChatModelTest {
 
         lastPrompts[result.case.task]?.let { prompt ->
             append("\n<details><summary>Found by the last move</summary>\n\n```\n")
-            append(prompt.substringAfter(delimiter = "Found so far:\n").take(n = PROMPT_CHARS))
+            append(prompt.substringAfter(delimiter = "so far:\n").take(n = PROMPT_CHARS))
             append("\n```\n</details>\n")
         }
     }
