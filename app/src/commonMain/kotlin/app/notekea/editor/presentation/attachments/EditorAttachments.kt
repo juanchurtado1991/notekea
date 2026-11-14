@@ -378,7 +378,8 @@ class EditorAttachments(
                 image = poster?.let {
                     decodedImage(
                         bytes = it,
-                        dispatcher = dispatchers.default
+                        dispatcher = dispatchers.default,
+                        maxWidth = CARD_PIXELS
                     )
                 }
             )
@@ -397,7 +398,8 @@ class EditorAttachments(
             ?.let {
                 decodedImage(
                     bytes = it,
-                    dispatcher = dispatchers.default
+                    dispatcher = dispatchers.default,
+                    maxWidth = CARD_PIXELS
                 )
             } ?: return null
 
@@ -431,7 +433,8 @@ class EditorAttachments(
         return bytes?.let {
             decodedImage(
                 bytes = it,
-                dispatcher = dispatchers.default
+                dispatcher = dispatchers.default,
+                maxWidth = IMAGE_PIXELS
             )
         }
     }
@@ -445,5 +448,9 @@ class EditorAttachments(
     companion object {
         /** The widest a new image is embedded, in the note's units (dp), so it fits beside the text it belongs to. */
         const val DEFAULT_IMAGE_WIDTH = 400
+
+        // As wide as a picture is ever drawn on a dense screen: an embedded image, and a card's small one.
+        private const val IMAGE_PIXELS = 2_400
+        private const val CARD_PIXELS = 960
     }
 }

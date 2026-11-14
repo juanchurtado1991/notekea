@@ -4,6 +4,7 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.FilePosters
 import app.notekea.editor.domain.FilesShownHere
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -36,16 +37,21 @@ internal class DesktopFilePosters(
 
         withContext(context = dispatchers.io) {
             if (Files.isRegularFile(kept)) Files.readAllBytes(kept) else null
-        } ?: made(
-            vaultPath = vaultPath,
-            path = path,
-            file = file
-        )?.also { poster ->
-            withContext(context = dispatchers.io) {
-                Files.createDirectories(folder)
-                Files.write(kept, poster)
-            }
         }
+            // Made to its end and kept even when who asked stopped waiting (the note was typed in): each keystroke
+            // threw the poster away as it was ready and started FFmpeg again (the code review of 2026-11-13).
+            ?: withContext(context = NonCancellable) {
+                made(
+                    vaultPath = vaultPath,
+                    path = path,
+                    file = file
+                )?.also { poster ->
+                    withContext(context = dispatchers.io) {
+                        Files.createDirectories(folder)
+                        Files.write(kept, poster)
+                    }
+                }
+            }
     }
 
     private suspend fun made(
