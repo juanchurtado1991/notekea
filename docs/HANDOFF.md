@@ -261,8 +261,12 @@ task ("Step 2, done" in `docs/agent-loop.md`). **Step 3 is done** (2026-11-14):
 `ConversationMemory` and `TurnRecord`; `ChatHistoryStore` keeps a `Conversation` (file version 2, version 1 read
 as it is), written from the moment a turn is asked. `ChatMemory` and `WorkRecord` are gone. A turn under way is
 still built in `ChatEntry` and turned into the conversation when kept (`EntryTurns`), until the loop of step 5
-writes its items itself. Gate: 27 of 30 and 7 of 21, as before. Manual case 3.3-15. Next: step 4 (the reading and
-working tools, skills, the vault's instructions).
+writes its items itself. Gate: 27 of 30 and 7 of 21, as before. Manual case 3.3-15. **Step 4 is done** (2026-11-14): the tools are built and
+tested, none called yet (`tool/reading`: outline, read by section, list, links, digest; `tool/app`: calculate,
+count, date; `tool/work`: plan, note, ask_user, with `TurnWork` in `ToolContext`; `chat/domain/skill`:
+`BuiltInSkills` and `VaultGuide`, which reads `Notekea.md` and `Skills/`). Next: step 5 (`RunTurnUseCase`, the
+router, the toolsets, the changing tools; agent mode only), with the setting for the instructions' and skills'
+place.
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

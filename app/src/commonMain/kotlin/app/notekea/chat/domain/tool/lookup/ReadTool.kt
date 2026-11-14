@@ -8,6 +8,7 @@ import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
+import app.notekea.chat.domain.tool.reading.TextOutline
 import app.notekea.core.notes.domain.NoteTextCache
 
 /**
@@ -20,9 +21,17 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
     override val name = NAME
 
     override val description =
-        "a note's name; you get its text, with the text of the documents attached to it (a pasted PDF)."
+        "a note's name; you get its text, with the text of the documents attached to it (a pasted PDF). " +
+            "With a section (a heading of its outline), only that part of a long note."
 
-    override val arguments = listOf(ToolArgument(name = NOTE))
+    override val arguments = listOf(
+        ToolArgument(name = NOTE),
+        ToolArgument(
+            name = SECTION,
+            isRequired = false
+        )
+    )
+
     override val effect = ToolEffect.READS
 
     // A note read is listed by its path in the vault ("Read Recipes/Arepas"), however the model named it.
@@ -69,6 +78,16 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
         }
 
         context.reads.add(note = path)
+        val section = call.text(name = SECTION)
+
+        if (section.isNotEmpty()) {
+            return sectionOf(
+                text = read.text,
+                section = section,
+                shown = shown
+            )
+        }
+
         val properties = NoteProperties.of(note = note).joinToString(separator = "") { "$it\n" }
 
         // Counted here, not by the model: "how many words does Arepas have?" got 109, 128 and 63 (the chat probe).
@@ -93,9 +112,51 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
         )
     }
 
+    // One part of a long note, by its heading, its subheadings with it; a heading the note lacks gets its headings.
+    private fun sectionOf(
+        text: String,
+        section: String,
+        shown: String
+    ): ToolResult {
+        val parts = TextOutline.of(text = text)
+
+        val part = TextOutline.find(
+            parts = parts,
+            section = section
+        )
+
+        if (part == null) {
+            val headings = parts
+                .filter {
+                    it.level > 0
+                }
+                .joinToString { it.heading }
+                .ifEmpty { "none" }
+
+            return ToolResult(
+                forModel = "read \"$shown\": no section \"$section\". Its headings: $headings."
+            )
+        }
+
+        val whole = part.textIn(text = text)
+
+        val more = if (whole.length > SECTION_CHARS) {
+            "\n(Its first $SECTION_CHARS of ${whole.length} characters: read one of its subsections for the rest.)"
+        } else {
+            ""
+        }
+
+        return ToolResult(
+            forModel = "read \"$shown\", section \"${part.heading}\" " +
+                "(${TextOutline.wordsIn(text = whole)} words):\n${whole.take(n = SECTION_CHARS)}$more"
+        )
+    }
+
     companion object {
         const val NAME = "read"
         const val NOTE = "note"
+        const val SECTION = "section"
+        private const val SECTION_CHARS = 6_000
         private val WORDS = Regex(pattern = "[\\p{L}\\p{N}]+(['’-][\\p{L}\\p{N}]+)*")
         private const val NO_TEXT = "nothing found: this note holds no text to work from."
         private const val NOTE_CHARS = 2_500

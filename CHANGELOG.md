@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Inside the chat, the tools the one loop will work with are built (`docs/agent-loop.md`, step 4): a note's
+  outline and reading by section, lists, links, digests of long documents, sums, counts and dates done by the app,
+  a plan and notes for a long task, a question to the person, skills and a vault's own instructions
+  (`Notekea.md`). Nothing uses them yet.
 - The chat is kept as a conversation: opened again, a request shows the steps it made and how its proposal ended
   (done, cancelled, undone, not confirmed), a question cut by closing Notekea is there marked Stopped, and the
   chat still knows what it did and what it had summarized. A history written before is read as it is

@@ -468,6 +468,43 @@ memory.
 evaluation 7 of 21 (33 %), 42 s: where they stood. Not run: the chat probe, which is a transcript read by eye and
 has no score; and `ChatMemoryChatModelTest`, which measures RAM with the Small model, not installed here.
 
+## Step 4, done — 2026-11-14
+
+**Reading no more than is needed** (`chat/domain/tool/reading`). `OutlineTool` gives a note's headings, nested,
+with the words each part holds and what it attaches; `ReadTool` takes a `section` (a heading, its subsections with
+it; a heading the note lacks gets the note's headings back); `ListTool` names what is in a folder or under a tag,
+or the notes changed last; `LinksTool` the notes a note links to and that link to it, as the backlinks panel
+finds them; `DigestTool` reads long notes part by part in calls of their own and gives the turn only what each
+part says about the question. All open a note through `NoteOpener`, so what they read is what a note the turn
+writes is written from.
+
+**Done by the app, not asked of the model** (`tool/app`). `CalculateTool` (`Arithmetic`: precedence,
+parentheses, percents, thousands; what is not arithmetic is said, never guessed), `CountTool` (notes, words,
+tasks in the vault, a folder, a tag or a note) and `DateTool` (`DatePhrases`: "tomorrow", "next Friday", "in 3
+weeks", "end of month", in English and Spanish, from `ToolContext.today`).
+
+**Working** (`tool/work`). `TurnWork` is the turn's working memory in `ToolContext`: the plan (`PlanTool`,
+written whole and ticked as it goes) and the facts noted with their passages (`NoteTool`), described for the
+prompt, where they stay whatever the budget trims. `AskUserTool` ends the turn with a question and two to four
+answers. A list argument reaches a tool one item a line (`ToolCall.list`).
+
+**Skills and the vault's instructions** (`chat/domain/skill`). `BuiltInSkills`: a comparison table, a document
+summary, study cards, meeting notes, each a few lines. `VaultGuide` reads the vault's instructions (one note,
+`Notekea.md` at its root until a setting says otherwise) and the person's own skills (the notes of `Skills/`: the
+first line describes one, the rest instructs it; one named as a skill of the app replaces it).
+
+**What waits for step 5.** None of this is called by today's agent, whose prompt and flat schema are its own:
+the loop, its router and its toolsets are step 5, and with them the setting for where the instructions and the
+skills live, and the first measure of these tools with the model. `sources(question)` stays where it is (the
+chat's site search) until the *web* toolset.
+
+**Tests.** `ReadingToolsTest`, `AppToolsTest`, `WorkToolsTest`, `VaultGuideTest`: each tool on a vault in
+memory, the digest with a scripted model.
+
+**The gate.** Every test passes. With the real model (Medium), today's agent, which none of this touches but
+`ReadTool`: 27 of 30 (90 %), 30 s a task; the wider evaluation 7 of 21 (33 %), 42 s. The tools themselves are
+measured with the model in step 5, when the loop calls them.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and

@@ -7,4 +7,11 @@ data class ToolCall(
 ) {
     /** The argument [name], trimmed; empty when the model left it out. */
     fun text(name: String): String = arguments[name]?.trim().orEmpty()
+
+    /** The list argument [name], one item a line as the loop keeps it; empty when the model left it out. */
+    fun list(name: String): List<String> = arguments[name]
+        .orEmpty()
+        .lines()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
 }

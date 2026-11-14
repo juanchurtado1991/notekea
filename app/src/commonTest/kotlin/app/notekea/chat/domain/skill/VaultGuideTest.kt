@@ -1,0 +1,88 @@
+package app.notekea.chat.domain.skill
+
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TextFolder
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+/**
+ * What a vault tells the chat about itself (`docs/agent-loop.md`, step 4): its instructions note, and the person's
+ * own skills beside the app's.
+ */
+class VaultGuideTest {
+    private val store = FakeNoteContentStore()
+    private val guide = VaultGuide(
+        noteTextCache = NoteTextCache(
+            contentStore = store,
+            textFolder = TextFolder()
+        )
+    )
+
+    private val instructions = RelativePath(value = "Notekea.md")
+    private val recipe = RelativePath(value = "Skills/Recipe card.md")
+    private val summary = RelativePath(value = "Skills/Document summary.md")
+    private val empty = RelativePath(value = "Skills/Empty.md")
+    private val notes = listOf(instructions, recipe, summary, empty).map { entry(path = it.value) }
+
+    @Test
+    fun `the vault's instructions are its note's text, and none when it has no such note or it is empty`() =
+        runTest {
+            store.texts[instructions] = "New notes go in Inbox. Write in Spanish."
+            val read = guide.instructionsOf(VAULT, notes)
+
+            val missing = guide.instructionsOf(
+                vaultPath = VAULT,
+                notes = notes.drop(n = 1)
+            )
+
+            store.texts[empty] = "  \n"
+
+            val blank = guide.instructionsOf(
+                vaultPath = VAULT,
+                notes = notes,
+                note = empty
+            )
+
+            assertEquals(
+                expected = listOf("New notes go in Inbox. Write in Spanish.", null, null),
+                actual = listOf(read, missing, blank)
+            )
+        }
+
+    @Test
+    fun `the person's skills are the notes of the folder, beside the app's, and one of the same name replaces it`() =
+        runTest {
+            store.texts[recipe] = "# Write a recipe as a card\nIngredients first, as a list.\nThen the steps."
+            store.texts[summary] = "Summaries my way\nThree bullets, no more."
+            store.texts[empty] = ""
+
+            val skills = guide.skillsOf(
+                vaultPath = VAULT,
+                notes = notes
+            )
+
+            assertEquals(
+                expected = listOf(
+                    listOf("comparison table", "study cards", "meeting notes", "document summary", "recipe card"),
+                    Skill(
+                        name = "recipe card",
+                        description = "Write a recipe as a card",
+                        instructions = "Ingredients first, as a list.\nThen the steps."
+                    ),
+                    "Three bullets, no more."
+                ),
+                actual = listOf(
+                    skills.map { it.name },
+                    skills.last(),
+                    skills.first {
+                        it.name == "document summary"
+                    }.instructions
+                )
+            )
+        }
+}
