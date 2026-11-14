@@ -176,23 +176,25 @@ pasted documentation page asks its question in the chat again.
     forgets a closed note; the side panel waits for its restore; three PDFs stay open; a deck's tag in any form;
     a page deleted from a section stays deleted; reserved address ranges refused; the hardware probed once; a
     selection of no case refused; releases test before packaging.
-- **Still open from that review** (none loses a note):
-  - **YouTube:** the player is added to the key window, not surely Notekea's own (`MacWebView.contentView`: match
-    `orderedWindows` by the window's title, which needs an `ObjC.count`); the first responder is not handed back;
-    element full screen is not followed. Not done because it cannot be checked without the app on screen.
-  - **Editor:** posters are asked again on every keystroke (`EditorFiles.update` cancels `makePosters`) and their
-    cache is never cleaned; a broken embed walks the vault each time (`EditorAttachments.viewsIn`); images are
-    decoded at full resolution (`ImageDecoding.kt`).
-  - **Settings › Files:** empty folders are not offered (needs `AttachmentStore.folders`).
-  - **Tree:** an optimistic rename can be undone by a tree computed before it (`VaultTreeViewModel.observe`); the
-    note cache of a vault removed from the recents is never deleted.
-  - **Sync:** a repository left MERGING or REBASING by a crash is not repaired (resetting it could lose edits made
-    since); keyring errors are silent; an address written with its token is stored with it.
-  - **Core:** two Notekeas overwrite each other's settings.properties; `NoteTextCache` is one per consumer and
-    unbounded; an attachment copy that fails leaves a cut file; YAML comments after a value stay in it.
-  - **Tests, CI, DI:** `expectNoText` passes at once (documented; `expectTextStaysAway` exists); milestone builds
-    are versioned above 1.0.0; the docs-only filter skips `KDocLinksTest`; no Koin graph check; three
-    `HttpClient`s are never closed.
+- **Fixed in the last round:** empty folders in Settings › Files (`AttachmentStore.folders`); a copy that fails
+  leaves no file; two Notekeas merge what each changed into settings.properties; a comment after a YAML value
+  (`YamlValues.withoutComment`); a token written in a remote's address goes to the keychain (`RemoteAddress`); a
+  tree read before a rename (`TreeRenaming.withPending`); a poster is kept once made; pictures are decoded no wider
+  than drawn (`decodedImage(maxWidth)`); the YouTube player joins the window by its title and hands the keyboard
+  back (`MacWebView.contentView`, `yieldKeyboard`); CI counts a deleted document as code; the chat's web sources
+  resolve from the real modules (`DesktopModulesTest`).
+- **Left open on purpose** (none loses a note):
+  - **Sync:** a repository left MERGING or REBASING by a crash is not repaired by itself: the only repair is a hard
+    reset, which would discard what the person wrote since. It needs a decision, and a dialog.
+  - **Editor:** a broken embed lists the vault again when the text changes. That listing is what finds a file
+    added outside Notekea (`EditorAttachmentsTest`); a throttle needs the vault's watcher to tell the editor.
+  - **YouTube:** the page's own full screen is not followed, and the window match was not seen on screen.
+  - **Tree:** the note cache of a vault removed from the recents stays in the database (vault and tree are two
+    features; it needs a port in the shell).
+  - **Core:** `NoteTextCache` is one per consumer and unbounded; the three `HttpClient`s live as long as the app.
+  - **Tests and CI:** `expectNoText` passes at once by design (`expectTextStaysAway` waits); milestone builds are
+    versioned 1.M.K, above 1.0.0, which the first release will not install over; Koin's own `verify()` is not
+    used (it needs koin-test).
 
 ## The release run
 
