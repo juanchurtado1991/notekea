@@ -88,11 +88,17 @@ internal fun FollowChat(
         chat.onIntent(intent = ChatIntent.OnIndexChange(isReady = isIndexReady))
     }
 
-    LaunchedEffect(chat, editorState.notePath) {
-        chat.onIntent(intent = ChatIntent.OnActiveNoteChange(path = editorState.notePath))
+    val activePath = tabs.workspace.activePath
+
+    // The note of the tab in front, and none when it is a PDF, a view or nothing at all: the editor still holds
+    // the last note it showed, which the chat kept asking about (the code review of 2026-11-13).
+    val activeNote = editorState.notePath?.takeIf {
+        it == activePath
     }
 
-    val activePath = tabs.workspace.activePath
+    LaunchedEffect(chat, activeNote) {
+        chat.onIntent(intent = ChatIntent.OnActiveNoteChange(path = activeNote))
+    }
 
     FollowWork(
         chat = chat,

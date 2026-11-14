@@ -42,4 +42,11 @@ class OnlyCasesTest {
 
         assertSame(suite, suite.only(prefixes = emptyList()))
     }
+
+    @Test
+    fun `a selection that names no case is refused, never a run of nothing that passes`() {
+        val refused = runCatching { suite.only(prefixes = listOf("1.6", "9.99")) }.exceptionOrNull()
+
+        assertEquals("No case is named 9.99", refused?.message)
+    }
 }

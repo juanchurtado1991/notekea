@@ -13,6 +13,19 @@ public fun Suite.only(prefixes: List<String>): Suite {
             id.startsWith("$prefix.")
     }
 
+    // A selection that names nothing (a typo, "9.99") ran no case and passed: it is refused instead.
+    val named = (automated.map { it.id } + manual.map { it.id })
+
+    prefixes.forEach { prefix ->
+        val isKnown = named.any { id ->
+            id == prefix ||
+                id.startsWith("$prefix-") ||
+                id.startsWith("$prefix.")
+        }
+
+        require(isKnown) { "No case is named $prefix" }
+    }
+
     return withCases(
         automated = automated.filter { isKept(id = it.id) },
         manual = manual.filter { isKept(id = it.id) }

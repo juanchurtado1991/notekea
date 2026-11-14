@@ -21,9 +21,9 @@ import java.io.File
 import javax.imageio.ImageIO
 
 /**
- * [PdfPages] with PDFBox: the PDF open while its tab reads it (one at a time, closed when another is asked for or its
- * tab closes), each
- * page drawn to a PNG, and a passage found on a page by its text positions ([PageTextPositions]).
+ * [PdfPages] with PDFBox: the PDFs open while their tabs read them (a few at a time, the one read longest ago closed
+ * when another is asked for, each when its tab closes), each page drawn to a PNG, and a passage found on a page by
+ * its text positions ([PageTextPositions]).
  */
 class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
     private val lock = Mutex()
@@ -32,8 +32,11 @@ class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
     private val scope = CoroutineScope(context = SupervisorJob() + dispatchers.io)
 
     /** Whether a PDF is open now. */
-    internal val isOpen: Boolean get() = open != null
-    private var open: Pair<String, PDDocument>? = null
+    internal val isOpen: Boolean get() = open.isNotEmpty()
+
+    // The few PDFs last read, by file, size and date: two tabs side by side closed each other's at every page
+    // (the code review of 2026-11-13). The one read longest ago is closed when another is asked for.
+    private val open = LinkedHashMap<String, PDDocument>(MOST_OPEN, LOAD_FACTOR, true)
 
     override suspend fun count(
         vaultPath: String,
@@ -88,11 +91,10 @@ class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
 
         scope.launch {
             lock.withLock {
-                val isThisOne = open?.first?.startsWith(prefix = "$file|") == true
-                if (!isThisOne) return@withLock
-
-                open?.second?.close()
-                open = null
+                open
+                    .keys
+                    .filter { it.startsWith(prefix = "$file|") }
+                    .forEach { open.remove(it)?.close() }
             }
         }
     }
@@ -116,21 +118,25 @@ class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
     private fun documentOf(file: File): PDDocument {
         val key = "${file.absolutePath}|${file.length()}|${file.lastModified()}"
 
-        open?.takeIf {
-            it.first == key
-        }?.let {
-            return it.second
+        open[key]?.let {
+            return it
         }
 
-        open?.second?.close()
+        if (open.size >= MOST_OPEN) {
+            val oldest = open.keys.first()
+            open.remove(oldest)?.close()
+        }
+
         PdfFonts.useBundledOnly()
         val document = Loader.loadPDF(file)
-        open = key to document
+        open[key] = document
 
         return document
     }
 
     private companion object {
         const val PNG = "png"
+        const val MOST_OPEN = 3
+        const val LOAD_FACTOR = 0.75f
     }
 }

@@ -16,6 +16,7 @@ import app.notekea.shell.domain.PlayedVideo
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.viewmodel.TreeFilePreviews
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -49,11 +50,14 @@ class WorkspaceViewModel(
     // The file each cover was read from, so a picture changed on disk is read again.
     private val coverSources = mutableMapOf<RelativePath, NoteFile?>()
 
+    private val panelRestored = CompletableDeferred<Unit>()
+
     init {
         launchGuarded(onError = ::showUnexpectedError) {
             val panel = tools.getSidePanel()
 
             reduce { it.copy(sidePanel = panel) }
+            panelRestored.complete(value = Unit)
 
             saved = tools.getWorkspace(vaultPath = vaultPath)
             restoreIfReady()
@@ -394,10 +398,15 @@ class WorkspaceViewModel(
             it.notes[path]?.file ?: it.attachments[path]
         }
 
+    // At once when the stored panel is back; a change made before waits for it, or it would save the defaults
+    // over what was stored and then be undone by the restore (the code review of 2026-11-13).
     private fun updateSidePanel(change: (SidePanelPreferences) -> SidePanelPreferences) {
-        reduce { it.copy(sidePanel = change(it.sidePanel)) }
+        val isRestored = panelRestored.isCompleted
+        if (isRestored) reduce { it.copy(sidePanel = change(it.sidePanel)) }
 
         launchGuarded(onError = ::showUnexpectedError) {
+            panelRestored.await()
+            if (!isRestored) reduce { it.copy(sidePanel = change(it.sidePanel)) }
             savingPanel.withLock { tools.saveSidePanel(preferences = state.value.sidePanel) }
         }
     }
