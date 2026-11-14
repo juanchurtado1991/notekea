@@ -95,6 +95,29 @@ internal fun CaseScope.awaitReplyStart(running: String = STOP) {
 }
 
 /**
+ * Waits for a step of the reply to be the one going on ([text], its line in the list of steps). The steps before it
+ * ask the model too (understanding the request), which on a loaded laptop takes longer than a text's usual wait: the
+ * model's own time is given (3.6-01 stayed on Understanding your request… past it, 2026-11-14).
+ */
+internal fun CaseScope.awaitStep(text: String) {
+    step(description = "Wait for the step “$text”")
+
+    try {
+        ui
+            .waitUntil(timeoutMillis = REPLY_MILLIS) {
+                ui
+                    .onAllNodes(hasText(text = text))
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+    } catch (exception: ComposeTimeoutException) {
+        throw CaseFailure(message = "expected the step “$text”, it never came").apply {
+            initCause(exception)
+        }
+    }
+}
+
+/**
  * Waits until the reply being written ends (the field's button, [running] meanwhile, is back): the model can take
  * minutes on a laptop.
  */

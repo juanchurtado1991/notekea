@@ -39,7 +39,7 @@ private fun SuiteBuilder.deepAnswer() {
         openChat()
         chooseMode(mode = "Deep thinking")
         send(question = WATER)
-        expectText(text = "Writing drafts and comparing them…")
+        awaitStep(text = "Writing drafts and comparing them…")
         awaitReply()
 
         val chat = copiedChat()
