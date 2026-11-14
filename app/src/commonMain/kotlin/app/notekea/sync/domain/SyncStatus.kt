@@ -21,5 +21,11 @@ sealed interface SyncStatus {
     /** Notes changed on both sides: each kept as it is on the remote, with ours beside it as "Note (conflict).md". */
     data class Conflict(val notes: List<RelativePath>) : SyncStatus
 
+    /**
+     * The vault was left in the middle of a merge (the app killed, the power gone): nothing syncs until the person
+     * chooses how to repair it. [changedHere] are the files changed on this computer and not on the remote.
+     */
+    data class Interrupted(val changedHere: List<RelativePath>) : SyncStatus
+
     data class Failed(val message: String) : SyncStatus
 }

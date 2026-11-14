@@ -11,7 +11,10 @@ import org.eclipse.jgit.treewalk.EmptyTreeIterator
 internal object JGitPending {
     private const val REMOTE_PREFIX = "refs/remotes/origin/"
 
-    fun of(git: Git): Int {
+    fun of(git: Git): Int = namesOf(git = git).size
+
+    /** Their paths in the vault. */
+    fun namesOf(git: Git): Set<String> {
         val status = git.status().call()
 
         val uncommitted = listOf(
@@ -23,7 +26,7 @@ internal object JGitPending {
             status.untracked
         ).flatten().toSet()
 
-        return (uncommitted + unpushed(git = git)).size
+        return uncommitted + unpushed(git = git)
     }
 
     private fun unpushed(git: Git): Set<String> {

@@ -957,6 +957,17 @@
         <item quantity="other">Conflicto en %1$d notas</item>
     </plurals>
     <string name="sync_status_failed">Falló la sincronización</string>
+    <string name="sync_status_interrupted">La sincronización se interrumpió</string>
+    <string name="sync_repair_banner">La última sincronización se interrumpió y dejó esta bóveda a medio fusionar. Nada se sincroniza hasta repararla.</string>
+    <string name="sync_repair_open">Reparar…</string>
+    <string name="sync_repair_title">Reparar la bóveda</string>
+    <string name="sync_repair_explain">Notekea se cerró en medio de una sincronización, y algunas notas pueden mostrar las marcas de conflicto de Git. Elige cómo arreglarlo; en ambos casos, lo que escribiste se conserva.</string>
+    <string name="sync_repair_keep">Conservar mis cambios</string>
+    <string name="sync_repair_keep_hint">Deshace la fusión sin terminar y conserva todo lo escrito en esta computadora. La próxima sincronización trae los cambios de la otra; una nota cambiada en ambas se guarda dos veces, para revisarla.</string>
+    <string name="sync_repair_remote">Volver a como está en el repositorio</string>
+    <string name="sync_repair_remote_hint">Deja esta bóveda como la tiene el repositorio. Los archivos cambiados aquí se copian antes a la papelera de la bóveda.</string>
+    <string name="sync_repair_changed">Cambiados en esta computadora: %1$s</string>
+    <string name="sync_repair_later">Ahora no</string>
     <string name="sync_status_tooltip">Sincronización: haz clic para ir a Ajustes → Sincronización</string>
     <string name="sync_conflict_banner">Cambió aquí y en otra computadora: %1$s</string>
     <string name="sync_conflict_review">Revisar</string>

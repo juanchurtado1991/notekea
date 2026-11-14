@@ -249,9 +249,10 @@ its environment the same way; `JGitRepository` could open its repositories witho
 Decided on 2026-11-14 after step 0: a loop of our own and not Koog, and **the modes go** in step 6 (the router
 decides the effort; the menu leaves if it gets it right on the evaluation sets). **Step 1 is done** (2026-11-14): `chat/domain/tool` holds `ChatTool`, the registry that generates the prompt's
 list and the grammar, and today's five look-ups as tools; `AgentLookUp` is gone. Its gate passed: every chat test
-untouched, 27 of 30 on the agent's tasks and the same 7 of 21 on the wider evaluation with the real model. Next,
-as decided: the repair of a repository left half merged, then step 2 (tokens counted, `ModelProfile`,
-`ContextBudget`).
+untouched, 27 of 30 on the agent's tasks and the same 7 of 21 on the wider evaluation with the real model. The repair of a
+repository left half merged, open since 2026-11-13, is done too (`JGitRepair`, `SyncStatus.Interrupted`,
+`RepairBanner`, `RepairDialog`; tested on real repositories left in a merge and in a rebase, not yet seen in the
+app). Next: step 2 (tokens counted, `ModelProfile`, `ContextBudget`).
 
 Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
 is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted

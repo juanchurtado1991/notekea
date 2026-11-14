@@ -13,6 +13,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.sync_status_auth
 import app.notekea.resources.sync_status_conflict
 import app.notekea.resources.sync_status_failed
+import app.notekea.resources.sync_status_interrupted
 import app.notekea.resources.sync_status_offline
 import app.notekea.resources.sync_status_pending
 import app.notekea.resources.sync_status_syncing
@@ -61,6 +62,8 @@ private fun textOf(status: SyncStatus): String = when (status) {
 
     is SyncStatus.Failed -> stringResource(resource = Res.string.sync_status_failed)
 
+    is SyncStatus.Interrupted -> stringResource(resource = Res.string.sync_status_interrupted)
+
     is SyncStatus.Pending -> pluralStringResource(
         resource = Res.plurals.sync_status_pending,
         quantity = status.changes,
@@ -76,10 +79,16 @@ private fun textOf(status: SyncStatus): String = when (status) {
 
 private fun lookOf(status: SyncStatus): Pair<ImageVector, Boolean> = when (status) {
     SyncStatus.NotConfigured, SyncStatus.UpToDate -> NotekeaIcons.SyncUpToDate to false
+
     SyncStatus.Syncing -> NotekeaIcons.Syncing to false
+
     is SyncStatus.Pending -> NotekeaIcons.SyncPending to false
+
     SyncStatus.Offline -> NotekeaIcons.SyncOffline to false
-    SyncStatus.AuthFailed, is SyncStatus.Failed -> NotekeaIcons.SyncProblem to true
+
+    SyncStatus.AuthFailed, is SyncStatus.Failed, is SyncStatus.Interrupted ->
+        NotekeaIcons.SyncProblem to true
+
     is SyncStatus.Conflict -> NotekeaIcons.SyncConflict to true
 }
 

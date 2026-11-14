@@ -92,6 +92,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A vault left half merged when Notekea was closed in the middle of a sync is told, and repaired by choice:
+  Keep my changes undoes the unfinished merge and keeps everything written here; Go back to the repository takes
+  the repository's notes and copies what was changed here to the vault's trash. Nothing syncs until one is chosen.
 - Import from a repository, on the welcome screen where Open the sample vault was: the HTTPS address of a Git
   repository of notes, its token if it is private, and a folder named after it; Import brings the notes into that
   new folder, opens it and leaves it syncing. Each problem is said under its field (the address, the token, the

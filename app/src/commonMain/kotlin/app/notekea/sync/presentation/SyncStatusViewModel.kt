@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.sync.domain.ConflictChoice
 import app.notekea.sync.domain.ConflictCopies
+import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.domain.VaultSyncs
 import co.touchlab.kermit.Logger
@@ -34,7 +35,9 @@ class SyncStatusViewModel(
                         conflicts = conflictsAfter(
                             status = status,
                             before = it.conflicts
-                        )
+                        ),
+                        unfinished = (status as? SyncStatus.Interrupted)?.changedHere,
+                        isRepairShown = it.isRepairShown && status is SyncStatus.Interrupted
                     )
                 }
             }
@@ -47,6 +50,9 @@ class SyncStatusViewModel(
             is SyncStatusIntent.OnReview -> review(note = intent.note)
             is SyncStatusIntent.OnChoose -> choose(choice = intent.choice)
             SyncStatusIntent.OnReviewDismiss -> reduce { it.copy(review = null) }
+            SyncStatusIntent.OnRepairShow -> reduce { it.copy(isRepairShown = true) }
+            SyncStatusIntent.OnRepairDismiss -> reduce { it.copy(isRepairShown = false) }
+            is SyncStatusIntent.OnRepair -> repair(choice = intent.choice)
         }
     }
 
@@ -91,6 +97,11 @@ class SyncStatusViewModel(
                 choice = choice
             )
         }
+    }
+
+    private fun repair(choice: RepairChoice) {
+        reduce { it.copy(isRepairShown = false) }
+        launchGuarded(onError = ::logError) { engine.repair(choice = choice) }
     }
 
     // A sync under way keeps the conflicts it started with; any other status says what is left.

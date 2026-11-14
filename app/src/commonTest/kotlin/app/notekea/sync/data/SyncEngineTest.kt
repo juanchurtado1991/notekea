@@ -5,9 +5,11 @@ import app.notekea.sync.domain.ConflictChoice
 import app.notekea.sync.domain.FakeGitRepository
 import app.notekea.sync.domain.FakeSyncSettingsStore
 import app.notekea.sync.domain.FakeTokenStore
+import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncStatus
+import app.notekea.sync.domain.UnfinishedSync
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
@@ -199,6 +201,34 @@ class SyncEngineTest {
             actual = refused to tokens.tokens[URL]
         )
     }
+
+    // Left open on 2026-11-13, done on 2026-11-14: a vault left in the middle of a merge by a crash.
+    @Test
+    fun `a vault left in the middle of a merge syncs nothing until it is repaired, then syncs`() =
+        runTest {
+            val engine = engine()
+
+            engine.connect(
+                settings = SyncSettings(remoteUrl = URL),
+                token = TOKEN
+            )
+
+            repository.calls.clear()
+            repository.unfinished = UnfinishedSync(changedHere = listOf(PLAN))
+            engine.syncNow()
+            val interrupted = engine.status.value to repository.calls.toList()
+
+            engine.repair(choice = RepairChoice.KEEP_MINE)
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    SyncStatus.Interrupted(changedHere = listOf(PLAN)) to emptyList<String>(),
+                    "repair KEEP_MINE",
+                    UP_TO_DATE
+                ),
+                actual = listOf<Any?>(interrupted, repository.calls.first(), engine.status.value)
+            )
+        }
 
     @Test
     fun `disconnecting forgets the settings and the token`() = runTest {

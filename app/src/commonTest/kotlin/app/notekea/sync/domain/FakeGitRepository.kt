@@ -85,6 +85,20 @@ class FakeGitRepository : GitRepository {
         return Outcome.Success(value = Unit)
     }
 
+    var unfinished: UnfinishedSync? = null
+
+    override suspend fun unfinished(vaultPath: String): UnfinishedSync? = unfinished
+
+    override suspend fun repair(
+        vaultPath: String,
+        choice: RepairChoice
+    ): Outcome<Unit, SyncError> {
+        calls += "repair $choice"
+        unfinished = null
+
+        return Outcome.Success(value = Unit)
+    }
+
     override suspend fun pendingChanges(vaultPath: String): Int = pending
 
     override suspend fun conflicts(vaultPath: String): List<RelativePath> = conflicts

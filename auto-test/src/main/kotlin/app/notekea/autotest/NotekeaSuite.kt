@@ -39,6 +39,7 @@ import app.notekea.autotest.cases.m3.modelManagerCases
 import app.notekea.autotest.cases.m4.agentCases
 import app.notekea.autotest.cases.m4.chatTalkCases
 import app.notekea.autotest.cases.m4.importCases
+import app.notekea.autotest.cases.m4.repairCases
 import app.notekea.autotest.cases.m4.sourceCases
 import app.notekea.autotest.cases.m4.syncCases
 import app.notekea.autotest.cases.m4.videoCases
@@ -121,6 +122,7 @@ object NotekeaSuite {
             actionCases()
             syncCases()
             importCases()
+            repairCases()
             sourceCases()
             videoCases()
             onboardingCases()

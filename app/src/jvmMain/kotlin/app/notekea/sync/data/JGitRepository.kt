@@ -7,7 +7,9 @@ import app.notekea.sync.domain.ConflictChoice
 import app.notekea.sync.domain.ConflictCopies
 import app.notekea.sync.domain.GitRepository
 import app.notekea.sync.domain.PullResult
+import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncError
+import app.notekea.sync.domain.UnfinishedSync
 import kotlinx.coroutines.withContext
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -94,6 +96,17 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
 
     override suspend fun pendingChanges(vaultPath: String): Int =
         (git(vaultPath = vaultPath) { JGitPending.of(git = it) } as? Outcome.Success)?.value ?: 0
+
+    override suspend fun unfinished(vaultPath: String): UnfinishedSync? = (
+        git(vaultPath = vaultPath) { JGitRepair(git = it).unfinished() } as? Outcome.Success
+        )?.value
+
+    override suspend fun repair(
+        vaultPath: String,
+        choice: RepairChoice
+    ): Outcome<Unit, SyncError> = git(vaultPath = vaultPath) {
+        JGitRepair(git = it).repair(choice = choice)
+    }
 
     override suspend fun conflicts(vaultPath: String): List<RelativePath> =
         withContext(context = dispatchers.io) {

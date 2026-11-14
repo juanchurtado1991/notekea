@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.ConflictChoice
 import app.notekea.sync.domain.GitRepository
 import app.notekea.sync.domain.RemoteAddress
+import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncSettingsStore
@@ -172,6 +173,17 @@ class SyncEngine(
         syncNow()
     }
 
+    override suspend fun repair(choice: RepairChoice) {
+        cycle.withLock {
+            repository.repair(
+                vaultPath = vaultPath,
+                choice = choice
+            )
+        }
+
+        syncNow()
+    }
+
     private suspend fun tick() {
         while (scope.isActive) {
             val settings = settingsStore.read(vaultPath = vaultPath) ?: return
@@ -196,6 +208,15 @@ class SyncEngine(
 
         // Whatever ends the cycle (stopped half way, or something thrown), the ring stops turning.
         try {
+            // Left in the middle of a merge, nothing is synced: a commit now would hold Git's conflict marks.
+            val unfinished = repository.unfinished(vaultPath = vaultPath)
+
+            if (unfinished != null) {
+                mutableStatus.value = SyncStatus.Interrupted(changedHere = unfinished.changedHere)
+
+                return@withLock
+            }
+
             val token = tokens.read(remoteUrl = settings.remoteUrl)
 
             val error = SyncCycle.run(
@@ -212,6 +233,10 @@ class SyncEngine(
 
     /** Where the vault stands once a cycle went through: a conflict, changes not pushed, or up to date. */
     private suspend fun settled(): SyncStatus {
+        repository.unfinished(vaultPath = vaultPath)?.let {
+            return SyncStatus.Interrupted(changedHere = it.changedHere)
+        }
+
         val conflicts = repository.conflicts(vaultPath = vaultPath)
         if (conflicts.isNotEmpty()) return SyncStatus.Conflict(notes = conflicts)
 
