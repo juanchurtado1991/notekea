@@ -45,6 +45,17 @@ class OkioVaultFileSystem(
         }
     }
 
+    override suspend fun discardImport(path: String) = withContext(context = dispatchers.io) {
+        val folder = path.toPath()
+
+        try {
+            fileSystem.deleteRecursively(fileOrDirectory = folder / GIT_FOLDER)
+            if (isEmptyFolder(folder = folder)) fileSystem.delete(path = folder)
+        } catch (_: IOException) {
+            // What could not be removed stays: the next import names the folder as taken.
+        }
+    }
+
     override suspend fun suggestedParentFolder(): String = withContext(context = dispatchers.io) {
         val documents = homeDirectory.toPath() / DOCUMENTS_FOLDER
         if (isDirectory(path = documents)) documents.toString() else homeDirectory
@@ -81,5 +92,6 @@ class OkioVaultFileSystem(
 
     companion object {
         private const val DOCUMENTS_FOLDER = "Documents"
+        private const val GIT_FOLDER = ".git"
     }
 }

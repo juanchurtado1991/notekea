@@ -15,6 +15,17 @@ data class RemoteAddress(
             option = RegexOption.IGNORE_CASE
         )
 
+        // HTTPS for a real remote; a local one (file:) for trying sync with a folder on this computer.
+        private val PREFIXES = listOf("https://", "file:")
+
+        /** Whether [url] is the address of a remote Notekea can reach. */
+        fun isAddress(url: String): Boolean = PREFIXES.any {
+            url.trim().startsWith(
+                prefix = it,
+                ignoreCase = true
+            )
+        }
+
         fun of(written: String): RemoteAddress {
             val trimmed = written.trim()
 

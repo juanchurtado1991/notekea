@@ -12,6 +12,12 @@ interface VaultFileSystem {
         name: String
     ): Outcome<String, VaultError>
 
+    /**
+     * Takes away what a failed import left in the folder made for it: its Git folder, and the folder itself when
+     * nothing else is in it. Anything else there is never touched.
+     */
+    suspend fun discardImport(path: String)
+
     /** Where new vaults are suggested: the user's Documents folder, or the home folder when there is none. */
     suspend fun suggestedParentFolder(): String
 }

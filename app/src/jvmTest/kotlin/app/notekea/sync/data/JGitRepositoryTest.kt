@@ -72,6 +72,45 @@ class JGitRepositoryTest {
         pulled
     }
 
+    // Import a vault from a repository (2026-11-14): connecting a new, empty folder brings everything the remote has.
+    @Test
+    fun `an empty folder connected to a repository gets all of its notes and folders`() =
+        runBlocking {
+            laptop.write(
+                path = "Recipes/Arepas.md",
+                text = "# Arepas"
+            )
+
+            laptop.write(
+                path = "Home.md",
+                text = "# Home"
+            )
+
+            git.connect(
+                vaultPath = laptop.path,
+                remoteUrl = url,
+                token = null
+            )
+
+            val imported = File(root, "Imported").apply { mkdirs() }
+
+            val connected = git.connect(
+                vaultPath = imported.path,
+                remoteUrl = url,
+                token = null
+            )
+
+            assertEquals(
+                expected = listOf<Any?>(true, "# Arepas", "# Home", 0),
+                actual = listOf<Any?>(
+                    connected is Outcome.Success,
+                    imported.read(path = "Recipes/Arepas.md"),
+                    imported.read(path = "Home.md"),
+                    git.pendingChanges(vaultPath = imported.path)
+                )
+            )
+        }
+
     @Test
     fun `a vault connected to an empty remote reaches a second vault, and an edit comes back on pull`() {
         laptop.write(

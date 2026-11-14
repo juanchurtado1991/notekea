@@ -9,6 +9,7 @@ import app.notekea.core.domain.Outcome
 class FakeVaultFileSystem : VaultFileSystem {
     val folders = mutableMapOf<String, FolderAccess>()
     val filled = mutableSetOf<String>()
+    val discarded = mutableListOf<String>()
     var createFailure: VaultError? = null
     var suggestedParent = DEFAULT_PARENT
 
@@ -31,6 +32,11 @@ class FakeVaultFileSystem : VaultFileSystem {
         folders[path] = FolderAccess.AVAILABLE
 
         return Outcome.Success(value = path)
+    }
+
+    override suspend fun discardImport(path: String) {
+        discarded += path
+        folders -= path
     }
 
     override suspend fun suggestedParentFolder(): String = suggestedParent

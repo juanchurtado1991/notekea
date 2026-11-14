@@ -2,6 +2,7 @@ package app.notekea.sync.presentation
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.sync.domain.RemoteAddress
 import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncSettingsStore
@@ -100,7 +101,9 @@ class SyncSettingsViewModel(
         val current = state.value
         val url = current.url.trim()
 
-        if (!isAddress(url = url)) return reduce { it.copy(error = SyncError.BadAddress) }
+        if (!RemoteAddress.isAddress(url = url)) {
+            return reduce { it.copy(error = SyncError.BadAddress) }
+        }
 
         reduce {
             it.copy(
@@ -163,13 +166,6 @@ class SyncSettingsViewModel(
         }
     }
 
-    private fun isAddress(url: String): Boolean = ADDRESS_PREFIXES.any {
-        url.startsWith(
-            prefix = it,
-            ignoreCase = true
-        )
-    }
-
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }
     }
@@ -177,8 +173,5 @@ class SyncSettingsViewModel(
     private companion object {
         const val LOG_TAG = "SyncSettingsViewModel"
         const val FAILED_MESSAGE = "Sync settings failed"
-
-        // HTTPS for a real remote; a local one (file:) for trying sync with a folder on this computer.
-        val ADDRESS_PREFIXES = listOf("https://", "file:")
     }
 }

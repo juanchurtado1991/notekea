@@ -3,6 +3,7 @@ package app.notekea.vault.di
 import app.notekea.vault.data.SettingsRecentVaultsStore
 import app.notekea.vault.domain.CreateVaultUseCase
 import app.notekea.vault.domain.GetRecentVaultsUseCase
+import app.notekea.vault.domain.ImportVaultUseCase
 import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
 import app.notekea.vault.domain.RecentVaultsStore
@@ -23,6 +24,7 @@ val vaultModule = module {
     }
 
     factoryOf(::CreateVaultUseCase)
+    factoryOf(::ImportVaultUseCase)
     factoryOf(::GetRecentVaultsUseCase)
     factoryOf(::LocateVaultUseCase)
     factoryOf(::OpenVaultUseCase)

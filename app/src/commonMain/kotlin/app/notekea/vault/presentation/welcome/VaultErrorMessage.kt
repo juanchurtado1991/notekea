@@ -16,6 +16,10 @@ import app.notekea.resources.error_vault_folder_exists
 import app.notekea.resources.error_vault_folder_missing
 import app.notekea.resources.error_vault_invalid_name
 import app.notekea.resources.error_vault_permission_denied
+import app.notekea.resources.error_vault_repository_address
+import app.notekea.resources.error_vault_repository_failed
+import app.notekea.resources.error_vault_repository_offline
+import app.notekea.resources.error_vault_repository_refused
 import app.notekea.vault.domain.VaultError
 import org.jetbrains.compose.resources.stringResource
 
@@ -56,6 +60,18 @@ internal fun vaultErrorMessage(
             Res.string.error_vault_permission_denied,
             shown(error.path)
         )
+
+        VaultError.RepositoryBadAddress ->
+            stringResource(resource = Res.string.error_vault_repository_address)
+
+        VaultError.RepositoryRefused ->
+            stringResource(resource = Res.string.error_vault_repository_refused)
+
+        VaultError.RepositoryOffline ->
+            stringResource(resource = Res.string.error_vault_repository_offline)
+
+        is VaultError.RepositoryFailed ->
+            stringResource(Res.string.error_vault_repository_failed, error.message)
     }
 }
 

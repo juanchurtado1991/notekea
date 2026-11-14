@@ -138,6 +138,10 @@
     <string name="error_vault_folder_exists">%1$s ya tiene archivos. Elige otro nombre o ábrela con Abrir carpeta….</string>
     <string name="error_vault_folder_missing">Notekea no encuentra %1$s. Puede que se haya movido, renombrado o eliminado.</string>
     <string name="error_vault_invalid_name">Escribe un nombre que no sea demasiado largo y no tenga caracteres como / : * ? o comillas.</string>
+    <string name="error_vault_repository_address">Esa no es la dirección de un repositorio al que Notekea pueda llegar. Usa la dirección HTTPS, como https://github.com/tu/notas.git.</string>
+    <string name="error_vault_repository_refused">El repositorio rechazó el token, o necesita uno. Revisa el token y que pueda leer el repositorio.</string>
+    <string name="error_vault_repository_offline">No se pudo llegar al repositorio. Revisa tu conexión y la dirección.</string>
+    <string name="error_vault_repository_failed">No se pudo traer el repositorio: %1$s</string>
     <string name="error_vault_permission_denied">Notekea no tiene permiso para abrir %1$s. Revisa los permisos de la carpeta e inténtalo de nuevo.</string>
 
     <string name="error_notes_changed_on_disk">“%1$s” cambió fuera de Notekea desde que se abrió.</string>

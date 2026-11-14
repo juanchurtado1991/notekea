@@ -7,6 +7,7 @@ import app.notekea.chat.domain.plan.WebPageClipper
 import app.notekea.chat.domain.sources.SourceSites
 import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.shell.data.SettingsWorkspaceStore
+import app.notekea.shell.data.SyncVaultImporter
 import app.notekea.shell.data.chat.CardsForChat
 import app.notekea.shell.data.chat.ClipsForChat
 import app.notekea.shell.data.chat.SettingsHelpFromGuide
@@ -23,6 +24,7 @@ import app.notekea.shell.presentation.workspace.WorkspaceTools
 import app.notekea.shell.presentation.workspace.WorkspaceViewModel
 import app.notekea.sync.domain.VaultEdits
 import app.notekea.tree.domain.FileWatcher
+import app.notekea.vault.domain.VaultImporter
 import kotlinx.coroutines.flow.map
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -89,6 +91,8 @@ val shellModule = module {
             clock = get()
         )
     }
+
+    single<VaultImporter> { SyncVaultImporter(vaultSyncs = get()) }
 
     single<ActionRunner> {
         VaultActionRunner(

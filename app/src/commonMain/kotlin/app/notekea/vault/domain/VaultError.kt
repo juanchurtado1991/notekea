@@ -11,4 +11,16 @@ sealed interface VaultError {
     data object InvalidName : VaultError
 
     data class PermissionDenied(val path: String) : VaultError
+
+    /** What was written is no address of a Git repository Notekea can reach (HTTPS, or a folder). */
+    data object RepositoryBadAddress : VaultError
+
+    /** The repository refused the token, or needs one. */
+    data object RepositoryRefused : VaultError
+
+    /** The repository could not be reached. */
+    data object RepositoryOffline : VaultError
+
+    /** Anything else Git reported while the repository was brought, as it said it. */
+    data class RepositoryFailed(val message: String) : VaultError
 }
