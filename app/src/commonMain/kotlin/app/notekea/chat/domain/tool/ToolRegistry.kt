@@ -30,6 +30,9 @@ class ToolRegistry(val tools: List<ChatTool>) {
         }
     )
 
+    /** The one tool named [name], when these have it: a call that may only be that one. */
+    fun only(name: String): ToolRegistry? = byName[name]?.let { ToolRegistry(tools = listOf(it)) }
+
     /** The tools as the prompt lists them: a line each, its name, its arguments and what it does. */
     fun described(): String = tools
         .joinToString(separator = "\n") { tool ->

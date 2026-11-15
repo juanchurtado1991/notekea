@@ -18,7 +18,6 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.change.ProposeTool
-import app.notekea.chat.domain.tool.change.SingularTask
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.chat.domain.tool.work.HandTool
@@ -112,19 +111,16 @@ class RunTurnUseCase(
 
             val tool = state.tools[call.name]
 
-            val unread = UnreadChoice.of(
+            val held = TurnChecks.heldOf(
                 call = call,
-                state = state
+                state = state,
+                tool = tool
             )
 
             when {
-                unread != null -> state.found += unread
+                held != null -> state.found += held
 
-                tool == null -> state.found += "(No tool \"${call.name}\". Call one of the tools listed.)"
-
-                isEmptyProposal(call = call, state = state) -> state.found += NOTHING_ADDED
-
-                isNeedlessQuestion(call = call, state = state) -> state.found += NOT_ASKED
+                tool == null -> Unit
 
                 tool is HandTool -> return emit(value = AgentStep.Replied(kind = tool.kind))
 
@@ -151,43 +147,11 @@ class RunTurnUseCase(
         emit(value = unread(state = state))
     }
 
-    // Ended on propose with no change added, in a work that changes: told once, and the call asked again.
-    private fun isEmptyProposal(
-        call: ToolCall,
-        state: TurnState
-    ): Boolean {
-        val changes = state
-            .tools
-            .tools
-            .any {
-                it.effect == ToolEffect.PROPOSES
-            }
-
-        val isEmpty =
-            call.name == ProposeTool.NAME &&
-                changes &&
-                state.turn.work.changes.isEmpty()
-
-        return isEmpty && state.told.add(NOTHING_ADDED)
-    }
-
     // What the answer is written from: what was found, as far as the context goes.
     private suspend fun fittedOf(state: TurnState): List<String> = state
         .budget
         .fit(state.found, state.dropped)
         .entries
-
-    // A question asked when the task points at nothing it leaves open (my two budgets, the Venezuelan recipes):
-    // held back once, the model told to do it; asked again, it is asked.
-    private fun isNeedlessQuestion(
-        call: ToolCall,
-        state: TurnState
-    ): Boolean {
-        val isOpen = SingularTask.pointsAtOne(task = state.task)
-        val isNeedless = call.name == AskUserTool.NAME && !isOpen
-
-        return isNeedless && state.told.add(NOT_ASKED)
-    }
 
     // A call that reads or works: shown as a step, run once, and told when it is made again.
     private suspend fun FlowCollector<AgentStep>.made(
@@ -381,7 +345,13 @@ class RunTurnUseCase(
             }
 
         val offered = if (isEnding) state.tools.ending() else state.tools
-        val tools = again?.let { offered.without(name = it) } ?: offered
+
+        val asking = state
+            .tools
+            .only(name = AskUserTool.NAME)
+            .takeIf { UnsettledEnd.mustAsk(state = state) }
+
+        val tools = asking ?: again?.let { offered.without(name = it) } ?: offered
 
         val json = StringBuilder()
 
@@ -456,13 +426,6 @@ class RunTurnUseCase(
         private const val DATE_PARTS = 3
         private const val AGAIN = "again: its result is above."
 
-        private const val NOT_ASKED =
-            "(Not asked: the task names what it means, all of them, so there is nothing to choose. Do it with " +
-                "what the tools found. Ask only if something it needs cannot be found.)"
-
-        private const val NOTHING_ADDED =
-            "(Nothing is added to the proposal yet, so there is nothing to confirm. Call the tool of each " +
-                "change first (write_note for a note to write), then propose.)"
         private const val NOTE = "note"
         private const val NOTES = "notes"
     }

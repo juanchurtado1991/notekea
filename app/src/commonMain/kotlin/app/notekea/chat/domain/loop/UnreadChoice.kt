@@ -14,7 +14,9 @@ internal object UnreadChoice {
         call: ToolCall,
         state: TurnState
     ): String? {
-        if (call.name != AskUserTool.NAME) return null
+        // Notes the task cannot tell apart are not told apart by reading them.
+        val isChoice = call.name == AskUserTool.NAME && state.ambiguous.isEmpty()
+        if (!isChoice) return null
 
         val read = state
             .turn

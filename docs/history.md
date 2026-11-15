@@ -297,3 +297,5 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   done and being measured on the three models.
 - **2026-11-15, the four fixes measured:** the handoff said the 4B made 158 of 201 (was 161), the 9B 159 (was
   149) and the 2B 78 (was 69), the table in `docs/agent-loop.md`.
+- **2026-11-15, the verifier's first checks:** the handoff said items 3 and 4 of "Why the loop fails" were done
+  and being measured on the three models.

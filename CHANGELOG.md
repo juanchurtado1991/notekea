@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The chat's new loop asks which note you mean when a request can mean several and does not say which ("Laura"
+  with two Lauras, "the budget" with two budgets), and checks a change to several notes once against what each
+  holds before showing the card, leaving out the ones the request does not ask for.
 - The chat's new loop adds tasks as tasks (not as a line of text), writes a note the request says what to hold
   instead of leaving it empty, sets a status as a property instead of marking a task done, and sees each task's
   date, so "my open tasks due in January" can be answered. Measured on 201 tasks, the 9B model now gets 79 % right

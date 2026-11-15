@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool.work
 
+import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.PlannedStep
 
 /**
@@ -24,6 +25,23 @@ class TurnWork {
 
     fun change(step: PlannedStep) {
         proposed += step
+    }
+
+    /** The notes [isDropped] picks taken out of the changes; a change left with none goes. */
+    fun drop(isDropped: (String) -> Boolean) {
+        val kept = proposed.mapNotNull { step ->
+            val notes = step.notes.filterNot(isDropped)
+            val isGone = step[ActionField.NOTE]?.let(isDropped) == true
+
+            when {
+                isGone -> null
+                step.notes.isNotEmpty() && notes.isEmpty() -> null
+                else -> step.copy(notes = notes)
+            }
+        }
+
+        proposed.clear()
+        proposed += kept
     }
 
     /** The plan written again, whole: the model rewrites it as it goes, ticking what is done. */

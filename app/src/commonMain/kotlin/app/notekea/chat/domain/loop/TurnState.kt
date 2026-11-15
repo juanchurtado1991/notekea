@@ -27,6 +27,14 @@ internal class TurnState(
     // The changes refused, so one refused again as it was counts as made again.
     val refused = mutableListOf<String>()
 
+    /** The notes the task can mean and does not say which of: the person is asked before the turn ends. */
+    val ambiguous by lazy {
+        AmbiguousTask.notesOf(
+            task = task,
+            notes = turn.notes
+        )
+    }
+
     val dropped: Int get() = drops.lastOrNull() ?: 0
 
     // What the turn was told once, so it is not told again: that it proposed with nothing added.
