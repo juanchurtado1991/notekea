@@ -675,6 +675,46 @@ looked enough; the loop was tuned on the 4B. The 2B is far below on both paths: 
 stands. Why each one fails is the next measure: every call of a failed task, the route and a kind of failure are
 now in the reports (`EvalTrace`, `EvalTraceReport`).
 
+### Why the loop fails, read call by call — 2026-11-15
+
+Every task the loop failed on 2026-11-14 was run again with every call in its report (`EvalTrace`): 40 on the 4B,
+52 on the 9B, 132 on the 2B (3, 1 and 0 of them came out right this time). Each failure is given a kind
+(`EvalTraceReport`; the first that fits):
+
+| Kind | 4B | 9B | 2B |
+|---|---|---|---|
+| Did the wrong thing (wrong notes, wrong tool for the change) | 13 | 25 | 7 |
+| Ran out of steps or repeated a call | 14 | 10 | 108 |
+| Ended the wrong way (changed or answered where it should ask) | 5 | 12 | 5 |
+| Never found what the answer needs | 3 | 3 | 3 |
+| Routed to work that cannot end that way | 1 | 1 | 5 |
+| Stopped | 1 | 0 | 3 |
+| Found it, then did not say it | 0 | 0 | 1 |
+
+What the calls show, by what would fix the most:
+
+1. **The 9B routes "add a task to X" to *write*** (10 tasks): *write* has `append_text`, not `add_task`, so it
+   appends a line and no task is added. A router rule (a task, tag, property or link added to a note is
+   *organize*) fixes all of them.
+2. **A note with content made with `create_note`** (9B 7, 4B 1): an empty note is made and nothing written.
+   `create_note` should refuse when the task says what the note holds, pointing to `write_note`.
+3. **Changes where the task should be asked back** (4B 5, 9B 10): "call Laura", "the trip", "the contract", "my
+   ideas note" when two notes could be meant. A check before `propose` and `answer`, like the one for notes that
+   share a name: two or more notes match what the task names and none was read → ask.
+4. **The wrong set of notes in a change to many** (about 8 on each model): the list note tagged along with the
+   books it lists, every recipe moved for "my Venezuelan recipes", a search for "the notes that mention the
+   garden" asked about instead of done. `propose` should list the notes back once with what each was chosen for,
+   so the model drops the ones it cannot justify; the rules say the note holding a list is not one of its items.
+5. **A tool that hides what the task needs:** `tasks` shows "this week" and "later", not the due date, so "my open
+   tasks due in January 2027" cannot be answered by either model. It should show the date and take a range.
+6. **The wrong change tool in *organize*** (4B 2): `complete_task` called to add a task or set a status. Their
+   descriptions should say what each is not for.
+7. **The 2B repeats itself** (108 of its 132): the loop refuses the same call and the 2B makes it again until the
+   turn ends. No prompt fixes that: the loop should not be offered on the 2B, which would keep today's path.
+
+Items 1, 2, 5 and 6 are changes to the router and the tools, checked by the trace on the tasks above; 3 and 4 are
+the first pieces of step 7's verifier.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and

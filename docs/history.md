@@ -291,3 +291,5 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
 - **2026-11-15, step 6a measured on the three models:** the handoff said 6a was done and measured (the router 111
   of 120; the loop 28, 17, 53 and 63 against today's 27, 7, 53 and 31), with the 9B no better than the 4B and the 2B
   far below, and that the failed tasks were being measured again with every call in the report.
+- **2026-11-15, the failures read call by call:** the handoff said the failed tasks of the three models were run
+  again with every call in the report, and their kinds of failure and seven fixes written in `docs/agent-loop.md`.
