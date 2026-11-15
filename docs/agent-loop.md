@@ -757,7 +757,26 @@ model call.
   notes or more is held, each note listed with its properties and open tasks, and the model told that a note
   listing the others is not one of them; `propose` takes `drop`, the notes to take out.
 
-VERIFIER_MEASURED
+Measured on the same four sets the same day (201 tasks; the 30, 21, 70 and 80):
+
+| Model | With 1, 2, 5, 6 | With the verifier | By set | Router |
+|---|---|---|---|---|
+| 4B (medium) | 158 (79 %) | 165 (82 %) | 26, 18, 54, 67 | 111 → 111 |
+| 9B (large) | 159 (79 %) | 166 (83 %) | 27, 18, 54, 67 | 116 → 116 |
+| 2B (small) | 78 (39 %) | 81 (40 %) | 11, 10, 26, 34 | 79 → 79 |
+
+| Failures by kind | 4B before → after | 9B before → after | 2B before → after |
+|---|---|---|---|
+| did the wrong thing | 13 → 10 | 13 → 13 | 8 → 5 |
+| ran out of steps or repeated itself | 17 → 19 | 10 → 11 | 104 → 105 |
+| ended the wrong way | 8 → 2 | 13 → 5 | 6 → 4 |
+| never found it | 4 → 4 | 5 → 5 | 1 → 1 |
+
+The question back did what it was for: wrong endings went from 8 to 2 on the 4B and from 13 to 5 on the 9B, most of
+the 7 tasks each gained. The list back before a change to many did little: the 9B's wrong changes stayed at 13 and
+the 4B's went from 13 to 10, inside what two runs differ by; those failures need reading one by one before the
+check is kept or taken out. The 2B is unchanged in kind. The detector was written against these tasks, so tasks it
+has not seen say how much of the gain holds.
 
 ## Risks, said plainly
 

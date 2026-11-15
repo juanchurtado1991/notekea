@@ -290,7 +290,9 @@ measured again with it on the three models (2026-11-15): the kinds of failure an
 at the developer's word, and the three models measured again with them: the 4B 158 of 201 (79 %, was 161), the
 9B 159 (79 %, was 149), the 2B 78 (39 %, was 69); the 9B's wrong changes halved. What is left on both is wrong
 endings and wrong note sets, items 3 and 4 (step 7's verifier), done the same day at the developer's word
-(`AmbiguousTask`, `UnsettledEnd`, `ProposalReview`) and being measured on the three models. Next in step 6:
+(`AmbiguousTask`, `UnsettledEnd`, `ProposalReview`) and measured: the 4B 165 of 201 (82 %), the 9B 166 (83 %), the
+2B 81 (40 %); wrong endings went from 8 to 2 and from 13 to 5, wrong note sets barely moved. Next on this branch:
+tasks the detector has not seen, the 2B kept on today's path (item 7), a code review. Next in step 6:
 6b (found tables, sources, streaming), 6c (scope, the section question), 6d, 6e. The web search of `ROADMAP.md`
 13 is the pull request after this one.
 
