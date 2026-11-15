@@ -14,9 +14,9 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * A change to the vault as a tool (`docs/agent-loop.md`, step 5): it changes nothing, it only adds one step of
- * [kind] to the turn's proposal, which the person confirms on the card. A step the vault cannot take (a note that
- * is not there, a field left out) is not added, and the result says why, to be corrected.
+ * A change to the vault as a tool (step 5): it only adds a step of [kind] to the proposal confirmed on the card. A
+ * step the vault cannot take (a note not there, a field left out) is not added and the result says why; nor, once,
+ * a call the task's words say another tool is for ([misuse]).
  */
 class ChangeTool(
     override val name: String,
@@ -24,6 +24,7 @@ class ChangeTool(
     private val kind: ActionKind,
     private val fields: List<ActionField>,
     private val optional: Set<ActionField> = emptySet(),
+    private val misuse: (task: String, step: PlannedStep) -> String? = { _, _ -> null },
     private val checkPlan: CheckPlanUseCase = CheckPlanUseCase()
 ) : ChatTool {
     override val arguments = fields.map {
@@ -77,6 +78,12 @@ class ChangeTool(
                 forModel = "$name: not added, ${checked.error}. Correct it and call $name again, " +
                     "or ask_user when the task does not say."
             )
+        }
+
+        val misused = misuse(context.task, step)
+
+        if (misused != null && context.work.warn(about = "$name misuse")) {
+            return ToolResult(forModel = "$name: not added. $misused")
         }
 
         val one = SingularTask.oneIn(task = context.task)

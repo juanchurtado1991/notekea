@@ -74,6 +74,9 @@ class LoopTools(
                     changes.writeNote,
                     changes.createNote,
                     changes.append,
+                    // A note written often comes with a task for it; the router may also send "add a task" here.
+                    changes.addTask,
+                    DateTool(),
                     changes.makeCards,
                     ask,
                     propose

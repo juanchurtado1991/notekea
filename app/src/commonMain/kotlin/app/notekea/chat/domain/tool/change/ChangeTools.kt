@@ -21,17 +21,20 @@ object ChangeTools {
     val createNote = ChangeTool(
         name = "create_note",
         description = "a new empty note, or one from a template: its title, and the folder or the template " +
-            "when the task names one.",
+            "when the task names one. Never a note the task says what to hold: that is write_note.",
         kind = ActionKind.CREATE_NOTE,
         fields = listOf(ActionField.TITLE, ActionField.FOLDER, ActionField.TEMPLATE),
-        optional = setOf(ActionField.FOLDER, ActionField.TEMPLATE)
+        optional = setOf(ActionField.FOLDER, ActionField.TEMPLATE),
+        misuse = ChangeMisuse::emptyNote
     )
 
     val append = ChangeTool(
         name = "append",
-        description = "text added at the end of a note: the note and the text, as it will be written.",
+        description = "text added at the end of a note: the note and the text, as it will be written. Never a " +
+            "task (add_task), a tag (add_tag) or a property (set_property).",
         kind = ActionKind.APPEND_TEXT,
-        fields = listOf(ActionField.NOTE, ActionField.TEXT)
+        fields = listOf(ActionField.NOTE, ActionField.TEXT),
+        misuse = ChangeMisuse::taskAppended
     )
 
     val makeCards = ChangeTool(
@@ -50,7 +53,8 @@ object ChangeTools {
 
     val setProperty = ChangeTool(
         name = "set_property",
-        description = "a property set on notes: the notes, the property as the vault names it, and its value.",
+        description = "a property set on notes: the notes, the property as the vault names it, and its value " +
+            "(a status, a priority, a date: never complete_task for them).",
         kind = ActionKind.SET_PROPERTY,
         fields = listOf(ActionField.NOTES, ActionField.PROPERTY, ActionField.VALUE)
     )
@@ -58,7 +62,7 @@ object ChangeTools {
     val addTask = ChangeTool(
         name = "add_task",
         description = "one task added to a note: the note, the task's text, and due as a date from the date " +
-            "tool when the task has a day. Call it once for each task.",
+            "tool when the task has a day. Call it once for each task. Never a task marked done (complete_task).",
         kind = ActionKind.ADD_TASK,
         fields = listOf(ActionField.NOTE, ActionField.TEXT, ActionField.DUE),
         optional = setOf(ActionField.DUE)
@@ -66,9 +70,11 @@ object ChangeTools {
 
     val completeTask = ChangeTool(
         name = "complete_task",
-        description = "a task marked done: its note and the task's text as the tasks tool gave it.",
+        description = "a task marked done: its note and the task's text as the tasks tool gave it. Never a " +
+            "task added (add_task) or a status set (set_property).",
         kind = ActionKind.COMPLETE_TASK,
-        fields = listOf(ActionField.NOTE, ActionField.TEXT)
+        fields = listOf(ActionField.NOTE, ActionField.TEXT),
+        misuse = ChangeMisuse::doneUnasked
     )
 
     val link = ChangeTool(

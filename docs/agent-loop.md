@@ -715,6 +715,12 @@ What the calls show, by what would fix the most:
 Items 1, 2, 5 and 6 are changes to the router and the tools, checked by the trace on the tasks above; 3 and 4 are
 the first pieces of step 7's verifier.
 
+**Items 1, 2, 5 and 6, done (2026-11-15):** the router's rule (a task, tag, property or link added to a note is
+*organize*) and *write* given `add_task` and `date`, for when it is sent there anyway; `ChangeMisuse`, which turns
+down once `create_note` for a note the task says what to hold, `append` for a task, and `complete_task` for a
+status or a task added, saying which tool to call; the descriptions of the change tools say what each is not for;
+`tasks` gives each task's date (`FoundRow.date`) and takes `from` and `to`. FIXES_MEASURED
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and

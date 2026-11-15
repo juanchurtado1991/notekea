@@ -365,7 +365,9 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Step 6a (2026-11-14), done:** with the setting on, the loop takes every request of the whole vault: the
      app's actions on screen and the chat's own replies (talk, help, the overview) too. 28 of 30, 17 of 21, 53 of
      70, 63 of 80; on the three models the loop beats today's agent, the 9B does no better than the 4B and the 2B
-     is far below. Next: 6b to 6e.
+     is far below. Its failures read call by call (2026-11-15), four of the fixes they point to are done: the
+     router, `create_note`, `append` and `complete_task` turned down when another tool is meant, and the tasks'
+     dates. Next: 6b to 6e.
 
 13. **The web, looked up by the agent** — asked for by the developer on 2026-11-14, for the pull request after the
    one agent loop: besides a link, the agent searches the web (`web_search`), and offers to when the notes do not

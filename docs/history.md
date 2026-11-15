@@ -293,3 +293,5 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   far below, and that the failed tasks were being measured again with every call in the report.
 - **2026-11-15, the failures read call by call:** the handoff said the failed tasks of the three models were run
   again with every call in the report, and their kinds of failure and seven fixes written in `docs/agent-loop.md`.
+- **2026-11-15, four fixes of the failures:** the handoff said items 1, 2, 5 and 6 of "Why the loop fails" were
+  done and being measured on the three models.

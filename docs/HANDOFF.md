@@ -286,7 +286,8 @@ same night (the table is in `docs/agent-loop.md`): the loop beats today's agent 
 the 4B (it ends before it has looked enough), and the 2B is far below on both paths. The reports now hold every
 call of a failed task, its route and its kind of failure (`EvalTrace`, `EvalTraceReport`); the failed tasks are
 measured again with it on the three models (2026-11-15): the kinds of failure and seven fixes, ranked, are in
-`docs/agent-loop.md`, "Why the loop fails, read call by call". They wait for the developer's read. Next in step 6:
+`docs/agent-loop.md`, "Why the loop fails, read call by call". Items 1, 2, 5 and 6 were done the same day,
+at the developer's word, and the three models measured again with them. Next in step 6:
 6b (found tables, sources, streaming), 6c (scope, the section question), 6d, 6e. The web search of `ROADMAP.md`
 13 is the pull request after this one.
 

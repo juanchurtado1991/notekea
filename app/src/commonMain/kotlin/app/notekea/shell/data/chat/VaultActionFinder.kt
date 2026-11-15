@@ -152,6 +152,7 @@ class VaultActionFinder(
                     note = it.path,
                     cells = listOf(it.task.text),
                     line = it.task.stateIndex,
+                    date = it.task.date,
                     due = it
                         .due
                         .name
