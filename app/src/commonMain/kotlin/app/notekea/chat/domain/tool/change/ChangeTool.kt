@@ -11,6 +11,7 @@ import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * A change to the vault as a tool (`docs/agent-loop.md`, step 5): it changes nothing, it only adds one step of
@@ -90,6 +91,20 @@ class ChangeTool(
             )
         }
 
+        val shared = sharedOf(
+            step = step,
+            context = context
+        )
+
+        val isShared = shared.isNotEmpty() && context.work.warn(about = "$name shared")
+
+        if (isShared) {
+            return ToolResult(
+                forModel = "$name: not added yet. ${shared.joinToString(separator = " ")} If the task does not " +
+                    "say which, ask_user with them as the options; if it does, call $name again."
+            )
+        }
+
         val unwritten = unwrittenOf(
             step = step,
             task = context.task
@@ -116,6 +131,51 @@ class ChangeTool(
                 "is not in it, add that one; else call propose now. Add nothing the task does not ask for."
         )
     }
+
+    // A note named by a name other notes share (Home/Budget 2026, Work/Budget 2026), its folder not in the task.
+    private fun sharedOf(
+        step: PlannedStep,
+        context: ToolContext
+    ): List<String> {
+        val task = context.task.lowercase()
+
+        return (step.notes + listOfNotNull(step[ActionField.NOTE])).mapNotNull { named ->
+            val name = named
+                .substringAfterLast(delimiter = '/')
+                .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+
+            val paths = context
+                .notes
+                .map { it.file.path }
+                .filter {
+                    it.nameWithoutExtension.equals(
+                        other = name,
+                        ignoreCase = true
+                    )
+                }
+
+            val isSaid = paths.any {
+                folderOf(path = it) in task
+            }
+
+            if (paths.size < 2 || isSaid) {
+                null
+            } else {
+                "${paths.size} notes are named \"$name\": " +
+                    paths.joinToString {
+                        it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                    } + "."
+            }
+        }
+    }
+
+    // The name of the folder a note is in, or none at the vault's root.
+    private fun folderOf(path: RelativePath): String = path
+        .parent
+        ?.value
+        ?.substringAfterLast(delimiter = '/')
+        ?.lowercase()
+        ?.takeIf { it.isNotEmpty() } ?: "\u0000"
 
     // A tag or a property name the task does not write (travel for "viaje"): the task's own words are kept.
     private fun unwrittenOf(

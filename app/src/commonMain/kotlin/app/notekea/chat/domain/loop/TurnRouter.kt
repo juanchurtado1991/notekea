@@ -63,7 +63,10 @@ class TurnRouter(private val llmEngine: LlmEngine) {
                 role = ChatRole.SYSTEM,
                 text = "You say how a request to a notes app is worked on. Reply with JSON. A request that " +
                     "asks to change anything at all is not ask, even when it first looks something up " +
-                    "(find my recipes and tag them: organize).\n\n" +
+                    "(find my recipes and tag them: organize). A question of how to do something in the app " +
+                    "(how do I…, ¿cómo…?, is there a shortcut) or of what the chat can do is help, never done for " +
+                    "them. A request that names anything in the notes is never talk. A request with a note to write (in a " +
+                    "note X, make a note) is write, even when it compares or summarizes.\n\n" +
                     "work, one of:\n$kinds\n\nskill, a way of doing it, or $NO_SKILL when no one fits:\n$ways"
             ),
             ChatMessage(

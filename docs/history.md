@@ -288,3 +288,6 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
 - **2026-11-14, step 0 under way:** the handoff listed the five experiments' results as they came (the context, the
   format of a tool call, how many tools, Koog) and the fixtures; all of it is in `docs/agent-loop.md`, "Step 0,
   what was measured".
+- **2026-11-15, step 6a measured on the three models:** the handoff said 6a was done and measured (the router 111
+  of 120; the loop 28, 17, 53 and 63 against today's 27, 7, 53 and 31), with the 9B no better than the 4B and the 2B
+  far below, and that the failed tasks were being measured again with every call in the report.

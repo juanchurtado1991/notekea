@@ -16,10 +16,13 @@ import app.notekea.chat.domain.tool.ToolCallJson
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
+import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.change.ProposeTool
 import app.notekea.chat.domain.tool.change.SingularTask
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
+import app.notekea.chat.domain.tool.work.HandTool
+import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
@@ -66,6 +69,8 @@ class RunTurnUseCase(
             task = task,
             skills = vaultGuide.skillsOf(vaultPath, notes)
         )
+
+        if (route.kind.isReply) return@flow emit(value = AgentStep.Replied(kind = route.kind))
 
         val tools = toolsets.of(kind = route.kind)
 
@@ -120,6 +125,13 @@ class RunTurnUseCase(
                 isEmptyProposal(call = call, state = state) -> state.found += NOTHING_ADDED
 
                 isNeedlessQuestion(call = call, state = state) -> state.found += NOT_ASKED
+
+                tool is HandTool -> return emit(value = AgentStep.Replied(kind = tool.kind))
+
+                tool is ShowTool -> when (val shown = tool.shown(call, state.turn)) {
+                    is Outcome.Success -> return emit(value = AgentStep.Shown(steps = shown.value))
+                    is Outcome.Failure -> state.found += shown.error
+                }
 
                 tool.effect == ToolEffect.ENDS -> return ended(
                     call = call,

@@ -594,6 +594,87 @@ The unseen half went up by three, so the tuning holds beyond what it looked at; 
 on agent mode's kind of task and is far ahead on the wider ones, at about twice its time. By the developer's rule
 (accuracy first, time after) this lets step 6 begin.
 
+### Step 6, what the old paths do that the loop does not — mapped 2026-11-14
+
+Before the planner, the question agent and the modes go, the loop must do what only they do today. Mapped from the
+code (the old paths: `ChatAnswering` → `ChatActions.act` → `ActOnRequestUseCase` / `PlanRequestUseCase`, the
+question agent `AgentAnswerUseCase` retried on NOT_FOUND, `ChatReplies` for questions, talk, help and the overview,
+and the modes through `AgentUse`):
+
+- **App actions shown at once** (open_note, open_today, search, show_panel, split_pane, close_other_tabs,
+  toggle_source, set_theme): `ActionTurnStep.Shown` → `ChatEffect.Show`. The loop needs an *app* toolset whose
+  tools end the turn with the step shown.
+- **Replies that are not looked up**: talk (`ConverseUseCase`), help with its shortcuts and offered requests
+  (`AnswerHelpUseCase`, `HelpShortcuts`), the vault's overview (`DescribeVaultUseCase`). The router gets kinds for
+  them (or tools of the ask set), reusing the use cases.
+- **Found tables** (find_notes, show_tasks, list_untagged, list_broken_links): the loop reads them as text only;
+  the person should get the clickable table as today.
+- **Answers with sources**: today's answers carry `[n]` citations and stream as they are written; the loop's
+  answer comes whole and without sources. `AgentStep.Finished` gains the sources it was written from, and the
+  answer streams.
+- **A note or folder as scope**: only the vault scope reaches the loop; `ToolContext` gets the scope, the looking
+  tools keep to it.
+- **A clip's section question** (`SectionAsked`): on the loop it ends as a failed card; it must ask as today.
+- **Refusals** (`RefusalChecked`, `REFUSE`) and **Deep thinking**'s three drafts: the router decides the effort
+  instead of the menu, as decided.
+
+Sub-steps, each measured on the sets and its Auto-Test cases before the next: **6a** the app toolset and the
+replies (talk, help, overview) on the loop; **6b** found tables, sources and streaming; **6c** scope and the
+section question; **6d** everything on the loop, compared with the old path on the action evaluation and the
+Auto-Test cases of 3.3, 3.6, 3.8, 3.9, 4.4, 4.6 and 4.7 (46 cases); **6e** the old paths, the modes, their menu
+and the setting removed (about 2,950 lines: the planner and its word rules, the question agent, the old agent,
+`ChatMode`, `DeepQuestion`, `DraftVote`, `AgentUse`), with the tests that only test them.
+
+### Step 6a, the app's actions and the chat's own replies on the loop — 2026-11-14
+
+With the setting on, every request of the whole vault goes to the loop, whatever the mode (`ChatAnswering`); a note
+or a folder as scope still goes to today's answer until 6c. The router has four more kinds: *app* (a note or today's
+note opened, a panel, the app's search, the theme, the panes, the note as Markdown: `ShowTool`, `ShowTools`, ending
+the turn with `AgentStep.Shown`, done at once with no card), and *talk*, *help* and *overview*, which the loop hands
+back (`AgentStep.Replied`) to the chat's own replies (`ConverseUseCase`, `AnswerHelpUseCase`, `DescribeVaultUseCase`)
+with no tool called. As a router's slip costs a whole turn, *app* has a `help` tool (`HandTool`) and *organize* has
+`append`. Wider overlaps were tried first (*ask* with `help` and `overview`, *organize* and *write* with `answer`):
+the loop then took the wrong way out more often (27 of 30, 16 of 21, 49 of 70, 54 of 80), so they were taken out.
+
+**The router on the action evaluation's 126 requests** (`RouterEvalChatModelTest`, refusals not graded): 101 of 120
+at first ("show my tasks" and "how do I…" sent to *app*, "shorter" to *app*); with the kinds described by what they
+are not and two rules ("how do I…" is help; a request naming anything in the notes is never talk), **116 of 120**.
+Left: "explain the reading challenge" to help, "what happened at the October retro" to talk, "what can you do for
+me?" to talk, "explain what is in my notes" to talk.
+
+After the overlaps were taken out, the router gives **111 of 120**, and three changes came from the wide tasks it
+still failed: a request with a note to write is *write* even when it compares or summarizes, *write* makes study
+cards and quizzes, and *ask* counts, compares and lists what it finds.
+
+**The loop with 6a, on the four sets** (4B, 2026-11-14), against today's agent on the same tasks:
+
+| Set | Loop before 6a | Loop with 6a | Today's agent |
+|---|---|---|---|
+| Agent mode's 30 | 29 | 28 | 27 |
+| The wide 21 | 17 | 17 | 7 |
+| Held-out 70 | 53 | 53 | 53 |
+| Held-out wide 80 | 58 | 63 | 31 |
+
+6a holds: the loop now takes every request of the whole vault and does no worse on any set. The tuning target of
+19 of 21 is still not reached.
+
+**The three models** (2026-11-14, every set; time is the average a task, in seconds):
+
+| Set | 2B loop | 2B today | 4B loop | 4B today | 9B loop | 9B today |
+|---|---|---|---|---|---|---|
+| Router (120) | 83 | — | 111 | — | 113 | — |
+| Agent mode's 30 | 12 (36 s) | 10 (16 s) | 28 (55 s) | 27 (30 s) | 22 (76 s) | 23 (46 s) |
+| The wide 21 | 9 (44 s) | 6 (25 s) | 17 (97 s) | 7 (42 s) | 17 (118 s) | 8 (58 s) |
+| Held-out 70 | 21 (39 s) | 18 (13 s) | 53 (45 s) | 53 (26 s) | 45 (61 s) | 46 (36 s) |
+| Held-out wide 80 | 27 (39 s) | 17 (22 s) | 63 (95 s) | 31 (43 s) | 65 (150 s) | 27 (65 s) |
+| All 201 | 69 | 51 | 161 | 118 | 149 | 104 |
+
+The loop beats today's agent on every model. The 9B is not better than the 4B: it is better on the wide held-out
+tasks and worse on the short ones, with fewer moves (3 against 5 on the held-out 70), so it ends before it has
+looked enough; the loop was tuned on the 4B. The 2B is far below on both paths: agent mode is not for it as it
+stands. Why each one fails is the next measure: every call of a failed task, the route and a kind of failure are
+now in the reports (`EvalTrace`, `EvalTraceReport`).
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
@@ -616,6 +697,20 @@ on agent mode's kind of task and is far ahead on the wider ones, at about twice 
 - **The ten-tool limit of a toolset goes** (2026-11-14, on seeing step 5's first measures): "hagamos lo que
   funcione mejor; si más herramientas funciona mejor, que así sea". A toolset holds what its work needs, and the
   evaluation sets decide its size.
+- **Looking things up on the web, the next pull request after this one** (2026-11-14): besides a link the person
+  writes, the agent may search the web, as a tool of the loop (`web_search`) and, when the notes do not hold the
+  answer, by asking first ("It is not in your notes: shall I look it up on the web?", with buttons). Plug and play:
+  **it works with nothing to set up**, through DuckDuckGo's HTML results, marked in Settings as "may stop working",
+  with an honest user agent (Notekea's own, never a browser's), a pause of 2 to 3 seconds between requests behind a
+  mutex, and no aggressive retries. **Brave Search with a free key** the person pastes in Settings is the stable
+  option. When DuckDuckGo blocks or fails, the chat says so, suggests a Brave key and explains how to get one.
+  Self-hosting SearXNG is not offered: asking a person to run Docker is the opposite of plug and play. Built on Ktor
+  and Ksoup, behind a `WebSearchProvider` in the domain. The query is shown before it is sent and never carries the
+  notes' text; pages found are data, cited with their link, and any change still waits for the card. It starts as
+  one search and two or three pages read, answered with their links; searches that follow each other (deep
+  research) come once the larger model is measured. DuckDuckGo's terms (read 2026-11-14) say nothing of automated
+  queries, but forbid showing "any portion of the services within another service" and reserve cutting access off:
+  hence the label, and Brave beside it.
 
 1. **The commit hook** runs ktlint and the unit and architecture tests (about two minutes); the real-app suite
    stays in CI and on demand. Done.

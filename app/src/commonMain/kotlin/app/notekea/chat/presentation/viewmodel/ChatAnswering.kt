@@ -31,8 +31,24 @@ internal class ChatAnswering(
 
         val current = host.state.value
 
+        val isVault = scope == ChatScope.VAULT
+
+        // With the one loop on, it takes every request of the whole vault; talk, help and the overview it hands back.
+        if (isVault && agent.isLooping()) {
+            val handed =
+                agent.takeOver(id, question, host.notes, history, host.activeNote) ?: return
+
+            return written(
+                id = id,
+                question = question,
+                scope = scope,
+                reply = handed,
+                history = history
+            )
+        }
+
         // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
-        val reply = if (scope == ChatScope.VAULT) {
+        val reply = if (isVault) {
             actions.act(
                 id = id,
                 request = question,
@@ -47,7 +63,9 @@ internal class ChatAnswering(
 
         // The agent ends on a card or with what it found, never in an answer of 3.2.
         if (reply is ChatReply.Agent) {
-            return agent.takeOver(id, question, host.notes, history, host.activeNote, reply.planned)
+            agent.takeOver(id, question, host.notes, history, host.activeNote, reply.planned)
+
+            return
         }
 
         if (reply == ChatReply.Acted) return

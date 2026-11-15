@@ -16,7 +16,8 @@ class AskUserTool : ChatTool {
 
     override val description =
         "when the request can be read two ways or something needed is missing: one short question to the " +
-            "person, and two to four answers to choose from. Do not guess."
+            "person, and two to four answers to choose from; answers that are notes are written as the vault " +
+            "names them (Home/Budget 2026). Do not guess."
 
     override val arguments = listOf(
         ToolArgument(name = QUESTION),

@@ -325,6 +325,36 @@ class RunTurnTest {
         }
 
     @Test
+    fun `a change on a name two notes share is held once when the task does not say which folder`() =
+        runTest {
+            val tag = """{"tool":"add_tag","notes":["Home/Lease"],"tag":"rented"}"""
+
+            script(
+                tag,
+                tag,
+                """{"tool":"propose","summary":"$SUMMARY"}""",
+                work = "organize"
+            )
+
+            val steps = run(
+                task = "tag the lease as rented",
+                notes = notes + entry(path = office.value)
+            )
+
+            assertEquals(
+                expected = listOf(true, ActionKind.ADD_TAG),
+                actual = listOf(
+                    "2 notes are named \"Lease\": Home/Lease, Work/Lease. If the task does not" in
+                        callPrompts()[1],
+                    (steps.last() as AgentStep.Proposed)
+                        .steps
+                        .single()
+                        .kind
+                )
+            )
+        }
+
+    @Test
     fun `a bare name two notes share is told with their paths, to ask the person or to say which`() =
         runTest {
             store.texts[lease] = "The rent is 950 euros a month."

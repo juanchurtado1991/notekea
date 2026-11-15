@@ -362,6 +362,17 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Step 5, the held-out tasks:** in agent mode behind a setting, its questions as buttons; on 150 tasks written
      after it was tuned it gets 111 right to today's 84, as many as today on agent mode's kind of task (53 of 70)
      after tuning on half of them, at about twice the time. Step 6 (the planner and the modes retired) is next.
+   - **Step 6a (2026-11-14), done:** with the setting on, the loop takes every request of the whole vault: the
+     app's actions on screen and the chat's own replies (talk, help, the overview) too. 28 of 30, 17 of 21, 53 of
+     70, 63 of 80; on the three models the loop beats today's agent, the 9B does no better than the 4B and the 2B
+     is far below. Next: 6b to 6e.
+
+13. **The web, looked up by the agent** — asked for by the developer on 2026-11-14, for the pull request after the
+   one agent loop: besides a link, the agent searches the web (`web_search`), and offers to when the notes do not
+   hold the answer. It works with nothing to set up (DuckDuckGo's HTML results, honest user agent, 2 to 3 seconds
+   between requests, marked "may stop working"); a free Brave Search key in Settings is the stable option, which the
+   chat suggests and explains when DuckDuckGo fails. The decision is in `docs/agent-loop.md` ("Decided with the
+   developer").
 
 ## Out of scope for the MVP
 
