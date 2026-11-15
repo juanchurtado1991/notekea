@@ -107,7 +107,14 @@ class RunTurnUseCase(
 
             val tool = state.tools[call.name]
 
+            val unread = UnreadChoice.of(
+                call = call,
+                state = state
+            )
+
             when {
+                unread != null -> state.found += unread
+
                 tool == null -> state.found += "(No tool \"${call.name}\". Call one of the tools listed.)"
 
                 isEmptyProposal(call = call, state = state) -> state.found += NOTHING_ADDED
@@ -224,6 +231,19 @@ class RunTurnUseCase(
         // A change not added (refused, or held back with a question) may be asked again as it was.
         val isRefused = tool.effect == ToolEffect.PROPOSES && state.turn.work.changes.size == before
         if (isRefused) state.made.remove(element = key)
+
+        // Refused again as it was, it counts as made again and is not offered next: refused over and over, it
+        // ends the turn.
+        val isRefusedAgain = isRefused && key in state.refused
+
+        if (isRefusedAgain) {
+            state.repeated += key
+
+            state.found += "(${call.name} $target was refused the same way $AGAIN Correct what it says, or " +
+                "make another call.)"
+        }
+
+        if (isRefused) state.refused += key
     }
 
     // A bare name several notes share is not settled by the app's guess: the model is told, to ask or to say which.
@@ -348,11 +368,8 @@ class RunTurnUseCase(
                     ?.contains(other = AGAIN) == true
             }
 
-        val tools = when {
-            isEnding -> state.tools.ending()
-            again != null -> state.tools.without(name = again)
-            else -> state.tools
-        }
+        val offered = if (isEnding) state.tools.ending() else state.tools
+        val tools = again?.let { offered.without(name = it) } ?: offered
 
         val json = StringBuilder()
 

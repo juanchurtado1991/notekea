@@ -271,7 +271,11 @@ yet. Next in step 5: fewer calls a task, the loop in agent mode behind a setting
 `write_note` by sections, `edit_note`. Measure a few tasks with `-PchatTasks="words,of,tasks"`.
 The loop is in the app behind Settings → General → "Agent mode with the new loop" (`AppPreferences.chatLoop`,
 `ChatLoop`), with ask_user's options as buttons (`ChatAskedOptions`); manual case 4.7-08. 150 held-out tasks
-(`AgentHeldOutCases`, `AgentWideHeldOut*`) measure both paths; half may be used to tune if the loop falls short.
+(`AgentHeldOutCases`, `AgentWideHeldOut*`) measure both paths: today's agent 84 of 150, the loop 111 at first and
+111 after tuning on the odd half of the Sample Vault's (53 of 70, as today's agent; the unseen even half 25 → 28),
+29 of 30 and 19 of 21 on the tuning sets, 46 s and 108 s a task. Accuracy first lets step 6 begin (retire the
+planner, the question agent and the modes, compared on the sets and the Auto-Test cases); `write_note` by sections
+and `edit_note` are still open in step 5.
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

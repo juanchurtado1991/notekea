@@ -17,7 +17,8 @@ class ListTool : ChatTool {
     override val name = NAME
 
     override val description =
-        "a folder's name or a tag; you get the names of the notes there. With neither, the notes changed last."
+        "a folder's name or a tag; you get the names of the notes there, each with its properties' names. " +
+            "With neither, the notes changed last."
 
     override val arguments = listOf(
         ToolArgument(
@@ -62,16 +63,10 @@ class ListTool : ChatTool {
         if (found.isEmpty()) return ToolResult(forModel = "list: no note $where.")
 
         val names = found
-            .map {
-                it
-                    .file
-                    .path
-                    .value
-                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            .let { entries ->
+                if (isRecent) entries else entries.sortedBy { it.file.path.value }
             }
-            .let {
-                if (isRecent) it else it.sorted()
-            }
+            .map { nameOf(note = it) }
 
         val more = (names.size - MAX_NAMES)
             .takeIf {
@@ -84,6 +79,25 @@ class ListTool : ChatTool {
             forModel = "list, ${names.size} notes $where:\n" +
                 names.take(n = MAX_NAMES).joinToString(separator = "\n") + more
         )
+    }
+
+    // A note's name with the names of its properties, so a task about notes "with a status" is seen in the list.
+    private fun nameOf(note: NoteEntry): String {
+        val name = note
+            .file
+            .path
+            .value
+            .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+
+        val keys = note
+            .metadata
+            .properties
+            .map { it.key }
+            .filter {
+                it != TAGS
+            }
+
+        return if (keys.isEmpty()) name else "$name (${keys.joinToString()})"
     }
 
     private fun recent(notes: List<NoteEntry>): List<NoteEntry> = notes
@@ -120,5 +134,6 @@ class ListTool : ChatTool {
         const val TAG = "tag"
         private const val MAX_NAMES = 60
         private const val RECENT = 20
+        private const val TAGS = "tags"
     }
 }

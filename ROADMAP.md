@@ -359,6 +359,9 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      vault's instructions; built and tested, called by the loop of step 5, which is next.
    - **Step 5 (2026-11-14), the loop measured:** 20 of the 21 wider tasks and 29 of agent mode's 30 (today's agent:
      7 and 27), at two to three times the time; next, fewer calls and the loop in the app.
+   - **Step 5, the held-out tasks:** in agent mode behind a setting, its questions as buttons; on 150 tasks written
+     after it was tuned it gets 111 right to today's 84, as many as today on agent mode's kind of task (53 of 70)
+     after tuning on half of them, at about twice the time. Step 6 (the planner and the modes retired) is next.
 
 ## Out of scope for the MVP
 

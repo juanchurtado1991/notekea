@@ -58,7 +58,9 @@ class ChangeTool(
                     it != ActionField.NOTES
                 }
                 .associateWith { call.text(name = it.written) }
-                .filterValues { it.isNotEmpty() },
+                .filterValues {
+                    it.isNotEmpty() && it.lowercase() !in NONE
+                },
             notes = call.list(name = ActionField.NOTES.written)
         )
 
@@ -88,15 +90,61 @@ class ChangeTool(
             )
         }
 
+        val unwritten = unwrittenOf(
+            step = step,
+            task = context.task
+        )
+
+        val isUnwritten = unwritten != null && context.work.warn(about = "$name words")
+
+        if (isUnwritten) {
+            return ToolResult(
+                forModel = "$name: not added yet. The task does not write \"$unwritten\". When the task names " +
+                    "it, use its words as the task writes them; if the task leaves it to you, call $name again."
+            )
+        }
+
         context.work.change(step = step)
 
+        val proposal = context
+            .work
+            .changes
+            .joinToString(separator = "\n") { "- ${describedOf(step = it)}" }
+
         return ToolResult(
-            forModel = "$name: added to the proposal (${context.work.changes.size} so far). " +
-                "If the task asks for more changes, add them; else call propose now."
+            forModel = "$name: added. The proposal now holds:\n$proposal\nIf the task asks for a change that " +
+                "is not in it, add that one; else call propose now. Add nothing the task does not ask for."
         )
+    }
+
+    // A tag or a property name the task does not write (travel for "viaje"): the task's own words are kept.
+    private fun unwrittenOf(
+        step: PlannedStep,
+        task: String
+    ): String? {
+        val words = task.lowercase()
+
+        return listOf(ActionField.TAG, ActionField.PROPERTY)
+            .mapNotNull { step[it]?.trim('#') }
+            .firstOrNull {
+                it.lowercase() !in words
+            }
+    }
+
+    private fun describedOf(step: PlannedStep): String {
+        val fields = step
+            .fields
+            .values
+            .filter { it.isNotBlank() }
+            .map { it.take(n = TARGET_CHARS) }
+
+        return (listOf(step.kind.written) + step.notes + fields).joinToString(separator = ", ")
     }
 
     private companion object {
         const val TARGET_CHARS = 60
+
+        // What a model writes in a field it leaves empty: the field is left out.
+        val NONE = setOf("none", "null", "n/a")
     }
 }

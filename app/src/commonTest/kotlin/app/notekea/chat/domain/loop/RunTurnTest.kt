@@ -59,7 +59,12 @@ class RunTurnTest {
                     AskUserTool(),
                     AnswerTool()
                 ),
-                WorkKind.ORGANIZE to listOf(ChangeTools.addTag, AskUserTool(), ProposeTool())
+                WorkKind.ORGANIZE to listOf(
+                    ChangeTools.addTag,
+                    ChangeTools.createNote,
+                    AskUserTool(),
+                    ProposeTool()
+                )
             )
         ),
         vaultGuide = VaultGuide(noteTextCache = cache),
@@ -259,14 +264,75 @@ class RunTurnTest {
         }
 
     @Test
+    fun `a tag the task does not write is held once, and each change added shows the proposal so far`() =
+        runTest {
+            script(
+                """{"tool":"add_tag","notes":["Lease"],"tag":"home"}""",
+                """{"tool":"add_tag","notes":["Lease"],"tag":"hogar"}""",
+                """{"tool":"propose","summary":"$SUMMARY"}""",
+                work = "organize"
+            )
+
+            val steps = run(task = "etiqueta el contrato Lease como hogar")
+
+            assertEquals(
+                expected = listOf(true, true, "hogar"),
+                actual = listOf(
+                    "add_tag: not added yet. The task does not write \"home\"." in callPrompts()[1],
+                    "The proposal now holds:\n- add_tag, Lease, hogar\n" in callPrompts()[2],
+                    (steps.last() as AgentStep.Proposed)
+                        .steps
+                        .single()
+                        .tag
+                )
+            )
+        }
+
+    @Test
+    fun `a change refused twice the same way is not offered next, and a field written none is left out`() =
+        runTest {
+            val tacos = """{"tool":"add_tag","notes":["Tacos"],"tag":"home"}"""
+
+            script(
+                tacos,
+                tacos,
+                """{"tool":"create_note","title":"Rent","template":"none"}""",
+                """{"tool":"propose","summary":"$SUMMARY"}""",
+                work = "organize"
+            )
+
+            val steps = run(task = "tag Tacos as home and create a note Rent")
+
+            val schemas = engine
+                .options
+                .mapNotNull { it.jsonSchema }
+                .filter {
+                    "\"propose\"" in it
+                }
+
+            assertEquals(
+                expected = listOf(true, false, listOf(ActionKind.CREATE_NOTE), null),
+                actual = listOf(
+                    "was refused the same way again" in callPrompts()[2],
+                    "\"add_tag\"" in schemas[2],
+                    (steps.last() as AgentStep.Proposed).steps.map { it.kind },
+                    (steps.last() as AgentStep.Proposed)
+                        .steps
+                        .single()
+                        .template
+                )
+            )
+        }
+
+    @Test
     fun `a bare name two notes share is told with their paths, to ask the person or to say which`() =
         runTest {
             store.texts[lease] = "The rent is 950 euros a month."
 
-            script(
-                """{"tool":"read","note":"Lease"}""",
+            val ask =
                 """{"tool":"ask_user","question":"Which lease?","options":["Home/Lease","Work/Lease"]}"""
-            )
+
+            script("""{"tool":"read","note":"Lease"}""", ask, ask)
 
             val steps = run(
                 task = "summarize the lease",
@@ -274,9 +340,10 @@ class RunTurnTest {
             )
 
             assertEquals(
-                expected = listOf(true, true),
+                expected = listOf(true, true, true),
                 actual = listOf(
                     "(2 notes are named \"Lease\": Home/Lease, Work/Lease." in callPrompts()[1],
+                    "you have not read Home/Lease, Work/Lease." in callPrompts()[2],
                     steps.last() is AgentStep.Asked
                 )
             )

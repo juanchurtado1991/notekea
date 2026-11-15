@@ -12,9 +12,12 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteFixtures.tags
+import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -49,7 +52,15 @@ class ReadingToolsTest {
             ),
             entry(
                 path = soup.value,
-                modifiedOffsetMillis = 1_000
+                modifiedOffsetMillis = 1_000,
+                metadata = NoteMetadata.NONE.copy(
+                    properties = listOf(
+                        NoteProperty(
+                            key = "serves",
+                            value = PropertyValue.Text(text = "4")
+                        )
+                    )
+                )
             )
         ),
         task = "what does the lease say about ending it?",
@@ -118,15 +129,15 @@ class ReadingToolsTest {
         }
 
     @Test
-    fun `a folder or a tag is listed by name, and with neither the notes changed last come first`() =
+    fun `a folder or a tag is listed by name with its properties, and with neither the last changed first`() =
         runTest {
             val list = ListTool()
 
             assertEquals(
                 expected = listOf(
-                    "list, 2 notes in \"recipes\":\nRecipes/Arepas\nRecipes/Soup",
+                    "list, 2 notes in \"recipes\":\nRecipes/Arepas\nRecipes/Soup (serves)",
                     "list, 1 notes tagged latin:\nRecipes/Arepas",
-                    "list, 3 notes changed last:\nHome/Lease\nRecipes/Arepas\nRecipes/Soup",
+                    "list, 3 notes changed last:\nHome/Lease\nRecipes/Arepas\nRecipes/Soup (serves)",
                     "list: no note in \"Trips\"."
                 ),
                 actual = listOf(
