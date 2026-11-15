@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
+Last updated: 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
 ([notekea#142](https://github.com/juanchurtado1991/notekea/pull/142), draft), the developer's macOS smoke test under
 way, its fixes and the code review's refactors in it.
 
@@ -276,6 +276,18 @@ The loop is in the app behind Settings → General → "Agent mode with the new 
 29 of 30 and 19 of 21 on the tuning sets, 46 s and 108 s a task. Accuracy first lets step 6 begin (retire the
 planner, the question agent and the modes, compared on the sets and the Auto-Test cases); `write_note` by sections
 and `edit_note` are still open in step 5.
+
+**Step 6a is done** (2026-11-14): with the setting on, every request of the whole vault goes to the loop, whatever
+the mode; the router has *app* (`ShowTool`, `ShowTools`: a note, today's note, a panel, the search, the theme, the
+panes, shown at once with no card) and *talk*, *help*, *overview*, handed back to the chat's own replies
+(`AgentStep.Replied`, `HandTool`). The router gives 111 of 120 (`RouterEvalChatModelTest`); the loop 28 of 30, 17
+of 21, 53 of 70 and 63 of 80 (today's agent 27, 7, 53, 31). Manual case 4.7-09. Measured on the three models the
+same night (the table is in `docs/agent-loop.md`): the loop beats today's agent on each, the 9B does no better than
+the 4B (it ends before it has looked enough), and the 2B is far below on both paths. The reports now hold every
+call of a failed task, its route and its kind of failure (`EvalTrace`, `EvalTraceReport`); the failed tasks are
+measured again with it on the three models, to say what the tools and the loop should help with. Next in step 6:
+6b (found tables, sources, streaming), 6c (scope, the section question), 6d, 6e. The web search of `ROADMAP.md`
+13 is the pull request after this one.
 
 **How steps 2 to 7 are run (the developer, 2026-11-14, before leaving them to the agent):**
 

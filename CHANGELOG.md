@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- With Settings → General → "The chat’s new loop" on, every request asked of the whole vault goes to the new loop,
+  whatever the mode: it also opens notes, today's note, panels and the search, changes the theme and the panes at
+  once, and hands greetings, how-to questions and "what does my vault hold?" to the chat's own replies.
 - Inside the chat, the one loop works (`docs/agent-loop.md`, step 5): it chooses its kind of work, calls one tool at
   a time, proposes changes on the card or asks the person when a request can be read two ways. Measured with the
   Medium model it does 20 of the 21 harder tasks (today's agent does 7) and 29 of agent mode's 30 (today: 27),

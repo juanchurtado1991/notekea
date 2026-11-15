@@ -6,12 +6,14 @@ import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.AgentTaskUseCase
 import app.notekea.chat.domain.language.SpokenLanguage
 import app.notekea.chat.domain.loop.ChatLoop
+import app.notekea.chat.domain.loop.WorkKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatAction
+import app.notekea.chat.presentation.model.ChatEffect
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.model.ChatStep
@@ -29,7 +31,13 @@ internal class ChatAgent(
     private val host: ChatHost,
     private val loop: ChatLoop?
 ) {
-    /** The entry handed to the agent, its end to come: asked of agent mode, or a question Auto could not answer. */
+    /** Whether every request of the whole vault goes to the one loop, the planner left out (step 6). */
+    suspend fun isLooping(): Boolean = loop?.isOn() == true
+
+    /**
+     * The entry handed to the agent, its end to come: asked of agent mode, or a question Auto could not answer. The
+     * reply of the chat's own that the loop hands back (talk, help, the overview), null when the turn ended here.
+     */
     suspend fun takeOver(
         id: Long,
         task: String,
@@ -37,7 +45,7 @@ internal class ChatAgent(
         history: List<ChatExchange>,
         openNote: RelativePath?,
         planned: List<PlannedStep> = emptyList()
-    ) {
+    ): ChatReply? {
         host
             .update(id) {
                 it.copy(
@@ -46,7 +54,7 @@ internal class ChatAgent(
                 )
             }
 
-        work(id, task, notes, history, planned, openNote)
+        return work(id, task, notes, history, planned, openNote)
     }
 
     private suspend fun work(
@@ -56,7 +64,7 @@ internal class ChatAgent(
         history: List<ChatExchange>,
         planned: List<PlannedStep>,
         openNote: RelativePath?
-    ) {
+    ): ChatReply? {
         host.update(id) { it.copy(step = ChatStep.WORKING) }
 
         val context = actions.contextOf(
@@ -79,10 +87,35 @@ internal class ChatAgent(
             agentTask(task, vaultPath, notes, context, openNote, planned)
         }
 
+        val replies = mutableListOf<ChatReply>()
+
         steps
             .collect { step ->
+                // The window acts outside the state's update, which may run more than once.
+                if (step is AgentStep.Shown) {
+                    step.steps.forEach { host.emit(ChatEffect.Show(step = it)) }
+                }
+
+                if (step is AgentStep.Replied) {
+                    replies += replyOf(
+                        kind = step.kind,
+                        task = task
+                    )
+                }
+
                 host.update(id) { entry -> entry.after(step = step) }
             }
+
+        return replies.firstOrNull()
+    }
+
+    private fun replyOf(
+        kind: WorkKind,
+        task: String
+    ): ChatReply = when (kind) {
+        WorkKind.HELP -> ChatReply.Help(request = task)
+        WorkKind.OVERVIEW -> ChatReply.Overview
+        else -> ChatReply.Talk(note = null)
     }
 
     private fun ChatEntry.after(step: AgentStep): ChatEntry = when (step) {
@@ -124,6 +157,18 @@ internal class ChatAgent(
             outcome = TurnOutcome.ANSWERED,
             options = step.options
         )
+
+        is AgentStep.Shown -> copy(
+            step = ChatStep.DONE,
+            outcome = TurnOutcome.ACTED,
+            action = ChatAction(
+                status = ActionStatus.FINISHED,
+                shown = step.steps
+            )
+        )
+
+        // The chat's own reply is written next, as a turn of the old path is.
+        is AgentStep.Replied -> this
 
         is AgentStep.Stopped -> copy(
             step = ChatStep.DONE,

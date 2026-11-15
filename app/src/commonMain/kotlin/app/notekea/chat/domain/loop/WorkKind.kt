@@ -6,12 +6,14 @@ package app.notekea.chat.domain.loop
  */
 enum class WorkKind(
     val written: String,
-    val description: String
+    val description: String,
+    val isReply: Boolean = false
 ) {
     WRITE(
         written = "write",
-        description = "a new note is written (a summary, a table, a comparison, a list, study cards), " +
-            "whatever it is written from (notes, tasks, meetings), an empty note is created, or text is added."
+        description = "a new note is written (a summary, a table, a comparison, a list, study cards or a " +
+            "quiz), whatever it is written from (notes, tasks, meetings), an empty note is created, or text " +
+            "is added."
     ),
     ORGANIZE(
         written = "organize",
@@ -25,6 +27,32 @@ enum class WorkKind(
     ASK(
         written = "ask",
         description = "only when the request changes nothing: a question answered from the notes, or " +
-            "something counted, compared or looked up in them."
+            "something counted, compared or looked up in them, or notes and tasks found and listed."
+    ),
+    APP(
+        written = "app",
+        description = "the app itself does something on screen now: a note or today's note opened, a panel " +
+            "(backlinks, outline, graph, bookmarks…), the app's search opened on words, the theme, the panes, " +
+            "the note as Markdown. Never notes or tasks listed (ask), a bookmark, tag or property (organize), " +
+            "or how to do it (help)."
+    ),
+
+    // Replies the loop hands to the chat's own answers, with no tool to call (`docs/agent-loop.md`, step 6).
+    TALK(
+        written = "talk",
+        description = "not about anything the notes hold: a greeting, thanks, small talk, or the chat's last " +
+            "reply asked again another way (shorter, in Spanish).",
+        isReply = true
+    ),
+    HELP(
+        written = "help",
+        description = "how to use Notekea itself, or what the chat can do: where a feature is, a shortcut, how " +
+            "do I do something in the app (a question, never done for them).",
+        isReply = true
+    ),
+    OVERVIEW(
+        written = "overview",
+        description = "what the vault holds as a whole: its folders, its topics, what is in it.",
+        isReply = true
     )
 }

@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.agent
 
+import app.notekea.chat.domain.loop.WorkKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
 
@@ -26,6 +27,12 @@ sealed interface AgentStep {
         val question: String,
         val options: List<String>
     ) : AgentStep
+
+    /** Steps the app shows now (a note opened, a panel, the theme): nothing in the notes changes. */
+    data class Shown(val steps: List<ActionStep>) : AgentStep
+
+    /** Not work for tools: the chat's own reply of this [kind] (talk, help, the vault's overview) answers it. */
+    data class Replied(val kind: WorkKind) : AgentStep
 
     /** Its proposal could not be checked against the vault, or it ran out of moves or time. */
     data class Stopped(val problem: ActionProblem?) : AgentStep
