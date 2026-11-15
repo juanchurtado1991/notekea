@@ -287,7 +287,9 @@ the 4B (it ends before it has looked enough), and the 2B is far below on both pa
 call of a failed task, its route and its kind of failure (`EvalTrace`, `EvalTraceReport`); the failed tasks are
 measured again with it on the three models (2026-11-15): the kinds of failure and seven fixes, ranked, are in
 `docs/agent-loop.md`, "Why the loop fails, read call by call". Items 1, 2, 5 and 6 were done the same day,
-at the developer's word, and the three models measured again with them. Next in step 6:
+at the developer's word, and the three models measured again with them: the 4B 158 of 201 (79 %, was 161), the
+9B 159 (79 %, was 149), the 2B 78 (39 %, was 69); the 9B's wrong changes halved. What is left on both is wrong
+endings and wrong note sets, items 3 and 4 (step 7's verifier). Next in step 6:
 6b (found tables, sources, streaming), 6c (scope, the section question), 6d, 6e. The web search of `ROADMAP.md`
 13 is the pull request after this one.
 

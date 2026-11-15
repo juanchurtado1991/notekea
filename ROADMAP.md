@@ -367,7 +367,7 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      70, 63 of 80; on the three models the loop beats today's agent, the 9B does no better than the 4B and the 2B
      is far below. Its failures read call by call (2026-11-15), four of the fixes they point to are done: the
      router, `create_note`, `append` and `complete_task` turned down when another tool is meant, and the tasks'
-     dates. Next: 6b to 6e.
+     dates; with them the 4B makes 158 of 201, the 9B 159 (was 149), the 2B 78. Next: 6b to 6e.
 
 13. **The web, looked up by the agent** — asked for by the developer on 2026-11-14, for the pull request after the
    one agent loop: besides a link, the agent searches the web (`web_search`), and offers to when the notes do not
