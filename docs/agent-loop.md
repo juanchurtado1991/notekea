@@ -778,6 +778,25 @@ the 4B's went from 13 to 10, inside what two runs differ by; those failures need
 check is kept or taken out. The 2B is unchanged in kind. The detector was written against these tasks, so tasks it
 has not seen say how much of the gain holds.
 
+**On tasks it was not written against (2026-11-15):** 24 new tasks over the same vault (`AgentUnseenCases`), written
+before the checks were run on them: 12 that can mean several notes, in words the tuned tasks do not use, and 12 that
+look like them and should not ask (a name told apart by what follows it or by what the notes hold, "both of my
+Ideas notes"). With no model the detector holds 9 of the 12 that ask and 2 of the 12 that do not ("Tomás from the
+chess club", "my Sunday weekly review"). Measured without the verifier (at `5f662a2c`) and with it:
+
+| Model | Without | With | Asking right (12) | Not asking right (12) |
+|---|---|---|---|---|
+| 4B (medium) | 19 (79 %) | 21 (87 %) | 8 → 12 | 11 → 9 |
+| 9B (large) | 16 (66 %) | 19 (79 %) | 6 → 8 | 10 → 11 |
+
+The gain holds, smaller than on the tuned tasks, and the two wrong holds cost what was expected: the 4B lost both,
+the 9B the second. The 9B's misses that remain are not the detector's: it answered with both Lauras' numbers, which
+an end covering all the notes is let through for, and summed both budgets; "my goals" and "the presupuesto" are not
+held at all (a plural title word, a Spanish word for an English title).
+
+**Item 7, done (2026-11-15):** with the small model the chat keeps today's agent even when the loop is turned on in
+Settings (`ChatLoop.isOn`), and the setting's hint says so.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
