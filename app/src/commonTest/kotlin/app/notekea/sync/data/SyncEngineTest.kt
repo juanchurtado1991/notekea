@@ -230,6 +230,28 @@ class SyncEngineTest {
             )
         }
 
+    // Code review, 2026-11-15: a failed repair was dropped, and the vault showed as interrupted again with no reason.
+    @Test
+    fun `a repair that fails says why, and nothing is synced`() = runTest {
+        val engine = engine()
+
+        engine.connect(
+            settings = SyncSettings(remoteUrl = URL),
+            token = TOKEN
+        )
+
+        repository.unfinished = UnfinishedSync(changedHere = listOf(PLAN))
+        repository.repairError = SyncError.Failed(message = LOCKED)
+        repository.calls.clear()
+
+        engine.repair(choice = RepairChoice.KEEP_MINE)
+
+        assertEquals(
+            expected = SyncStatus.Failed(message = LOCKED) to listOf("repair KEEP_MINE"),
+            actual = engine.status.value to repository.calls.toList()
+        )
+    }
+
     @Test
     fun `disconnecting forgets the settings and the token`() = runTest {
         val engine = engine()
@@ -251,6 +273,7 @@ class SyncEngineTest {
         const val VAULT = "/vaults/Notes"
         const val URL = "https://example.com/notes.git"
         const val TOKEN = "secret"
+        const val LOCKED = "The index is locked"
         val PLAN = RelativePath(value = "Plan.md")
         val UP_TO_DATE = SyncStatus.UpToDate
     }

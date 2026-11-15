@@ -91,6 +91,21 @@ class AppToolsTest {
         )
     }
 
+    // Code review, 2026-11-15: large and small results came back as "1.234567825E7", and -3^2 as 9.
+    @Test
+    fun `results are written out in full, and a minus before a power is taken after it`() {
+        val sums = listOf("12345678.25 * 1", "1 / 2000", "-3^2 + 10", "2 ^ -1", "-(0.00001)")
+
+        assertEquals(
+            expected = listOf("12345678.25", "0.0005", "1", "0.5", "0"),
+            actual = sums.map { sum ->
+                Arithmetic
+                    .valueOf(expression = sum)
+                    ?.let { Arithmetic.written(value = it) }
+            }
+        )
+    }
+
     @Test
     fun `a sum is answered with what it comes to, and one it cannot do says how to write it`() =
         runTest {

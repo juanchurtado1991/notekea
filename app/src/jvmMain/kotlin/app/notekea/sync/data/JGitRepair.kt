@@ -48,11 +48,15 @@ internal class JGitRepair(private val git: Git) {
 
     // What was written here after the merge stopped (changed in the folder, not by the merge) is set aside, the
     // merge undone to the last commit made here, and those files put back. The notes Git marked as clashing go
-    // back to that commit too: the next sync meets the remote's side again and keeps both, as any conflict.
+    // back to that commit too: the next sync meets the remote's side again and keeps both, as any conflict. What
+    // they held, the person's own hand on them included, is copied to the vault's trash first.
     private fun keepMine() {
         val status = git.status().call()
         val written = (status.modified - status.conflicting).filter { File(vault, it).isFile }
+        val clashing = status.conflicting.filter { File(vault, it).isFile }
         val aside = Files.createTempDirectory(ASIDE)
+
+        if (clashing.isNotEmpty()) trashed(paths = clashing)
 
         try {
             written.forEach {
@@ -78,21 +82,17 @@ internal class JGitRepair(private val git: Git) {
     // Everything changed here is copied to the vault's trash, then the vault is the remote's last commit.
     private fun takeRemote() {
         val changed = unfinished()?.changedHere.orEmpty()
-        val trash = freeTrashFolder()
 
-        changed
-            .map { it.value }
-            .filter { File(vault, it).isFile }
-            .forEach {
-                copy(
-                    from = File(vault, it),
-                    to = File(trash, it)
-                )
-            }
+        trashed(
+            paths = changed
+                .map { it.value }
+                .filter { File(vault, it).isFile }
+        )
 
         undo()
 
-        val remote = repository.resolve("$REMOTE_PREFIX${repository.branch}") ?: return
+        val remote =
+            repository.resolve("${JGitPending.REMOTE_PREFIX}${repository.branch}") ?: return
 
         git
             .reset()
@@ -101,11 +101,27 @@ internal class JGitRepair(private val git: Git) {
             .call()
     }
 
+    // The files at [paths] copied, as they are now, to a folder of their own in the vault's trash.
+    private fun trashed(paths: List<String>) {
+        val trash = freeTrashFolder()
+
+        paths.forEach {
+            copy(
+                from = File(vault, it),
+                to = File(trash, it)
+            )
+        }
+    }
+
     // "Sync repair" in the vault's trash, numbered when an earlier repair left one: never one written over.
     private fun freeTrashFolder(): File = generateSequence(seed = 1) {
         it + 1
     }
-        .map { number -> File(vault, "$TRASH/$TRASH_FOLDER" + if (number == 1) "" else " $number") }
+        .map { number ->
+            val suffix = if (number == 1) "" else " $number"
+
+            File(vault, "$TRASH/$REPAIR_FOLDER$suffix")
+        }
         .first {
             !it.exists()
         }
@@ -137,9 +153,10 @@ internal class JGitRepair(private val git: Git) {
     }
 
     private companion object {
-        const val REMOTE_PREFIX = "refs/remotes/origin/"
         const val ASIDE = "notekea-repair"
+
+        // The vault's trash as the tree keeps it, which the sync leaves out (`.git/info/exclude`).
         const val TRASH = ".trash"
-        const val TRASH_FOLDER = "Sync repair"
+        const val REPAIR_FOLDER = "Sync repair"
     }
 }

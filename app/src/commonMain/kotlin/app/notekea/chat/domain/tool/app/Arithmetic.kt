@@ -1,7 +1,6 @@
 package app.notekea.chat.domain.tool.app
 
 import kotlin.math.abs
-import kotlin.math.floor
 import kotlin.math.pow
 import kotlin.math.round
 
@@ -16,9 +15,12 @@ internal object Arithmetic {
     private val TIMES = Regex(pattern = "(?<=[\\d)])\\s*[x×·]\\s*(?=[\\d(])")
     private val TOKEN = Regex(pattern = "\\d+(?:\\.\\d+)?|[-+*/^()]")
     private const val NEGATE = "~"
-    private const val DECIMALS = 10_000.0
+    private const val DECIMALS = 10_000L
+    private const val DECIMAL_PLACES = 4
     private const val WHOLE_LIMIT = 1e15
-    private val PRECEDENCE = mapOf("+" to 1, "-" to 1, "*" to 2, "/" to 2, "^" to 3, NEGATE to 4)
+
+    // A minus before a number binds less than a power: -2^2 is -(2^2), as it is written by hand.
+    private val PRECEDENCE = mapOf("+" to 1, "-" to 1, "*" to 2, "/" to 2, NEGATE to 3, "^" to 4)
     private val RIGHT = setOf("^", NEGATE)
 
     /** What [expression] comes to; null when it is not arithmetic or divides by zero. */
@@ -60,12 +62,24 @@ internal object Arithmetic {
         }
     }
 
-    /** [value] as a person writes it: whole when it is, else to four decimals. */
+    /** [value] as a person writes it, never in scientific notation: whole when it is, else to four decimals. */
     fun written(value: Double): String {
-        val isWhole = value == floor(value) && abs(value) < WHOLE_LIMIT
-        if (isWhole) return value.toLong().toString()
+        if (abs(value) >= WHOLE_LIMIT) return value.toString()
 
-        return (round(value * DECIMALS) / DECIMALS).toString()
+        val scaled = round(abs(value) * DECIMALS).toLong()
+        val whole = scaled / DECIMALS
+
+        val decimals = (scaled % DECIMALS)
+            .toString()
+            .padStart(
+                length = DECIMAL_PLACES,
+                padChar = '0'
+            )
+            .trimEnd('0')
+
+        val sign = if (value < 0 && scaled > 0) "-" else ""
+
+        return if (decimals.isEmpty()) "$sign$whole" else "$sign$whole.$decimals"
     }
 
     // The shunting yard: operators wait on a stack until one that binds no tighter comes.
@@ -92,6 +106,9 @@ internal object Arithmetic {
                     while (waiting.lastOrNull() in PRECEDENCE) output += waiting.removeLast()
                     waiting.removeLastOrNull() ?: return null
                 }
+
+                // A minus before a number waits for what follows it: it takes nothing off the stack.
+                operator == NEGATE -> waiting.addLast(element = operator)
 
                 else -> {
                     while (bindsBefore(operator = operator, waiting = waiting.lastOrNull())) {

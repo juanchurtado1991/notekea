@@ -293,7 +293,11 @@ endings and wrong note sets, items 3 and 4 (step 7's verifier), done the same da
 (`AmbiguousTask`, `UnsettledEnd`, `ProposalReview`) and measured: the 4B 165 of 201 (82 %), the 9B 166 (83 %), the
 2B 81 (40 %); wrong endings went from 8 to 2 and from 13 to 5, wrong note sets barely moved. On 24 tasks it was
 not written against (`AgentUnseenCases`) the 4B went from 19 to 21 and the 9B from 16 to 19. Item 7 too: the small
-model keeps today's agent with the loop turned on. Next on this branch: a code review. Next in step 6:
+model keeps today's agent with the loop turned on. The branch's code review (2026-11-15) found ten things; fixed:
+Keep mine losing what was written into a clashing note, a failed repair not said, sums in scientific notation and
+-3^2, accented first names, a question held on the last step; left, with the reason: an empty proposal after a drop
+of every note (told once already), `countTokens` outside the token room (llama's tokenizer only reads), and the
+`tool == null` branch, which the compiler needs. Next in step 6:
 6b (found tables, sources, streaming), 6c (scope, the section question), 6d, 6e. The web search of `ROADMAP.md`
 13 is the pull request after this one.
 

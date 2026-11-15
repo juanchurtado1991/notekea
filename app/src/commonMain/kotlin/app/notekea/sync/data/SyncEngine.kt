@@ -174,11 +174,18 @@ class SyncEngine(
     }
 
     override suspend fun repair(choice: RepairChoice) {
-        cycle.withLock {
+        val repaired = cycle.withLock {
             repository.repair(
                 vaultPath = vaultPath,
                 choice = choice
             )
+        }
+
+        // A repair that failed says why, rather than the vault showing as interrupted again with no reason.
+        if (repaired is Outcome.Failure) {
+            mutableStatus.value = statusOf(error = repaired.error)
+
+            return
         }
 
         syncNow()

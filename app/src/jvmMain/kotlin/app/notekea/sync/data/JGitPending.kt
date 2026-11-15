@@ -9,7 +9,7 @@ import org.eclipse.jgit.treewalk.EmptyTreeIterator
 
 /** The files changed here and not on the remote: uncommitted ones, and those of the commits not pushed yet. */
 internal object JGitPending {
-    private const val REMOTE_PREFIX = "refs/remotes/origin/"
+    const val REMOTE_PREFIX = "refs/remotes/origin/"
 
     fun of(git: Git): Int = namesOf(git = git).size
 

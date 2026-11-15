@@ -216,6 +216,37 @@ class TurnVerifierTest {
             )
         }
 
+    // Code review, 2026-11-15: held on the last step, the turn ran out and answered anyway, never asking.
+    @Test
+    fun `an answer held on the last step is followed by one call more, the question`() = runTest {
+        val people = listOf("People/Laura Castro.md", "People/Laura Méndez.md").map {
+            entry(path = it)
+        }
+
+        val sums = (1 until RunTurnUseCase.MAX_STEPS).map {
+            """{"tool":"calculate","expression":"$it + 1"}"""
+        }
+
+        script(
+            *sums.toTypedArray(),
+            """{"tool":"answer","text":"Laura's phone is 8701-9032."}""",
+            """{"tool":"ask_user","question":"Which Laura?","options":["Laura Castro","Laura Méndez"]}"""
+        )
+
+        val steps = run(
+            task = "what is the phone of Laura?",
+            notes = notes + people
+        )
+
+        assertEquals(
+            expected = AgentStep.Asked(
+                question = "Which Laura?",
+                options = listOf("Laura Castro", "Laura Méndez")
+            ),
+            actual = steps.last()
+        )
+    }
+
     @Test
     fun `a change to several notes is listed back once with what each holds, and the ones dropped are left out`() =
         runTest {
