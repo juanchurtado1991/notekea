@@ -369,7 +369,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
      router, `create_note`, `append` and `complete_task` turned down when another tool is meant, and the tasks'
      dates; with them the 4B makes 158 of 201, the 9B 159 (was 149), the 2B 78. Items 3 and 4 too, the first checks of step 7's verifier: a task that can mean several notes
      is asked back, a change to several notes listed back once; with them the 4B makes 165 of 201, the 9B 166, the
-     2B 81. Next: 6b to 6e.
+     2B 81; on 24 tasks they were not written against, 19 → 21 and 16 → 19. The small model keeps today's agent
+     with the loop on. Next: 6b to 6e.
 
 13. **The web, looked up by the agent** — asked for by the developer on 2026-11-14, for the pull request after the
    one agent loop: besides a link, the agent searches the web (`web_search`), and offers to when the notes do not

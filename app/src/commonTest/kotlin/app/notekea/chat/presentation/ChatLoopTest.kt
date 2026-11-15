@@ -122,7 +122,8 @@ class ChatLoopTest {
 
         return ChatLoop(
             runTurn = runTurn,
-            preferencesStore = FakeAppPreferencesStore(initial = AppPreferences(chatLoop = isOn))
+            preferencesStore = FakeAppPreferencesStore(initial = AppPreferences(chatLoop = isOn)),
+            llmEngine = engine
         )
     }
 
@@ -186,6 +187,30 @@ class ChatLoopTest {
     fun `turned off, agent mode is today's agent, which never asks with buttons`() =
         runTest(dispatcher) {
             val viewModel = asked(isOn = false)
+
+            assertEquals(
+                expected = emptyList(),
+                actual = viewModel
+                    .state
+                    .value
+                    .entries
+                    .last()
+                    .options
+            )
+        }
+
+    // The 2B repeats a refused call until the turn ends (docs/agent-loop.md, item 7): it keeps today's agent.
+    @Test
+    fun `turned on with the small model, agent mode is still today's agent`() =
+        runTest(dispatcher) {
+            engine.readiness = Outcome.Success(
+                value = LlmModelInfo(
+                    isSmall = true,
+                    hasAgent = true
+                )
+            )
+
+            val viewModel = asked(isOn = true)
 
             assertEquals(
                 expected = emptyList(),

@@ -250,7 +250,7 @@
     <string name="rail_graph">Grafo</string>
     <string name="rail_side_panel">Panel lateral</string>
     <string name="settings_chat_loop">El nuevo bucle del chat</string>
-    <string name="settings_chat_loop_hint">Una vista previa de la nueva forma de trabajar del chat: toda petición sobre la bóveda entera, sea cual sea el modo, se trabaja paso a paso. Lee los documentos largos por partes, hace él mismo sumas y fechas, abre notas y paneles, y pregunta cuando una petición se puede entender de dos maneras. Acierta más y tarda más. Apagado, el chat funciona como antes.</string>
+    <string name="settings_chat_loop_hint">Una vista previa de la nueva forma de trabajar del chat: toda petición sobre la bóveda entera, sea cual sea el modo, se trabaja paso a paso. Lee los documentos largos por partes, hace él mismo sumas y fechas, abre notas y paneles, y pregunta cuando una petición se puede entender de dos maneras. Acierta más y tarda más. Apagado, o con el modelo pequeño, el chat funciona como antes.</string>
     <string name="settings_close">Cerrar</string>
     <string name="settings_section_about">Acerca de</string>
     <string name="settings_language">Idioma</string>

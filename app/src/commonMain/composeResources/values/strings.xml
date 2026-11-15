@@ -250,7 +250,7 @@
     <string name="rail_graph">Graph</string>
     <string name="rail_side_panel">Side panel</string>
     <string name="settings_chat_loop">The chat’s new loop</string>
-    <string name="settings_chat_loop_hint">A preview of the chat’s new way of working: every request about the whole vault, whatever the mode, is worked on step by step. It reads long documents part by part, does sums and dates itself, opens notes and panels, and asks when a request can be read two ways. It is right more often and takes longer. Turned off, the chat works as before.</string>
+    <string name="settings_chat_loop_hint">A preview of the chat’s new way of working: every request about the whole vault, whatever the mode, is worked on step by step. It reads long documents part by part, does sums and dates itself, opens notes and panels, and asks when a request can be read two ways. It is right more often and takes longer. Turned off, or with the small model, the chat works as before.</string>
     <string name="settings_close">Close</string>
     <string name="settings_section_about">About</string>
     <string name="settings_language">Language</string>
