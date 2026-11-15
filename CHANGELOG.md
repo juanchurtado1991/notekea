@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The chat's new loop adds tasks as tasks (not as a line of text), writes a note the request says what to hold
   instead of leaving it empty, sets a status as a property instead of marking a task done, and sees each task's
-  date, so "my open tasks due in January" can be answered.
+  date, so "my open tasks due in January" can be answered. Measured on 201 tasks, the 9B model now gets 79 % right
+  (was 74 %), the 4B 79 % (was 80 %) and the 2B 39 % (was 34 %).
 - With Settings → General → "The chat’s new loop" on, every request asked of the whole vault goes to the new loop,
   whatever the mode: it also opens notes, today's note, panels and the search, changes the theme and the panes at
   once, and hands greetings, how-to questions and "what does my vault hold?" to the chat's own replies.

@@ -295,3 +295,5 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   again with every call in the report, and their kinds of failure and seven fixes written in `docs/agent-loop.md`.
 - **2026-11-15, four fixes of the failures:** the handoff said items 1, 2, 5 and 6 of "Why the loop fails" were
   done and being measured on the three models.
+- **2026-11-15, the four fixes measured:** the handoff said the 4B made 158 of 201 (was 161), the 9B 159 (was
+  149) and the 2B 78 (was 69), the table in `docs/agent-loop.md`.

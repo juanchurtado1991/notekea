@@ -719,7 +719,28 @@ the first pieces of step 7's verifier.
 *organize*) and *write* given `add_task` and `date`, for when it is sent there anyway; `ChangeMisuse`, which turns
 down once `create_note` for a note the task says what to hold, `append` for a task, and `complete_task` for a
 status or a task added, saying which tool to call; the descriptions of the change tools say what each is not for;
-`tasks` gives each task's date (`FoundRow.date`) and takes `from` and `to`. FIXES_MEASURED
+`tasks` gives each task's date (`FoundRow.date`) and takes `from` and `to`.
+
+Measured on the same four sets the same day (201 tasks; the 30, 21, 70 and 80):
+
+| Model | Before | With 1, 2, 5, 6 | By set | Router |
+|---|---|---|---|---|
+| 4B (medium) | 161 (80 %) | 158 (79 %) | 28, 17, 51, 62 | 111 → 111 |
+| 9B (large) | 149 (74 %) | 159 (79 %) | 27, 17, 54, 61 | 113 → 116 |
+| 2B (small) | 69 (34 %) | 78 (39 %) | 12, 10, 27, 29 | 83 → 79 |
+
+| Failures by kind | 4B before → after | 9B before → after | 2B before → after |
+|---|---|---|---|
+| did the wrong thing | 13 → 13 | 25 → 13 | 7 → 8 |
+| ran out of steps or repeated itself | 14 → 17 | 10 → 10 | 108 → 104 |
+| ended the wrong way | 5 → 8 | 12 → 13 | 5 → 6 |
+| never found it | 3 → 4 | 3 → 5 | 3 → 1 |
+
+The fixes did what they were for on the 9B, the model they were mostly drawn from: half its wrong changes are gone,
+and it now ties the 4B. The 4B lost 3, inside the ±2 % two runs of the same set differ by; its new failures are
+repeats and wrong endings, not the misuses the fixes turn down. The 2B gained 9 but still fails by repeating
+itself, as item 7 said. What is left on the 4B and 9B is items 3 and 4 (wrong endings, wrong note sets): step 7's
+verifier.
 
 ## Risks, said plainly
 
