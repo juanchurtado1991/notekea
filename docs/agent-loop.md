@@ -549,7 +549,50 @@ wired into the app behind a setting, ask_user's answers as buttons, `write_note`
 The loop is reached from agent mode when Settings → General turns it on (`ChatLoop`); a question back shows its
 options as buttons (`ChatAskedOptions`), the one chosen sent as the next message. 150 tasks written after the loop
 was tuned, by agents that had not seen it, measure it on what it was not tuned on: 70 over the Sample Vault
-(`AgentHeldOutCases`) and 80 over 25 new notes of `Agent Eval` (`AgentWideHeldOutCases`). HELD_OUT_NUMBERS
+(`AgentHeldOutCases`) and 80 over 25 new notes of `Agent Eval` (`AgentWideHeldOutCases`).
+
+**Measured on the held-out tasks (Medium, 2026-11-14), before any tuning on them:**
+
+| | Today's agent | The loop |
+|---|---|---|
+| Held-out, Sample Vault (70) | 53 (75 %), 26 s a task | 51 (72 %), 69 s a task |
+| Held-out, `Agent Eval` (80) | 31 (38 %), 43 s a task | 60 (75 %), 116 s a task |
+| Both (150) | 84 (56 %) | 111 (74 %) |
+
+On the wider tasks the loop held what it was tuned to (75 % where today's agent gets 38 %); on agent mode's kind of
+task it fell two short of today's. Twelve tasks today's agent gets right the loop got wrong, eleven the other way.
+As agreed (half and half), the loop is tuned looking only at the odd-numbered held-out tasks of the Sample Vault;
+the even-numbered ones stay unseen and say whether the tuning holds. What the odd half showed:
+
+- It added changes nobody asked for after the right one: the list note tagged too (the reading list, the weekly
+  menu), a task invented ("tag notes mentioning Lisbon"), the tag translated (`travel` for "viaje"). A change added
+  now shows the whole proposal so far and says to add nothing the task does not ask for; a tag or a property name
+  the task does not write is held back once (`ChangeTool`).
+- It asked the person to choose among notes it had not read ("which meeting is about the sidebar?"). Such a
+  question is held back once, the model told which options it has not read (`UnreadChoice`).
+- It could not see which notes have a property ("the notes with a status"): `list` now gives each note's
+  properties' names.
+
+Two of the wider tasks it got wrong after that tuning showed a fault of the loop itself: a change refused the same
+way (a template written "none") was asked again until the steps ran out, as a refusal never counted as a call made
+again. A field written none, null or n/a is now left out, and a change refused twice the same way counts as made
+again and is not offered for the next call.
+
+**Measured after the tuning (Medium, 2026-11-14):**
+
+| | Today's agent | The loop, before | The loop, tuned |
+|---|---|---|---|
+| Held-out, Sample Vault (70) | 53 (75 %), 26 s | 51 (72 %), 69 s | 53 (75 %), 46 s |
+| — the odd half, looked at | | 26 | 25 |
+| — the even half, unseen | | 25 | 28 |
+| Held-out, `Agent Eval` (80) | 31 (38 %), 43 s | 60 (75 %), 116 s | 58 (72 %), 108 s |
+| Wider evaluation (21), tuned on | 7 (33 %), 42 s | 20 (95 %), 127 s | 19 (90 %), 110 s |
+| Agent mode's tasks (30), tuned on | 27 (90 %), 30 s | 29 (96 %), 69 s | 29 (96 %), 53 s |
+| All (201) | 118 (59 %) | 160 (80 %) | 159 (79 %) |
+
+The unseen half went up by three, so the tuning holds beyond what it looked at; the loop now matches today's agent
+on agent mode's kind of task and is far ahead on the wider ones, at about twice its time. By the developer's rule
+(accuracy first, time after) this lets step 6 begin.
 
 ## Risks, said plainly
 

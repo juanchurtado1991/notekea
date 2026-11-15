@@ -24,6 +24,9 @@ internal class TurnState(
     val repeated = mutableListOf<String>()
     val drops = mutableListOf<Int>()
 
+    // The changes refused, so one refused again as it was counts as made again.
+    val refused = mutableListOf<String>()
+
     val dropped: Int get() = drops.lastOrNull() ?: 0
 
     // What the turn was told once, so it is not told again: that it proposed with nothing added.

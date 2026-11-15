@@ -231,6 +231,13 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
     used (it needs koin-test).
 
 
+## One agent loop, step 5 (2026-11-14): the held-out tasks
+
+- The handoff said until then: "half may be used to tune if the loop falls short". It fell two short of today's
+  agent on the Sample Vault's held-out tasks (51 to 53 of 70); tuned on the odd half only, it reached 53, the unseen
+  even half rising from 25 to 28. A loop fault came out on the way: a change refused the same way was asked again
+  until the steps ran out.
+
 ## One agent loop, step 5 (2026-11-14): the loop measured
 
 - The handoff said until then: "Next: step 5 (`RunTurnUseCase`, the router, the toolsets, the changing tools)".
