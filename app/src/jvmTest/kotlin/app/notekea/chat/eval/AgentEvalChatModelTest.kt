@@ -18,9 +18,6 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
-import app.notekea.core.llm.domain.ChatMessage
-import app.notekea.core.llm.domain.GenerationOptions
-import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.notes.data.GhostFrontmatterParser
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.NoteEntry
@@ -41,7 +38,6 @@ import app.notekea.tree.data.OkioNoteMetadataReader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
@@ -51,7 +47,6 @@ import org.junit.Assume.assumeTrue
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -88,29 +83,9 @@ class AgentEvalChatModelTest {
         dispatchers = dispatchers
     )
 
-    // The last prompt of each task's moves, by its task, for the report of a task that went wrong.
-    private val lastPrompts = ConcurrentHashMap<String, String>()
-
-    private val recorded = object : LlmEngine by engine {
-        override fun generate(
-            messages: List<ChatMessage>,
-            options: GenerationOptions
-        ): Flow<String> {
-            val prompt = messages.last().text
-
-            val task = TASK
-                .find(input = prompt)
-                ?.groupValues
-                ?.get(1)
-
-            if (task != null) lastPrompts[task] = prompt
-
-            return engine.generate(
-                messages = messages,
-                options = options
-            )
-        }
-    }
+    // Every call of each task, by its task, for the report of a task that went wrong.
+    private val trace = EvalTrace(engine = engine)
+    private val recorded = trace.recorded
 
     @AfterTest
     fun tearDown() {
@@ -415,10 +390,28 @@ class AgentEvalChatModelTest {
         append("# Agent mode on $vault (${size.id})\n\n")
         append("$right of ${results.size} right (${right * PERCENT / results.size} %), ")
         append("moves ${moves.average().toInt()} on average (${moves.max()} at most), ")
-        append("${results.map { it.seconds }.average().toInt()} s a task on average (${results.maxOf { it.seconds }} s at most)\n")
+        val seconds = results.map { it.seconds }
+
+        append("${seconds.average().toInt()} s a task on average (${seconds.max()} s at most)\n")
+
+        val categories = results.mapNotNull { result ->
+            result.problem?.let {
+                EvalTraceReport.categoryOf(
+                    problem = it,
+                    end = result.steps.last(),
+                    calls = trace.of(task = result.case.task)
+                )
+            }
+        }
+
+        append(EvalTraceReport.summary(categories = categories))
 
         results.forEach { result ->
+            val calls = trace.of(task = result.case.task)
+
             append("\n## ${if (result.problem == null) "✓" else "✗"} ${result.case.task}\n\n")
+
+            EvalTraceReport.routeOf(calls = calls)?.let { append("Routed to $it.\n\n") }
 
             result.steps.forEach { append("- ${shown(step = it)}\n") }
 
@@ -445,13 +438,18 @@ class AgentEvalChatModelTest {
         result: AgentResult,
         problem: String
     ): String = buildString {
-        append("\n**$problem**\n")
+        val calls = trace.of(task = result.case.task)
+        val category = EvalTraceReport.categoryOf(problem, result.steps.last(), calls)
 
-        lastPrompts[result.case.task]?.let { prompt ->
+        append("\n**$problem**\n\nKind: $category.\n")
+
+        trace.lastPrompt(task = result.case.task)?.let { prompt ->
             append("\n<details><summary>Found by the last move</summary>\n\n```\n")
             append(prompt.substringAfter(delimiter = "so far:\n").take(n = PROMPT_CHARS))
             append("\n```\n</details>\n")
         }
+
+        append(EvalTraceReport.traced(calls = calls))
     }
 
     private class AgentResult(
@@ -467,7 +465,6 @@ class AgentEvalChatModelTest {
         const val PERCENT = 100
         const val PROMPT_CHARS = 4_000
         const val STEP_CHARS = 600
-        val TASK = Regex(pattern = "Task: (.+)")
         const val NANOS_PER_SECOND = 1_000_000_000L
 
         // A size is offered agent mode when four tasks in five come out right.
