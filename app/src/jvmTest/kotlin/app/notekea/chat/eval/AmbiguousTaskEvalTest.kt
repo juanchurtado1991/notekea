@@ -72,6 +72,26 @@ class AmbiguousTaskEvalTest {
         assertTrue(actual = held.size * 2 >= asking.size)
     }
 
+    // Not tuned on: it says how the check does on tasks it was not written against.
+    @Test
+    fun `on the unseen tasks, what is held is reported`() {
+        val held = AgentUnseenCases.all.filter {
+            AmbiguousTask.notesOf(
+                task = it.task,
+                notes = wide
+            ).isNotEmpty()
+        }
+
+        val (asking, clear) = held.partition {
+            it.ends == AgentWideCase.End.ASK
+        }
+
+        println(
+            "unseen: held ${asking.size} that ask, ${clear.size} that do not: " +
+                held.map { it.task }
+        )
+    }
+
     private companion object {
         const val SAMPLE_VAULT = "Sample Vault"
     }
