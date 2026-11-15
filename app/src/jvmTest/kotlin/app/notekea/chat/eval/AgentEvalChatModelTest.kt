@@ -158,6 +158,15 @@ class AgentEvalChatModelTest {
         Unit
     }
 
+    // Tasks the verifier's checks were not written against: whether asking back holds beyond the tuned tasks.
+    @Test
+    fun `the one loop is measured on tasks its checks were not written against`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+        val all = AgentUnseenCases.all.map { it.forLoop() }
+        measured(AgentWideCases.VAULT, all, "loop-unseen", isLoop = true)
+        Unit
+    }
+
     // The one loop on agent mode's 30 tasks: it may not do worse than today's agent to take its place (step 6).
     @Test
     fun `the one loop is measured on the tasks of agent mode`() = runBlocking {
