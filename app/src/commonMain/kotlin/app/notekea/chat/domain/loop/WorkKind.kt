@@ -13,12 +13,12 @@ enum class WorkKind(
         written = "write",
         description = "a new note is written (a summary, a table, a comparison, a list, study cards or a " +
             "quiz), whatever it is written from (notes, tasks, meetings), an empty note is created, or text " +
-            "is added."
+            "is added to a note. Never a task, tag, property or link added to a note (organize)."
     ),
     ORGANIZE(
         written = "organize",
-        description = "notes are tagged, given a property or a task, linked, moved, renamed, bookmarked or " +
-            "trashed, or a folder is created; a task is marked done."
+        description = "notes are tagged, given a property or a task (add a task to…), linked, moved, renamed, " +
+            "bookmarked or trashed, or a folder is created; a task is marked done."
     ),
     WEB(
         written = "web",
