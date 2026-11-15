@@ -22,9 +22,12 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -325,7 +328,7 @@ class RunTurnTest {
         }
 
     @Test
-    fun `a change on a name two notes share is held once when the task does not say which folder`() =
+    fun `a change on a name two notes share is held once, and proposed anyway the person is asked which`() =
         runTest {
             val tag = """{"tool":"add_tag","notes":["Home/Lease"],"tag":"rented"}"""
 
@@ -333,6 +336,7 @@ class RunTurnTest {
                 tag,
                 tag,
                 """{"tool":"propose","summary":"$SUMMARY"}""",
+                """{"tool":"ask_user","question":"Which lease?","options":["Home/Lease","Work/Lease"]}""",
                 work = "organize"
             )
 
@@ -342,14 +346,13 @@ class RunTurnTest {
             )
 
             assertEquals(
-                expected = listOf(true, ActionKind.ADD_TAG),
+                expected = listOf(true, true, true),
                 actual = listOf(
                     "2 notes are named \"Lease\": Home/Lease, Work/Lease. If the task does not" in
                         callPrompts()[1],
-                    (steps.last() as AgentStep.Proposed)
-                        .steps
-                        .single()
-                        .kind
+                    "(Not done: the task can mean 2 notes and does not say which: Home/Lease, Work/Lease." in
+                        callPrompts()[3],
+                    steps.last() is AgentStep.Asked
                 )
             )
         }
@@ -362,18 +365,18 @@ class RunTurnTest {
             val ask =
                 """{"tool":"ask_user","question":"Which lease?","options":["Home/Lease","Work/Lease"]}"""
 
-            script("""{"tool":"read","note":"Lease"}""", ask, ask)
+            script("""{"tool":"read","note":"Lease"}""", ask)
 
             val steps = run(
                 task = "summarize the lease",
                 notes = notes + entry(path = office.value)
             )
 
+            // Reading them would not say which lease "the lease" is: the question is asked at once.
             assertEquals(
-                expected = listOf(true, true, true),
+                expected = listOf(true, true),
                 actual = listOf(
                     "(2 notes are named \"Lease\": Home/Lease, Work/Lease." in callPrompts()[1],
-                    "you have not read Home/Lease, Work/Lease." in callPrompts()[2],
                     steps.last() is AgentStep.Asked
                 )
             )

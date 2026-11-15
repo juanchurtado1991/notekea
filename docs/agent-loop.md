@@ -742,6 +742,23 @@ repeats and wrong endings, not the misuses the fixes turn down. The 2B gained 9 
 itself, as item 7 said. What is left on the 4B and 9B is items 3 and 4 (wrong endings, wrong note sets): step 7's
 verifier.
 
+**Items 3 and 4, the verifier's first checks (2026-11-15):** before a turn ends, two checks the app makes with no
+model call.
+
+- **A task that can mean several notes is asked back** (`AmbiguousTask`, `UnsettledEnd`): two notes of one name the
+  task says whole ("my 2027 goals"), a first name two people have and nothing else in the task tells apart
+  ("Laura"), or "the X" said bare where several notes are an X ("the budget", "the contract", "the supplier
+  meeting"). An answer, a card or a note shown that picks one of them is held once, and the next call may only be
+  `ask_user`; an end that covers all of them goes through. Asking among them is not held back to read them first.
+  On the evaluation's tasks with no model (`AmbiguousTaskEvalTest`) it holds 11 of the 17 that should ask and none
+  of the 184 others. Those tasks are the ones it was written against, so the gain it brings is measured here
+  rather than taken as general.
+- **A change to several notes is listed back once** (`ProposalReview`): the first `propose` whose changes act on two
+  notes or more is held, each note listed with its properties and open tasks, and the model told that a note
+  listing the others is not one of them; `propose` takes `drop`, the notes to take out.
+
+VERIFIER_MEASURED
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and
