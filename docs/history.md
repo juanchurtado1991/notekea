@@ -299,3 +299,5 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   149) and the 2B 78 (was 69), the table in `docs/agent-loop.md`.
 - **2026-11-15, the verifier's first checks:** the handoff said items 3 and 4 of "Why the loop fails" were done
   and being measured on the three models.
+- **2026-11-15, the verifier measured:** the handoff said the 4B made 165 of 201 (was 158), the 9B 166 (was 159)
+  and the 2B 81 (was 78); wrong endings fell, wrong note sets barely moved.
