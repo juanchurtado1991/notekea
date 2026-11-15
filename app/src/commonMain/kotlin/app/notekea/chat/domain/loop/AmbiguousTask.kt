@@ -172,7 +172,9 @@ internal object AmbiguousTask {
     private const val THING = 2
 
     private val NOT_WORD = Regex(pattern = "[^\\p{L}\\p{N}]+")
-    private val FIRST_NAME = Regex(pattern = "\\b\\p{Lu}\\p{Ll}+\\b")
+
+    // Bounded by letters, not a word boundary, which the JVM reads as ASCII: "Ángela" and "José" are names too.
+    private val FIRST_NAME = Regex(pattern = "(?<![\\p{L}\\p{N}])\\p{Lu}\\p{Ll}+(?![\\p{L}\\p{N}])")
 
     private val THE = Regex(
         pattern = "\\b(the|el|la|my|mi)\\s+([\\p{L}\\p{N}-]+)",

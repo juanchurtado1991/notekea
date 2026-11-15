@@ -190,6 +190,28 @@ class JGitRepairTest {
             )
         }
 
+    // Code review, 2026-11-15: a clashing note the person wrote in after the crash went back to the last commit.
+    @Test
+    fun `keeping mine copies a clashing note, as the person left it, to the vault's trash`() =
+        runBlocking {
+            leftHalfWay(isRebase = false)
+
+            desktop.write(
+                path = "Plan.md",
+                text = HAND_MERGED
+            )
+
+            git.repair(
+                vaultPath = desktop.path,
+                choice = RepairChoice.KEEP_MINE
+            )
+
+            assertEquals(
+                expected = "# Plan\n\nThe desktop's draft.\n" to HAND_MERGED,
+                actual = desktop.read(path = "Plan.md") to desktop.read(path = ".trash/Sync repair/Plan.md")
+            )
+        }
+
     @Test
     fun `a rebase cut short is repaired the same way`() = runBlocking {
         leftHalfWay(isRebase = true)
@@ -280,5 +302,9 @@ class JGitRepairTest {
             expected = "# Plan\n\nNot committed yet.\n" to false,
             actual = laptop.read(path = "Plan.md") to File(laptop, ".trash").exists()
         )
+    }
+
+    private companion object {
+        const val HAND_MERGED = "# Plan\n\nThe laptop's draft and the desktop's, joined by hand.\n"
     }
 }

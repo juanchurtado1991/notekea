@@ -303,3 +303,5 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   and the 2B 81 (was 78); wrong endings fell, wrong note sets barely moved.
 - **2026-11-15, the verifier on unseen tasks, and the 2B kept off the loop:** the handoff said 24 new tasks gave
   the 4B 19 → 21 and the 9B 16 → 19, and the small model keeps today's agent with the loop on.
+- **2026-11-15, the branch's code review:** the handoff said Next was a code review; it found ten things, six fixed
+  with a test each (the sync repair, the sums, accented names, the last step's question).

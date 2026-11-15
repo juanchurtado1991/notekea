@@ -144,6 +144,31 @@ class RunTurnUseCase(
             }
         }
 
+        // Held on the last step for the question it must ask: one call more, which may only ask it.
+        val asked = if (UnsettledEnd.mustAsk(state = state)) {
+            callOf(
+                state,
+                left = 1,
+                isEnding = true
+            )
+        } else {
+            null
+        }
+
+        val asking = asked?.let {
+            state.tools[it.name]
+        }
+
+        val isAsked = asked?.name == AskUserTool.NAME && asking != null
+
+        if (isAsked) {
+            return ended(
+                call = asked,
+                tool = asking,
+                state = state
+            )
+        }
+
         emit(value = unread(state = state))
     }
 

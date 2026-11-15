@@ -94,6 +94,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Repairing a vault left in the middle of a sync with Keep mine copies the notes that clashed, as you left them, to
+  the vault's trash before they go back to the last commit; a repair that fails says why.
+- The chat's sums are written out in full ("12345678.25", not "1.234567825E7"), and a minus before a power is taken
+  after it (-3^2 is -9).
+- The new loop takes "Ángela" and "José" for first names two people may share, and asks which one even when the
+  question comes on its last step.
 - The commit hook no longer fails, nor rewrites the repository's index, when the sync tests run in it: Gradle runs
   there without the variables git gives its hooks.
 - Connecting or importing a repository that can only be read (someone else's public notes, a read-only token) no
