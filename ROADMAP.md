@@ -380,6 +380,14 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    chat suggests and explains when DuckDuckGo fails. The decision is in `docs/agent-loop.md` ("Decided with the
    developer").
 
+14. **The chat's memory between conversations** — asked about by the developer on 2026-11-15: the chat learns which
+   note a name means, where things go and how the person likes answers, and keeps it from one chat to the next. One
+   note of the vault, `Notekea memory.md`, read in every chat (only the lines relevant to the task) and written only
+   with the person's approval: a Remember button after a question back is answered, and `remember` / `forget` on the
+   card. A line used is shown in the turn's steps, and `AmbiguousTask` takes a name it settles as settled. Designed
+   in `docs/agent-memory.md` (2026-11-15, on `docs/chat-memory`, four steps measured on the evaluation), awaiting the
+   developer's review and four decisions; built after the one agent loop is merged.
+
 ## Out of scope for the MVP
 
 Cloud models (OpenAI, Anthropic…), accounts, real-time collaboration, a plugin API of our own, mobile apps,
