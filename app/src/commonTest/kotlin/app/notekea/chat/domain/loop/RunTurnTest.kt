@@ -47,7 +47,7 @@ class RunTurnTest {
     )
 
     private val lease = RelativePath(value = "Home/Lease.md")
-    private val instructions = RelativePath(value = "Notekea.md")
+    private val instructions = RelativePath(value = "Notekea/Notekea.md")
     private val office = RelativePath(value = "Work/Lease.md")
     private val notes = listOf(lease, instructions).map { entry(path = it.value) }
 

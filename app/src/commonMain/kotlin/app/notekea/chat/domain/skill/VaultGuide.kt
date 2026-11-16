@@ -111,8 +111,11 @@ class VaultGuide(private val noteTextCache: NoteTextCache) {
         }
 
     companion object {
-        /** Where the vault's instructions and the person's skills are looked for until a setting says otherwise. */
-        val INSTRUCTIONS = RelativePath(value = "Notekea.md")
+        /**
+         * Where the vault's instructions and the person's skills are looked for until a setting says otherwise. The
+         * instructions live in a folder of Notekea's own, where the chat's memory is meant to go too.
+         */
+        val INSTRUCTIONS = RelativePath(value = "Notekea/Notekea.md")
         const val SKILLS_FOLDER = "Skills"
 
         // Always in the prompt, so short: about 500 tokens of instructions, 300 of a skill.

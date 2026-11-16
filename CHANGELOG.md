@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The chat's new loop reads a vault's instructions from `Notekea/Notekea.md`, in a folder of its own where the
+  chat's memory will go too, instead of `Notekea.md` at the vault's root.
 - The chat's new loop asks which note you mean when a request can mean several and does not say which ("Laura"
   with two Lauras, "the budget" with two budgets), and checks a change to several notes once against what each
   holds before showing the card, leaving out the ones the request does not ask for. Measured on 201 tasks, the 4B
@@ -38,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Inside the chat, the tools the one loop will work with are built (`docs/agent-loop.md`, step 4): a note's
   outline and reading by section, lists, links, digests of long documents, sums, counts and dates done by the app,
   a plan and notes for a long task, a question to the person, skills and a vault's own instructions
-  (`Notekea.md`). Nothing uses them yet.
+  (`Notekea/Notekea.md`). Nothing uses them yet.
 - The chat is kept as a conversation: opened again, a request shows the steps it made and how its proposal ended
   (done, cancelled, undone, not confirmed), a question cut by closing Notekea is there marked Stopped, and the
   chat still knows what it did and what it had summarized. A history written before is read as it is
