@@ -109,7 +109,7 @@ the router.
 - **The vault's instructions** — one note of the vault (its place a setting), always read: where new notes go, the
   tags in use, the language, how the person names things. What `CLAUDE.md` is to Claude Code.
 - **Memory between chats** is left for later: what it may keep, and how the person sees and deletes it, needs its
-  own decision. Designed on 2026-11-15 in `docs/agent-memory.md`.
+  own decision. Designed on 2026-11-15 in `docs/agent-memory.md`, and the web search on it in `docs/agent-web.md`.
 
 ### `TurnVerifier`
 

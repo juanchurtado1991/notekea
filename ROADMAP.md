@@ -378,16 +378,28 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    hold the answer. It works with nothing to set up (DuckDuckGo's HTML results, honest user agent, 2 to 3 seconds
    between requests, marked "may stop working"); a free Brave Search key in Settings is the stable option, which the
    chat suggests and explains when DuckDuckGo fails. The decision is in `docs/agent-loop.md` ("Decided with the
-   developer").
+   developer"). **Designed (2026-11-15) in `docs/agent-web.md`**, with the developer, on the memory below:
+   - research that becomes notes, with every link approved or turned down;
+   - the sources' trust remembered by domain, so only unknown sources are asked about;
+   - the offer to search when the notes do not hold the answer, first in the vault's web sources, then the web;
+   - "where can I buy X in Y", searched in the person's country;
+   - built on the existing site search, clips and page reader;
+   - `GUIDELINES.md` §13 updated first, through an issue.
+   Steps 4 to 7 of the pull request that begins with the memory.
 
 14. **The chat's memory between conversations** — asked about by the developer on 2026-11-15: the chat learns which
-   note a name means, where things go and how the person likes answers, and keeps it from one chat to the next. One
-   note of the vault, `Notekea/Memory.md` beside the instructions (`Notekea/Notekea.md`, the developer's choice),
-   read in every chat (only the lines relevant to the task) and written only with the person's approval: a Remember
-   button after a question back is answered, and `remember` / `forget` on the card. A line used is shown in the
-   turn's steps, and `AmbiguousTask` takes a name it settles as settled. Designed in `docs/agent-memory.md`
-   (2026-11-15, on `docs/chat-memory`, four steps measured on the evaluation), awaiting the developer's review and
-   three decisions; built after the one agent loop is merged.
+   note a name means, where things go and how the person likes answers, and keeps it from one chat to the next. It
+   is the first half of the pull request after the one agent loop; item 13 is the second.
+   - **The place:** one note of the vault, `Notekea/Memory.md`, beside the instructions (`Notekea/Notekea.md`), as
+     the developer chose.
+   - **Reading:** in every chat, only the lines relevant to the task.
+   - **Writing:** only with the person's approval and only from their words or a button, never from a page or a
+     note.
+   - **Use:** for names and aliases, people, where things go, formats, areas, sources and the person's country.
+   - **Protection:** every line used is shown with a way to correct it; the memory never grants a permission.
+   - **Setup without Markdown:** in the chat and in Settings → Chat → What the chat knows.
+   - Designed in `docs/agent-memory.md` (2026-11-15, second version after the developer's review, every
+     recommendation accepted), in three steps measured on the evaluation. Built after the one agent loop is merged.
 
 ## Out of scope for the MVP
 

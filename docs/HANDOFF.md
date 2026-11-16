@@ -319,16 +319,34 @@ once, the vault gets its instructions note and the person's own skills in step 4
 half merged comes after step 1. Before the design, an audit: 90,400 code lines in the app, no dead code to speak of,
 1,800 to 2,600 lines that reuse would save (the list is in the conversation of that day, not yet acted on).
 
-## The chat's memory between conversations, designed on `docs/chat-memory` (2026-11-15)
+## The next pull request: the chat's memory, then the web (designed 2026-11-15)
 
-Asked about by the developer while #143 waited for CI. `docs/agent-memory.md` holds the design, written and not yet
-reviewed: one note of the vault (`Notekea/Memory.md`, beside the instructions in `Notekea/Notekea.md`, as the
-developer decided the same day) that the chat reads in every chat, with the lines relevant to
-the task; a line is written only with the person's approval (a Remember button after a question back is answered,
-`remember` and `forget` on the card), never by the model alone; a line used is shown in the turn's steps; and
-`AmbiguousTask` takes a name the memory settles as settled. Four steps, measured on the evaluation with a memory note
-added to `Agent Eval`. **Open, for the developer:** on or off by default, whether the model may propose a line on its own, and the headings' language. Nothing is built; it starts on
-a branch from `main` once #143 is merged. The branch is cut from `feature/one-agent-loop` and not pushed.
+Planned with the developer while #143 waited for CI, and reviewed twice the same day; every recommendation was
+accepted. Two designs, one pull request, the memory first. **Nothing is built.** It starts on a branch from `main`
+once #143 is merged, step by step, each step measured before the next.
+
+- **`docs/agent-memory.md`** (steps 1 to 3):
+  - **What it is:** `Notekea/Memory.md`, written by the chat only after a click and only from the person's words
+    or a button, never from a page or a note.
+  - **Reading:** in every chat, only what is relevant to the task.
+  - **What it holds:** names and aliases, people as the person states them, where things go, formats, areas,
+    sources and the person's country.
+  - **Six layers against false memories:** from the person only, checked with no model, read word for word on the
+    card, its origin on every line, shown whenever it is used with "This is wrong", and no permission ever.
+  - **Setup without Markdown:** in the chat, and in Settings → Chat → What the chat knows.
+- **`docs/agent-web.md`** (steps 4 to 7):
+  - **What it adds:** web search on the existing site search, clips and page reader.
+  - **Asking:** the first search of a chat is asked, the rest show their query.
+  - **Sources:** trust by domain, with the vault's sources trusted.
+  - **Region:** the request first, then the memory, then the computer's region; only the country is sent.
+  - **Research:** up to three searches and eight pages a request.
+  - **Privacy:** §13 is updated through an issue before any code, as the developer approved.
+
+**Things to know before step 1:**
+- The decision of 2026-11-14 named Ksoup for the web, which `LIBRARIES.md` does not list. jsoup is listed, and the
+  clips use it already, so no library is added.
+- The design pieces' names (`MemoryLine`, `RememberOrigin`, `SourceTrust`, `WebSearchProvider`) are proposals, not
+  code.
 
 ## The release run
 

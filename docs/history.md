@@ -237,6 +237,15 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   deletes it, needs its own decision". On 2026-11-15 the developer asked why the agent does not learn the person;
   the decision was written as `docs/agent-memory.md`, a note of the vault written only with approval, before any
   code.
+- **The handoff's first version said:** a design not yet reviewed, in four steps, with four decisions open: a note
+  of its own, on by default, the model proposing lines, and the headings' language.
+- **The developer's review the same day changed four things:**
+  - The place became `Notekea/Memory.md`, and the instructions moved beside it.
+  - Every other recommendation was accepted.
+  - They asked for three more things, which became the second version: the person's region, setup without
+    Markdown, and protection against false memories.
+  - The web search was designed on top of the memory (`docs/agent-web.md`), in one pull request with it, the memory
+    first.
 
 ## One agent loop, step 5 (2026-11-14): the held-out tasks
 
