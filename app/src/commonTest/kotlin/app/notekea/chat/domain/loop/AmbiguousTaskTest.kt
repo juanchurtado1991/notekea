@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.memory.MemoryLine
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,6 +33,35 @@ class AmbiguousTaskTest {
                 heldOf(task = "call Ángela tomorrow"),
                 heldOf(task = "¿cuál es el correo de José?")
             )
+        )
+    }
+
+    // docs/agent-memory.md: a name the memory says the note of is settled, and only that name.
+    @Test
+    fun `a name the memory settles is not held, a name it does not settle still is`() {
+        val settled = listOf(
+            MemoryLine.Named(
+                said = "Ángela",
+                note = "People/Ángela Ruiz"
+            )
+        )
+
+        val held = listOf("call Ángela tomorrow", "¿cuál es el correo de José?").map {
+            AmbiguousTask
+                .notesOf(
+                    task = it,
+                    notes = notes,
+                    settled = settled
+                )
+                .map { path -> path.value }
+        }
+
+        assertEquals(
+            expected = listOf(
+                emptyList(),
+                listOf("People/José Mora.md", "People/José Vega.md")
+            ),
+            actual = held
         )
     }
 }

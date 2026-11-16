@@ -308,3 +308,14 @@ The pull request has the memory first and the web after it. These are the memory
 - **The sections' headings are in English,** the language of the loop's prompt. Settings shows them in the app's
   language.
 - **The plan as reviewed:** the region, the setup without Markdown, and the six layers against false memories.
+- **The screens (2026-11-16):** the first sketches were turned down; a second round drawn to the macOS guidelines
+  was chosen, the recommended one of each:
+  - **Remember** is a checkbox under the answered question ("Remember for next time", with the line and where it
+    is kept). The memory used shows as a step whose Correct… and Forget appear on hover and on right-click.
+  - **Settings → Chat memory** is a section of the settings sidebar, laid out as macOS System Settings is: a switch
+    group; an "About you" group of pop-up rows (country, currency, the answers' language, where new notes go); and
+    "What the chat learnt" as one inset list with a header per section. Each row has its origin under it, edit and
+    remove on hover, and + and − under the list; Open Memory.md and Forget everything… sit at the bottom.
+- **The chat's guide and the settings help** (the developer, 2026-11-16) are updated with everything new:
+  - `composeResources/files/guide/guide.md` says how to use the memory and the web;
+  - every new setting gets its entry in `SettingsPlaceNames`, so "where do I…?" finds it.

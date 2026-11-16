@@ -167,6 +167,40 @@ class AgentEvalChatModelTest {
         Unit
     }
 
+    // docs/agent-memory.md: the unseen tasks with a memory that settles them, and the memory's other uses.
+    @Test
+    fun `the one loop is measured with the chat's memory`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+        val vault = AgentWideCases.VAULT
+        val settling = AgentMemoryCases.SETTLING
+
+        val clear = AgentUnseenCases.all.filter {
+            it.ends != AgentWideCase.End.ASK
+        }
+
+        val all = (AgentMemoryCases.settled + clear + AgentMemoryCases.uses).map { it.forLoop() }
+
+        measured(
+            vault,
+            all,
+            "loop-memory",
+            isLoop = true,
+            memory = settling
+        )
+
+        val wrong = AgentMemoryCases.followed.map { it.forLoop() }
+
+        measured(
+            vault,
+            wrong,
+            "loop-memory-wrong",
+            isLoop = true,
+            memory = AgentMemoryCases.WRONG
+        )
+
+        Unit
+    }
+
     // The one loop on agent mode's 30 tasks: it may not do worse than today's agent to take its place (step 6).
     @Test
     fun `the one loop is measured on the tasks of agent mode`() = runBlocking {
@@ -203,7 +237,8 @@ class AgentEvalChatModelTest {
         vault: String,
         all: List<AgentEvalCase>,
         name: String,
-        isLoop: Boolean = false
+        isLoop: Boolean = false,
+        memory: String? = null
     ): Pair<Double, String> {
         val indexed = EvalVault.of(
             vault = vault,
@@ -225,13 +260,16 @@ class AgentEvalChatModelTest {
 
         if (cases.isEmpty()) return 1.0 to ""
 
-        val notes = withMetadata(indexed = indexed)
+        val notes = AgentEvalSetup.remembering(
+            indexed = indexed,
+            notes = AgentEvalSetup.withMetadata(indexed, dispatchers),
+            memory = memory
+        )
+
         val agent = agentOf(indexed = indexed)
 
-        val runner = runnerOf(
-            indexed = indexed,
-            cache = NoteTextCache(indexed.store, TextFolder())
-        )
+        val cache = NoteTextCache(indexed.store, TextFolder())
+        val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
         val loop = LoopEval.loopOf(recorded, embedder, indexed, runner)
         val slots = Semaphore(permits = setup.slots)
@@ -243,7 +281,7 @@ class AgentEvalChatModelTest {
                         slots.withPermit {
                             val start = System.nanoTime()
 
-                            val context = contextOf(notes = notes)
+                            val context = AgentEvalSetup.contextOf(notes = notes)
 
                             val steps = if (isLoop) {
                                 loop(case.task, indexed.path, notes, context, null).toList()
@@ -285,51 +323,13 @@ class AgentEvalChatModelTest {
         return right.toDouble() / results.size to report
     }
 
-    // Nothing is ever run in the evaluation: the runner's find is the vault's, the rest a fake.
-    private fun runnerOf(
-        indexed: EvalVault,
-        cache: NoteTextCache
-    ): ActionRunner {
-        val apply = ApplyLinkUpdatesUseCase(noteContentStore = indexed.store)
-        val calendar = JvmLocalCalendar()
-
-        val finder = VaultActionFinder(
-            TranslateQueryUseCase(engine, GhostQueryJsonReader()),
-            BuildQueryCatalogUseCase(),
-            RunQueryUseCase(),
-            QueryYaml(),
-            ListTasksUseCase(),
-            SetTaskDoneUseCase(indexed.store, apply),
-            SetPropertyUseCase(indexed.store, apply),
-            cache,
-            JetBrainsMarkdownLinkFinder(),
-            calendar,
-            Clock.System
-        )
-
-        return object : ActionRunner by FakeActionRunner() {
-            override suspend fun find(
-                vaultPath: String,
-                step: ActionStep,
-                notes: Collection<NoteEntry>
-            ) = finder.find(
-                vaultPath = vaultPath,
-                step = step,
-                notes = notes
-            )
-        }
-    }
-
     private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
         val cache = NoteTextCache(
             contentStore = indexed.store,
             textFolder = TextFolder()
         )
 
-        val runner = runnerOf(
-            indexed = indexed,
-            cache = cache
-        )
+        val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
         return AgentTaskUseCase(
             llmEngine = recorded,
@@ -343,47 +343,6 @@ class AgentEvalChatModelTest {
             clock = Clock.System
         )
     }
-
-    /** The vault's notes with the properties, tags and tasks of their committed text, read from a copy on disk. */
-    private suspend fun withMetadata(indexed: EvalVault): List<NoteEntry> {
-        val copy = Files.createTempDirectory("notekea-agent").toFile()
-
-        val reader =
-            OkioNoteMetadataReader(FileSystem.SYSTEM, dispatchers, GhostFrontmatterParser())
-
-        return indexed.notes.map { note ->
-            val target = File(copy, note.file.path.value)
-            target.parentFile.mkdirs()
-
-            target.writeText(
-                text = indexed
-                    .store
-                    .texts
-                    .getValue(note.file.path)
-            )
-
-            note.copy(metadata = reader.read(copy.path, note.file.path) ?: note.metadata)
-        }
-    }
-
-    private fun contextOf(notes: List<NoteEntry>) = ActionContext(
-        today = "2026-11-11",
-        folders = ActionContext.foldersOf(paths = notes.map { it.file.path }),
-        notes = notes.map {
-            it
-                .file
-                .path
-                .value
-                .removeSuffix(suffix = ".md")
-        },
-        properties = notes.flatMap { note ->
-            note
-                .metadata
-                .properties
-                .map { it.key }
-        }.distinct(),
-        tags = notes.flatMap { it.metadata.tags }.distinct()
-    )
 
     private fun report(
         vault: String,

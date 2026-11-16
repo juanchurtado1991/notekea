@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.chat.domain.memory.MemoryLines
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatEntry
@@ -27,6 +28,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.chat_agent_fetch
 import app.notekea.resources.chat_agent_find
+import app.notekea.resources.chat_agent_memory
 import app.notekea.resources.chat_agent_read
 import app.notekea.resources.chat_agent_search
 import app.notekea.resources.chat_agent_tasks
@@ -150,6 +152,7 @@ private fun textOf(line: AgentMoveLine): String = when (line.move) {
     AgentTaskPrompt.READ -> replyString(Res.string.chat_agent_read, line.target)
     AgentTaskPrompt.FIND -> replyString(Res.string.chat_agent_find, line.target)
     AgentTaskPrompt.FETCH -> replyString(Res.string.chat_agent_fetch, line.target)
+    MemoryLines.MOVE -> replyString(Res.string.chat_agent_memory, line.target)
     else -> replyString(resource = Res.string.chat_agent_tasks)
 }
 

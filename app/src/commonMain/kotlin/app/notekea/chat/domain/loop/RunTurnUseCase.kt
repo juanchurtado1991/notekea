@@ -8,6 +8,7 @@ import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.agent.ProposalVault
 import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.context.ModelProfile
+import app.notekea.chat.domain.memory.MemoryLines
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.tool.ChatTool
@@ -73,10 +74,28 @@ class RunTurnUseCase(
 
         val tools = toolsets.of(kind = route.kind)
 
+        val memory = MemoryLines.relevantTo(
+            lines = vaultGuide.memoryOf(vaultPath, notes),
+            task = task,
+            isWeb = route.kind == WorkKind.WEB
+        )
+
+        // A line the task matched is said as a step, so a wrong memory is seen the first time it matters.
+        MemoryLines.matched(lines = memory).forEach {
+            emit(
+                value = AgentStep.Moving(
+                    number = 0,
+                    move = MemoryLines.MOVE,
+                    target = it.text
+                )
+            )
+        }
+
         val system = LoopPrompt.system(
             tools = tools,
             instructions = vaultGuide.instructionsOf(vaultPath, notes),
-            skill = route.skill
+            skill = route.skill,
+            memory = memory
         )
 
         val state = TurnState(
@@ -85,6 +104,7 @@ class RunTurnUseCase(
             system = system,
             tools = tools,
             turn = turn,
+            memory = memory,
             budget = ContextBudget(
                 llmEngine = llmEngine,
                 tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,

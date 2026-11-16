@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The chat's new loop reads its memory, `Notekea/Memory.md`: what you approved it to remember, such as which
+  note "Laura" means, so it no longer asks which. The lines a request uses show as a step ("From your memory: …").
+  Only the lines a request matches are read, plus how you like answers. A line that asks for leave to act
+  ("without asking") is never read. Your own skills now live in `Notekea/Skills/`.
 - Settings → General → Agent mode with the new loop: a preview that has Agent mode work with the one loop. When a
   request can be read two ways the chat asks back with a button for each answer.
 - The design of the chat's memory between conversations (`docs/agent-memory.md`). The memory is a note of the vault,

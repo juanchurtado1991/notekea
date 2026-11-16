@@ -92,6 +92,8 @@ import app.notekea.resources.chat_agent_fetch
 import app.notekea.resources.chat_agent_fetch_es
 import app.notekea.resources.chat_agent_find
 import app.notekea.resources.chat_agent_find_es
+import app.notekea.resources.chat_agent_memory
+import app.notekea.resources.chat_agent_memory_es
 import app.notekea.resources.chat_agent_read
 import app.notekea.resources.chat_agent_read_es
 import app.notekea.resources.chat_agent_search
@@ -250,6 +252,7 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_agent_find to Res.string.chat_agent_find_es,
     Res.string.chat_agent_tasks to Res.string.chat_agent_tasks_es,
     Res.string.chat_agent_fetch to Res.string.chat_agent_fetch_es,
+    Res.string.chat_agent_memory to Res.string.chat_agent_memory_es,
     Res.string.chat_problem_agent_stopped to Res.string.chat_problem_agent_stopped_es,
     Res.string.chat_action_make_cards to Res.string.chat_action_make_cards_es,
     Res.string.chat_action_cards_count to Res.string.chat_action_cards_count_es,

@@ -1,6 +1,7 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.context.ContextBudget
+import app.notekea.chat.domain.memory.MemoryLine
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolRegistry
@@ -15,7 +16,8 @@ internal class TurnState(
     val system: String,
     val tools: ToolRegistry,
     val turn: ToolContext,
-    val budget: ContextBudget
+    val budget: ContextBudget,
+    val memory: List<MemoryLine> = emptyList()
 ) {
     val found = mutableListOf<String>()
     val made = mutableSetOf<String>()
@@ -31,7 +33,8 @@ internal class TurnState(
     val ambiguous by lazy {
         AmbiguousTask.notesOf(
             task = task,
-            notes = turn.notes
+            notes = turn.notes,
+            settled = memory.mapNotNull { it.named }
         )
     }
 

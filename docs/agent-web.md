@@ -171,3 +171,11 @@ They follow the memory's three (`docs/agent-memory.md`).
 - **Trust is by domain.**
 - **§13 changes,** in the terms above.
 - **The memory before the web,** in one pull request.
+- **The list of sources found (2026-11-16),** drawn to the macOS guidelines and chosen by the developer:
+  - one card in the chat headed by what was found;
+  - each source a row with a checkbox, its site's initial, the page's title and its domain;
+  - trusted ones ticked, with a "Trusted" tag; new ones with a "Remember ▾" pop-up (Always trust, Never trust),
+    also on right-click;
+  - a footer line for the ones left out ("Left out 2 you marked as not trusted · Show"), Cancel, and the default
+    button "Read N sources" (Return reads, Esc cancels).
+- **The guide and the settings help** say how to search, approve sources and set the Brave key.

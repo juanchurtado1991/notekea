@@ -400,6 +400,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Setup without Markdown:** in the chat and in Settings → Chat → What the chat knows.
    - Designed in `docs/agent-memory.md` (2026-11-15, second version after the developer's review, every
      recommendation accepted), in three steps measured on the evaluation. Built after the one agent loop is merged.
+   - **Step 1 (2026-11-16), coded:** the memory read, the lines a request matches shown as a step, and names it
+     settles not asked back; being measured.
 
 ## Out of scope for the MVP
 

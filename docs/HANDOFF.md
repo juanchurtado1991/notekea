@@ -321,6 +321,21 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
 
 ## The next pull request: the chat's memory, then the web (designed 2026-11-15)
 
+**Under way on `feature/chat-memory-web` (2026-11-16), the developer away, "la vía segura":**
+- The developer chose the screens and asked for the guide and the settings help to be updated (`docs/agent-memory.md`
+  and `docs/agent-web.md`, "Decided").
+- The work is done alone, by the rules of the loop's run: a gate that does not pass stops the work at that step.
+- Every step ends with the 201 tasks measured on the 4B and the 9B.
+- **Step 1, coded:**
+  - `chat/domain/memory`: `MemoryNote` reads the note, `MemoryLines` picks what a turn gets, `MemoryLine.named`
+    is what a name settles;
+  - `VaultGuide.memoryOf`;
+  - `AmbiguousTask` takes the names the memory settles;
+  - the lines the task matched show as a step;
+  - `Skills/` moved to `Notekea/Skills/`.
+  - The evaluation's setup moved to `AgentEvalSetup`, and `AgentMemoryCases` was added.
+  - Being measured.
+
 Planned with the developer while #143 waited for CI, and reviewed twice the same day; every recommendation was
 accepted. Two designs, one pull request, the memory first. **Nothing is built.** It starts on a branch from `main`
 once #143 is merged, step by step, each step measured before the next.

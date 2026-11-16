@@ -1,6 +1,7 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.domain.loop.AmbiguousTask
+import app.notekea.chat.domain.memory.MemoryNote
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import java.io.File
 import kotlin.test.Test
@@ -89,6 +90,28 @@ class AmbiguousTaskEvalTest {
         println(
             "unseen: held ${asking.size} that ask, ${clear.size} that do not: " +
                 held.map { it.task }
+        )
+    }
+
+    // docs/agent-memory.md: with a memory that says which note each name means, none of those tasks is held.
+    @Test
+    fun `with a memory that settles them, the unseen tasks that asked are not held`() {
+        val settled = MemoryNote
+            .linesOf(text = AgentMemoryCases.SETTLING)
+            .mapNotNull { it.named }
+
+        assertEquals(
+            expected = emptyList(),
+            actual = AgentMemoryCases
+                .settled
+                .map { it.task }
+                .filter {
+                    AmbiguousTask.notesOf(
+                        task = it,
+                        notes = wide,
+                        settled = settled
+                    ).isNotEmpty()
+                }
         )
     }
 

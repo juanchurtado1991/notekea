@@ -1,5 +1,7 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.memory.MemoryLine
+import app.notekea.chat.domain.memory.MemoryLines
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 
@@ -8,10 +10,14 @@ import app.notekea.core.notes.domain.RelativePath
  * item 3): two notes of one name, two people of one first name, "the X" where several notes are an X.
  */
 internal object AmbiguousTask {
-    /** The first set of two notes or more [task] can mean and does not say which of, by their paths; else empty. */
+    /**
+     * The first set of two notes or more [task] can mean and does not say which of, by their paths; else empty. A set
+     * the memory [settled] (`"Laura" is [[Laura Castro]]`, said in the task) is not open (`docs/agent-memory.md`).
+     */
     fun notesOf(
         task: String,
-        notes: Collection<NoteEntry>
+        notes: Collection<NoteEntry>,
+        settled: List<MemoryLine.Named> = emptyList()
     ): List<RelativePath> {
         val said = wordsOf(text = task)
         if (said.any { it in PLURAL }) return emptyList()
@@ -27,10 +33,41 @@ internal object AmbiguousTask {
             named = named
         )
             .firstOrNull { group ->
-                group.size in 2..MOST_OPTIONS && !isToldApart(group = group, said = said)
+                val isOpen =
+                    !isToldApart(group = group, said = said) && !isSettled(group, task, settled)
+
+                group.size in 2..MOST_OPTIONS && isOpen
             }
             ?.map { it.path }
             .orEmpty()
+    }
+
+    // The memory says which of them the words of the task mean: the note it links is one of the group.
+    private fun isSettled(
+        group: List<Named>,
+        task: String,
+        settled: List<MemoryLine.Named>
+    ): Boolean = settled.any { named ->
+        // A link with its folder ([[Work/Budget 2026]]) means that path; a bare title, the note of that title.
+        val link = folded(text = named.note.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION))
+
+        val isSaid = MemoryLines.says(
+            text = task,
+            said = named.said
+        )
+
+        val isOne = group.any {
+            val path = folded(
+                text = it
+                    .path
+                    .value
+                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            )
+
+            if ('/' in link) path == link else it.title == link
+        }
+
+        isSaid && isOne
     }
 
     /** Whether [text] names each of [paths] by a word only it has: an answer or a change that covers them all. */

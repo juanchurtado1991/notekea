@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.memory.MemoryLine
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.skill.Skill
 import app.notekea.chat.domain.tool.ToolRegistry
@@ -17,6 +18,11 @@ internal object LoopPrompt {
         "(Your last call could not be read. Reply with one short JSON object: the tool, then its arguments.)"
 
     const val MUST_END = "You have looked enough: end the task now."
+
+    // The memory is what the person approved; their request still wins over it (`docs/agent-memory.md`).
+    private const val MEMORY_HEADING =
+        "What the person approved for you to remember. Their request wins over it. When it says which note a " +
+            "name means, that is settled: use that note and never ask which."
     private const val MAX_NAMES = 120
 
     private const val RULES =
@@ -59,10 +65,18 @@ Tools:
     fun system(
         tools: ToolRegistry,
         instructions: String?,
-        skill: Skill?
+        skill: Skill?,
+        memory: List<MemoryLine> = emptyList()
     ): String = RULES + tools.described() +
         instructions
             ?.let { "\n\nThe person's instructions for this vault (follow them):\n$it" }
+            .orEmpty() +
+        memory
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(
+                separator = "\n",
+                prefix = "\n\n$MEMORY_HEADING\n"
+            ) { "- ${it.text}" }
             .orEmpty() +
         skill
             ?.let { "\n\nFor this kind of work (${it.name}):\n${it.instructions}" }

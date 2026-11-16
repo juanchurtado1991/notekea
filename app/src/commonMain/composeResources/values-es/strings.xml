@@ -1144,6 +1144,7 @@
     <string name="chat_agent_find">Listed notes: %1$s</string>
     <string name="chat_agent_tasks">Looked at the tasks</string>
     <string name="chat_agent_fetch">Read the page %1$s</string>
+    <string name="chat_agent_memory">From your memory: %1$s</string>
     <string name="chat_problem_agent_stopped">I stopped before finishing: the task needed more than 30 steps or 10 minutes, or the model failed. Try a smaller task.</string>
     <string name="chat_step_working_es">Trabajando en ello, paso a paso…</string>
     <string name="chat_agent_search_es">Busqué en las notas «%1$s»</string>
@@ -1151,6 +1152,7 @@
     <string name="chat_agent_find_es">Listé notas: %1$s</string>
     <string name="chat_agent_tasks_es">Miré las tareas</string>
     <string name="chat_agent_fetch_es">Leí la página %1$s</string>
+    <string name="chat_agent_memory_es">De tu memoria: %1$s</string>
     <string name="chat_problem_agent_stopped_es">Me detuve antes de terminar: la tarea necesitaba más de 30 pasos o 10 minutos, o el modelo falló. Prueba con una tarea más pequeña.</string>
     <string name="chat_section_found">I found %1$d links on this page</string>
     <string name="chat_section_found_es">Encontré %1$d enlaces en esta página</string>
