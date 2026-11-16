@@ -59,4 +59,46 @@ class WebSearchToolTest {
                 )
             )
         }
+
+    // The web's evaluation, 2026-11-16: "buy soil moisture sensor" in Costa Rica's region brought shops in the
+    // United States. A search for where to buy names the country; a fact, or a query that names one, is sent as is.
+    @Test
+    fun `a search for where to buy names the turn's country, and other searches are sent as written`() =
+        runTest {
+            val shown = listOf(
+                "buy soil moisture sensor",
+                "boiling point of water at 1200 m",
+                "comprar bicicleta eléctrica en Colombia"
+            ).map { query ->
+                val call = ToolCall(
+                    name = WebSearchTool.NAME,
+                    arguments = mapOf(WebSearchTool.QUERY to query)
+                )
+
+                val context = ToolContext(
+                    vaultPath = VAULT,
+                    notes = emptyList(),
+                    task = query,
+                    openNote = null,
+                    country = "CR"
+                )
+
+                tool.run(call, context)
+                tool.targetOf(call, context)
+            }
+
+            assertEquals(
+                expected = listOf(
+                    "buy soil moisture sensor Costa Rica",
+                    "boiling point of water at 1200 m",
+                    "comprar bicicleta eléctrica en Colombia"
+                ),
+                actual = sent.map { it.first }
+            )
+
+            assertEquals(
+                expected = sent.map { it.first },
+                actual = shown
+            )
+        }
 }

@@ -56,10 +56,11 @@ class DuckDuckGoSearch(private val fetcher: PageFetcher) : WebSearchProvider {
         }
     }
 
-    // Each result's title, its address out of DuckDuckGo's redirect, and its snippet.
+    // Each result's title, its address out of DuckDuckGo's redirect, and its snippet. Ads are left out: their link is
+    // DuckDuckGo's own click address, which the eval saw ticked as a source and read as nothing (2026-11-16).
     private fun resultsOf(html: String): List<WebResult> = Jsoup
         .parse(html)
-        .select(".result")
+        .select(".result:not(.result--ad)")
         .mapNotNull { result ->
             val link = result.selectFirst("a.result__a") ?: return@mapNotNull null
             val url = addressOf(href = link.attr("href")) ?: return@mapNotNull null
@@ -86,8 +87,16 @@ class DuckDuckGoSearch(private val fetcher: PageFetcher) : WebSearchProvider {
             URLDecoder.decode(wrapped.substringBefore(delimiter = '&'), Charsets.UTF_8)
         }
 
+        val isPage =
+            address.startsWith(prefix = "https://") || address.startsWith(prefix = "http://")
+
+        val isOwn = address
+            .substringAfter(delimiter = "://")
+            .substringBefore(delimiter = '/')
+            .endsWith(suffix = "duckduckgo.com")
+
         return address.takeIf {
-            it.startsWith(prefix = "https://") || it.startsWith(prefix = "http://")
+            isPage && !isOwn
         }
     }
 

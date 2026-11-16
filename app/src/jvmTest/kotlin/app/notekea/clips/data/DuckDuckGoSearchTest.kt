@@ -9,7 +9,10 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** DuckDuckGo's HTML results read with no network (`docs/agent-web.md`): a page as it gives one, recorded. */
+/**
+ * DuckDuckGo's HTML results read with no network (`docs/agent-web.md`): a page as it gives one, recorded. Its ads,
+ * links to DuckDuckGo's own click address, are never results (the web's evaluation, 2026-11-16).
+ */
 class DuckDuckGoSearchTest {
     private val asked = mutableListOf<String>()
 
@@ -18,6 +21,10 @@ class DuckDuckGoSearchTest {
           href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.fao.org%2Ftomato&amp;rut=1">Tomato under glass</a>
           <a class="result__snippet">Water at the base, in the morning.</a></div>
         <div class="result"><a class="result__a" href="javascript:void(0)">Not a page</a></div>
+        <div class="result result--ad"><a class="result__a"
+          href="https://duckduckgo.com/y.js?ad_domain=amazon.com.mx&amp;u3=x">Kindle, sold here</a></div>
+        <div class="result"><a class="result__a"
+          href="https://duckduckgo.com/y.js?ad_domain=ebay.com&amp;u3=x">An ad without its class</a></div>
     """.trimIndent()
 
     @Test

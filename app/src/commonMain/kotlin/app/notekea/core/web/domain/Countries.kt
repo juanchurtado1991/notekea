@@ -17,6 +17,18 @@ object Countries {
             ?.value
     }
 
+    /** The name of the country of [code] as a search writes it ("Costa Rica"); null for a code it does not know. */
+    fun nameOf(code: String): String? = NAMES
+        .entries
+        .firstOrNull {
+            it.value == code.uppercase()
+        }
+        ?.key
+        ?.split(" ")
+        ?.joinToString(separator = " ") { word ->
+            word.replaceFirstChar { it.uppercase() }
+        }
+
     private fun folded(text: String): String = text
         .lowercase()
         .map {

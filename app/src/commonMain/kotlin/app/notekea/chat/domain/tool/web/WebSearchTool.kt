@@ -8,6 +8,7 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolOrigin
 import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.core.domain.Outcome
+import app.notekea.core.web.domain.Countries
 import app.notekea.core.web.domain.FoundSource
 import app.notekea.core.web.domain.SourceTrust
 import app.notekea.core.web.domain.WebSearchProblem
@@ -31,15 +32,19 @@ class WebSearchTool(private val provider: WebSearchProvider) : ChatTool {
     override fun targetOf(
         call: ToolCall,
         context: ToolContext
-    ): String = call.text(name = QUERY)
+    ): String = queryOf(
+        call = call,
+        context = context
+    )
 
     override suspend fun run(
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val query = call
-            .text(name = QUERY)
-            .take(n = MOST_QUERY_CHARS)
+        val query = queryOf(
+            call = call,
+            context = context
+        )
 
         if (query.isEmpty()) return ToolResult(forModel = "$NAME: a query is needed.")
 
@@ -96,6 +101,27 @@ class WebSearchTool(private val provider: WebSearchProvider) : ChatTool {
         )
     }
 
+    // The query sent and shown. A search for where to buy something is made in the turn's country by its name too:
+    // the region alone still brought shops in the United States to a person living in Costa Rica (the web's
+    // evaluation, 2026-11-16, "buy soil moisture sensor").
+    private fun queryOf(
+        call: ToolCall,
+        context: ToolContext
+    ): String {
+        val written = call
+            .text(name = QUERY)
+            .take(n = MOST_QUERY_CHARS)
+
+        val country = context
+            .country
+            ?.let { Countries.nameOf(code = it) }
+            ?.takeIf {
+                BUYING.containsMatchIn(input = written) && Countries.codeIn(text = written) == null
+            }
+
+        return if (written.isEmpty() || country == null) written else "$written $country"
+    }
+
     private fun saidOf(problem: WebSearchProblem): String = when (problem) {
         WebSearchProblem.NOTHING_FOUND -> "nothing found; try other words once, or say it was not found."
         WebSearchProblem.BLOCKED -> "the search engine refused the search; say so, and that a Brave key helps."
@@ -106,5 +132,11 @@ class WebSearchTool(private val provider: WebSearchProvider) : ChatTool {
         const val NAME = "web_search"
         const val QUERY = "query"
         private const val MOST_QUERY_CHARS = 120
+
+        private val BUYING = Regex(
+            pattern = "\\b(buy|purchase|shop|shops|store|stores|sell|sells|offers?|deals?|comprar?|compro|" +
+                "venden?|tiendas?|ofertas?|dónde consigo|donde consigo)\\b",
+            option = RegexOption.IGNORE_CASE
+        )
     }
 }
