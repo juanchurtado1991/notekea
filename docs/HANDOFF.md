@@ -359,9 +359,42 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
     approved addresses are asked again with the request; `fetch` reads only trusted or written addresses.
   - **Step 6, research:** the prompt's web rule (answer with links; clip the approved addresses to make notes);
     three searches and eight pages a request.
+- **Measured (2026-11-16), step 1 on the 9B and steps 1 to 6 on both:**
+  - **Step 1, 9B (`8044c622`):** the 201 tasks 166, the same as before the memory (27, 18, 54, 67); the memory's 23
+    of 27, the wrong memory 3 of 3, the unseen 19 of 24. Step 1's gate passes on both models.
+  - **Steps 1 to 6, 4B:** 159 of 201 (26, 18, 52, 63); memory 22 of 27, wrong memory 2 of 3, poisoning 4 of 4,
+    unseen 21 of 24.
+  - **Steps 1 to 6, 9B:** 164 of 201 (25, 19, 53, 67); memory 23 of 27, wrong memory 3 of 3, poisoning 4 of 4,
+    unseen 18 of 24.
+  - **Read task by task against step 1:** on the 4B 22 tasks changed, 14 for the worse and 8 for the better, none of
+    them through the new tools (`remember`, `forget`, `web_search` were called only by the poisoning tasks, and
+    refused there). The failures are the loop's known kinds (out of steps, wrong note sets). Taken as the runs'
+    noise, not a regression; one is ours and fixed: a question back offering one note twice, by its name and its
+    path (`SameNoteQuestion`).
+- **The web measured (2026-11-16):** 50 tasks (`WebEvalCases`: where to buy, facts, prices, clips, deep notes,
+  research, the web beside the notes, safety) on the real web, the person's turns played by the run (Search the
+  web on a not found, the sources they would tick) and every page kept in `-PwebPages` so the three models read the
+  same. Graded by hand against each task's rubric; the grades are in `docs/agent-web.md`. The first three tasks
+  found one bug of ours, fixed: a shop's address the model cut at its `&pid=` was refused (`FetchTool`).
+  - **Graded:** 9B 25 of 50, 4B 25, 2B 9 (by kind in `docs/agent-web.md`). Where to buy, facts and prices from
+    pages read work; research and deep notes did not.
+  - **Fixed, each with a test:** the writing work gets `web_search`, `fetch` and `clip` when the request asks for
+    the web (`WebAsked`, `Toolsets.of(kind, task)`); `WebChecks` holds once a search for a note of the vault (a
+    person's details never searched), an end with the request's or the approved pages unread, and research that
+    never searched; a search for where to buy names the country; DuckDuckGo's ads left out; the answer prompt's
+    example figure and notes on its conclusion gone; "The notes do not contain…" read as not found.
+  - **Role-play on the 9B (five turns):** asked what the irrigation project lacks (honestly not found), searched
+    the web for parts and Costa Rican shops, read the two ticked pages, and proposed adding the list with links to
+    the note from the conversation's history. A correction to that proposal ("remove Yaxa") was not followed: the
+    history keeps only a proposal's summary, and nothing was written.
+  - **Re-measured after the fixes (third run):** graded side by side with the second by one standard, the 9B 29½
+    of 50 (was 24½) and the 4B 25 (was 25½); the 201 tasks unchanged, 9B 164 and 4B 159. What still fails is in
+    `docs/agent-web.md`: links left out, the 4B's "the notes do not contain" about pages read, a change made again
+    offered over and over, "my weekly review" searched after the held search.
 - **Not done yet:** a Brave key in Settings; Correct… on a memory step; Tidy your memory; corrections into a
   skill; asking the country when none is known (the computer's region is not read); the vault's web sources as
-  trusted; the web's recorded evaluation; Auto-Test cases and `MVP_SMOKE_TEST.md`.
+  trusted; Auto-Test cases; a memory of the turn's steps (`ROADMAP.md`, Post-MVP 15), after the web's third
+  measurement.
 
 Planned with the developer while #143 waited for CI, and reviewed twice the same day; every recommendation was
 accepted. Two designs, one pull request, the memory first. **Nothing is built.** It starts on a branch from `main`

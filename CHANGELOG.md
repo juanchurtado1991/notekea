@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - With the chat's new loop on, the chat can search the web when you ask or when your notes don't hold an answer
   (#144). Every search shows what it searched. New sources wait for you to tick them, sites you trust are read
   without asking, and it can remember which sites you trust or not.
+- The web's evaluation: 50 tasks the chat works on the real web, graded by hand. They are where to buy in your
+  country, facts and prices with their sources, pages clipped, deep notes, research, and what must stay safe.
 - The chat's new loop reads its memory, `Notekea/Memory.md`: what you approved it to remember, such as which
   note "Laura" means, so it no longer asks which. The lines a request uses show as a step ("From your memory: …").
   Only the lines a request matches are read, plus how you like answers. A line that asks for leave to act
@@ -116,6 +118,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The chat no longer asks which of two notes you mean when both answers are the same note, once by its name and
+  once by its folder.
+- The chat reads a page you ticked even when the model shortens its address at its `?` or `&`, as it did with a
+  shop's product page.
+- Asked to research something and write a note, or to make a note of a page's address, the chat searches and
+  reads the web instead of writing from unrelated notes or leaving an empty note.
+- The chat reads the pages you ticked before it answers, and searches the web when you ask it to research.
+- The chat reads a note of your vault instead of searching the web for it, and never searches for a person's
+  phone, address or email.
+- Asked to make a note of a page, the chat clips the page instead of writing an empty note or one from your other
+  notes; asked to add what pages say to a note, it appends it with each page's link instead of only answering.
+- A search for where to buy something names your country, so it finds shops where you live.
+- DuckDuckGo's ads no longer show as sources.
+- The chat's answers no longer carry an example figure from its instructions, or notes about its own reasoning.
+- "The notes do not contain…" is read as not found, so the chat offers to search the web.
 - Repairing a vault left in the middle of a sync with Keep mine copies the notes that clashed, as you left them, to
   the vault's trash before they go back to the last commit; a repair that fails says why.
 - The chat's sums are written out in full ("12345678.25", not "1.234567825E7"), and a minus before a power is taken

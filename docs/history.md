@@ -327,3 +327,17 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   the 4B 19 → 21 and the 9B 16 → 19, and the small model keeps today's agent with the loop on.
 - **2026-11-15, the branch's code review:** the handoff said Next was a code review; it found ten things, six fixed
   with a test each (the sync repair, the sums, accented names, the last step's question).
+- **2026-11-16, the memory measured with steps 1 to 6:** the handoff said the 9B made 166 of 201 on step 1 (the
+  same as before), and with every step the 4B 159 and the 9B 164; the changes read task by task were the runs'
+  noise, and one question offering one note twice was fixed.
+- **2026-11-16, the web's 50 tasks:** the handoff said the web's recorded evaluation was not done; the developer
+  asked instead for 50 tasks on the real web on the three models, graded by hand, and a shortened address was fixed.
+- **2026-11-16, the web graded and its failures fixed:** graded by hand the 9B and the 4B made 25 of 50 and the 2B
+  9; research and deep notes had no web in the writing work, approved pages went unread and a person's phone was
+  searched online, and each was fixed with a test (`docs/agent-web.md`); a role-play on the 9B found a correction
+  to a proposal not yet made cannot be followed, as the history keeps only its summary.
+- **2026-11-16, the web measured again after its fixes:** graded side by side by one standard, the 9B went from
+  24½ to 29½ of 50 and the 4B stayed at 25; the 201 tasks did not change (164, 159).
+- **2026-11-16, a memory of the turn's steps planned:** the developer asked for what each step finds to be kept
+  outside the model's context and handed back in parts; written as Post-MVP 15 in `ROADMAP.md`, to be measured
+  after the web's third measurement. Cloudflare's Code Mode was looked at for the same problem and left.

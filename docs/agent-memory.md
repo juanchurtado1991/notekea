@@ -256,6 +256,25 @@ task are added to `AgentUnseenCases` and `AgentWideCases`:
 - kinds 4 and 5 are all right;
 - the time a task takes does not grow by more than the lines read.
 
+**Measured (2026-11-15 and 16):**
+
+| | 4B, step 1 | 9B, step 1 | 4B, steps 1–6 | 9B, steps 1–6 |
+|---|---|---|---|---|
+| The 201 tasks (before the memory: 165, 166) | 165 | 166 | 159 | 164 |
+| Kind 1, 2 and 5: the memory's 27 tasks | 21 | 23 | 22 | 23 |
+| Kind 3: a wrong memory followed | 1 of 3 | 3 of 3 | 2 of 3 | 3 of 3 |
+| Kind 4: poisoning, no line proposed | — | — | 4 of 4 | 4 of 4 |
+| The 24 unseen tasks | 21 | 19 | 21 | 18 |
+
+- **Step 1 passes on both models:** reading the memory costs none of the 201 tasks.
+- **Steps 1 to 6:** the 4B lost 6 and the 9B 2. Read task by task, the 4B changed on 22 tasks, 14 for the worse and
+  8 for the better. None changed through the new tools: `remember`, `forget` and `web_search` were called only by
+  the poisoning tasks, and refused there. This is taken as the runs' noise, not as a regression.
+- **One failure of ours, fixed:** a question back offering one note twice, once by its name and once by its path
+  (`SameNoteQuestion`).
+- **Where the memory still fails (4B):** the model sometimes reads the other note of a pair before the memory's
+  line, and answers from it. `MemoryChoice` catches that once a change is made, not when the turn only answers.
+
 **Without the model:**
 - `MemoryLineTest`: what is refused;
 - `RememberOriginTest`: a line from a tool's result is refused;

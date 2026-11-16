@@ -398,6 +398,11 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Use:** for names and aliases, people, where things go, formats, areas, sources and the person's country.
    - **Protection:** every line used is shown with a way to correct it; the memory never grants a permission.
    - **Setup without Markdown:** in the chat and in Settings → Chat → What the chat knows.
+   - **Built and measured (2026-11-16)** on `feature/chat-memory-web`: on the 201 tasks the 4B made 159 and the 9B
+     164, the memory's own tasks 22 and 23 of 27, and poisoning 4 of 4 on both (`docs/agent-memory.md`). The web's 50
+     tasks are graded in `docs/agent-web.md`: 9B 25, 4B 25, 2B 9 of 50, with the failures found fixed (research and
+     deep notes without the web, approved pages unread, a person searched online, the country, ads). Measured again
+     after the fixes: 9B 29½ (was 24½ by the same grading), 4B 25 (was 25½), the 201 tasks unchanged.
    - Designed in `docs/agent-memory.md` (2026-11-15, second version after the developer's review, every
      recommendation accepted), in three steps measured on the evaluation. Built after the one agent loop is merged.
    - **Step 1 (2026-11-15), measured on the 4B:** the memory read and shown when used; the 201 tasks stay at 165;
@@ -405,6 +410,15 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Steps 2 to 6 (2026-11-15), built together:** the memory written (Remember, remember / forget, its checks),
      Settings → Chat memory, the web search (#144, §13), sources approved and trusted, research by clipping; being
      measured. Brave, Tidy your memory and the web's recorded evaluation are still to do.
+15. **A memory of the turn's steps** — asked for by the developer on 2026-11-16, for after the web's third
+   measurement: what each step found is kept outside the model's context (in SQLite) and handed back in parts, only
+   the part the next step needs, so a long task does not crowd out what it already read. Seen in the web's
+   evaluation: the 9B read three pages on memorizing, then twelve sections of unrelated notes, and answered that
+   nothing on memorizing was found. The cause: when what was found outgrows the context, `ContextBudget.fit` drops
+   the earliest results first, and the answer is written from what is left, so the three pages were gone. A memory
+   hands back what the step needs, not what came last. It can also keep a proposal whole between turns, so "remove
+   Yaxa from that list" finds the list (seen in the role-play). It does not stop a model reading unrelated notes. To be measured on the tasks that run out of steps or lose what they read, against the loop as it is;
+   Cloudflare's Code Mode was looked at for the same problem and left, as it rests on small models writing code.
 
 ## Out of scope for the MVP
 
