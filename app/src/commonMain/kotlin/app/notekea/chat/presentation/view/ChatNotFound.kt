@@ -29,6 +29,9 @@ import app.notekea.resources.chat_site_none
 import app.notekea.resources.chat_site_search
 import app.notekea.resources.chat_site_search_hint
 import app.notekea.resources.chat_site_sources
+import app.notekea.resources.chat_web_search
+import app.notekea.resources.chat_web_search_hint
+import app.notekea.resources.chat_web_search_request
 
 /**
  * "I couldn't find this in your notes", and what to do about it (the developer's request of 2026-11-13): look for it
@@ -62,6 +65,16 @@ internal fun ChatNotFound(
                 entry = entry,
                 pages = pages,
                 onIntent = onIntent
+            )
+        }
+
+        if (entry.canSearchWeb) {
+            val request = replyString(Res.string.chat_web_search_request, entry.question)
+
+            NotekeaOptionRow(
+                title = replyString(Res.string.chat_web_search, entry.question),
+                onClick = { onIntent(ChatIntent.OnFollowUp(text = request)) },
+                supportingText = replyString(resource = Res.string.chat_web_search_hint)
             )
         }
     }

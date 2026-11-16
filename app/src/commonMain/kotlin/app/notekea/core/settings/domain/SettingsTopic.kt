@@ -7,6 +7,7 @@ enum class SettingsTopic {
     EDITOR,
     FILES,
     AI_MODEL,
+    CHAT_MEMORY,
     SYNC,
     SHORTCUTS,
     ABOUT

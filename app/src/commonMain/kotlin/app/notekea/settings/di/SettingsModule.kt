@@ -5,6 +5,7 @@ import app.notekea.settings.presentation.about.AboutViewModel
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
 import app.notekea.settings.presentation.files.FilesSettingsViewModel
 import app.notekea.settings.presentation.help.SettingsHelpViewModel
+import app.notekea.settings.presentation.memory.MemorySettingsViewModel
 import app.notekea.settings.presentation.preferences.PreferencesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -24,6 +25,18 @@ val settingsModule = module {
             reader = get(),
             writer = get(),
             attachmentStore = get(),
+            localCalendar = get(),
+            clock = get(),
+            vaultPath = parameters.getOrNull()
+        )
+    }
+
+    viewModel { parameters ->
+        MemorySettingsViewModel(
+            noteContentStore = get(),
+            noteFileOperations = get(),
+            attachmentStore = get(),
+            preferencesStore = get(),
             localCalendar = get(),
             clock = get(),
             vaultPath = parameters.getOrNull()

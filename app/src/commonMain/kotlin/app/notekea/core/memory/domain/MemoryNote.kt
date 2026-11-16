@@ -1,4 +1,6 @@
-package app.notekea.chat.domain.memory
+package app.notekea.core.memory.domain
+
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * `Notekea/Memory.md` read into its lines (`docs/agent-memory.md`): a bullet under a `##` heading is a line, its
@@ -6,6 +8,9 @@ package app.notekea.chat.domain.memory
  * preferences, never leave to act (layer 6).
  */
 object MemoryNote {
+    /** Where the memory is kept: beside the vault's instructions, in Notekea's own folder (2026-11-15). */
+    val PATH = RelativePath(value = "Notekea/Memory.md")
+
     fun linesOf(text: String): List<MemoryLine> = text
         .lines()
         .map { it.trim() }

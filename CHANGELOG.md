@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The chat remembers what you approve: tick Remember for next time when it asks which note you mean, or say
+  "remember that…", and it keeps the line in `Notekea/Memory.md`. Forget a line from the step that used it.
+- Settings → Chat memory: turn the memory on or off; set your country, currency, the language of the answers and
+  where new notes go; see what the chat learnt and forget a line, or everything.
+- With the chat's new loop on, the chat can search the web when you ask or when your notes don't hold an answer
+  (#144). Every search shows what it searched. New sources wait for you to tick them, sites you trust are read
+  without asking, and it can remember which sites you trust or not.
 - The chat's new loop reads its memory, `Notekea/Memory.md`: what you approved it to remember, such as which
   note "Laura" means, so it no longer asks which. The lines a request uses show as a step ("From your memory: …").
   Only the lines a request matches are read, plus how you like answers. A line that asks for leave to act

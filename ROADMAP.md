@@ -400,8 +400,11 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Setup without Markdown:** in the chat and in Settings → Chat → What the chat knows.
    - Designed in `docs/agent-memory.md` (2026-11-15, second version after the developer's review, every
      recommendation accepted), in three steps measured on the evaluation. Built after the one agent loop is merged.
-   - **Step 1 (2026-11-16), coded:** the memory read, the lines a request matches shown as a step, and names it
-     settles not asked back; being measured.
+   - **Step 1 (2026-11-15), measured on the 4B:** the memory read and shown when used; the 201 tasks stay at 165;
+     with a memory that settles them, 21 of 27 memory tasks right, and the failures fixed in general.
+   - **Steps 2 to 6 (2026-11-15), built together:** the memory written (Remember, remember / forget, its checks),
+     Settings → Chat memory, the web search (#144, §13), sources approved and trusted, research by clipping; being
+     measured. Brave, Tidy your memory and the web's recorded evaluation are still to do.
 
 ## Out of scope for the MVP
 

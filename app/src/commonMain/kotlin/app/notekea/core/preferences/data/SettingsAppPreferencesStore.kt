@@ -73,6 +73,11 @@ class SettingsAppPreferencesStore(
                 key = CHAT_LOOP_KEY,
                 value = preferences.chatLoop
             )
+
+            settings.putBoolean(
+                key = CHAT_MEMORY_KEY,
+                value = preferences.chatMemory
+            )
         }
 
         current.value = preferences
@@ -101,6 +106,10 @@ class SettingsAppPreferencesStore(
             chatLoop = settings.getBoolean(
                 key = CHAT_LOOP_KEY,
                 defaultValue = false
+            ),
+            chatMemory = settings.getBoolean(
+                key = CHAT_MEMORY_KEY,
+                defaultValue = true
             )
         )
     }
@@ -108,6 +117,7 @@ class SettingsAppPreferencesStore(
     private companion object {
         const val LANGUAGE_KEY = "app.language"
         const val CHAT_LOOP_KEY = "chat.loop"
+        const val CHAT_MEMORY_KEY = "chat.memory"
         const val OPENS_LAST_VAULT_KEY = "app.opens_last_vault"
         const val TEXT_SIZE_KEY = "app.editor_text_size"
         const val LINE_WIDTH_KEY = "app.editor_line_width"

@@ -14,6 +14,7 @@ import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
@@ -185,7 +186,7 @@ class AgentEvalChatModelTest {
             all,
             "loop-memory",
             isLoop = true,
-            memory = settling
+            written = mapOf(MEMORY to settling)
         )
 
         val wrong = AgentMemoryCases.followed.map { it.forLoop() }
@@ -195,7 +196,15 @@ class AgentEvalChatModelTest {
             wrong,
             "loop-memory-wrong",
             isLoop = true,
-            memory = AgentMemoryCases.WRONG
+            written = mapOf(MEMORY to AgentMemoryCases.WRONG)
+        )
+
+        measured(
+            vault,
+            AgentMemoryCases.poisoning,
+            "loop-memory-poisoned",
+            isLoop = true,
+            written = AgentMemoryCases.POISONED
         )
 
         Unit
@@ -238,7 +247,7 @@ class AgentEvalChatModelTest {
         all: List<AgentEvalCase>,
         name: String,
         isLoop: Boolean = false,
-        memory: String? = null
+        written: Map<String, String> = emptyMap()
     ): Pair<Double, String> {
         val indexed = EvalVault.of(
             vault = vault,
@@ -260,10 +269,10 @@ class AgentEvalChatModelTest {
 
         if (cases.isEmpty()) return 1.0 to ""
 
-        val notes = AgentEvalSetup.remembering(
+        val notes = AgentEvalSetup.withWritten(
             indexed = indexed,
             notes = AgentEvalSetup.withMetadata(indexed, dispatchers),
-            memory = memory
+            written = written
         )
 
         val agent = agentOf(indexed = indexed)
@@ -429,6 +438,7 @@ class AgentEvalChatModelTest {
 
     private companion object {
         const val VAULT = "Sample Vault"
+        val MEMORY = VaultGuide.MEMORY.value
         const val GPU_SLOTS = 4
         const val PERCENT = 100
         const val PROMPT_CHARS = 4_000

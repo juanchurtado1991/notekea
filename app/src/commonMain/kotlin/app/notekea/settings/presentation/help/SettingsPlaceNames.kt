@@ -14,6 +14,8 @@ import app.notekea.resources.settings_daily_notes_folder
 import app.notekea.resources.settings_daily_notes_format
 import app.notekea.resources.settings_language
 import app.notekea.resources.settings_line_width
+import app.notekea.resources.settings_memory_forget_all
+import app.notekea.resources.settings_memory_on
 import app.notekea.resources.settings_open_last_vault
 import app.notekea.resources.settings_place_model_size
 import app.notekea.resources.settings_place_models_folder
@@ -31,6 +33,8 @@ import org.jetbrains.compose.resources.StringResource
 
 /** A setting's name on Show, as its screen labels it ("Access token"). */
 internal fun nameOf(place: SettingsPlace): StringResource = when (place) {
+    SettingsPlace.CHAT_MEMORY_ON -> Res.string.settings_memory_on
+    SettingsPlace.CHAT_MEMORY_FORGET_ALL -> Res.string.settings_memory_forget_all
     SettingsPlace.GENERAL_LANGUAGE -> Res.string.settings_language
     SettingsPlace.GENERAL_OPEN_LAST_VAULT -> Res.string.settings_open_last_vault
     SettingsPlace.GENERAL_SHOW_WELCOME -> Res.string.settings_show_welcome

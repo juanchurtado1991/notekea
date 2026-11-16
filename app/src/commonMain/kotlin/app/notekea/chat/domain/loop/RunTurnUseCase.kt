@@ -6,10 +6,11 @@ import app.notekea.chat.domain.agent.AgentTaskMove
 import app.notekea.chat.domain.agent.GroundedSteps
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.agent.ProposalVault
+import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.context.ModelProfile
-import app.notekea.chat.domain.memory.MemoryLines
 import app.notekea.chat.domain.plan.ActionContext
+import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
@@ -27,8 +28,13 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.memory.domain.MemoryLine
+import app.notekea.core.memory.domain.MemoryLines
+import app.notekea.core.memory.domain.MemorySection
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.web.domain.Countries
+import app.notekea.core.web.domain.SourceTrust
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -57,13 +63,8 @@ class RunTurnUseCase(
         context: ActionContext,
         openNote: RelativePath?
     ): Flow<AgentStep> = flow {
-        val turn = ToolContext(
-            vaultPath = vaultPath,
-            notes = notes,
-            task = task,
-            openNote = openNote,
-            today = dateOf(written = context.today)
-        )
+        val remembered = vaultGuide.memoryOf(vaultPath, notes)
+        val turn = TurnSetup.contextOf(task, vaultPath, notes, context.today, remembered, openNote)
 
         val route = router.route(
             task = task,
@@ -74,10 +75,10 @@ class RunTurnUseCase(
 
         val tools = toolsets.of(kind = route.kind)
 
-        val memory = MemoryLines.relevantTo(
-            lines = vaultGuide.memoryOf(vaultPath, notes),
+        val memory = TurnSetup.memoryOf(
             task = task,
-            isWeb = route.kind == WorkKind.WEB
+            remembered = remembered,
+            kind = route.kind
         )
 
         // A line the task matched is said as a step, so a wrong memory is seen the first time it matters.
@@ -162,6 +163,19 @@ class RunTurnUseCase(
                     state = state
                 )
             }
+
+            // New sources found on the web wait for the person, unless this turn already says which to read.
+            val web = state.turn.web
+            val isApproved = UrlsNamed.writtenIn(text = state.task).isNotEmpty()
+
+            if (web.isWaiting && !isApproved) {
+                return emit(
+                    value = AgentStep.SourcesFound(
+                        sources = web.found,
+                        omitted = web.omitted
+                    )
+                )
+            }
         }
 
         // Held on the last step for the question it must ask: one call more, which may only ask it.
@@ -207,7 +221,7 @@ class RunTurnUseCase(
     ) {
         val target = tool.targetOf(call, state.turn)
 
-        val shared = sharedBy(
+        val shared = SharedNames.of(
             call = call,
             state = state
         )
@@ -267,28 +281,6 @@ class RunTurnUseCase(
         if (isRefused) state.refused += key
     }
 
-    // A bare name several notes share is not settled by the app's guess: the model is told, to ask or to say which.
-    private fun sharedBy(
-        call: ToolCall,
-        state: TurnState
-    ): String? {
-        val named = listOf(call.text(name = NOTE)) + call.list(name = NOTES)
-
-        return named
-            .filter { it.isNotEmpty() }
-            .firstNotNullOfOrNull { name ->
-                state
-                    .turn
-                    .sharing(name = name)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { paths ->
-                        "(${paths.size} notes are named \"$name\": ${paths.joinToString()}. When the task " +
-                            "means one of them and does not say which, ask_user with them as the options. " +
-                            "When it means them all, or says which, call again with each whole path.)"
-                    }
-            }
-    }
-
     private suspend fun FlowCollector<AgentStep>.ended(
         call: ToolCall,
         tool: ChatTool,
@@ -297,7 +289,8 @@ class RunTurnUseCase(
         val step = when (tool.name) {
             AskUserTool.NAME -> AgentStep.Asked(
                 question = call.text(name = AskUserTool.QUESTION),
-                options = AskUserTool.optionsOf(call = call)
+                options = AskUserTool.optionsOf(call = call),
+                remembering = SharedNames.rememberingOf(state = state)
             )
 
             ProposeTool.NAME -> proposed(
@@ -448,30 +441,12 @@ class RunTurnUseCase(
         return AgentStep.Finished(summary = answer)
     }
 
-    private fun dateOf(written: String): CalendarDate? {
-        val parts = written
-            .split("-")
-            .mapNotNull { it.toIntOrNull() }
-
-        if (parts.size != DATE_PARTS) return null
-
-        return CalendarDate(
-            year = parts[0],
-            month = parts[1],
-            day = parts[2]
-        ).takeIf { it.isValid }
-    }
-
     companion object {
         const val MAX_STEPS = 30
         val TIME_LIMIT = 10.minutes
         private const val CALL_TOKENS = 700
         private const val RETRY_TOKENS = 1_400
         private const val WORK_TOKENS = 300
-        private const val DATE_PARTS = 3
         private const val AGAIN = "again: its result is above."
-
-        private const val NOTE = "note"
-        private const val NOTES = "notes"
     }
 }

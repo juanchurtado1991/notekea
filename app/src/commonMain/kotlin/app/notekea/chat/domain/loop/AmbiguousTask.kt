@@ -1,7 +1,7 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.memory.MemoryLine
-import app.notekea.chat.domain.memory.MemoryLines
+import app.notekea.core.memory.domain.MemoryLine
+import app.notekea.core.memory.domain.MemoryLines
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 
@@ -42,6 +42,105 @@ internal object AmbiguousTask {
             .orEmpty()
     }
 
+    /**
+     * The sets of notes [task] could mean that the memory settles (`docs/agent-memory.md`): the note it means and the
+     * others, so a turn that picks another is reminded once, and a tool's "several notes share this name" is not said.
+     */
+    fun settledOf(
+        task: String,
+        notes: Collection<NoteEntry>,
+        settled: List<MemoryLine.Named>
+    ): List<Settled> {
+        val said = wordsOf(text = task)
+
+        val isPlural = said.any {
+            it in PLURAL
+        }
+
+        if (settled.isEmpty() || isPlural) return emptyList()
+
+        val named = notes
+            .map { it.file.path }
+            .filter { it.isMarkdown }
+            .map { Named(path = it) }
+
+        return candidatesOf(
+            task = task,
+            said = said,
+            named = named
+        )
+            .filter { group ->
+                group.size in 2..MOST_OPTIONS && !isToldApart(group = group, said = said)
+            }
+            .mapNotNull { group ->
+                val meant = settled.firstNotNullOfOrNull { line ->
+                    group.firstOrNull {
+                        isMeant(
+                            named = it,
+                            line = line,
+                            task = task
+                        )
+                    }
+                } ?: return@mapNotNull null
+
+                Settled(
+                    meant = meant.path,
+                    others = group.filter {
+                        it != meant
+                    }.map { it.path }
+                )
+            }
+            .toList()
+    }
+
+    /** A set of notes the memory settled: the one it [meant], and the [others] the task's words could also mean. */
+    data class Settled(
+        val meant: RelativePath,
+        val others: List<RelativePath>
+    )
+
+    // The note a line of the memory links, when the task says that line's words and does not qualify them.
+    private fun isMeant(
+        named: Named,
+        line: MemoryLine.Named,
+        task: String
+    ): Boolean {
+        val link = folded(text = line.note.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION))
+
+        val path = folded(
+            text = named
+                .path
+                .value
+                .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        )
+
+        val isLink = if ('/' in link) path == link else named.title == link
+
+        return isLink &&
+            MemoryLines.says(text = task, said = line.said) &&
+            !isQualified(task = task, said = line.said)
+    }
+
+    /**
+     * Whether [task] says which one it means right after [said]: "Tomás from the chess club", "Laura Méndez", "la
+     * revisión semanal personal". The request wins over the memory (`docs/agent-memory.md`).
+     */
+    fun isQualified(
+        task: String,
+        said: String
+    ): Boolean {
+        val last = wordsOf(text = said).lastOrNull() ?: return false
+        val words = task.split(NOT_WORD).filter { it.isNotEmpty() }
+
+        val at = words.indexOfFirst {
+            folded(text = it) == last
+        }
+
+        val next = words.getOrNull(index = at + 1) ?: return false
+
+        return at >= 0 && (folded(text = next) in QUALIFIERS || next.first().isUpperCase())
+    }
+
     // The memory says which of them the words of the task mean: the note it links is one of the group.
     private fun isSettled(
         group: List<Named>,
@@ -67,7 +166,44 @@ internal object AmbiguousTask {
             if ('/' in link) path == link else it.title == link
         }
 
-        isSaid && isOne
+        isSaid &&
+            isOne &&
+            !isQualified(task = task, said = named.said)
+    }
+
+    /**
+     * The words of [task] that meant any of [paths] ("Laura", "the budget"), as the task writes them: what a line of
+     * the memory says once the person picks one (`docs/agent-memory.md`, "How a line is written"); null when none.
+     */
+    fun saidOf(
+        task: String,
+        paths: List<RelativePath>
+    ): String? {
+        val common = paths
+            .map { Named(path = it).words }
+            .reduceOrNull { shared, words ->
+                shared intersect words
+            }
+            .orEmpty()
+
+        if (common.isEmpty()) return null
+
+        val the = THE
+            .findAll(input = task)
+            .firstOrNull {
+                folded(text = it.groupValues[THING]) in common
+            }
+
+        if (the != null) return the.value
+
+        return task
+            .split(NOT_WORD)
+            .filter {
+                it.isNotEmpty() && folded(text = it) in common
+            }
+            .distinctBy { folded(text = it) }
+            .joinToString(separator = " ")
+            .ifEmpty { null }
     }
 
     /** Whether [text] names each of [paths] by a word only it has: an answer or a change that covers them all. */
@@ -222,6 +358,12 @@ internal object AmbiguousTask {
     private val DESCRIBED = Regex(
         pattern = "\\b(la de|el de|la del|el del|la que|el que|the one)\\b",
         option = RegexOption.IGNORE_CASE
+    )
+
+    // Words that start saying which one a name means: "from", "de", "who", "at", "personal", "work".
+    private val QUALIFIERS = setOf(
+        "from", "of", "at", "in", "who", "that", "de", "del", "que", "en", "personal", "work", "trabajo", "home",
+        "casa"
     )
 
     private val GOES = setOf("to", "into", "as", "a", "al", "en", "como")

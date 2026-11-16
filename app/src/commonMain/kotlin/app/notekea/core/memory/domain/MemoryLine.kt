@@ -1,4 +1,4 @@
-package app.notekea.chat.domain.memory
+package app.notekea.core.memory.domain
 
 /**
  * One fact of the chat's memory (`docs/agent-memory.md`): a line of `Notekea/Memory.md` under its [section], its

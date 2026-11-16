@@ -1,7 +1,7 @@
 package app.notekea.chat.domain.skill
 
-import app.notekea.chat.domain.memory.MemoryLine
-import app.notekea.chat.domain.memory.MemoryNote
+import app.notekea.core.memory.domain.MemoryLine
+import app.notekea.core.memory.domain.MemoryNote
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
@@ -142,7 +142,7 @@ class VaultGuide(private val noteTextCache: NoteTextCache) {
          * instructions live in a folder of Notekea's own, where the chat's memory is meant to go too.
          */
         val INSTRUCTIONS = RelativePath(value = "Notekea/Notekea.md")
-        val MEMORY = RelativePath(value = "Notekea/Memory.md")
+        val MEMORY = MemoryNote.PATH
         const val SKILLS_FOLDER = "Notekea/Skills"
 
         // Always in the prompt, so short: about 500 tokens of instructions, 300 of a skill.

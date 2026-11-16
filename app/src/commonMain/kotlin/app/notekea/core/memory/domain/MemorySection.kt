@@ -1,4 +1,4 @@
-package app.notekea.chat.domain.memory
+package app.notekea.core.memory.domain
 
 /** The sections of the memory, by what their lines are for; a heading the app does not know is [OTHER]. */
 enum class MemorySection(val heading: String) {

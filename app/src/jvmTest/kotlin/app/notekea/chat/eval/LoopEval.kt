@@ -16,6 +16,7 @@ import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.web.domain.WebSearchProblem
 import app.notekea.search.eval.EvalVault
 import kotlin.time.Clock
 
@@ -38,7 +39,8 @@ internal object LoopEval {
             noteTextCache = cache,
             actionRunner = runner,
             pageReader = { Outcome.Failure(error = PageProblem.OFFLINE) },
-            linkFinder = JetBrainsMarkdownLinkFinder()
+            linkFinder = JetBrainsMarkdownLinkFinder(),
+            webSearch = { _, _ -> Outcome.Failure(error = WebSearchProblem.OFFLINE) }
         )
 
         return RunTurnUseCase(

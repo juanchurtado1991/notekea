@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.plan
 
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
@@ -85,6 +86,9 @@ internal class VaultNames(
             )
 
             ActionKind.SHOW_TASKS -> StepTargets(folder = folderName?.let { folderOf(name = it) })
+
+            // The chat's memory is one note, whatever note is open.
+            ActionKind.REMEMBER, ActionKind.FORGET -> StepTargets(notes = listOf(VaultGuide.MEMORY))
 
             else -> StepTargets(
                 notes = selected(

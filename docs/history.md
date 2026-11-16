@@ -233,6 +233,10 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
 
 ## The chat's memory between conversations (2026-11-15): designed
 
+- **The handoff said, once built:** "Next: step 1 (the memory read), measured, then step 2."
+- **What happened:** steps 2 to 6 were written while step 1 was measured, as the measurement holds Gradle for an
+  hour or more. The 9B's run then compiled their unfinished code and stopped.
+
 - The loop's design had said "memory between chats is left for later: what it may keep, and how the person sees and
   deletes it, needs its own decision". On 2026-11-15 the developer asked why the agent does not learn the person;
   the decision was written as `docs/agent-memory.md`, a note of the vault written only with approval, before any

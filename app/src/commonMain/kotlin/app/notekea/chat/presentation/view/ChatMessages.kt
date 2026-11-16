@@ -205,7 +205,10 @@ private fun Answer(
 
     // The answer reads as the note's own text under its question (7B).
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        ChatTasks(entry = entry)
+        ChatTasks(
+            entry = entry,
+            onMemoryForget = { onIntent(ChatIntent.OnMemoryForget(line = it)) }
+        )
 
         AnswerContent(
             entry = entry,
@@ -214,6 +217,26 @@ private fun Answer(
             onIntent = onIntent,
             onSourceClick = onSourceClick
         )
+
+        if (entry.foundSources.isNotEmpty()) {
+            ChatFoundSources(
+                sources = entry.foundSources,
+                picked = entry.pickedSources,
+                omitted = entry.omittedSources,
+                onToggle = {
+                    onIntent(
+                        ChatIntent.OnSourceToggle(
+                            id = entry.id,
+                            url = it
+                        )
+                    )
+                },
+                onTrust = { domain, isTrusted ->
+                    onIntent(ChatIntent.OnSourceTrust(domain, isTrusted))
+                },
+                onRead = { onIntent(ChatIntent.OnSourcesRead(id = entry.id)) }
+            )
+        }
     }
 }
 
@@ -275,7 +298,8 @@ private fun AnswerContent(
             isSourcesFirst = isSmall,
             onSourceClick = onSourceClick,
             onOfferedClick = { onIntent(ChatIntent.OnOfferedClick(id = entry.id)) },
-            onOptionChoose = { onIntent(ChatIntent.OnFollowUp(text = it)) }
+            onOptionChoose = { onIntent(ChatIntent.OnFollowUp(text = it)) },
+            onRemember = { onIntent(ChatIntent.OnRemember(line = it)) }
         )
     }
 }
@@ -287,7 +311,8 @@ private fun Written(
     isSourcesFirst: Boolean,
     onSourceClick: (AnswerSource) -> Unit,
     onOfferedClick: () -> Unit,
-    onOptionChoose: (String) -> Unit
+    onOptionChoose: (String) -> Unit,
+    onRemember: (String) -> Unit
 ) {
     val isDone = !entry.isAnswering && entry.sources.isNotEmpty()
     val isOffered = !entry.isAnswering && entry.offered != null
@@ -316,7 +341,9 @@ private fun Written(
         if (entry.options.isNotEmpty()) {
             ChatAskedOptions(
                 options = entry.options,
-                onChoose = onOptionChoose
+                remembering = entry.remembering,
+                onChoose = onOptionChoose,
+                onRemember = onRemember
             )
         }
 

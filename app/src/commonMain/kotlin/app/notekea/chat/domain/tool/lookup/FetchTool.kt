@@ -35,12 +35,23 @@ class FetchTool(private val pageReader: PageReader) : ChatTool {
     ): ToolResult {
         val url = call.text(name = URL)
 
-        // Only an address the task writes whole: not a piece of one, such as its site's root.
-        val isWritten = url in UrlsNamed.writtenIn(text = context.task)
+        // Only an address the task writes whole (not a piece of one, such as its site's root), or a page a web search
+        // found on a trusted site (docs/agent-web.md, #144).
+        val isWritten =
+            url in UrlsNamed.writtenIn(text = context.task) || url in context.web.readable
 
         if (!isWritten) {
-            return ToolResult(forModel = "fetch \"$url\": refused, the task does not write this address.")
+            return ToolResult(
+                forModel = "fetch \"$url\": refused, the task does not write this address and it is not a trusted " +
+                    "page the search found."
+            )
         }
+
+        if (!context.web.canRead) {
+            return ToolResult(forModel = "fetch \"$url\": eight pages are the most a request may read; answer now.")
+        }
+
+        context.web.read(url = url)
 
         return when (val page = pageReader.read(url = url)) {
             is Outcome.Success -> ToolResult(

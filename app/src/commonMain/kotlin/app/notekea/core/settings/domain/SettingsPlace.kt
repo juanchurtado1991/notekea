@@ -9,6 +9,14 @@ enum class SettingsPlace(
     val topic: SettingsTopic,
     val words: List<String>
 ) {
+    CHAT_MEMORY_ON(
+        topic = SettingsTopic.CHAT_MEMORY,
+        words = listOf("chat memory", "remember", "memory", "memoria", "recordar", "recuerda", "what the chat knows")
+    ),
+    CHAT_MEMORY_FORGET_ALL(
+        topic = SettingsTopic.CHAT_MEMORY,
+        words = listOf("forget everything", "forget", "olvidar todo", "olvidar", "borrar la memoria", "clear memory")
+    ),
     GENERAL_LANGUAGE(
         topic = SettingsTopic.GENERAL,
         words = listOf("language", "idioma", "english", "inglés", "spanish", "español", "lenguaje")

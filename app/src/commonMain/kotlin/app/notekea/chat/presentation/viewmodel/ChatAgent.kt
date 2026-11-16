@@ -19,6 +19,7 @@ import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.web.domain.SourceTrust
 
 /**
  * Agent mode in the chat (4.7), for [ChatViewModel]: a request worked on move after move, each move listed on its
@@ -81,8 +82,11 @@ internal class ChatAgent(
 
         val chosen = loop?.takeIf { it.isOn() }
 
+        // With the memory turned off, a question back offers no Remember.
+        val isRemembering = chosen?.isRemembering() == true
+
         val steps = if (chosen != null) {
-            chosen.runTurn(task, vaultPath, notes, context, openNote)
+            chosen.runTurn(task, vaultPath, chosen.notesFor(notes = notes), context, openNote)
         } else {
             agentTask(task, vaultPath, notes, context, openNote, planned)
         }
@@ -103,7 +107,10 @@ internal class ChatAgent(
                     )
                 }
 
-                host.update(id) { entry -> entry.after(step = step) }
+                val isForgetful = step is AgentStep.Asked && !isRemembering
+                val shown = if (isForgetful) step.copy(remembering = null) else step
+
+                host.update(id) { entry -> entry.after(step = shown) }
             }
 
         return replies.firstOrNull()
@@ -141,7 +148,8 @@ internal class ChatAgent(
             copy(
                 step = ChatStep.DONE,
                 answer = "",
-                outcome = TurnOutcome.NOT_FOUND
+                outcome = TurnOutcome.NOT_FOUND,
+                canSearchWeb = true
             )
         } else {
             copy(
@@ -155,7 +163,8 @@ internal class ChatAgent(
             step = ChatStep.DONE,
             answer = step.question,
             outcome = TurnOutcome.ANSWERED,
-            options = step.options
+            options = step.options,
+            remembering = step.remembering
         )
 
         is AgentStep.Shown -> copy(
@@ -165,6 +174,20 @@ internal class ChatAgent(
                 status = ActionStatus.FINISHED,
                 shown = step.steps
             )
+        )
+
+        is AgentStep.SourcesFound -> copy(
+            step = ChatStep.DONE,
+            outcome = TurnOutcome.ANSWERED,
+            foundSources = step.sources,
+            omittedSources = step.omitted,
+            pickedSources = step
+                .sources
+                .filter {
+                    it.trust == SourceTrust.Trust.TRUSTED
+                }
+                .map { it.result.url }
+                .toSet()
         )
 
         // The chat's own reply is written next, as a turn of the old path is.

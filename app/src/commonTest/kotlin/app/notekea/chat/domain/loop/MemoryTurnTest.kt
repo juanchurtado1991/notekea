@@ -3,7 +3,6 @@ package app.notekea.chat.domain.loop
 import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.ProposalCheck
-import app.notekea.chat.domain.memory.MemoryLines
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
@@ -12,6 +11,7 @@ import app.notekea.chat.domain.tool.lookup.ReadTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.core.llm.domain.FakeLlmEngine
+import app.notekea.core.memory.domain.MemoryLines
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry

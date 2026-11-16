@@ -32,6 +32,7 @@ import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
+import app.notekea.core.web.domain.WebSearchProblem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -106,7 +107,8 @@ class ChatLoopTest {
             noteTextCache = cache,
             actionRunner = FakeActionRunner(),
             pageReader = { Outcome.Failure(error = PageProblem.OFFLINE) },
-            linkFinder = JetBrainsMarkdownLinkFinder()
+            linkFinder = JetBrainsMarkdownLinkFinder(),
+            webSearch = { _, _ -> Outcome.Failure(error = WebSearchProblem.OFFLINE) }
         )
 
         val runTurn = RunTurnUseCase(

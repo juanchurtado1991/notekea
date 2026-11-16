@@ -264,7 +264,7 @@ class VaultActionRunner(
             Outcome.Success(value = Unit)
         }
 
-        else -> Outcome.Success(value = Unit)
+        else -> writer.otherwise(step = step)
     }
 
     /** The step's notes, or today's daily note (made if it is not there yet) when it names none. */

@@ -67,6 +67,7 @@ class SettingsHelpFromGuide(
         SettingsTopic.EDITOR -> "settings editor text size"
         SettingsTopic.FILES -> "settings files attachments folder"
         SettingsTopic.AI_MODEL -> "ai model"
+        SettingsTopic.CHAT_MEMORY -> "settings chat memory forget everything"
         SettingsTopic.SYNC -> "set up sync github"
         SettingsTopic.SHORTCUTS -> "keyboard shortcuts"
         SettingsTopic.ABOUT -> "about notekea version privacy"

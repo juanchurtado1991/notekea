@@ -1,7 +1,7 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.domain.loop.AmbiguousTask
-import app.notekea.chat.domain.memory.MemoryNote
+import app.notekea.core.memory.domain.MemoryNote
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import java.io.File
 import kotlin.test.Test

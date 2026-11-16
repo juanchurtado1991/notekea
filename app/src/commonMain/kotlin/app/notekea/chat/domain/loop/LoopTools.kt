@@ -9,6 +9,7 @@ import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DateTool
 import app.notekea.chat.domain.tool.app.ShowTools
 import app.notekea.chat.domain.tool.change.ChangeTools
+import app.notekea.chat.domain.tool.change.MemoryTool
 import app.notekea.chat.domain.tool.change.ProposeTool
 import app.notekea.chat.domain.tool.lookup.FetchTool
 import app.notekea.chat.domain.tool.lookup.FindTool
@@ -19,12 +20,14 @@ import app.notekea.chat.domain.tool.reading.DigestTool
 import app.notekea.chat.domain.tool.reading.LinksTool
 import app.notekea.chat.domain.tool.reading.ListTool
 import app.notekea.chat.domain.tool.reading.OutlineTool
+import app.notekea.chat.domain.tool.web.WebSearchTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.chat.domain.tool.work.HandTool
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.web.domain.WebSearchProvider
 
 /**
  * The loop's toolsets as the app builds them (`docs/agent-loop.md`, "Toolsets"): what each kind of work is given,
@@ -36,7 +39,8 @@ class LoopTools(
     private val noteTextCache: NoteTextCache,
     private val actionRunner: ActionRunner,
     private val pageReader: PageReader,
-    private val linkFinder: LinkFinder
+    private val linkFinder: LinkFinder,
+    private val webSearch: WebSearchProvider
 ) {
     fun toolsets(): Toolsets {
         val search = SearchTool(answerFromNotes = answerFromNotes)
@@ -78,6 +82,7 @@ class LoopTools(
                     changes.addTask,
                     DateTool(),
                     changes.makeCards,
+                    MemoryTool.remember,
                     ask,
                     propose
                 ),
@@ -88,6 +93,7 @@ class LoopTools(
                 // Shown at once, after looking up the note or the heading the request means.
                 WorkKind.APP to looking + shows + listOf(HandTool.help, ask, answer),
                 WorkKind.WEB to listOf(
+                    WebSearchTool(provider = webSearch),
                     FetchTool(pageReader = pageReader),
                     search,
                     read,
@@ -119,6 +125,8 @@ class LoopTools(
         ChangeTools.createFolder,
         ChangeTools.trash,
         ChangeTools.bookmark,
+        MemoryTool.remember,
+        MemoryTool.forget,
         ask
     ) + ends
 }

@@ -19,8 +19,8 @@ the chat with {chat}.
 words: what can't you do, what cannot you do, limits, limitations, qué no puedes hacer, que no puedes hacer, qué no podés hacer, que no podes hacer, límites, no puedes, can't you
 It works only with the notes of this vault, on this computer, and it never goes online by itself. It cannot send
 emails or messages, set reminders or alarms (it can add a task with a due date, which shows in Today and Tasks),
-look at the calendar, search the web or know the weather and the news (it reads a web page only when you paste its
-address, to clip it), change Settings or the AI model (it can change the color theme), delete notes for good (it moves
+look at the calendar, or know the weather and the news by itself. It searches the web only when you ask it to, with
+the chat's new loop on (see Search the web). It can't change Settings or the AI model (it can change the color theme), delete notes for good (it moves
 them to the trash, and Undo brings them back), or reach files outside the vault. When it cannot do something it says
 so, and what it can do instead.
 
@@ -217,8 +217,8 @@ Agent works step by step. Deep thinking comes with the Medium model, Agent with 
 words: copy chat, copiar chat, clear history, borrar historial, report, reportar
 Click ⋯ at the top right of the chat: Copy chat puts the conversation on the clipboard, and Clear history empties it.
 
-# The chat's memory
-words: memory, memoria, context, contexto, context window, ventana de contexto, compact, compactar, forget, olvidar, ring, rueda, círculo
+# The chat's memory of this conversation
+words: conversation memory, context, contexto, context window, ventana de contexto, compact, compactar, ring, rueda, círculo
 The chat remembers the conversation so you can ask "and the water?" or "make it shorter". The ring beside the mode, at
 the bottom right of the question field, fills as the conversation grows; hold the pointer on it to see how full it
 is. When it is full, or when you ask again after half an hour or in a chat from an earlier session, the chat writes
@@ -279,6 +279,44 @@ the vault: Notekea reads them, never changes them, and finds them in search, Rel
 notes. Click one in the Files sidebar, or a citation of it, to read it in a tab: a PDF shows its real pages, the
 others their text, with the cited passage marked. Open in the system's app opens it with the app your computer uses.
 A scanned PDF without text cannot be read yet.
+
+# Remember things across chats
+words: remember, recuerda, recordar, from now on, a partir de ahora, forget, olvida, olvidar, what do you know about me, qué sabes de mí, memory note, Memory.md, aprende, learn
+try: remember that …
+With the chat's new loop on, the chat can remember what you tell it from one chat to the next. It keeps only what you
+approve, in a note of your vault, Notekea/Memory.md, which you can open, edit, sync or delete like any other.
+- When the chat asks which note you mean (two Lauras, two budgets), tick Remember for next time before you choose. It
+  won't ask again.
+- Say "remember that recipes go in Cocina" or "from now on answer in Spanish", and Do it on the card keeps it.
+- When a line of the memory shapes an answer, the chat shows it as a step ("From your memory: …"). If it's wrong,
+  click Forget on that step.
+It never keeps a guess, a password or a number of an account, health or money details, or anything a note or a web page
+says, and the memory never gives it leave to act without the card. Your request always wins over what it remembers.
+Turn it off, see it and forget it in Settings → Chat memory.
+
+# Settings: Chat memory
+words: chat memory settings, memoria del chat, ajustes de memoria, forget everything, olvidar todo, country, país, currency, moneda, language of the answers, idioma de las respuestas, new notes folder
+In Settings → Chat memory:
+- **Remember between conversations** turns the chat's memory on or off. It's on by default.
+- **About you** holds your country, your currency, the language of the answers and where new notes go. The chat reads
+  them in every chat.
+- **What the chat learnt** lists every line with when it learnt it. Hover over a line, or right-click it, to forget it.
+- **Forget everything…** moves Notekea/Memory.md to the vault's trash, where you can still restore it.
+
+# Search the web
+words: search the web, look it up online, busca en internet, buscar en internet, google, web search, búsqueda web, sources, fuentes, where can I buy, dónde comprar, research, investiga, trusted sources, fuentes confiables
+try: search the web: …
+With the chat's new loop on, ask "search the web for …" or "research … and make notes", or click Search the web when
+your notes don't hold an answer. The chat never searches by itself.
+- **The search:** each search shows as a step with what was searched. It never carries your notes' text, only your
+  words and, when it helps, your country (from the request, or Settings → Chat memory).
+- **Approving sources:** the sources found are listed, and only the ticked ones are read. Sites you trust come ticked;
+  the new ones wait for you, with Remember ▾ to always or never trust their site. Sites you marked as not trusted are
+  left out and counted. Your trust is kept in Notekea/Memory.md under Sources, and you can write rules in
+  Notekea/Notekea.md ("I prefer official sources").
+- **Answers and notes:** answers cite each page's link. To make notes, the chat clips the pages you approved.
+- **Limits:** at most three searches and eight pages a request. Searches go through DuckDuckGo, which may stop
+  working.
 
 # Clip a web page
 words: clip, recortar, web page, página web, article, artículo, save a page, guardar una página, link, url, enlace, documentation, documentación, linked pages, enlaces internos, section, sección

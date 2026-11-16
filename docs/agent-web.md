@@ -171,7 +171,7 @@ They follow the memory's three (`docs/agent-memory.md`).
 - **Trust is by domain.**
 - **§13 changes,** in the terms above.
 - **The memory before the web,** in one pull request.
-- **The list of sources found (2026-11-16),** drawn to the macOS guidelines and chosen by the developer:
+- **The list of sources found (2026-11-15),** drawn to the macOS guidelines and chosen by the developer:
   - one card in the chat headed by what was found;
   - each source a row with a checkbox, its site's initial, the page's title and its domain;
   - trusted ones ticked, with a "Trusted" tag; new ones with a "Remember ▾" pop-up (Always trust, Never trust),

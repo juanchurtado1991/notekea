@@ -161,8 +161,9 @@ class ChangeTool(
                     )
                 }
 
+            // Said by the task's folder, or by the memory, which says which of them the task's words mean.
             val isSaid = paths.any {
-                folderOf(path = it) in task
+                folderOf(path = it) in task || it in context.remembered
             }
 
             if (paths.size < 2 || isSaid) {

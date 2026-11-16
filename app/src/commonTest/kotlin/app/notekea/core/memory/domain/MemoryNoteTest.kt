@@ -1,4 +1,4 @@
-package app.notekea.chat.domain.memory
+package app.notekea.core.memory.domain
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

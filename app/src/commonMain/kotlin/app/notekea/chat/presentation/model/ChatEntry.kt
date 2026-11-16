@@ -4,12 +4,14 @@ import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.chat.domain.conversation.TurnItem
 import app.notekea.chat.domain.language.ReplyLanguage
 import app.notekea.chat.domain.plan.PageProgress
 import app.notekea.chat.domain.plan.SectionAsked
 import app.notekea.chat.domain.sources.SourcePage
+import app.notekea.core.web.domain.FoundSource
 
 /**
  * A question of the chat and its answer, keyed by [id]: [step] says where it stands, [sources] are the passages its
@@ -45,6 +47,14 @@ data class ChatEntry(
     val answeredWith: ChatMode? = null,
     // The answers to choose from when the chat asked back in place of guessing: buttons under its question.
     val options: List<String> = emptyList(),
+    // What the chosen answer can be remembered as, with a checkbox under the buttons (docs/agent-memory.md).
+    val remembering: Remembering? = null,
+    // The loop found nothing in the notes: the web is offered, its query the question (docs/agent-web.md).
+    val canSearchWeb: Boolean = false,
+    // Sources a web search found, for the person to approve (docs/agent-web.md): the ticked ones are read.
+    val foundSources: List<FoundSource> = emptyList(),
+    val omittedSources: Int = 0,
+    val pickedSources: Set<String> = emptySet(),
     // A turn of an earlier session: what it proposed then and how that ended, said in a line in the card's place.
     val proposal: TurnItem.Proposal? = null
 ) {

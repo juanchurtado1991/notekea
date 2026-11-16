@@ -27,7 +27,10 @@ object ActionPrompt {
         }
         .joinToString(separator = ",") { "\"${it.written}\":{\"type\":\"string\"}" }
 
-    private val ACTIONS = ActionKind.entries.joinToString(separator = ",") { "\"${it.written}\"" }
+    private val ACTIONS = ActionKind
+        .entries
+        .filterNot { it.isLoopOnly }
+        .joinToString(separator = ",") { "\"${it.written}\"" }
 
     /** The plan's JSON: up to [MAX_STEPS] steps, each an action of the list and the fields it fills. */
     val SCHEMA =

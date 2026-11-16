@@ -52,12 +52,14 @@ import app.notekea.resources.chat_action_confirm
 import app.notekea.resources.chat_action_create_folder
 import app.notekea.resources.chat_action_create_note
 import app.notekea.resources.chat_action_done_title
+import app.notekea.resources.chat_action_forget
 import app.notekea.resources.chat_action_link_notes
 import app.notekea.resources.chat_action_make_cards
 import app.notekea.resources.chat_action_move
 import app.notekea.resources.chat_action_notes_from_text
 import app.notekea.resources.chat_action_open
 import app.notekea.resources.chat_action_panel
+import app.notekea.resources.chat_action_remember
 import app.notekea.resources.chat_action_rename
 import app.notekea.resources.chat_action_running
 import app.notekea.resources.chat_action_search
@@ -371,6 +373,8 @@ private fun verbOf(kind: ActionKind): StringResource = when (kind) {
     ActionKind.RENAME -> Res.string.chat_action_rename
     ActionKind.MOVE -> Res.string.chat_action_move
     ActionKind.TRASH -> Res.string.chat_action_trash
+    ActionKind.REMEMBER -> Res.string.chat_action_remember
+    ActionKind.FORGET -> Res.string.chat_action_forget
     ActionKind.OPEN_NOTE, ActionKind.OPEN_TODAY -> Res.string.chat_action_open
     ActionKind.SEARCH -> Res.string.chat_action_search
     ActionKind.SPLIT_PANE -> Res.string.chat_action_split
@@ -407,6 +411,10 @@ private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
     ActionKind.MOVE -> NotekeaIcons.FolderOpen
 
     ActionKind.TRASH -> NotekeaIcons.Delete
+
+    ActionKind.REMEMBER -> NotekeaIcons.Bookmark
+
+    ActionKind.FORGET -> NotekeaIcons.Delete
 
     ActionKind.OPEN_NOTE, ActionKind.OPEN_TODAY -> NotekeaIcons.Note
 

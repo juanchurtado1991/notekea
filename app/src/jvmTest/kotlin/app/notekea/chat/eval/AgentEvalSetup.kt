@@ -4,7 +4,6 @@ import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.ActionStep
-import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.llm.domain.LlmEngine
@@ -13,6 +12,7 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
@@ -57,16 +57,15 @@ internal object AgentEvalSetup {
         }
     }
 
-    /** [notes] with the chat's memory written into the vault (`docs/agent-memory.md`), when there is one. */
-    fun remembering(
+    /** [notes] with [written] notes put into the vault for one measure: the chat's memory, a note that poisons it. */
+    fun withWritten(
         indexed: EvalVault,
         notes: List<NoteEntry>,
-        memory: String?
+        written: Map<String, String>
     ): List<NoteEntry> {
-        if (memory == null) return notes
-        indexed.store.texts[VaultGuide.MEMORY] = memory
+        written.forEach { (path, text) -> indexed.store.texts[RelativePath(value = path)] = text }
 
-        return notes + NoteFixtures.entry(path = VaultGuide.MEMORY.value)
+        return notes + written.keys.map { NoteFixtures.entry(path = it) }
     }
 
     fun contextOf(notes: List<NoteEntry>) = ActionContext(

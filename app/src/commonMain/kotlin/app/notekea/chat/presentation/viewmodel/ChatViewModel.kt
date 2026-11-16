@@ -5,10 +5,8 @@ import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.CompactChatUseCase
-import app.notekea.chat.domain.TurnOutcome
 import app.notekea.chat.domain.agent.AgentAnswerUseCase
 import app.notekea.chat.domain.agent.AgentTaskUseCase
-import app.notekea.chat.domain.answer.AnswerCitations
 import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.answer.AnswerStep
@@ -28,6 +26,7 @@ import app.notekea.chat.presentation.model.ChatState
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.chat.presentation.model.ModelStatus
 import app.notekea.chat.presentation.model.at
+import app.notekea.chat.presentation.model.stopped
 import app.notekea.chat.presentation.model.without
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.LocalCalendar
@@ -135,6 +134,14 @@ class ChatViewModel(
         sources = sources,
         host = host,
         onAnswered = { keeping.save() }
+    )
+
+    private val remembering = ChatRemembering(
+        vaultPath = vaultPath,
+        actionRunner = actionRunner,
+        today = { actions.today() },
+        host = host,
+        onAsk = ::offered
     )
 
     private val keeping = ChatKeeping(
@@ -257,6 +264,8 @@ class ChatViewModel(
             }
 
             is ChatIntent.OnFollowUp -> offered(request = intent.text)
+
+            is ChatIntent.MemoryIntent -> remembering.on(intent = intent)
 
             is ChatIntent.OnSiteSearch, is ChatIntent.OnSitePageToggle, is ChatIntent.OnSiteClip ->
                 siteSearch.on(intent = intent)?.let { answer = it }
@@ -399,21 +408,7 @@ class ChatViewModel(
             ?.takeIf { it.isAnswering } ?: return
 
         answer?.cancel()
-
-        val kept = AnswerCitations.of(
-            text = entry.answer,
-            read = entry.sources
-        )
-
-        update(id = entry.id) {
-            it.copy(
-                step = ChatStep.DONE,
-                answer = kept.text,
-                sources = kept.sources,
-                outcome = TurnOutcome.STOPPED
-            )
-        }
-
+        update(id = entry.id) { it.stopped() }
         keeping.save()
     }
 

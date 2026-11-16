@@ -1,4 +1,4 @@
-package app.notekea.chat.domain.memory
+package app.notekea.core.memory.domain
 
 /**
  * What of the memory a turn is given (`docs/agent-memory.md`, "How it is read"), with no model call: *How I like

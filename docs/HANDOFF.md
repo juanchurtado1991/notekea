@@ -321,20 +321,47 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
 
 ## The next pull request: the chat's memory, then the web (designed 2026-11-15)
 
-**Under way on `feature/chat-memory-web` (2026-11-16), the developer away, "la vía segura":**
+**Under way on `feature/chat-memory-web` (2026-11-15), the developer away, "la vía segura":**
 - The developer chose the screens and asked for the guide and the settings help to be updated (`docs/agent-memory.md`
   and `docs/agent-web.md`, "Decided").
 - The work is done alone, by the rules of the loop's run: a gate that does not pass stops the work at that step.
 - Every step ends with the 201 tasks measured on the 4B and the 9B.
-- **Step 1, coded:**
-  - `chat/domain/memory`: `MemoryNote` reads the note, `MemoryLines` picks what a turn gets, `MemoryLine.named`
-    is what a name settles;
-  - `VaultGuide.memoryOf`;
-  - `AmbiguousTask` takes the names the memory settles;
-  - the lines the task matched show as a step;
-  - `Skills/` moved to `Notekea/Skills/`.
-  - The evaluation's setup moved to `AgentEvalSetup`, and `AgentMemoryCases` was added.
-  - Being measured.
+- **Step 1, measured (4B), commit `8044c622`:** the memory read (`core/memory`: `MemoryNote`, `MemoryLines`,
+  `MemoryLine.named`), the lines a task matched shown as a step, `AmbiguousTask` taking the names it settles,
+  `Skills/` under `Notekea/`.
+  - **The 201 tasks, 4B:** 165, the same as before the memory (26, 18, 54, 67); the 24 unseen tasks, 21.
+  - **The memory's tasks, 4B:** 21 of 27 with a memory that settles the ambiguous tasks, 1 of 3 with a wrong one.
+    Read call by call, 4 of the 6 failures were ours: a tool's "several notes share this name, ask" did not know the
+    memory, so the model made the right change and then asked. The other two: the model ignored the memory's note
+    ("my goals", "the weekly review"), and the memory beat the request ("Tomás from the chess club").
+  - Fixed in general (in the commit after): a shared name the memory settles is not said (`SharedNames`,
+    `ChangeTool`); a change to another note of a set the memory settled is held once (`MemoryChoice`); a name the
+    task says which one of ("Tomás from the chess club", "Laura Méndez") does not read its line
+    (`AmbiguousTask.isQualified`).
+  - The 9B on step 1 did not run: it compiled the next steps' code, not yet building, and stopped. It is measured
+    on `8044c622` in a worktree.
+- **Steps 2 to 6, written together while step 1 was measured** (the measurement holds Gradle, so they were built
+  without compiling, then made to build and test): this departs from "each step measured before the next", said
+  here so the numbers are read as what they are. They are measured together:
+  - **Step 2, the memory written:** `remember` / `forget` (`MemoryTool`, on the card, `ActionKind.REMEMBER` and
+    `FORGET`, loop-only), `MemoryCheck` (the person's words only, nothing secret, guessed or permitting, notes and
+    folders that exist), `MemoryEdit` (a contradicting line replaced), the Remember checkbox under a question back
+    (`Remembering`, `ChatAskedOptions`), Forget on a memory step (`ChatMemoryStep`), the poisoning tasks.
+  - **Step 3, Settings → Chat memory:** `MemorySettings` and its view model (the switch, About you's fields as
+    lines of the memory, what it learnt with Forget on hover and right-click, Forget everything to `.trash`), the
+    `chatMemory` preference (off: the turn never sees the note, no Remember), places for Ask about Settings, the
+    guide's three topics. The memory's domain moved to `core/memory` so Settings may use it.
+  - **Step 4, the web:** #144 opened and `GUIDELINES.md` §13 updated first; `WebSearchProvider` with
+    `DuckDuckGoSearch` (one at a time, 2.5 s apart, through the clips' page fetcher); `web_search` in the web
+    toolset; the country from the request or the memory (`Countries`); Search the web when the notes lack it.
+  - **Step 5, the sources:** `SourceTrust` (the memory's trusted and untrusted domains, `*.edu`); a search that
+    finds new sources ends the turn on `ChatFoundSources` (ticks, Remember ▾, left-out count, Read N sources); the
+    approved addresses are asked again with the request; `fetch` reads only trusted or written addresses.
+  - **Step 6, research:** the prompt's web rule (answer with links; clip the approved addresses to make notes);
+    three searches and eight pages a request.
+- **Not done yet:** a Brave key in Settings; Correct… on a memory step; Tidy your memory; corrections into a
+  skill; asking the country when none is known (the computer's region is not read); the vault's web sources as
+  trusted; the web's recorded evaluation; Auto-Test cases and `MVP_SMOKE_TEST.md`.
 
 Planned with the developer while #143 waited for CI, and reviewed twice the same day; every recommendation was
 accepted. Two designs, one pull request, the memory first. **Nothing is built.** It starts on a branch from `main`

@@ -5,6 +5,7 @@ import app.notekea.settings.presentation.about.AboutViewModel
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
 import app.notekea.settings.presentation.files.FilesSettingsViewModel
 import app.notekea.settings.presentation.help.SettingsHelpViewModel
+import app.notekea.settings.presentation.memory.MemorySettingsViewModel
 import app.notekea.settings.presentation.preferences.PreferencesViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -14,16 +15,18 @@ class SettingsViewModels(
     val appearance: AppearanceViewModel,
     val preferences: PreferencesViewModel,
     val files: FilesSettingsViewModel,
+    val memory: MemorySettingsViewModel,
     val about: AboutViewModel,
     val help: SettingsHelpViewModel
 ) {
     companion object {
-        /** Settings' view models from Koin, Files' for the vault at [vaultPath]. */
+        /** Settings' view models from Koin, Files' and Chat memory's for the vault at [vaultPath]. */
         @Composable
         fun fromKoin(vaultPath: String?): SettingsViewModels = SettingsViewModels(
             appearance = koinViewModel(),
             preferences = koinViewModel(),
             files = koinViewModel(key = "FilesSettings:$vaultPath") { parametersOf(vaultPath) },
+            memory = koinViewModel(key = "MemorySettings:$vaultPath") { parametersOf(vaultPath) },
             about = koinViewModel(),
             help = koinViewModel()
         )

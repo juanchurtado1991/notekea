@@ -14,13 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.chat.domain.memory.MemoryLines
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
+import app.notekea.chat.domain.tool.web.WebSearchTool
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.chat.presentation.model.PassedStep
+import app.notekea.core.memory.domain.MemoryLines
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -32,6 +33,7 @@ import app.notekea.resources.chat_agent_memory
 import app.notekea.resources.chat_agent_read
 import app.notekea.resources.chat_agent_search
 import app.notekea.resources.chat_agent_tasks
+import app.notekea.resources.chat_agent_web_search
 import app.notekea.resources.chat_step_composing
 import app.notekea.resources.chat_step_drafting
 import app.notekea.resources.chat_step_further
@@ -52,6 +54,7 @@ private const val ELLIPSIS = "…"
 @Composable
 internal fun ChatTasks(
     entry: ChatEntry,
+    onMemoryForget: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isGoing = entry.isAnswering && entry.step != ChatStep.DONE
@@ -68,7 +71,16 @@ internal fun ChatTasks(
             TaskLine(text = textOf(passed = it).removeSuffix(suffix = ELLIPSIS))
         }
 
-        entry.moves.forEach { TaskLine(text = textOf(line = it)) }
+        entry.moves.forEach { line ->
+            if (line.move == MemoryLines.MOVE) {
+                ChatMemoryStep(
+                    text = textOf(line = line),
+                    onForget = { onMemoryForget(line.target) }
+                )
+            } else {
+                TaskLine(text = textOf(line = line))
+            }
+        }
 
         if (isGoing) {
             val going = PassedStep(
@@ -153,6 +165,7 @@ private fun textOf(line: AgentMoveLine): String = when (line.move) {
     AgentTaskPrompt.FIND -> replyString(Res.string.chat_agent_find, line.target)
     AgentTaskPrompt.FETCH -> replyString(Res.string.chat_agent_fetch, line.target)
     MemoryLines.MOVE -> replyString(Res.string.chat_agent_memory, line.target)
+    WebSearchTool.NAME -> replyString(Res.string.chat_agent_web_search, line.target)
     else -> replyString(resource = Res.string.chat_agent_tasks)
 }
 

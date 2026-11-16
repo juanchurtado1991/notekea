@@ -5,21 +5,29 @@ import app.notekea.chat.domain.tool.work.TurnWork
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.web.domain.SourceTrust
 
 /**
- * What the tools of one turn work on: the vault and its [notes], the note open in the window, the [task] as the
- * person wrote it (a web page is read only from an address it writes), [today], what the turn has read ([reads])
- * and its working memory ([work]). The vault's names are indexed once for the turn.
+ * What one turn's tools work on: the vault, its [notes], the open note, the [task] as written, [today], where a web
+ * search is made ([country]) and whose sites it [trust]s, the notes the memory says the task means ([remembered]),
+ * and what the turn read ([reads]), found on the web ([web]) and works on ([work]).
  */
 class ToolContext(
     val vaultPath: String,
     val notes: Collection<NoteEntry>,
     val task: String,
     val openNote: RelativePath?,
-    val today: CalendarDate? = null
+    val today: CalendarDate? = null,
+    val country: String? = null,
+    val trust: SourceTrust = SourceTrust(
+        sources = emptyList(),
+        memory = emptyList()
+    ),
+    val remembered: Set<RelativePath> = emptySet()
 ) {
     val reads = TurnReads()
     val work = TurnWork()
+    val web = TurnWeb()
 
     private val names = VaultNames(
         notes = notes,

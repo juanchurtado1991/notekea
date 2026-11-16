@@ -2,6 +2,7 @@ package app.notekea.chat.domain.loop
 import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.ProposalCheck
+import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.CheckPlanUseCase
@@ -241,7 +242,14 @@ class TurnVerifierTest {
         assertEquals(
             expected = AgentStep.Asked(
                 question = "Which Laura?",
-                options = listOf("Laura Castro", "Laura Méndez")
+                options = listOf("Laura Castro", "Laura Méndez"),
+                // docs/agent-memory.md: a question about notes the task left open can be remembered once answered.
+                remembering = Remembering(
+                    said = "Laura",
+                    notes = listOf("People/Laura Castro.md", "People/Laura Méndez.md").map {
+                        RelativePath(value = it)
+                    }
+                )
             ),
             actual = steps.last()
         )

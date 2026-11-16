@@ -38,7 +38,11 @@ internal object TurnChecks {
 
             isNeedlessQuestion(call = call, state = state) -> NOT_ASKED
 
-            else -> UnsettledEnd.heldOf(
+            else -> MemoryChoice.heldOf(
+                call = call,
+                state = state,
+                tool = tool
+            ) ?: UnsettledEnd.heldOf(
                 call = call,
                 state = state,
                 tool = tool

@@ -1,10 +1,10 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.context.ContextBudget
-import app.notekea.chat.domain.memory.MemoryLine
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolRegistry
+import app.notekea.core.memory.domain.MemoryLine
 
 /**
  * One turn of the loop as it goes, held inside [RunTurnUseCase]'s flow and nowhere else: what its calls gave back
@@ -32,6 +32,15 @@ internal class TurnState(
     /** The notes the task can mean and does not say which of: the person is asked before the turn ends. */
     val ambiguous by lazy {
         AmbiguousTask.notesOf(
+            task = task,
+            notes = turn.notes,
+            settled = memory.mapNotNull { it.named }
+        )
+    }
+
+    /** The sets of notes the memory settled for the task: a change to another of them is held back once. */
+    val settled by lazy {
+        AmbiguousTask.settledOf(
             task = task,
             notes = turn.notes,
             settled = memory.mapNotNull { it.named }

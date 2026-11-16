@@ -1,8 +1,12 @@
 package app.notekea.shell.data.chat
 
+import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
+import app.notekea.core.memory.domain.MemoryEdit
+import app.notekea.core.memory.domain.MemorySection
 import app.notekea.core.notes.domain.NewNoteDefaults
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
@@ -147,6 +151,59 @@ internal class NoteWriter(
 
             val after = before.trimEnd() + "\n\n" + text.trim() + "\n"
 
+            rewrite(
+                rewrite = NoteRewrite(
+                    path = path,
+                    original = before,
+                    updated = after,
+                    linkCount = 0
+                )
+            )
+        }
+
+        return Outcome.Success(value = Unit)
+    }
+
+    /** A step of no kind above: the chat's memory written (`docs/agent-memory.md`); else shown, not written. */
+    suspend fun otherwise(step: ActionStep): Outcome<Unit, ActionProblem> =
+        if (step.kind.isLoopOnly) {
+            remembered(step = step)
+        } else {
+            Outcome.Success(value = Unit)
+        }
+
+    /** A line put into the chat's memory, or taken out of it (`docs/agent-memory.md`); the note made when missing. */
+    suspend fun remembered(step: ActionStep): Outcome<Unit, ActionProblem> {
+        val path = VaultGuide.MEMORY
+        val line = step.text.orEmpty()
+
+        val before = noteContentStore.read(
+            vaultPath = vaultPath,
+            path = path
+        )
+
+        val after = if (step.kind == ActionKind.FORGET) {
+            MemoryEdit.forgotten(
+                note = before.orEmpty(),
+                line = line
+            )
+        } else {
+            MemoryEdit.remembered(
+                note = before.orEmpty(),
+                line = line,
+                section = MemorySection.of(heading = step.property.orEmpty()),
+                origin = step.value.orEmpty()
+            )
+        }
+
+        if (before == null) {
+            return create(
+                path = path,
+                text = after
+            )
+        }
+
+        if (after != before) {
             rewrite(
                 rewrite = NoteRewrite(
                     path = path,

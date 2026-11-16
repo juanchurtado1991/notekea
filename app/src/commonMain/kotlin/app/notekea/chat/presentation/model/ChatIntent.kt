@@ -87,6 +87,30 @@ sealed interface ChatIntent {
     /** A question the chat suggested under its last answer ([FollowUps]), asked of the whole vault. */
     data class OnFollowUp(val text: String) : ChatIntent
 
+    /** What the chat's memory and the sources found on the web are asked, acted on apart from the rest. */
+    sealed interface MemoryIntent : ChatIntent
+
+    /** Remember was ticked under a question back and an answer chosen: [line] goes into the chat's memory. */
+    data class OnRemember(val line: String) : MemoryIntent
+
+    /** Forget, on a step that used a line of the chat's memory: [line] is taken out of it. */
+    data class OnMemoryForget(val line: String) : MemoryIntent
+
+    /** A source found on the web ticked or unticked, by its [url], under the entry [id]. */
+    data class OnSourceToggle(
+        val id: Long,
+        val url: String
+    ) : MemoryIntent
+
+    /** Always or never trust the site [domain]: a line of the memory's Sources (docs/agent-web.md). */
+    data class OnSourceTrust(
+        val domain: String,
+        val isTrusted: Boolean
+    ) : MemoryIntent
+
+    /** Read the ticked sources of the entry [id]: the request is asked again with their addresses. */
+    data class OnSourcesRead(val id: Long) : MemoryIntent
+
     /** The answer to "only this page, or the pages it links too?" ([ChatEntry.sectionAsked]), asked as a request. */
     data class OnSectionChoose(
         val id: Long,

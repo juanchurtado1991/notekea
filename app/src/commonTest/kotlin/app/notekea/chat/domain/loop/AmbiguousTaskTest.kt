@@ -1,7 +1,9 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.memory.MemoryLine
+import app.notekea.chat.domain.agent.Remembering
+import app.notekea.core.memory.domain.MemoryLine
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,6 +34,43 @@ class AmbiguousTaskTest {
             actual = listOf(
                 heldOf(task = "call Ángela tomorrow"),
                 heldOf(task = "¿cuál es el correo de José?")
+            )
+        )
+    }
+
+    // docs/agent-memory.md, "How a line is written": the answer chosen becomes a line the app builds, not the model.
+    @Test
+    fun `the words that meant the notes become the line kept for the answer chosen, a shared title by its path`() {
+        val angela = notes.take(n = 2).map { it.file.path }
+
+        val budgets = listOf("Home/Budget 2026.md", "Work/Budget 2026.md").map {
+            RelativePath(value = it)
+        }
+
+        val said = AmbiguousTask.saidOf(
+            task = "what is the total of the budget?",
+            paths = budgets
+        )
+
+        assertEquals(
+            expected = listOf(
+                "\"Ángela\" is [[Ángela Ruiz]]",
+                "the budget",
+                "\"the budget\" is [[Work/Budget 2026]]"
+            ),
+            actual = listOf(
+                Remembering(
+                    said = AmbiguousTask.saidOf(
+                        task = "call Ángela tomorrow",
+                        paths = angela
+                    ).orEmpty(),
+                    notes = angela
+                ).lineFor(option = "Ángela Ruiz"),
+                said,
+                Remembering(
+                    said = said.orEmpty(),
+                    notes = budgets
+                ).lineFor(option = "Work/Budget 2026")
             )
         )
     }
