@@ -280,6 +280,7 @@ tasks.register<Test>("chatModelTest") {
     systemProperty("notekea.web.pages", providers.gradleProperty("webPages").getOrElse(""))
     systemProperty("notekea.web.replay", providers.gradleProperty("webReplay").getOrElse("false"))
     systemProperty("notekea.roleplay", providers.gradleProperty("rolePlay").getOrElse(""))
+    systemProperty("notekea.stepmemory", providers.gradleProperty("stepMemory").getOrElse(""))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)

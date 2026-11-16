@@ -53,7 +53,19 @@ val chatModule = module {
     factoryOf(::ProposalCheck)
     factoryOf(::LoopTools)
     factory { get<LoopTools>().toolsets() }
-    factoryOf(::RunTurnUseCase)
+
+    factory {
+        RunTurnUseCase(
+            llmEngine = get(),
+            toolsets = get(),
+            vaultGuide = get(),
+            proposal = get(),
+            clock = get(),
+            // Bound on the desktop (`SqliteStepMemory`); elsewhere the loop drops what does not fit, as before.
+            stepMemory = getOrNull()
+        )
+    }
+
     factoryOf(::ChatLoop)
     factoryOf(::AnswerHelpUseCase)
     factoryOf(::DescribeVaultUseCase)

@@ -9,6 +9,7 @@ import app.notekea.chat.domain.agent.ProposalVault
 import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.context.ModelProfile
+import app.notekea.chat.domain.context.StepMemory
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.skill.VaultGuide
@@ -20,6 +21,7 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.change.ProposeTool
+import app.notekea.chat.domain.tool.lookup.RecallTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.chat.domain.tool.work.HandTool
@@ -35,9 +37,12 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.web.domain.Countries
 import app.notekea.core.web.domain.SourceTrust
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -51,7 +56,8 @@ class RunTurnUseCase(
     private val toolsets: Toolsets,
     private val vaultGuide: VaultGuide,
     private val proposal: ProposalCheck,
-    private val clock: Clock
+    private val clock: Clock,
+    private val stepMemory: StepMemory? = null
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
     private val router = TurnRouter(llmEngine = llmEngine)
@@ -73,9 +79,12 @@ class RunTurnUseCase(
 
         if (route.kind.isReply) return@flow emit(value = AgentStep.Replied(kind = route.kind))
 
-        val tools = toolsets.of(
-            kind = route.kind,
-            task = task
+        val tools = StepRecall.toolsOf(
+            tools = toolsets.of(
+                kind = route.kind,
+                task = task
+            ),
+            memory = stepMemory
         )
 
         val memory = TurnSetup.memoryOf(
@@ -113,11 +122,18 @@ class RunTurnUseCase(
                 llmEngine = llmEngine,
                 tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,
                 fixed = LoopPrompt.fixedOf(system, task, context),
-                replyTokens = CALL_TOKENS + WORK_TOKENS
+                replyTokens = CALL_TOKENS + WORK_TOKENS,
+                memory = stepMemory,
+                need = task,
+                space = Random.nextLong().toString()
             )
         )
 
-        run(state = state)
+        try {
+            run(state = state)
+        } finally {
+            withContext(context = NonCancellable) { state.budget.forget() }
+        }
     }
 
     private suspend fun FlowCollector<AgentStep>.run(state: TurnState) {
@@ -264,7 +280,12 @@ class RunTurnUseCase(
         }
 
         val before = state.turn.work.changes.size
-        state.found += tool.run(call, state.turn).forModel
+
+        state.found += StepRecall.resultOf(
+            call = call,
+            tool = tool,
+            state = state
+        )
 
         // A change not added (refused, or held back with a question) may be asked again as it was.
         val isRefused = tool.effect == ToolEffect.PROPOSES && state.turn.work.changes.size == before
@@ -385,7 +406,11 @@ class RunTurnUseCase(
                     ?.contains(other = AGAIN) == true
             }
 
-        val offered = if (isEnding) state.tools.ending() else state.tools
+        // Recall is offered once something is no longer shown: before, there is nothing to ask back.
+        val looking =
+            if (state.dropped == 0) state.tools.without(name = RecallTool.NAME) else state.tools
+
+        val offered = if (isEnding) state.tools.ending() else looking
 
         val asking = state
             .tools

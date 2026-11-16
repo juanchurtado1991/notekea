@@ -393,8 +393,8 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
     offered over and over, "my weekly review" searched after the held search.
 - **Not done yet:** a Brave key in Settings; Correct… on a memory step; Tidy your memory; corrections into a
   skill; asking the country when none is known (the computer's region is not read); the vault's web sources as
-  trusted; Auto-Test cases; a memory of the turn's steps (`ROADMAP.md`, Post-MVP 15), after the web's third
-  measurement.
+  trusted; Auto-Test cases; a memory of the turn's steps (`ROADMAP.md`, Post-MVP 15) is built
+  (`docs/agent-step-memory.md`) and being measured against the third run; across turns it is not turned on.
 
 Planned with the developer while #143 waited for CI, and reviewed twice the same day; every recommendation was
 accepted. Two designs, one pull request, the memory first. **Nothing is built.** It starts on a branch from `main`

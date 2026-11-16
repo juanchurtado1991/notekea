@@ -1,6 +1,7 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.SqliteStepMemory
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.loop.LoopTools
@@ -57,7 +58,10 @@ internal object LoopEval {
                 checkPlan = CheckPlanUseCase(),
                 composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader(), clipper)
             ),
-            clock = Clock.System
+            clock = Clock.System,
+            stepMemory = SqliteStepMemory().takeIf {
+                System.getProperty("notekea.stepmemory") != "off"
+            }
         )
     }
 

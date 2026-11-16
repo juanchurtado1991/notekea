@@ -419,6 +419,9 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    hands back what the step needs, not what came last. It can also keep a proposal whole between turns, so "remove
    Yaxa from that list" finds the list (seen in the role-play). It does not stop a model reading unrelated notes. To be measured on the tasks that run out of steps or lose what they read, against the loop as it is;
    Cloudflare's Code Mode was looked at for the same problem and left, as it rests on small models writing code.
+   **Built (2026-11-16)** in the same pull request (`docs/agent-step-memory.md`): SQLite full-text in memory, the
+   needed parts handed back when results are dropped, and a `recall` tool so the model asks rather than remembers;
+   being measured against the third run.
 
 ## Out of scope for the MVP
 

@@ -341,3 +341,6 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
 - **2026-11-16, a memory of the turn's steps planned:** the developer asked for what each step finds to be kept
   outside the model's context and handed back in parts; written as Post-MVP 15 in `ROADMAP.md`, to be measured
   after the web's third measurement. Cloudflare's Code Mode was looked at for the same problem and left.
+- **2026-11-16, the memory of the turn's steps built:** the developer asked it in this pull request, used by every
+  kind of work and not only the web, and for the model to ask back what it needs rather than remember it; built
+  with SQLite's full-text search in memory and a `recall` tool (`docs/agent-step-memory.md`).
