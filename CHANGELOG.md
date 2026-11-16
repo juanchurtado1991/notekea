@@ -11,9 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Settings → General → Agent mode with the new loop: a preview that has Agent mode work with the one loop. When a
   request can be read two ways the chat asks back with a button for each answer.
-- The design of the chat's memory between conversations (`docs/agent-memory.md`): a note of the vault the chat
-  reads in every chat and writes only with your approval, so it remembers which note a name means, where things go
-  and how you like answers. Not built yet.
+- The design of the chat's memory between conversations (`docs/agent-memory.md`). The memory is a note of the vault,
+  `Notekea/Memory.md`, that the chat reads in every chat and writes only with your approval and from your own
+  words. With it the chat remembers which note a name means, where things go, how you like answers, and which web
+  sources you trust. Every line it uses is shown, with a way to correct it. Not built yet.
+- The design of web search in the chat (`docs/agent-web.md`), built on the memory. It covers:
+  - research that becomes notes, with every link approved or turned down;
+  - an offer to search when your notes do not hold the answer;
+  - "where can I buy…" searched in your country.
+  Not built yet.
 - The agent is measured on 150 more tasks written after the loop was tuned (70 over the Sample Vault, 80 over the
   Agent Eval vault, which gains 25 notes: a Spanish lease, a handbook, an audit, long journals and minutes).
 
