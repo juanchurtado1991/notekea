@@ -9,6 +9,8 @@ import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
+import app.notekea.chat.domain.plan.PageReader
+import app.notekea.chat.domain.plan.WebPageClipper
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.TextEmbedder
@@ -17,16 +19,20 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.web.domain.WebSearchProblem
+import app.notekea.core.web.domain.WebSearchProvider
 import app.notekea.search.eval.EvalVault
 import kotlin.time.Clock
 
-/** The one loop (`docs/agent-loop.md`, step 5) over an evaluation vault, with the real models. */
+/** The one loop (`docs/agent-loop.md`, step 5) over an evaluation vault, with the real models; offline by default. */
 internal object LoopEval {
     fun loopOf(
         engine: LlmEngine,
         embedder: TextEmbedder,
         indexed: EvalVault,
-        runner: ActionRunner
+        runner: ActionRunner,
+        pageReader: PageReader = OFFLINE_PAGES,
+        webSearch: WebSearchProvider = OFFLINE_SEARCH,
+        clipper: WebPageClipper? = null
     ): RunTurnUseCase {
         val cache = NoteTextCache(
             contentStore = indexed.store,
@@ -38,9 +44,9 @@ internal object LoopEval {
             answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine),
             noteTextCache = cache,
             actionRunner = runner,
-            pageReader = { Outcome.Failure(error = PageProblem.OFFLINE) },
+            pageReader = pageReader,
             linkFinder = JetBrainsMarkdownLinkFinder(),
-            webSearch = { _, _ -> Outcome.Failure(error = WebSearchProblem.OFFLINE) }
+            webSearch = webSearch
         )
 
         return RunTurnUseCase(
@@ -49,9 +55,14 @@ internal object LoopEval {
             vaultGuide = VaultGuide(noteTextCache = cache),
             proposal = ProposalCheck(
                 checkPlan = CheckPlanUseCase(),
-                composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader())
+                composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader(), clipper)
             ),
             clock = Clock.System
         )
+    }
+
+    private val OFFLINE_PAGES = PageReader { Outcome.Failure(error = PageProblem.OFFLINE) }
+    private val OFFLINE_SEARCH = WebSearchProvider { _, _ ->
+        Outcome.Failure(error = WebSearchProblem.OFFLINE)
     }
 }

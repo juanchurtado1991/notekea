@@ -276,6 +276,9 @@ tasks.register<Test>("chatModelTest") {
     systemProperty("notekea.chat.vault", providers.gradleProperty("chatVault").getOrElse(""))
     // Only the evaluation tasks whose text holds one of these words (comma separated): a quick rerun of the failures.
     systemProperty("notekea.chat.tasks", providers.gradleProperty("chatTasks").getOrElse(""))
+    // The web's evaluation keeps the pages it downloads here, and reads only those with -PwebReplay=true.
+    systemProperty("notekea.web.pages", providers.gradleProperty("webPages").getOrElse(""))
+    systemProperty("notekea.web.replay", providers.gradleProperty("webReplay").getOrElse("false"))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)
