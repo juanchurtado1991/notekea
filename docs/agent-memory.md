@@ -8,7 +8,7 @@ It builds on the one agent loop (`feature/one-agent-loop`) and is not started un
 ## Why
 
 The loop already has two memories: the conversation (`Conversation`, a chat's turns and what they did) and the
-vault's instructions (`Notekea.md`, written by the person and always read). Neither carries what a chat learns into
+vault's instructions (`Notekea/Notekea.md`, written by the person and always read). Neither carries what a chat learns into
 the next one. The evaluation shows where that costs most:
 
 - **The same question, every chat.** A task that can mean several notes is asked back (`AmbiguousTask`,
@@ -39,9 +39,20 @@ their vault.
 - In Spanish, short, with the figures
 ```
 
-- **Its place:** `Notekea memory.md` at the vault's root, a setting like the instructions note's. A note of its own
-  and not a section of `Notekea.md`, so what the person wrote and what the chat proposed are never mixed, and the
-  memory can be cleared without touching the instructions.
+- **Its place:** `Notekea/Memory.md`, beside the vault's instructions in the same folder (decided by the developer
+  on 2026-11-15: "que se guarde en un folder Notekea/: Notekea.md, Memory.md"). The instructions move there from the
+  vault's root, in the loop's branch, so what Notekea reads of the vault is in one folder the person can find.
+  A note of its own and not a section of `Notekea.md`, so what the person wrote and what the chat proposed are
+  never mixed, and the memory can be cleared without touching the instructions.
+
+```
+My vault/
+├── Notekea/
+│   ├── Notekea.md   what the person tells the chat
+│   └── Memory.md    what the chat learnt, and the person approved
+├── Cocina/
+└── Trabajo/
+```
 - **Its sections:** three, by what each line is for. Lines are short, one fact each. A note is named by its
   wikilink, so a rename or a move of the note updates the memory as it updates every link (renames update links without asking, `docs/roadmap/M1.md`).
 
@@ -94,7 +105,7 @@ initiative in this first version; whether it should is measured later (open ques
 
 ### How the person sees it and turns it off
 
-- **Settings → General → Chat memory**: on or off, the note's place, and **Open memory**, which opens the note in a
+- **Settings → General → Chat memory**: on or off, and **Open memory**, which opens the note in a
   tab. Off means nothing is read and no Remember is offered; the note is left as it is.
 - **In the chat**: "what do you remember about me?" answers from the note with its lines; "forget that" proposes
   taking the line out.
@@ -132,7 +143,7 @@ Each its own set of commits, measured before the next, on a branch from `main` o
 2. **Remember after a question back.** The button built from the question and the answer, the line appended through
    the runner, Undo.
 3. **`remember` and `forget` as tools**, on the card, with `MemoryLine`'s checks; "what do you remember about me?".
-4. **Settings and the guide.** Chat memory on or off, its place, Open memory; the guide's section; Auto-Test cases
+4. **Settings and the guide.** Chat memory on or off, Open memory; the guide's section; Auto-Test cases
    and `MVP_SMOKE_TEST.md`.
 
 ## Risks, said plainly
@@ -147,7 +158,7 @@ Each its own set of commits, measured before the next, on a branch from `main` o
 
 ## For the developer to decide
 
-1. **A note of its own**, `Notekea memory.md` (this design), or a section of `Notekea.md`?
+1. ~~A note of its own, or a section of `Notekea.md`?~~ Decided (2026-11-15): a note of its own, `Notekea/Memory.md`.
 2. **On by default** (recommended: nothing is written without a click, and only relevant lines are read), or off
    until the person turns it on?
 3. **May the model propose a line on its own** (for example after a correction it understood), always as a card? Not
