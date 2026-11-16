@@ -231,6 +231,13 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
     used (it needs koin-test).
 
 
+## The chat's memory between conversations (2026-11-15): designed
+
+- The loop's design had said "memory between chats is left for later: what it may keep, and how the person sees and
+  deletes it, needs its own decision". On 2026-11-15 the developer asked why the agent does not learn the person;
+  the decision was written as `docs/agent-memory.md`, a note of the vault written only with approval, before any
+  code.
+
 ## One agent loop, step 5 (2026-11-14): the held-out tasks
 
 - The handoff said until then: "half may be used to tune if the loop falls short". It fell two short of today's

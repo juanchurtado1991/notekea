@@ -319,6 +319,17 @@ once, the vault gets its instructions note and the person's own skills in step 4
 half merged comes after step 1. Before the design, an audit: 90,400 code lines in the app, no dead code to speak of,
 1,800 to 2,600 lines that reuse would save (the list is in the conversation of that day, not yet acted on).
 
+## The chat's memory between conversations, designed on `docs/chat-memory` (2026-11-15)
+
+Asked about by the developer while #143 waited for CI. `docs/agent-memory.md` holds the design, written and not yet
+reviewed: one note of the vault (`Notekea memory.md`) that the chat reads in every chat, with the lines relevant to
+the task; a line is written only with the person's approval (a Remember button after a question back is answered,
+`remember` and `forget` on the card), never by the model alone; a line used is shown in the turn's steps; and
+`AmbiguousTask` takes a name the memory settles as settled. Four steps, measured on the evaluation with a memory note
+added to `Agent Eval`. **Open, for the developer:** a note of its own or a section of `Notekea.md`, on or off by
+default, whether the model may propose a line on its own, and the headings' language. Nothing is built; it starts on
+a branch from `main` once #143 is merged. The branch is cut from `feature/one-agent-loop` and not pushed.
+
 ## The release run
 
 Decided on 2026-11-04: there is no M2, M3 or M4 QA run. The only run left comes after 5.4 and before 5.5, on Windows,
