@@ -279,6 +279,7 @@ tasks.register<Test>("chatModelTest") {
     // The web's evaluation keeps the pages it downloads here, and reads only those with -PwebReplay=true.
     systemProperty("notekea.web.pages", providers.gradleProperty("webPages").getOrElse(""))
     systemProperty("notekea.web.replay", providers.gradleProperty("webReplay").getOrElse("false"))
+    systemProperty("notekea.roleplay", providers.gradleProperty("rolePlay").getOrElse(""))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)
