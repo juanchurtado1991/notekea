@@ -73,7 +73,10 @@ class RunTurnUseCase(
 
         if (route.kind.isReply) return@flow emit(value = AgentStep.Replied(kind = route.kind))
 
-        val tools = toolsets.of(kind = route.kind)
+        val tools = toolsets.of(
+            kind = route.kind,
+            task = task
+        )
 
         val memory = TurnSetup.memoryOf(
             task = task,

@@ -98,6 +98,8 @@ class LoopTools(
                     search,
                     read,
                     changes.clip,
+                    // "Look up … and add it to my trip note": what the pages say, appended with their links.
+                    changes.append,
                     ask,
                     propose,
                     answer
