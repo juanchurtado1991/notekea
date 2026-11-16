@@ -38,7 +38,10 @@ internal object TurnChecks {
 
             isNeedlessQuestion(call = call, state = state) -> NOT_ASKED
 
-            else -> MemoryChoice.heldOf(
+            else -> SameNoteQuestion.heldOf(
+                call = call,
+                state = state
+            ) ?: MemoryChoice.heldOf(
                 call = call,
                 state = state,
                 tool = tool
