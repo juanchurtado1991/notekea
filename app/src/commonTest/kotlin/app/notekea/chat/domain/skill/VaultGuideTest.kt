@@ -23,7 +23,8 @@ class VaultGuideTest {
         )
     )
 
-    private val instructions = RelativePath(value = "Notekea.md")
+    private val instructions = RelativePath(value = "Notekea/Notekea.md")
+    private val atRoot = RelativePath(value = "Notekea.md")
     private val recipe = RelativePath(value = "Skills/Recipe card.md")
     private val summary = RelativePath(value = "Skills/Document summary.md")
     private val empty = RelativePath(value = "Skills/Empty.md")
@@ -51,6 +52,22 @@ class VaultGuideTest {
             assertEquals(
                 expected = listOf("New notes go in Inbox. Write in Spanish.", null, null),
                 actual = listOf(read, missing, blank)
+            )
+        }
+
+    @Test
+    fun `the vault's instructions are read from the Notekea folder, not from a note of that name at the root`() =
+        runTest {
+            store.texts[atRoot] = "Write in English."
+
+            val read = guide.instructionsOf(
+                vaultPath = VAULT,
+                notes = notes.drop(n = 1) + entry(path = atRoot.value)
+            )
+
+            assertEquals(
+                expected = null,
+                actual = read
             )
         }
 

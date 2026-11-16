@@ -252,6 +252,8 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   a flat schema, and giving it eleven more would have gone against step 0's measure (ten tools at most, a grammar
   per tool). The setting for where the vault's instructions and skills live was left for step 5, with what reads
   them; until then `Notekea.md` and `Skills/`.
+- On 2026-11-15 the developer moved the instructions into a folder of Notekea's own: `Notekea/Notekea.md`, where
+  the chat's memory is designed to go too (`Notekea/Memory.md`). `Skills/` stayed where it was.
 
 ## One agent loop, step 3 (2026-11-14): the conversation in the domain
 

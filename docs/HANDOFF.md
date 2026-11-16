@@ -297,7 +297,9 @@ model keeps today's agent with the loop turned on. The branch's code review (202
 Keep mine losing what was written into a clashing note, a failed repair not said, sums in scientific notation and
 -3^2, accented first names, a question held on the last step; left, with the reason: an empty proposal after a drop
 of every note (told once already), `countTokens` outside the token room (llama's tokenizer only reads), and the
-`tool == null` branch, which the compiler needs. Next in step 6:
+`tool == null` branch, which the compiler needs. The vault's instructions moved the same day, at the developer's
+word, from `Notekea.md` at the root to `Notekea/Notekea.md`, the folder where the chat's memory is designed to go
+(`docs/agent-memory.md`, on `docs/chat-memory`). Next in step 6:
 6b (found tables, sources, streaming), 6c (scope, the section question), 6d, 6e. The web search of `ROADMAP.md`
 13 is the pull request after this one.
 

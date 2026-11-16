@@ -490,8 +490,9 @@ answers. A list argument reaches a tool one item a line (`ToolCall.list`).
 
 **Skills and the vault's instructions** (`chat/domain/skill`). `BuiltInSkills`: a comparison table, a document
 summary, study cards, meeting notes, each a few lines. `VaultGuide` reads the vault's instructions (one note,
-`Notekea.md` at its root until a setting says otherwise) and the person's own skills (the notes of `Skills/`: the
-first line describes one, the rest instructs it; one named as a skill of the app replaces it).
+`Notekea/Notekea.md` until a setting says otherwise; at the vault's root until 2026-11-15, when the developer put
+it in a folder of Notekea's own, where the chat's memory goes too) and the person's own skills (the notes of
+`Skills/`: the first line describes one, the rest instructs it; one named as a skill of the app replaces it).
 
 **What waits for step 5.** None of this is called by today's agent, whose prompt and flat schema are its own:
 the loop, its router and its toolsets are step 5, and with them the setting for where the instructions and the
