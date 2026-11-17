@@ -81,6 +81,12 @@ internal object SharedNames {
                 "that whole path.)"
         }
 
+        // "both of my Goals 2027 notes", "my two budgets" mean them all: told to ask, the models asked (the run
+        // after the bug hunt), so a task about several is told only to read each.
+        if (!AmbiguousTask.isSingular(task = task)) {
+            return "$shared The task means them all: call again with each whole path.)"
+        }
+
         return "$shared When the task means one of them and does not say which, ask_user with them as the " +
             "options. When it means them all, or says which, call again with each whole path.)"
     }

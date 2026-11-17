@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool.change
 
+import app.notekea.chat.domain.loop.AmbiguousTask
 import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.CheckPlanUseCase
@@ -168,7 +169,13 @@ class ChangeTool(
             context = context
         )
 
-        val isShared = shared.isNotEmpty() && context.work.warn(about = "$name shared")
+        // A task about several ("tag both of my Goals 2027 notes") means each of them: nothing to ask.
+        val isSeveral = !AmbiguousTask.isSingular(task = context.task)
+
+        val isShared =
+            shared.isNotEmpty() &&
+                !isSeveral &&
+                context.work.warn(about = "$name shared")
 
         if (isShared) {
             return "$name: not added yet. ${shared.joinToString(separator = " ")} If the task does not " +
