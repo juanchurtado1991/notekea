@@ -420,8 +420,12 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    Yaxa from that list" finds the list (seen in the role-play). It does not stop a model reading unrelated notes. To be measured on the tasks that run out of steps or lose what they read, against the loop as it is;
    Cloudflare's Code Mode was looked at for the same problem and left, as it rests on small models writing code.
    **Built (2026-11-16)** in the same pull request (`docs/agent-step-memory.md`): SQLite full-text in memory, the
-   needed parts handed back when results are dropped, and a `recall` tool so the model asks rather than remembers;
-   being measured against the third run.
+   needed parts handed back when results are dropped, and a `recall` tool so the model asks rather than remembers.
+   **Measured (2026-11-16 and 17)** on the loop's 259 tasks: folding old results to a line made both models worse
+   (9B 203, was 212; 4B 201, was 204), so it is off by default (`-PstepMemory=fold` turns it on). With it off and
+   the fixes of the seventh run (no invented links, the note a task means settled before the turn, groups of notes
+   found in one step): 9B 221, 4B 219. With the fixes of the eighth (sums gathered from every line, no change the
+   task does not ask, the task's words over the memory): 4B 225, 9B 224. Across turns it is still not turned on.
 
 ## Out of scope for the MVP
 

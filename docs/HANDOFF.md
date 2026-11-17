@@ -394,7 +394,34 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
 - **Not done yet:** a Brave key in Settings; Correct… on a memory step; Tidy your memory; corrections into a
   skill; asking the country when none is known (the computer's region is not read); the vault's web sources as
   trusted; Auto-Test cases; a memory of the turn's steps (`ROADMAP.md`, Post-MVP 15) is built
-  (`docs/agent-step-memory.md`) and being measured against the third run; across turns it is not turned on.
+  (`docs/agent-step-memory.md`); across turns it is not turned on.
+- **The loop measured again (2026-11-17, the seventh run), on its 259 tasks** (the 201, the memory's 34, the 24
+  unseen):
+  - **Folding off.** Old results folded to a line made both models worse in the fifth run (9B 203, was 212; 4B
+    201, was 204): `RunTurnUseCase.wholeLast` is null by default, `-PstepMemory=fold` turns it on.
+  - **Fixed from the fifth run's failures:** an answer links only to pages the turn read (`AnswerLinks`; the link
+    example was in every answer prompt, and the 4B copied it for notes); the note a task means is settled before
+    the turn by the memory or by a word of the task only one note writes (`ToldApart`, `MemoryChoice`); a new
+    note's sources are not notes to change; a group of notes is found in one step (`search` names every note that
+    writes the words, `list` shows tags and open tasks).
+  - **Seventh run:** 4B 219 of 259 (27, 55, 65, 19 on the 201; memory 31 of 34; unseen 22 of 24), 9B 221 (26, 58,
+    65, 20; 31; 21). No answer holds an invented link.
+  - **Fixed from the seventh run's failures (`5aaafa81`):** a figure a note writes many
+    times is gathered and added by `count` (`WrittenFigures`); `add_task` is refused where the task asks for another
+    change and no task; a tag the task writes is kept as written; several notes named ("the journal notes that
+    mention the garden") are not one note to ask about (`SingularTask`); a word the task writes inside a name the
+    memory settled wins over the memory ("the household budget"); the answer is written knowing the memory;
+    "etiquétalas con…" and "… in a note X" are never routed to ask (`RouteWords`); `find` "with rating" keeps the
+    notes that have the property.
+  - **Eighth run:** 4B 225 of 259 (28, 60, 65, 18 on the 201; memory 32 of 34; unseen 22 of 24), 9B 224 (27, 58,
+    65, 18; 34 of 34; 22). 17 failures of the 4B and 10 of the 9B are gone; 11 and 7 tasks that were right now
+    fail, by the model's variance and not by a change that touches them, so a few tasks between runs is noise.
+  - **Still failing, by kind:** a request that needs two notes put together (the lease's rent plus the moving
+    note's bills), a filter the model must read each note for ("every meeting that lists its attendees" went on to
+    tag the others too), a note meant through another ("the project the vendor call is about"), and "the trip" with
+    two trips in the vault, answered from one without asking. New in the eighth: a long note answered from its
+    first 2,500 characters ("the agreement does not say what happens to the data", and it does, further down), and
+    a question asked though the memory already says which note ("my goals").
 
 Planned with the developer while #143 waited for CI, and reviewed twice the same day; every recommendation was
 accepted. Two designs, one pull request, the memory first. **Nothing is built.** It starts on a branch from `main`

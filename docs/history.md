@@ -344,3 +344,13 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
 - **2026-11-16, the memory of the turn's steps built:** the developer asked it in this pull request, used by every
   kind of work and not only the web, and for the model to ask back what it needs rather than remember it; built
   with SQLite's full-text search in memory and a `recall` tool (`docs/agent-step-memory.md`).
+- **2026-11-17, the loop's fifth and seventh runs:** the handoff said the step memory was "being measured against
+  the third run". Folding old results to a line measured worse on both models (9B 203 of 259, was 212; 4B 201, was
+  204) and was turned off by default. The fifth run's failures were read one by one with the developer asleep, at
+  their word that the 4B "errs where it matters": invented links in nearly every answer, the memory not settling
+  "my goals", questions with one option, sources of a new note dropped. Fixed and measured in the seventh run: 4B
+  219, 9B 221, no invented link. The seventh's failures were read the same way (wrong sums said with confidence,
+  tasks nobody asked for added to a tagging, a question asked for a plural request, the memory winning over the
+  task's own words) and fixed for the eighth: 4B 225, 9B 224. Between the two runs 11 tasks of the 4B and 7 of
+  the 9B went from right to wrong with no change that touches them, so a few tasks of difference is noise, and
+  the measure of reliability is the kind of each failure, not the total.

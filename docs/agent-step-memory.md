@@ -49,7 +49,12 @@ was still the model's load. So the prompt the model picks its next step from now
 whole (`StepRecall.WHOLE_LAST`); each longer one before them is one line, its first, saying it is kept aside and
 can be recalled. A short result (under 120 tokens) stays whole: its line would save nothing. The answer is still
 written from every result whole. A read made again of a folded result gets it back whole rather than "its result
-is above". `-PstepMemory=whole` turns the folding off, to measure one against the other.
+is above".
+
+Measured the same day (the fifth run), the folding made the loop worse: 203 of 259 on the 9B (was 212) and 201 on
+the 4B (was 204). A model shown one line of a note it read answered from that line, or read the note again. So the
+folding is **off by default**: the model sees every result whole while they fit, and the memory only brings back
+what the room dropped. `-PstepMemory=fold` turns the folding on, to measure it again.
 
 ## What it does not do
 
@@ -62,3 +67,20 @@ is above". `-PstepMemory=whole` turns the folding off, to measure one against th
 
 Against the loop as it was (the web's third measurement, the same day): the web's 50 tasks and the 201 tasks on the
 9B and the 4B. `-PstepMemory=off` runs the evaluation without it.
+
+The loop's 259 tasks (the 201, the memory's 34 and the 24 unseen), right answers of each run:
+
+| Run | What changed | 4B | 9B |
+|---|---|---|---|
+| Fourth (2026-11-16) | the memory of the steps, nothing folded | 204 | 212 |
+| Fifth (2026-11-16) | old results folded to a line | 201 | 203 |
+| Seventh (2026-11-17) | folding off; no invented links; the note a task means settled before the turn; groups of notes found in one step | 219 | 221 |
+| Eighth (2026-11-17) | sums gathered from every line; no change the task does not ask; the task's words over the memory | 225 | 224 |
+
+The seventh run's answers hold no link to a page the turn never read (the fifth held 112). What still fails
+there, by kind: a request that needs two notes put together (a contract's rent and a moving note's bills), a sum
+over many lines of one long note, a change beyond the notes the task means, and "the trip" where two notes are a
+trip. The eighth run measures the fixes for the sums and the unasked changes: 17 of the 4B's failures and 10 of
+the 9B's are gone, and 11 and 7 tasks that were right now fail, most of them by the model's own variance from
+run to run (a long note answered from its first 2,500 characters, a question asked though the memory answers
+it). So a run is read by its failures, one by one, and a difference of a few tasks between two runs is noise.
