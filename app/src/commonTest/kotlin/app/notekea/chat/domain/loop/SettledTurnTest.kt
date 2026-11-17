@@ -82,6 +82,7 @@ class SettledTurnTest {
                     """{"tool":"read","note":"People/Tomás Herrera"}""",
                     """{"tool":"answer","text":"8890-3317"}""",
                     """{"tool":"read","note":"People/Tomás Vargas"}""",
+                    """{"tool":"answer","text":"8712-6650"}""",
                     """{"tool":"answer","text":"8712-6650"}"""
                 )
             )
@@ -95,6 +96,38 @@ class SettledTurnTest {
                         .text,
                     "Read People/Tomás Vargas and answer from it." in prompts[2].last().text
                 )
+            )
+        }
+
+    // The run after the bug hunt: "the budget" answered with both budgets, though one was the note meant.
+    @Test
+    fun `an answer after reading the note meant and another is told to keep to the one meant`() =
+        runTest {
+            val people = listOf(
+                entry(path = "People/Tomás Herrera.md"),
+                entry(
+                    path = "People/Tomás Vargas.md",
+                    metadata = tags("people", "club")
+                )
+            )
+
+            store.texts[people[0].file.path] = "# Tomás Herrera\n\nphone: 8890-3317"
+            store.texts[people[1].file.path] = "# Tomás Vargas\n\nphone: 8712-6650"
+
+            val prompts = promptsOf(
+                task = "what is the phone number of Tomás from the chess club?",
+                notes = people,
+                calls = listOf(
+                    """{"tool":"read","note":"People/Tomás Vargas"}""",
+                    """{"tool":"read","note":"People/Tomás Herrera"}""",
+                    """{"tool":"answer","text":"8712-6650 or 8890-3317"}""",
+                    """{"tool":"answer","text":"8712-6650"}"""
+                )
+            )
+
+            assertEquals(
+                expected = true,
+                actual = "Answer from People/Tomás Vargas alone" in prompts[3].last().text
             )
         }
 

@@ -96,12 +96,27 @@ internal object MemoryChoice {
 
         val missed = state.settled.firstOrNull { settled ->
             settled.meant !in read && settled.others.any { it in read }
+        }
+
+        if (missed != null) {
+            if (!state.told.add(element = ANSWERED)) return null
+
+            return "(Not done: ${whyOf(settled = missed)}, and you have not read it. Read " +
+                "${bare(path = missed.meant)} and answer from it.)"
+        }
+
+        // Both read, the answer gave both: "77,600, the household's and the cooperative's" for "the budget", which
+        // the memory says is the cooperative's (the run after the bug hunt, the 9B). Told once to keep to it.
+        val both = state.settled.firstOrNull { settled ->
+            settled.meant in read && settled.others.any { it in read }
         } ?: return null
 
-        if (!state.told.add(element = ANSWERED)) return null
+        if (!state.told.add(element = ANSWERED_ALONE)) return null
 
-        return "(Not done: ${whyOf(settled = missed)}, and you have not read it. Read " +
-            "${bare(path = missed.meant)} and answer from it.)"
+        val others = both.others.joinToString { bare(path = it) }
+
+        return "(Not done: ${whyOf(settled = both)}. Answer from ${bare(path = both.meant)} alone: leave $others " +
+            "out of the answer, its figures included.)"
     }
 
     private fun whyOf(settled: AmbiguousTask.Settled): String {
@@ -122,4 +137,5 @@ internal object MemoryChoice {
     private const val ASKED = "memory asked"
     private const val ASKED_AGAIN = "memory asked again"
     private const val ANSWERED = "memory answered"
+    private const val ANSWERED_ALONE = "memory answered alone"
 }
