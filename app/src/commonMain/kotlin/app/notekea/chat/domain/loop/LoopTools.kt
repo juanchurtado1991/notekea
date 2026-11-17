@@ -43,7 +43,11 @@ class LoopTools(
     private val webSearch: WebSearchProvider
 ) {
     fun toolsets(): Toolsets {
-        val search = SearchTool(answerFromNotes = answerFromNotes)
+        val search = SearchTool(
+            answerFromNotes = answerFromNotes,
+            noteTextCache = noteTextCache
+        )
+
         val read = ReadTool(noteTextCache = noteTextCache)
         val outline = OutlineTool(noteTextCache = noteTextCache)
         val list = ListTool()
@@ -66,14 +70,18 @@ class LoopTools(
         val count = CountTool(noteTextCache = noteTextCache)
 
         val looking = listOf(search, read, find, tasks, list)
+
+        // "Tag every note that links to Budget 2026", "the recipes the menu uses": a change to the notes a note's
+        // links name (the loop's fifth run had no links when it organized or wrote).
+        val linking = looking + links
         val shows = ShowTools.of(setTheme = { actionRunner.setTheme(theme = it) })
         val changes = ChangeTools
 
         return Toolsets(
             byKind = mapOf(
                 WorkKind.ASK to
-                    looking + listOf(outline, digest, links, CalculateTool(), count, ask, answer),
-                WorkKind.WRITE to looking + listOf(
+                    linking + listOf(outline, digest, CalculateTool(), count, ask, answer),
+                WorkKind.WRITE to linking + listOf(
                     outline,
                     changes.writeNote,
                     changes.createNote,
@@ -86,7 +94,7 @@ class LoopTools(
                     ask,
                     propose
                 ),
-                WorkKind.ORGANIZE to looking + organizing(
+                WorkKind.ORGANIZE to linking + organizing(
                     ask = ask,
                     ends = listOf(propose)
                 ),

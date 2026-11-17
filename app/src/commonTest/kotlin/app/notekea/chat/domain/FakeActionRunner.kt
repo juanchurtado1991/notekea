@@ -16,11 +16,15 @@ class FakeActionRunner : ActionRunner {
     var found = FoundNotes()
     var done = DonePlan(id = 1)
 
+    // A find that fails with it, when set.
+    var problem: ActionProblem? = null
+
     override suspend fun find(
         vaultPath: String,
         step: ActionStep,
         notes: Collection<NoteEntry>
-    ): Outcome<FoundNotes, ActionProblem> = Outcome.Success(value = found)
+    ): Outcome<FoundNotes, ActionProblem> =
+        problem?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = found)
 
     override suspend fun run(
         vaultPath: String,

@@ -18,7 +18,7 @@ class FindTool(actionRunner: ActionRunner) : ChatTool {
 
     override val description =
         "notes chosen by their properties, in plain words, naming the property the task means as the vault " +
-            "lists it (\"books rated 4 or more\", \"books with finished true\"); never another property in " +
+            "lists it (\"books rated 4\", \"books with finished true\"); never another property in " +
             "its place."
 
     override val arguments = listOf(ToolArgument(name = QUERY))

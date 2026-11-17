@@ -24,6 +24,27 @@ internal object DatePhrases {
         listOf("sunday", "domingo")
     )
 
+    private val MONTHS = listOf(
+        listOf("january", "enero"),
+        listOf("february", "febrero"),
+        listOf("march", "marzo"),
+        listOf("april", "abril"),
+        listOf("may", "mayo"),
+        listOf("june", "junio"),
+        listOf("july", "julio"),
+        listOf("august", "agosto"),
+        listOf("september", "septiembre", "setiembre"),
+        listOf("october", "octubre"),
+        listOf("november", "noviembre"),
+        listOf("december", "diciembre")
+    )
+
+    // "15 de noviembre", "15 November 2027", "November 15th".
+    private val DAY_MONTH =
+        Regex(pattern = "\\b(\\d{1,2}) (?:de )?([a-z]+)(?:,? (?:de |del )?(\\d{4}))?")
+    private val MONTH_DAY =
+        Regex(pattern = "\\b([a-z]+) (\\d{1,2})(?:st|nd|rd|th)?\\b(?:,? (\\d{4}))?")
+
     private val NAMES =
         listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
@@ -60,6 +81,10 @@ internal object DatePhrases {
         }
 
         return written(said = said)
+            ?: named(
+                said = said,
+                today = today
+            )
             ?: moved(
                 said = said,
                 today = today
@@ -106,6 +131,37 @@ internal object DatePhrases {
             month = match.groupValues[2].toInt(),
             day = match.groupValues[3].toInt()
         ).takeIf { it.isValid }
+    }
+
+    // A day and a month's name, in this year when none is written: the date tool could not say "el 15 de noviembre"
+    // (the loop's fifth run, both models).
+    private fun named(
+        said: String,
+        today: CalendarDate
+    ): CalendarDate? {
+        val dayFirst = DAY_MONTH
+            .findAll(input = said)
+            .map { it.groupValues }
+            .map { Triple(it[1], it[2], it[3]) }
+
+        val monthFirst = MONTH_DAY
+            .findAll(input = said)
+            .map { it.groupValues }
+            .map { Triple(it[2], it[1], it[3]) }
+
+        return (dayFirst + monthFirst).firstNotNullOfOrNull { (day, month, year) ->
+            val index = MONTHS.indexOfFirst {
+                month in it
+            }
+
+            if (index < 0) return@firstNotNullOfOrNull null
+
+            CalendarDate(
+                year = year.toIntOrNull() ?: today.year,
+                month = index + 1,
+                day = day.toInt()
+            ).takeIf { it.isValid }
+        }
     }
 
     // "in 3 weeks", "hace 2 meses", "next month".

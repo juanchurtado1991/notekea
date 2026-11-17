@@ -18,6 +18,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.tasks.NoteTask
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,7 +44,17 @@ class ReadingToolsTest {
         notes = listOf(
             entry(
                 path = lease.value,
-                modifiedOffsetMillis = 3_000
+                modifiedOffsetMillis = 3_000,
+                metadata = NoteMetadata.NONE.copy(
+                    tasks = listOf(true, false, false).map {
+                        NoteTask(
+                            stateIndex = 0,
+                            endIndex = 0,
+                            text = "Call Ana",
+                            isDone = it
+                        )
+                    }
+                )
             ),
             entry(
                 path = arepas.value,
@@ -135,16 +146,20 @@ class ReadingToolsTest {
 
             assertEquals(
                 expected = listOf(
-                    "list, 2 notes in \"recipes\":\nRecipes/Arepas\nRecipes/Soup (serves)",
-                    "list, 1 notes tagged latin:\nRecipes/Arepas",
-                    "list, 3 notes changed last:\nHome/Lease\nRecipes/Arepas\nRecipes/Soup (serves)",
-                    "list: no note in \"Trips\"."
+                    "list, 2 notes in \"recipes\":\nRecipes/Arepas (#latin)\nRecipes/Soup (serves)",
+                    "list, 1 notes tagged latin:\nRecipes/Arepas (#latin)",
+                    "list, 3 notes changed last:\nHome/Lease (2 open tasks)\nRecipes/Arepas (#latin)\n" +
+                        "Recipes/Soup (serves)",
+                    "list: no note in \"Trips\".",
+                    // A tag asked as a folder, as the 9B listed "Tags/idea" three times (the loop's fifth run).
+                    "list, 1 notes tagged latin:\nRecipes/Arepas (#latin)"
                 ),
                 actual = listOf(
                     said(list, "folder" to "recipes"),
                     said(list, "tag" to "latin"),
                     said(list),
-                    said(list, "folder" to "Trips")
+                    said(list, "folder" to "Trips"),
+                    said(list, "folder" to "Tags/latin")
                 )
             )
         }

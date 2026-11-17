@@ -56,7 +56,8 @@ object ChangeTools {
         description = "a property set on notes: the notes, the property as the vault names it, and its value " +
             "(a status, a priority, a date: never complete_task for them).",
         kind = ActionKind.SET_PROPERTY,
-        fields = listOf(ActionField.NOTES, ActionField.PROPERTY, ActionField.VALUE)
+        fields = listOf(ActionField.NOTES, ActionField.PROPERTY, ActionField.VALUE),
+        misuse = ChangeMisuse::tagAsProperty
     )
 
     val addTask = ChangeTool(

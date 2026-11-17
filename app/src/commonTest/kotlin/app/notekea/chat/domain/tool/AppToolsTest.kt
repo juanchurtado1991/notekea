@@ -13,6 +13,8 @@ import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.domain.tasks.NoteTask
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -48,7 +50,17 @@ class AppToolsTest {
                     tasks = listOf(task(isDone = false), task(isDone = true), task(isDone = false))
                 )
             ),
-            entry(path = "Recipes/Soup.md"),
+            entry(
+                path = "Recipes/Soup.md",
+                metadata = NoteMetadata.NONE.copy(
+                    properties = listOf(
+                        NoteProperty(
+                            key = "servings",
+                            value = PropertyValue.Number(text = "2")
+                        )
+                    )
+                )
+            ),
             entry(path = "Books/Dune.md")
         ),
         task = "how much is the rent a year?",
@@ -139,7 +151,9 @@ class AppToolsTest {
                 "count: 5 words in Arepas.",
                 "count: 2 open tasks in the vault.",
                 "count: 1 done tasks in the vault.",
-                "count: no folder, tag or note \"Trips\"."
+                "count: no folder, tag or note \"Trips\".",
+                // A property summed: the loop's fifth run answered 10 and 4 for the 16 servings of the recipes.
+                "count: servings sums 2 over 1 notes (Soup 2)."
             ),
             actual = listOf(
                 said(count, "what" to "notes"),
@@ -148,7 +162,8 @@ class AppToolsTest {
                 said(count, "what" to "words", "where" to "Arepas"),
                 said(count, "what" to "open tasks"),
                 said(count, "what" to "done tasks"),
-                said(count, "what" to "notes", "where" to "Trips")
+                said(count, "what" to "notes", "where" to "Trips"),
+                said(count, "what" to "servings", "where" to "Recipes")
             )
         )
     }
@@ -167,7 +182,11 @@ class AppToolsTest {
             "fin de año",
             "next month",
             "2027-02-03",
-            "someday"
+            "someday",
+            // A day and a month's name: the date tool could not say "el 15 de noviembre" (the loop's fifth run).
+            "el 15 de noviembre",
+            "November 3rd, 2027",
+            "31 de febrero"
         )
 
         assertEquals(
@@ -182,6 +201,9 @@ class AppToolsTest {
                 "2026-12-31 (Thursday)",
                 "2026-12-14 (Monday)",
                 "2027-02-03 (Wednesday)",
+                null,
+                "2026-11-15 (Sunday)",
+                "2027-11-03 (Wednesday)",
                 null
             ),
             actual = phrases.map { phrase ->

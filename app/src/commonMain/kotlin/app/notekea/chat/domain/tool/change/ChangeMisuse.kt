@@ -57,6 +57,32 @@ internal object ChangeMisuse {
         }
     }
 
+    /**
+     * set_property with the value a task tags with: "tag the notes that have a status property with tracked" had
+     * both models set status to tracked on every project (the loop's fifth run).
+     */
+    fun tagAsProperty(
+        task: String,
+        step: PlannedStep
+    ): String? {
+        val words = task.lowercase()
+        val value = step[ActionField.VALUE]?.lowercase()?.removePrefix(prefix = "#") ?: return null
+
+        val isTagged = TAGS.containsMatchIn(input = words) && Regex.escape(value).let {
+            Regex(pattern = "\\b(with|con) #?$it\\b").containsMatchIn(input = words)
+        }
+
+        return if (isTagged) {
+            "set_property sets a property, and the task tags with \"$value\": call add_tag with the notes and " +
+                "that tag."
+        } else {
+            null
+        }
+    }
+
+    private val TAGS =
+        Regex(pattern = "\\b(tag|tags|etiqueta|etiquetas|etiquétalas|etiquetalas|etiquetar)\\b")
+
     // "a note X with…", "listing…", "Lisbon plan: the places…", "con las recetas…".
     private val HOLDS = Regex(pattern = "\\b(with|listing|holding|con|listando|que tenga)\\b|\\w: ")
     private val ADDS_TASK =
