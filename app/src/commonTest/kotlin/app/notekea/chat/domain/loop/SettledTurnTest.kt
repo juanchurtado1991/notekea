@@ -131,6 +131,59 @@ class SettledTurnTest {
             )
         }
 
+    // The run after the bug hunt: asked "the chess one or the other?", options that name no note.
+    @Test
+    fun `a question the note meant already answers is not asked, whatever its options say`() =
+        runTest {
+            val people = listOf(
+                entry(path = "People/Tomás Herrera.md"),
+                entry(
+                    path = "People/Tomás Vargas.md",
+                    metadata = tags("people", "club")
+                )
+            )
+
+            store.texts[people[1].file.path] = "# Tomás Vargas\n\nphone: 8712-6650"
+
+            val prompts = promptsOf(
+                task = "what is the phone number of Tomás from the chess club?",
+                notes = people,
+                calls = listOf(
+                    """{"tool":"read","note":"People/Tomás Vargas"}""",
+                    """{"tool":"ask_user","question":"Which?","options":["The chess one","The other"]}""",
+                    """{"tool":"answer","text":"8712-6650"}"""
+                )
+            )
+
+            assertEquals(
+                expected = true,
+                actual = "so there is nothing to ask" in prompts[2].last().text
+            )
+        }
+
+    // The run after the bug hunt: "which of my two budgets is larger?" answered from one, "there is no second".
+    @Test
+    fun `an answer about several notes of one name waits for the unread one`() = runTest {
+        val budgets = listOf("Home/Budget 2026.md", "Work/Budget 2026.md").map { entry(path = it) }
+        store.texts[budgets[0].file.path] = "# Budget 2026\n\n9,600 USD in all."
+        store.texts[budgets[1].file.path] = "# Budget 2026\n\n68,000 USD in all."
+
+        val prompts = promptsOf(
+            task = "which of my two budgets is larger, and by how much?",
+            notes = budgets,
+            calls = listOf(
+                """{"tool":"read","note":"Home/Budget 2026"}""",
+                """{"tool":"answer","text":"There is no second budget."}""",
+                """{"tool":"answer","text":"The work one, by 58,400 USD."}"""
+            )
+        )
+
+        assertEquals(
+            expected = true,
+            actual = "you have not read Work/Budget 2026" in prompts[2].last().text
+        )
+    }
+
     @Test
     fun `a question with one note as its only answer is not asked`() = runTest {
         val recipe = entry(path = "Recipes/Pancakes.md")

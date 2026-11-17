@@ -64,6 +64,9 @@ internal object TurnChecks {
                 call = call,
                 state = state,
                 tool = tool
+            ) ?: SeveralUnread.heldOf(
+                call = call,
+                state = state
             ) ?: UnsettledEnd.heldOf(
                 call = call,
                 state = state,

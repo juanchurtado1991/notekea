@@ -49,6 +49,14 @@ internal object MemoryChoice {
                     .lowercase()
             }
 
+        val read = state
+            .turn
+            .reads
+            .read
+            .toSet()
+
+        // Options written as what the notes hold ("the household one", "the cooperative's one") name no note: with
+        // the note meant read, the question is the memory's to answer (the run after the bug hunt, the 4B).
         val asked = state.settled.firstOrNull { settled ->
             (settled.others + settled.meant).count { path ->
                 val whole = bare(path = path).lowercase()
@@ -58,6 +66,8 @@ internal object MemoryChoice {
                     it == whole || whole.substringAfterLast(delimiter = '/') in it
                 }
             } >= 2
+        } ?: state.settled.firstOrNull {
+            it.meant in read
         } ?: return null
 
         val isHeld = state.told.add(element = ASKED) || state.told.add(element = ASKED_AGAIN)
