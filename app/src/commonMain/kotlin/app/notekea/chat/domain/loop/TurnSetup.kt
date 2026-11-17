@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.memory.domain.MemoryLine
@@ -22,7 +23,8 @@ internal object TurnSetup {
         notes: Collection<NoteEntry>,
         today: String,
         remembered: List<MemoryLine>,
-        openNote: RelativePath?
+        openNote: RelativePath?,
+        told: List<AmbiguousTask.Settled> = emptyList()
     ): ToolContext = ToolContext(
         vaultPath = vaultPath,
         notes = notes,
@@ -37,17 +39,68 @@ internal object TurnSetup {
             sources = emptyList(),
             memory = remembered
         ),
-        remembered = AmbiguousTask
-            .settledOf(task, notes, remembered.mapNotNull { it.named })
+        remembered = settledOf(
+            task = task,
+            notes = notes,
+            remembered = remembered,
+            told = told
+        )
             .map { it.meant }
             .toSet()
     )
+
+    /**
+     * The sets of notes settled for [task]: the ones its own words tell apart by what the notes say ([told]), then
+     * the memory's, but not for a set the task already told: the request wins over the memory.
+     */
+    fun settledOf(
+        task: String,
+        notes: Collection<NoteEntry>,
+        remembered: List<MemoryLine>,
+        told: List<AmbiguousTask.Settled>
+    ): List<AmbiguousTask.Settled> = told + AmbiguousTask
+        .settledOf(task, notes, remembered.flatMap { it.names })
+        .filterNot { settled ->
+            told.any {
+                it.meant == settled.meant || it.meant in settled.others
+            }
+        }
+
+    /** The sets of notes [task]'s name fits that a word of it tells apart, by what the notes say ([ToldApart]). */
+    suspend fun apartOf(
+        task: String,
+        vaultPath: String,
+        notes: Collection<NoteEntry>,
+        vaultGuide: VaultGuide
+    ): List<AmbiguousTask.Settled> {
+        val byPath = notes.associateBy { it.file.path }
+
+        val groups = AmbiguousTask
+            .openOf(
+                task = task,
+                notes = notes
+            )
+            .map { group ->
+                group.mapNotNull {
+                    byPath[it]
+                }
+            }
+
+        if (groups.isEmpty()) return emptyList()
+
+        return ToldApart.settledOf(
+            task = task,
+            groups = groups,
+            texts = vaultGuide.textsOf(vaultPath, groups.flatten().distinct())
+        )
+    }
 
     /** The lines the model is given: the relevant ones, but a name the task says which one of is the request's. */
     fun memoryOf(
         task: String,
         remembered: List<MemoryLine>,
-        kind: WorkKind
+        kind: WorkKind,
+        apart: List<AmbiguousTask.Settled> = emptyList()
     ): List<MemoryLine> = MemoryLines
         .relevantTo(
             lines = remembered,
@@ -55,8 +108,33 @@ internal object TurnSetup {
             isWeb = kind == WorkKind.WEB
         )
         .filterNot { line ->
-            line.named?.let { AmbiguousTask.isQualified(task, it.said) } == true
+            line.names.any { AmbiguousTask.isQualified(task, it.said) } || isOverruled(line, apart)
         }
+
+    // A line that names another note of a set the task's own words told apart: "my Sunday weekly review".
+    private fun isOverruled(
+        line: MemoryLine,
+        apart: List<AmbiguousTask.Settled>
+    ): Boolean {
+        val note = line
+            .names
+            .firstOrNull()
+            ?.note
+            ?.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            ?.lowercase() ?: return false
+
+        return apart
+            .flatMap { it.others }
+            .map {
+                it
+                    .value
+                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                    .lowercase()
+            }
+            .any {
+                it == note || it.substringAfterLast(delimiter = '/') == note
+            }
+    }
 
     // The country a search is made in: the one the task names, else the one the memory says the person lives in.
     private fun countryOf(

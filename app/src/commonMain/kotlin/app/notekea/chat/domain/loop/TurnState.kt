@@ -17,7 +17,8 @@ internal class TurnState(
     val tools: ToolRegistry,
     val turn: ToolContext,
     val budget: ContextBudget,
-    val memory: List<MemoryLine> = emptyList()
+    val memory: List<MemoryLine> = emptyList(),
+    val apart: List<AmbiguousTask.Settled> = emptyList()
 ) {
     val found = mutableListOf<String>()
     val made = mutableSetOf<String>()
@@ -38,16 +39,18 @@ internal class TurnState(
         AmbiguousTask.notesOf(
             task = task,
             notes = turn.notes,
-            settled = memory.mapNotNull { it.named }
+            settled = memory.flatMap { it.names },
+            told = apart
         )
     }
 
-    /** The sets of notes the memory settled for the task: a change to another of them is held back once. */
+    /** The sets of notes the memory or the notes settled for the task: another of them picked is held back once. */
     val settled by lazy {
-        AmbiguousTask.settledOf(
+        TurnSetup.settledOf(
             task = task,
             notes = turn.notes,
-            settled = memory.mapNotNull { it.named }
+            remembered = memory,
+            told = apart
         )
     }
 

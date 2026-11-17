@@ -14,24 +14,31 @@ data class MemoryLine(
      * wikilink, [[Laura Castro]]); null for a line of another section or of another shape.
      */
     val named: Named?
-        get() {
-            if (section != MemorySection.PEOPLE) return null
+        get() = names.firstOrNull()
 
-            val said = QUOTED
-                .find(input = text)
-                ?.groupValues
-                ?.get(1) ?: return null
+    /**
+     * Every name the line settles: each phrase in quotes before the link means its note, so `"the weekly review" and
+     * "la revisión semanal" are [[Work/Weekly review]]` settles both (the loop's fifth run asked which for the second).
+     */
+    val names: List<Named>
+        get() {
+            if (section != MemorySection.PEOPLE) return emptyList()
 
             val note = LINK
                 .find(input = text)
                 ?.groupValues
                 ?.get(1)
-                ?.trim() ?: return null
+                ?.trim() ?: return emptyList()
 
-            return Named(
-                said = said,
-                note = note
-            )
+            return QUOTED
+                .findAll(input = text.substringBefore(delimiter = "[["))
+                .map {
+                    Named(
+                        said = it.groupValues[1],
+                        note = note
+                    )
+                }
+                .toList()
         }
 
     /** "[said]" means the note [note], as a wikilink names it: a title or a path. */

@@ -3,21 +3,73 @@ package app.notekea.chat.domain.loop
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolEffect
+import app.notekea.chat.domain.tool.work.AnswerTool
+import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * A change made to a note the memory says the task does not mean (`docs/agent-memory.md`): "my goals" is Work/Goals
- * 2027 and the change names Personal/Goals 2027. Held back once with the note the memory means; made again, it stands.
+ * A turn that goes against a note settled for its task, by the memory (`docs/agent-memory.md`: "my goals" is
+ * Work/Goals 2027) or by the task's own words (`ToldApart`): a change to another note of the set, a question asking
+ * which, or an answer from another note with the one meant unread. Held back with the note meant.
  */
 internal object MemoryChoice {
     fun heldOf(
         call: ToolCall,
         state: TurnState,
         tool: ChatTool?
-    ): String? {
-        val isChange = tool?.effect == ToolEffect.PROPOSES
-        if (!isChange || state.settled.isEmpty()) return null
+    ): String? = when {
+        state.settled.isEmpty() -> null
 
+        tool?.effect == ToolEffect.PROPOSES -> changedOf(
+            call = call,
+            state = state
+        )
+
+        call.name == AnswerTool.NAME -> answeredOf(state = state)
+
+        else -> null
+    }
+
+    /**
+     * What the model is told when [call] asks the person which note of a settled set: twice at most, as the 4B asked
+     * again right after it was told (the loop's fifth run), and then the question is asked.
+     */
+    fun askedOf(
+        call: ToolCall,
+        state: TurnState
+    ): String? {
+        if (call.name != AskUserTool.NAME) return null
+
+        val options = AskUserTool
+            .optionsOf(call = call)
+            .map {
+                it
+                    .trim()
+                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                    .lowercase()
+            }
+
+        val asked = state.settled.firstOrNull { settled ->
+            (settled.others + settled.meant).count { path ->
+                val whole = bare(path = path).lowercase()
+
+                options.any {
+                    it == whole || it == whole.substringAfterLast(delimiter = '/')
+                }
+            } >= 2
+        } ?: return null
+
+        val isHeld = state.told.add(element = ASKED) || state.told.add(element = ASKED_AGAIN)
+        if (!isHeld) return null
+
+        return "(Not asked: ${whyOf(settled = asked)}, so there is nothing to ask. Do the task with " +
+            "${bare(path = asked.meant)} now.)"
+    }
+
+    private fun changedOf(
+        call: ToolCall,
+        state: TurnState
+    ): String? {
         val named = (listOf(call.text(name = NOTE)) + call.list(name = NOTES))
             .filter { it.isNotEmpty() }
             .mapNotNull { state.turn.pathOf(name = it) }
@@ -29,10 +81,35 @@ internal object MemoryChoice {
 
         if (!state.told.add(element = TOLD)) return null
 
-        val meant = bare(path = missed.meant)
+        return "(Not added: ${whyOf(settled = missed)}. Use that note, unless the task itself says another.)"
+    }
 
-        return "(Not added: the person's memory says the task's words mean $meant. Use that note, unless the task " +
-            "itself says another.)"
+    // An answer from another note of the set, the one meant never read: "Tomás from the chess club" answered with
+    // the phone of the first Tomás read.
+    private fun answeredOf(state: TurnState): String? {
+        val read = state
+            .turn
+            .reads
+            .read
+            .toSet()
+
+        val missed = state.settled.firstOrNull { settled ->
+            settled.meant !in read && settled.others.any { it in read }
+        } ?: return null
+
+        if (!state.told.add(element = ANSWERED)) return null
+
+        return "(Not done: ${whyOf(settled = missed)}, and you have not read it. Read " +
+            "${bare(path = missed.meant)} and answer from it.)"
+    }
+
+    private fun whyOf(settled: AmbiguousTask.Settled): String {
+        val meant = bare(path = settled.meant)
+
+        return settled
+            .said
+            ?.let { "the task says \"$it\", and of the notes it could mean only $meant writes it" }
+            ?: "the person's memory says the task's words mean $meant"
     }
 
     private fun bare(path: RelativePath): String =
@@ -41,4 +118,7 @@ internal object MemoryChoice {
     private const val NOTE = "note"
     private const val NOTES = "notes"
     private const val TOLD = "memory choice"
+    private const val ASKED = "memory asked"
+    private const val ASKED_AGAIN = "memory asked again"
+    private const val ANSWERED = "memory answered"
 }

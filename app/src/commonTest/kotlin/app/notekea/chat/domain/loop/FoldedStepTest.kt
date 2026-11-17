@@ -58,7 +58,8 @@ class FoldedStepTest {
             )
         ),
         clock = Clock.System,
-        stepMemory = FakeStepMemory()
+        stepMemory = FakeStepMemory(),
+        wholeLast = StepRecall.WHOLE_LAST
     )
 
     @Test

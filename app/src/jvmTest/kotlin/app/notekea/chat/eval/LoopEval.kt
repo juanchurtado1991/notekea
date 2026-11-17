@@ -63,9 +63,10 @@ internal object LoopEval {
             stepMemory = SqliteStepMemory().takeIf {
                 System.getProperty("notekea.stepmemory") != "off"
             },
-            // -PstepMemory=whole shows every result whole, to measure folding against it.
+            // -PstepMemory=fold shows only the last results whole, to measure folding again; it is off
+            // (docs/agent-step-memory.md).
             wholeLast = StepRecall.WHOLE_LAST.takeIf {
-                System.getProperty("notekea.stepmemory") != "whole"
+                System.getProperty("notekea.stepmemory") == "fold"
             }
         )
     }

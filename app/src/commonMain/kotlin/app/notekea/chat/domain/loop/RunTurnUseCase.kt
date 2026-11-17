@@ -58,7 +58,7 @@ class RunTurnUseCase(
     private val proposal: ProposalCheck,
     private val clock: Clock,
     private val stepMemory: StepMemory? = null,
-    private val wholeLast: Int? = StepRecall.WHOLE_LAST
+    private val wholeLast: Int? = null
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
     private val router = TurnRouter(llmEngine = llmEngine)
@@ -71,7 +71,10 @@ class RunTurnUseCase(
         openNote: RelativePath?
     ): Flow<AgentStep> = flow {
         val remembered = vaultGuide.memoryOf(vaultPath, notes)
-        val turn = TurnSetup.contextOf(task, vaultPath, notes, context.today, remembered, openNote)
+        val apart = TurnSetup.apartOf(task, vaultPath, notes, vaultGuide)
+
+        val turn =
+            TurnSetup.contextOf(task, vaultPath, notes, context.today, remembered, openNote, apart)
 
         val route = router.route(
             task = task,
@@ -88,11 +91,7 @@ class RunTurnUseCase(
             memory = stepMemory
         )
 
-        val memory = TurnSetup.memoryOf(
-            task = task,
-            remembered = remembered,
-            kind = route.kind
-        )
+        val memory = TurnSetup.memoryOf(task, remembered, route.kind, apart)
 
         // A line the task matched is said as a step, so a wrong memory is seen the first time it matters.
         MemoryLines.matched(lines = memory).forEach {
@@ -109,7 +108,8 @@ class RunTurnUseCase(
             tools = tools,
             instructions = vaultGuide.instructionsOf(vaultPath, notes),
             skill = route.skill,
-            memory = memory
+            memory = memory,
+            apart = apart
         )
 
         val state = TurnState(
@@ -119,6 +119,7 @@ class RunTurnUseCase(
             tools = tools,
             turn = turn,
             memory = memory,
+            apart = apart,
             budget = ContextBudget(
                 llmEngine = llmEngine,
                 tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,

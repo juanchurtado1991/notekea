@@ -17,6 +17,21 @@ internal object TurnChecks {
         state: TurnState,
         tool: ChatTool?
     ): String? {
+        // A question about notes already settled is not asked, read or not.
+        val settled = MemoryChoice.askedOf(
+            call = call,
+            state = state
+        )
+
+        if (settled != null) return settled
+
+        val only = oneOptionOf(
+            call = call,
+            state = state
+        )
+
+        if (only != null) return only
+
         val unread = UnreadChoice.of(
             call = call,
             state = state
@@ -91,6 +106,29 @@ internal object TurnChecks {
 
         return isNeedless && state.told.add(NOT_ASKED)
     }
+
+    // A question with one note as its only answer: the 4B found the one recipe of two servings, then asked "which
+    // recipe? Options: Pancakes" (the loop's fifth run). Held back twice, as it asks again right away.
+    private fun oneOptionOf(
+        call: ToolCall,
+        state: TurnState
+    ): String? {
+        if (call.name != AskUserTool.NAME) return null
+
+        val only = AskUserTool
+            .optionsOf(call = call)
+            .singleOrNull()
+            ?.let { state.turn.pathOf(name = it) } ?: return null
+
+        val isHeld = state.told.add(ONE_OPTION) || state.told.add(ONE_OPTION_AGAIN)
+
+        val held = "(Not asked: one note is nothing to choose between. Do the task with $only now.)"
+
+        return held.takeIf { isHeld }
+    }
+
+    private const val ONE_OPTION = "one option"
+    private const val ONE_OPTION_AGAIN = "one option again"
 
     private const val NOT_ASKED =
         "(Not asked: the task names what it means, all of them, so there is nothing to choose. Do it with " +

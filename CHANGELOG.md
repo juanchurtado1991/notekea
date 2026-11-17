@@ -18,8 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   without asking, and it can remember which sites you trust or not.
 - The chat's new loop keeps what a request's steps found aside, so a page read early is not lost when later
   reads fill what the model can see: the parts the request needs come back, and the model can ask for one back
-  (`recall`). Kept only while the request runs, never written to a file. To lighten a small model's load, it
-  sees only its last three results whole while it works; the longer ones before them are one line it can recall.
+  (`recall`). Kept only while the request runs, never written to a file.
 - The web's evaluation: 50 tasks the chat works on the real web, graded by hand. They are where to buy in your
   country, facts and prices with their sources, pages clipped, deep notes, research, and what must stay safe.
 - The chat's new loop reads its memory, `Notekea/Memory.md`: what you approved it to remember, such as which
@@ -122,6 +121,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The chat's new loop no longer ends an answer from your notes with a link it made up: an answer links only to
+  pages the request searched or read.
+- The chat's new loop knows which note you mean without asking, when your request or its memory says so: "Tomás
+  from the chess club" is the Tomás tagged club, "my Sunday weekly review" the one held on Sundays, and "my
+  goals" the note the memory names. It no longer asks "which one?" with a single note to choose.
+- The chat's new loop writes a note from several notes ("a note with what I learnt from each book") instead of
+  asking which of them you meant or dropping them.
+- The chat's new loop finds a group of notes in one step: a search names every note that writes its words, a
+  folder's list shows each note's tags and open tasks, and links are followed when organizing and writing.
+- The chat's new loop adds up a property across notes, understands "15 de noviembre" and "November 3rd" as
+  dates, tags instead of setting a property when asked to tag, and says why a choice by properties found nothing.
 - The chat no longer asks which of two notes you mean when both answers are the same note, once by its name and
   once by its folder.
 - The chat reads a page you ticked even when the model shortens its address at its `?` or `&`, as it did with a

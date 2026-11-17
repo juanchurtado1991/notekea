@@ -121,7 +121,8 @@ class VaultGuide(private val noteTextCache: NoteTextCache) {
         )
     }
 
-    private suspend fun textsOf(
+    /** The text of each of [notes] that can be read, without its frontmatter's edges of blank space. */
+    suspend fun textsOf(
         vaultPath: String,
         notes: List<NoteEntry>
     ): Map<RelativePath, String> = noteTextCache

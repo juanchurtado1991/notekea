@@ -12,13 +12,32 @@ import app.notekea.core.notes.domain.RelativePath
 internal object AmbiguousTask {
     /**
      * The first set of two notes or more [task] can mean and does not say which of, by their paths; else empty. A set
-     * the memory [settled] (`"Laura" is [[Laura Castro]]`, said in the task) is not open (`docs/agent-memory.md`).
+     * the memory [settled] (`"Laura" is [[Laura Castro]]`, said in the task) is not open (`docs/agent-memory.md`),
+     * nor one the notes themselves tell apart ([told], `ToldApart`).
      */
     fun notesOf(
         task: String,
         notes: Collection<NoteEntry>,
+        settled: List<MemoryLine.Named> = emptyList(),
+        told: List<Settled> = emptyList()
+    ): List<RelativePath> = openOf(
+        task = task,
+        notes = notes,
+        settled = settled
+    )
+        .firstOrNull { group ->
+            told.none {
+                it.meant in group
+            }
+        }
+        .orEmpty()
+
+    /** Every set of two notes or more [task] can mean and does not say which of, but those the memory [settled]. */
+    fun openOf(
+        task: String,
+        notes: Collection<NoteEntry>,
         settled: List<MemoryLine.Named> = emptyList()
-    ): List<RelativePath> {
+    ): List<List<RelativePath>> {
         val said = wordsOf(text = task)
         if (said.any { it in PLURAL }) return emptyList()
 
@@ -32,14 +51,16 @@ internal object AmbiguousTask {
             said = said,
             named = named
         )
-            .firstOrNull { group ->
+            .filter { group ->
                 val isOpen =
                     !isToldApart(group = group, said = said) && !isSettled(group, task, settled)
 
                 group.size in 2..MOST_OPTIONS && isOpen
             }
-            ?.map { it.path }
-            .orEmpty()
+            .map { group ->
+                group.map { it.path }
+            }
+            .toList()
     }
 
     /**
@@ -64,11 +85,20 @@ internal object AmbiguousTask {
             .filter { it.isMarkdown }
             .map { Named(path = it) }
 
-        return candidatesOf(
-            task = task,
-            said = said,
-            named = named
-        )
+        // The notes that share a name with the one a line means, whatever the task's words: "my goals" and "la
+        // revisión semanal" are no set the task's own words find (the loop's fifth run asked which for both).
+        val sharing = named
+            .groupBy { it.title }
+            .values
+            .asSequence()
+
+        return (
+            candidatesOf(
+                task = task,
+                said = said,
+                named = named
+            ) + sharing
+            )
             .filter { group ->
                 group.size in 2..MOST_OPTIONS && !isToldApart(group = group, said = said)
             }
@@ -90,13 +120,18 @@ internal object AmbiguousTask {
                     }.map { it.path }
                 )
             }
+            .distinct()
             .toList()
     }
 
-    /** A set of notes the memory settled: the one it [meant], and the [others] the task's words could also mean. */
+    /**
+     * A set of notes settled: the one [meant], and the [others] the task's words could also mean. Settled by the
+     * memory, or by a word the task [said] that only the one meant writes (`ToldApart`).
+     */
     data class Settled(
         val meant: RelativePath,
-        val others: List<RelativePath>
+        val others: List<RelativePath>,
+        val said: String? = null
     )
 
     // The note a line of the memory links, when the task says that line's words and does not qualify them.

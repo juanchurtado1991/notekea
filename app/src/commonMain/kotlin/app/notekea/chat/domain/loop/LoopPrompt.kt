@@ -6,6 +6,7 @@ import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.memory.domain.MemoryLine
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What the model is given at each step of the one loop (`docs/agent-loop.md`, step 5): how it works, the tools of
@@ -24,6 +25,11 @@ internal object LoopPrompt {
         "What the person approved for you to remember. Their request wins over it. When it says which note a " +
             "name means, that is settled: use that note and never ask which."
     private const val MAX_NAMES = 120
+
+    // The note the task means among several of its name, worked out from what the notes say (`ToldApart`).
+    private const val APART_HEADING =
+        "The note this task means, where several share its name: settled by the task's own words. Use that " +
+            "note and never ask which."
 
     private const val RULES =
         """You work on a task in the person's notes app, one step at a time. Each step you call one tool and see
@@ -69,7 +75,8 @@ Tools:
         tools: ToolRegistry,
         instructions: String?,
         skill: Skill?,
-        memory: List<MemoryLine> = emptyList()
+        memory: List<MemoryLine> = emptyList(),
+        apart: List<AmbiguousTask.Settled> = emptyList()
     ): String = RULES + tools.described() +
         instructions
             ?.let { "\n\nThe person's instructions for this vault (follow them):\n$it" }
@@ -80,6 +87,20 @@ Tools:
                 separator = "\n",
                 prefix = "\n\n$MEMORY_HEADING\n"
             ) { "- ${it.text}" }
+            .orEmpty() +
+        apart
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(
+                separator = "\n",
+                prefix = "\n\n$APART_HEADING\n"
+            ) {
+                val meant = it
+                    .meant
+                    .value
+                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+
+                "- $meant (only it writes \"${it.said}\")"
+            }
             .orEmpty() +
         skill
             ?.let { "\n\nFor this kind of work (${it.name}):\n${it.instructions}" }
