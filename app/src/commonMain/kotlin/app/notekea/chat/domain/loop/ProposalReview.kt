@@ -1,6 +1,7 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.plan.ActionField
+import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.NoteProperties
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.change.ProposeTool
@@ -52,11 +53,15 @@ internal object ProposalReview {
             }
     }
 
-    // The notes the changes name, each once, as they were written.
+    // The notes the changes act on, each once, as they were written: a new note's sources are what it is written
+    // from, and dropping them emptied the note (the loop's fifth run, eight notes on the 4B never written).
     private fun notesOf(state: TurnState): List<String> = state
         .turn
         .work
         .changes
+        .filter {
+            it.kind != ActionKind.WRITE_FROM_NOTES
+        }
         .flatMap {
             it.notes + listOfNotNull(it[ActionField.NOTE])
         }

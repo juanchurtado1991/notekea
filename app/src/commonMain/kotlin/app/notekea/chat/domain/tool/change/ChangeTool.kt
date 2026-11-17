@@ -86,17 +86,12 @@ class ChangeTool(
             return ToolResult(forModel = "$name: not added. $misused")
         }
 
-        val one = SingularTask.oneIn(task = context.task)
-        val isMany = step.notes.size > 1 && one != null
-        val isWarned = isMany && context.work.warn(about = name)
+        val many = manyOf(
+            step = step,
+            context = context
+        )
 
-        if (isWarned) {
-            return ToolResult(
-                forModel = "$name: not added yet. The task says \"$one\", one, and this names " +
-                    "${step.notes.size} notes. If the task means one of them and does not say which, ask_user " +
-                    "with them as the options; if it means them all, call $name again."
-            )
-        }
+        if (many != null) return ToolResult(forModel = many)
 
         val shared = sharedOf(
             step = step,
@@ -137,6 +132,42 @@ class ChangeTool(
             forModel = "$name: added. The proposal now holds:\n$proposal\nIf the task asks for a change that " +
                 "is not in it, add that one; else call propose now. Add nothing the task does not ask for."
         )
+    }
+
+    // Several notes named where the task says one, told once. A new note's notes are what it is written from, not
+    // what it changes: "the garden" may take two (the loop's fifth run asked which garden note for "a note Garden
+    // budget").
+    private fun manyOf(
+        step: PlannedStep,
+        context: ToolContext
+    ): String? {
+        val one = SingularTask.oneIn(task = context.task).takeIf {
+            kind != ActionKind.WRITE_FROM_NOTES
+        }
+
+        val isMany = step.notes.size > 1 && one != null
+        val isWarned = isMany && context.work.warn(about = name)
+        if (!isWarned) return null
+
+        // One of them is the note settled for the task (the memory, or the task's own words): no question.
+        val meant = step
+            .notes
+            .mapNotNull { context.noteNamed(name = it) }
+            .singleOrNull {
+                it in context.remembered
+            }
+            ?.value
+            ?.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+
+        val open =
+            "If the task means one of them and does not say which, ask_user with them as the options; " +
+                "if it means them all, call $name again."
+
+        val next =
+            meant?.let { "The task means $it: call $name again with only that note." } ?: open
+
+        return "$name: not added yet. The task says \"$one\", one, and this names " +
+            "${step.notes.size} notes. $next"
     }
 
     // A note named by a name other notes share (Home/Budget 2026, Work/Budget 2026), its folder not in the task.

@@ -10,7 +10,7 @@ internal object SingularTask {
         option = RegexOption.IGNORE_CASE
     )
     private val PLURAL = Regex(
-        pattern = "\\b(all|every|each|both|todas|todos|cada|ambos|ambas)\\b",
+        pattern = "\\b(all|every|everyone|everybody|each|both|todas|todos|cada|ambos|ambas)\\b",
         option = RegexOption.IGNORE_CASE
     )
     private val NOT_THINGS =
