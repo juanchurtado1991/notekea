@@ -1,6 +1,7 @@
 package app.notekea.chat.domain.agent
 
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
+import app.notekea.chat.domain.prompt.AnswerLinks
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
@@ -47,9 +48,11 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
             return summary
         }
 
-        return text
-            .toString()
-            .trim()
+        return AnswerLinks
+            .kept(
+                answer = text.toString(),
+                known = (looked + task).joinToString(separator = "\n")
+            )
             .ifEmpty { summary }
     }
 
