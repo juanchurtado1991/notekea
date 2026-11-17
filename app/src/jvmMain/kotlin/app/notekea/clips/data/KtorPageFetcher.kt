@@ -8,13 +8,13 @@ import app.notekea.core.domain.Outcome
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.HttpHeaders
 import io.ktor.http.charset
-import io.ktor.utils.io.readAvailable
+import io.ktor.http.contentLength
 import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import java.net.URI
@@ -50,45 +50,78 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
                     return@withContext Outcome.Failure(error = it)
                 }
 
-                val response = try {
-                    client.get(urlString = current) { header(HttpHeaders.UserAgent, USER_AGENT) }
+                // Streamed, not `get`: a `get` holds the whole body in memory before the cap could be checked.
+                val step = try {
+                    client
+                        .prepareGet(urlString = current) {
+                            header(HttpHeaders.UserAgent, USER_AGENT)
+                        }
+                        .execute {
+                            stepOf(
+                                response = it,
+                                url = current
+                            )
+                        }
                 } catch (exception: Exception) {
                     if (exception is kotlinx.coroutines.CancellationException) throw exception
 
                     return@withContext Outcome.Failure(error = errorOf(exception = exception))
                 }
 
-                val status = response.status.value
-                val location = response.headers[HttpHeaders.Location]
-
-                if (status in REDIRECTS && location != null) {
-                    // A Location no address can be made of ("/docs/my page") is a page that cannot be read.
-                    current = try {
-                        URI(current).resolve(location).toString()
-                    } catch (_: IllegalArgumentException) {
-                        val unreadable = ClipError.Refused(status = status)
-
-                        return@withContext Outcome.Failure(error = unreadable)
-                    }
-
-                    return@repeat
+                when (step) {
+                    is Step.Redirect -> current = step.to
+                    is Step.Done -> return@withContext step.outcome
                 }
-
-                val refused = ClipError.Refused(status = status)
-                if (status !in OK) return@withContext Outcome.Failure(error = refused)
-
-                return@withContext bodyOf(response = response)?.let {
-                    Outcome.Success(
-                        value = FetchedPage(
-                            url = current,
-                            html = it
-                        )
-                    )
-                } ?: Outcome.Failure(error = ClipError.TooLarge)
             }
 
             Outcome.Failure(error = ClipError.Refused(status = TOO_MANY_REDIRECTS))
         }
+
+    private suspend fun stepOf(
+        response: HttpResponse,
+        url: String
+    ): Step {
+        val status = response.status.value
+        val refusal = Outcome.Failure(error = ClipError.Refused(status = status))
+        val refused = Step.Done(outcome = refusal)
+
+        val location = response
+            .headers[HttpHeaders.Location]
+            ?.takeIf {
+                status in REDIRECTS
+            }
+
+        if (location != null) {
+            // A Location no address can be made of ("/docs/my page") is a page that cannot be read.
+            val next = try {
+                URI(url).resolve(location).toString()
+            } catch (_: IllegalArgumentException) {
+                return refused
+            }
+
+            return Step.Redirect(to = next)
+        }
+
+        if (status !in OK) return refused
+
+        val html = PageBody.read(
+            channel = response.bodyAsChannel(),
+            declaredLength = response.contentLength(),
+            declaredCharset = response.charset(),
+            maxBytes = MAX_BYTES
+        )
+
+        val outcome = html?.let {
+            Outcome.Success(
+                value = FetchedPage(
+                    url = url,
+                    html = it
+                )
+            )
+        } ?: Outcome.Failure(error = ClipError.TooLarge)
+
+        return Step.Done(outcome = outcome)
+    }
 
     // An address Notekea may fetch: http or https to a host on the internet.
     private fun checked(url: String): ClipError? {
@@ -108,22 +141,6 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
         return if (isLocal) ClipError.LocalAddress else null
     }
 
-    private suspend fun bodyOf(response: HttpResponse): String? {
-        val channel = response.bodyAsChannel()
-        val bytes = java.io.ByteArrayOutputStream()
-        val buffer = ByteArray(size = BUFFER)
-
-        while (!channel.isClosedForRead) {
-            val read = channel.readAvailable(buffer)
-            if (read > 0) bytes.write(buffer, 0, read)
-            if (bytes.size() > MAX_BYTES) return null
-            if (read < 0) break
-        }
-
-        // The charset the response declares, else UTF-8: an older site's Latin-1 page keeps its accents.
-        return bytes.toString(response.charset() ?: Charsets.UTF_8)
-    }
-
     private fun errorOf(exception: Exception): ClipError {
         val name = exception::class.simpleName.orEmpty()
 
@@ -138,6 +155,13 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
         }
     }
 
+    // What one request leads to: the next address of a redirect, or the fetch's outcome.
+    private sealed interface Step {
+        data class Redirect(val to: String) : Step
+
+        data class Done(val outcome: Outcome<FetchedPage, ClipError>) : Step
+    }
+
     private companion object {
         const val HTTP = "http"
         const val HTTPS = "https"
@@ -147,7 +171,6 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
 
         // A news page of 2026 weighs 4 MB with its scripts (CNN, the developer's try of 2026-11-11).
         const val MAX_BYTES = 10 * 1024 * 1024
-        const val BUFFER = 64 * 1024
         const val TIMEOUT_MILLIS = 20_000L
         const val CONNECT_MILLIS = 10_000L
         val OK = 200..299

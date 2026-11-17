@@ -6,10 +6,12 @@ import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.domain.frontmatter.YamlValues
 
+// Keys, conditions and orders are read whatever their case and spacing (`Filters:`, `Is empty`, `Descending`), as a
+// person types them by hand, and a comment after a value is left out as on a note's own frontmatter.
 /**
  * A query as the YAML of its `query` code block: `filters` (each a `property`, a `condition` and a `value`), `sort` (a
- * `property` and an `order`) and `columns`, every part optional. It is read with the frontmatter's own blocks, and
- * [read] names the first line it cannot.
+ * `property` and an `order`, or the property alone) and `columns`, every part optional, read with the frontmatter's
+ * own blocks; [read] names the first line it cannot.
  */
 class QueryYaml {
     private val frontmatterReader = FrontmatterReader()
@@ -42,7 +44,7 @@ class QueryYaml {
                 return@forEach
             }
 
-            query = when (block.key) {
+            query = when (QueryCondition.wordsOf(text = block.key)) {
                 FILTERS -> when (val filters = filtersOf(block = block, line = blockLine)) {
                     is Read.Done -> query.copy(filters = filters.value)
                     is Read.Failed -> return filters.invalid
@@ -218,6 +220,13 @@ class QueryYaml {
         block: FrontmatterBlocks.Block,
         line: Int
     ): Read<QuerySort?> {
+        if (block.inlineValue.isNotEmpty()) {
+            return inlineSortOf(
+                block = block,
+                line = line
+            )
+        }
+
         val parts = mutableMapOf<String, String>()
 
         block.continuation.forEachIndexed { index, text ->
@@ -228,7 +237,9 @@ class QueryYaml {
             }
                 ?: return Read.Failed(unknownKey(line = line + index + 1))
 
-            val isUnknownOrder = part.first == ORDER && part.second !in ORDERS
+            val isOrder = part.first == ORDER
+            val written = if (isOrder) QueryCondition.wordsOf(text = part.second) else part.second
+            val isUnknownOrder = isOrder && written !in ORDERS
 
             if (isUnknownOrder) {
                 return Read.Failed(
@@ -239,7 +250,7 @@ class QueryYaml {
                 )
             }
 
-            parts[part.first] = part.second
+            parts[part.first] = written
         }
 
         val property = parts[PROPERTY]
@@ -258,6 +269,22 @@ class QueryYaml {
         )
     }
 
+    /** `sort: rating`: the property alone, ascending; lines under it as well would say two things. */
+    private fun inlineSortOf(
+        block: FrontmatterBlocks.Block,
+        line: Int
+    ): Read<QuerySort?> {
+        val offset = block.continuation.indexOfFirst {
+            !isIgnored(line = it)
+        }
+
+        if (offset >= 0) return Read.Failed(unknownKey(line = line + offset + 1))
+
+        val property = YamlValues.unquoted(text = block.inlineValue)
+
+        return Read.Done(value = QuerySort(property = property))
+    }
+
     /** The columns of [block], or null when it is no list. */
     private fun columnsOf(block: FrontmatterBlocks.Block): List<String>? = when (
         val value = frontmatterReader.valueOf(block = block)
@@ -267,7 +294,10 @@ class QueryYaml {
         else -> null
     }
 
-    /** The key and the value of a line under a key, without its list mark, indent and quotes. */
+    /**
+     * The key and the value of a line under a key, without its list mark, indent, comment and quotes: the comment
+     * goes first, as on a top-level line, or `value: 3 # stars` is no number.
+     */
     private fun partOf(text: String): Pair<String, String>? {
         val line = text
             .trim()
@@ -275,10 +305,12 @@ class QueryYaml {
             .trim()
 
         if (FrontmatterBlocks.KEY_SEPARATOR !in line) return null
-        val key = line.substringBefore(delimiter = FrontmatterBlocks.KEY_SEPARATOR).trim()
+        val key = line.substringBefore(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
         val value = line.substringAfter(delimiter = FrontmatterBlocks.KEY_SEPARATOR).trim()
 
-        return key to YamlValues.unquoted(text = value)
+        return QueryCondition.wordsOf(text = key) to YamlValues.unquoted(
+            text = YamlValues.withoutComment(text = value)
+        )
     }
 
     private fun isIgnored(line: String): Boolean = line.isBlank() || line.trimStart().startsWith(

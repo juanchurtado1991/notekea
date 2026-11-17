@@ -82,6 +82,46 @@ class FrontmatterReaderTest {
         )
     }
 
+    // Bug hunt S7: the apostrophe in "Don't" opened a quote, so the comment after it stayed in the value.
+    @Test
+    fun `an apostrophe inside a value opens no quote, one at its start or in a list item does`() {
+        val values = listOf(
+            "Don't stop # note",
+            "O'Brien # the author",
+            "'it # is' # quoted",
+            "'it''s # one' # quoted",
+            "[a, 'b # c'] # list"
+        )
+
+        assertEquals(
+            expected = listOf("Don't stop", "O'Brien", "'it # is'", "'it''s # one'", "[a, 'b # c']"),
+            actual = values.map { YamlValues.withoutComment(text = it) }
+        )
+    }
+
+    // Bug hunt S6: a comment line under a property turned its value into an unreadable one.
+    @Test
+    fun `a comment line under a property leaves its value as it is`() {
+        val content =
+            reader.read(header = "---\nstatus: draft\n# kept for later\nrating: 4\n  # five\n---\n")
+
+        assertEquals(
+            expected = FrontmatterContent.Properties(
+                properties = listOf(
+                    NoteProperty(
+                        key = "status",
+                        value = PropertyValue.Text(text = "draft")
+                    ),
+                    NoteProperty(
+                        key = "rating",
+                        value = PropertyValue.Number(text = "4")
+                    )
+                )
+            ),
+            actual = content
+        )
+    }
+
     @Test
     fun `no frontmatter, a stray line and a repeated key are told apart`() {
         assertEquals(

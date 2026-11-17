@@ -102,7 +102,7 @@ class VaultActionFinderTest {
                     notes = listOf(home),
                     text = "Pay rent"
                 ),
-                notes = listOf(note)
+                tasks = note.metadata.tasks
             )
 
             assertEquals(
@@ -140,7 +140,7 @@ class VaultActionFinderTest {
                 notes = listOf(home),
                 text = "Buy milk and eggs 📅 2027-01-05"
             ),
-            notes = listOf(note)
+            tasks = note.metadata.tasks
         )
 
         assertEquals(
@@ -216,6 +216,95 @@ class VaultActionFinderTest {
                     .map { it.note.value }
             )
         }
+
+    // A7: "call" ticked "Call mom" of "Call mom" and "Call dentist".
+    @Test
+    fun `of two tasks the words fit alike neither is ticked, and the step fails`() = runTest {
+        store.texts[home] = "- [ ] Call mom\n- [ ] Call dentist\n"
+
+        val done = finder.completeTask(
+            vaultPath = VAULT,
+            step = ActionStep(
+                kind = ActionKind.COMPLETE_TASK,
+                notes = listOf(home),
+                text = "call"
+            ),
+            tasks = listOf(
+                task(
+                    state = 3,
+                    end = 14,
+                    text = "Call mom"
+                ),
+                task(
+                    state = 18,
+                    end = 33,
+                    text = "Call dentist"
+                )
+            )
+        )
+
+        assertEquals(
+            expected = listOf<Any?>(
+                Outcome.Failure(error = ActionProblem.UnknownTask(text = "call")),
+                "- [ ] Call mom\n- [ ] Call dentist\n"
+            ),
+            actual = listOf(done, store.texts[home])
+        )
+    }
+
+    // A8: a zip code lost its zero and a phone its plus in any YAML reader.
+    @Test
+    fun `only a plain decimal is written as a number, text that looks like one stays text`() =
+        runTest {
+            val written = listOf("08001", "007", "0.5", "42").map { value ->
+                store.texts[home] = "# Home\n"
+
+                finder.setProperty(
+                    vaultPath = VAULT,
+                    step = ActionStep(
+                        kind = ActionKind.SET_PROPERTY,
+                        notes = listOf(home),
+                        property = "code",
+                        value = value
+                    ),
+                    path = home,
+                    notes = emptyList()
+                )
+
+                store
+                    .texts[home]
+                    .orEmpty()
+                    .lines()[1]
+            }
+
+            assertEquals(
+                expected = listOf(
+                    "code: \"08001\"",
+                    "code: \"007\"",
+                    "code: 0.5",
+                    "code: 42"
+                ),
+                actual = written
+            )
+        }
+
+    // T14: "tomorrow" is no period here, and its tasks were every open task, shown as tomorrow's.
+    @Test
+    fun `a period of no name here is no period`() = runTest {
+        val found = finder.find(
+            vaultPath = VAULT,
+            step = ActionStep(
+                kind = ActionKind.SHOW_TASKS,
+                period = "tomorrow"
+            ),
+            notes = emptyList()
+        ) as Outcome.Success
+
+        assertEquals(
+            expected = null,
+            actual = found.value.period
+        )
+    }
 
     private fun task(
         state: Int,

@@ -94,4 +94,41 @@ class DuckDuckGoSearchTest {
             )
         )
     }
+
+    // The bug hunt of 2026-11-17 (E6): a rate-limited search gets HTTP 202 with a challenge page and no results, which
+    // was told as nothing found.
+    @Test
+    fun `a challenge page for bots is a block, and DuckDuckGo's own no results is nothing found`() =
+        runTest {
+            val challenge = """
+            <form id="challenge-form" action="//duckduckgo.com/anomaly.js?cc=botnet">
+            <div class="anomaly-modal__title">Unfortunately, bots use DuckDuckGo too.</div></form>
+            """.trimIndent()
+
+            val none = "<div class=\"no-results\">No results.</div>"
+
+            val outcomes = listOf(challenge, none).map { html ->
+                val search = DuckDuckGoSearch { url ->
+                    Outcome.Success(
+                        value = FetchedPage(
+                            url = url,
+                            html = html
+                        )
+                    )
+                }
+
+                search.search(
+                    query = "x",
+                    country = null
+                )
+            }
+
+            assertEquals(
+                expected = listOf<Any>(
+                    Outcome.Failure(error = WebSearchProblem.BLOCKED),
+                    Outcome.Failure(error = WebSearchProblem.NOTHING_FOUND)
+                ),
+                actual = outcomes
+            )
+        }
 }

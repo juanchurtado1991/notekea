@@ -5,16 +5,40 @@ package app.notekea.core.web.domain
  * request ("in Mexico", "en Colombia") or the memory ("I live in Bogotá, Colombia") says it, to its ISO code.
  */
 object Countries {
-    /** The ISO code of the first country [text] names; null when it names none. */
+    /** The ISO code of the first country [text] names, by where it is in the text; null when it names none. */
     fun codeIn(text: String): String? {
         val words = folded(text = text)
 
         return NAMES
             .entries
-            .firstOrNull { (name, _) ->
-                Regex(pattern = "\\b$name\\b").containsMatchIn(input = words)
+            .mapNotNull { (name, code) ->
+                positionOf(
+                    name = name,
+                    words = words
+                )?.let {
+                    it to code
+                }
             }
-            ?.value
+            .minByOrNull { it.first }
+            ?.second
+    }
+
+    // Where [name] starts in [words]. A name that is also a common word ("chile relleno", "una cuba de vino") only
+    // counts after a preposition, as a place is said: "en Chile", "in the USA"; not after "de", which
+    // a food takes as much ("salsa de chile").
+    private fun positionOf(
+        name: String,
+        words: String
+    ): Int? {
+        val escaped = Regex.escape(literal = name)
+        val before = if (name in AMBIGUOUS) "(?:en|in|desde|from|a|to) (?:the )?" else ""
+        val pattern = "(?<![a-z])$before$escaped(?![a-z])"
+
+        return Regex(pattern = pattern)
+            .find(input = words)
+            ?.let {
+                it.range.last + 1 - name.length
+            }
     }
 
     /** The name of the country of [code] as a search writes it ("Costa Rica"); null for a code it does not know. */
@@ -39,6 +63,9 @@ object Countries {
     private val ACCENTS =
         mapOf('á' to 'a', 'é' to 'e', 'í' to 'i', 'ó' to 'o', 'ú' to 'u', 'ñ' to 'n')
 
+    // Bare "usa" is the Spanish verb ("usa la web"), "chile" a food, "cuba" a barrel, "el salvador" a title.
+    private val AMBIGUOUS = setOf("usa", "chile", "cuba", "panama", "el salvador")
+
     private val NAMES = mapOf(
         "colombia" to "CO", "mexico" to "MX", "argentina" to "AR", "chile" to "CL", "peru" to "PE",
         "venezuela" to "VE", "ecuador" to "EC", "bolivia" to "BO", "uruguay" to "UY", "paraguay" to "PY",
@@ -46,8 +73,10 @@ object Countries {
         "el salvador" to "SV", "nicaragua" to "NI", "cuba" to "CU", "republica dominicana" to "DO",
         "dominican republic" to "DO",
         "puerto rico" to "PR", "spain" to "ES", "espana" to "ES", "united states" to "US",
-        "estados unidos" to "US", "usa" to "US", "canada" to "CA", "brazil" to "BR", "brasil" to "BR",
-        "united kingdom" to "GB", "reino unido" to "GB", "france" to "FR", "francia" to "FR", "germany" to "DE", "alemania" to "DE",
+        "estados unidos" to "US", "ee. uu." to "US", "ee.uu." to "US", "eeuu" to "US",
+        "usa" to "US", "canada" to "CA", "brazil" to "BR", "brasil" to "BR",
+        "united kingdom" to "GB", "reino unido" to "GB", "france" to "FR", "francia" to "FR",
+        "germany" to "DE", "alemania" to "DE",
         "italy" to "IT", "italia" to "IT", "portugal" to "PT", "japan" to "JP", "japon" to "JP"
     )
 }

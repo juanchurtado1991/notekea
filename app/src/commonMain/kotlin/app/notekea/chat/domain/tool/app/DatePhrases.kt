@@ -86,11 +86,16 @@ internal object DatePhrases {
                 said = said,
                 today = today
             )
-            ?: moved(
+            ?: inWeek(
                 said = said,
+                weekday = weekday + 1,
                 today = today
             )
             ?: ended(
+                said = said,
+                today = today
+            )
+            ?: moved(
                 said = said,
                 today = today
             )
@@ -255,6 +260,39 @@ internal object DatePhrases {
         else -> null
     }
 
+    // A weekday of next week, or the last one gone: "friday next week" was the day a week on, and "last friday"
+    // the coming one (T11). [weekday] is 1 for Monday, 0 for none.
+    private fun inWeek(
+        said: String,
+        weekday: Int,
+        today: CalendarDate
+    ): CalendarDate? {
+        if (weekday < 1) return null
+
+        val isNextWeek = NEXT_WEEK.any {
+            it in said
+        }
+
+        val isLast = LAST.containsMatchIn(input = said)
+
+        return when {
+            isNextWeek -> {
+                val monday = today.plusDays(days = 1L - today.dayOfWeek + WEEK)
+
+                monday.plusDays(days = weekday - 1L)
+            }
+
+            isLast -> {
+                val back = (today.dayOfWeek - weekday).mod(other = CalendarDate.DAYS_IN_WEEK)
+
+                today.plusDays(days = -(if (back == 0) WEEK else back.toLong()))
+            }
+
+            else -> null
+        }
+    }
+
+    // "end of next month" is the last day of next month, not this day of it (T11).
     private fun ended(
         said: String,
         today: CalendarDate
@@ -266,19 +304,31 @@ internal object DatePhrases {
 
         val isYear = "year" in said || " ano" in said
         val isMonth = "month" in said || "mes" in said
+        val isNext = NEXT.containsMatchIn(input = said)
+
+        val ahead = when {
+            !isNext -> 0L
+            isYear -> CalendarDate.MONTHS.toLong()
+            else -> 1L
+        }
+
+        val base = plusMonths(
+            date = today,
+            months = ahead
+        )
 
         return when {
             !isEnd -> null
 
-            isYear -> today.copy(
+            isYear -> base.copy(
                 month = CalendarDate.MONTHS,
                 day = LAST_DAY_OF_YEAR
             )
 
-            isMonth -> today.copy(
+            isMonth -> base.copy(
                 day = CalendarDate.lengthOfMonth(
-                    year = today.year,
-                    month = today.month
+                    year = base.year,
+                    month = base.month
                 )
             )
 
@@ -320,6 +370,10 @@ internal object DatePhrases {
     }
 
     private const val LAST_DAY_OF_YEAR = 31
+
+    private val NEXT_WEEK = listOf("next week", "proxima semana", "semana que viene")
+    private val LAST = Regex(pattern = "\\b(last|past|previous|pasado|anterior)\\b")
+    private val NEXT = Regex(pattern = "\\b(next|proximo|que viene)\\b")
 
     private val OFFSET = Regex(
         pattern = "(\\d+|an?|one|two|three|un|una|dos|tres)\\s+(days?|weeks?|months?|dias?|semanas?|mes|meses)" +

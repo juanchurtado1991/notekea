@@ -12,40 +12,24 @@ import java.io.File
 internal object LargeFiles {
     const val MAX_BYTES = 100L * 1024 * 1024
     private val logger = Logger.withTag(tag = "Sync")
-    private val SPECIAL = Regex(pattern = "([\\\\*?\\[\\]!#])")
 
     /** Leaves out of [git] the files not yet in it that are over [maxBytes]; their paths. */
     fun leaveOut(
         git: Git,
+        untracked: Set<String>,
         maxBytes: Long = MAX_BYTES
     ): List<String> {
         val workTree = git.repository.workTree
 
-        val large = git
-            .status()
-            .call()
-            .untracked
-            .filter {
-                File(workTree, it).length() > maxBytes
-            }
+        val large = untracked.filter {
+            File(workTree, it).length() > maxBytes
+        }
 
         if (large.isEmpty()) return emptyList()
 
-        val exclude = File(git.repository.directory, "info/exclude")
-        exclude.parentFile.mkdirs()
-
-        exclude.appendText(
-            large
-                .joinToString(
-                    separator = "\n",
-                    prefix = "\n",
-                    postfix = "\n"
-                ) {
-                    "/" + it.replace(
-                        regex = SPECIAL,
-                        replacement = "\\\\$1"
-                    )
-                }
+        JGitExclude.add(
+            git = git,
+            paths = large
         )
 
         logger.w { "${large.size} file(s) over 100 MB are not synced" }

@@ -1,10 +1,11 @@
 package app.notekea.chat.domain.context
 
 import app.notekea.core.llm.domain.LlmEngine
+import kotlin.math.pow
 
 /**
- * What a turn's prompt may hold of what the turn found, in the model's tokens (`docs/agent-loop.md`, step 2): whole
- * entries, the oldest dropped first and several at once; the newest always kept. With a [memory] and [wholeLast], the
+ * What a turn's prompt may hold of what it found, in the model's tokens (`docs/agent-loop.md`, step 2): the oldest
+ * dropped first, the newest kept and cut to the room when it alone is over it. With a [memory] and [wholeLast], the
  * step's prompt shows less on purpose ([shown]); one budget a turn, carrying on [FittedContext.dropped].
  */
 class ContextBudget(
@@ -44,30 +45,62 @@ class ContextBudget(
             } ?: most
         }
 
-        val kept = entries.drop(n = dropped)
+        val line = droppedLine(
+            count = dropped,
+            canRecall = memory != null
+        ).takeIf {
+            dropped > 0
+        }
 
-        if (dropped == 0) {
+        val lineTokens = if (line == null) 0 else countOf(text = line)
+
+        val kept = keptOf(
+            entries = entries.drop(n = dropped),
+            room = room - lineTokens
+        )
+
+        if (line == null) {
             return FittedContext(
                 entries = kept,
                 dropped = 0
             )
         }
 
-        val line = droppedLine(
-            count = dropped,
-            canRecall = memory != null
-        )
-
         val recalled = recalledOf(
             entries = entries,
             dropped = dropped,
-            free = room - sizes.drop(n = dropped).sum() - countOf(text = line)
+            free = room - kept.sumOf { countOf(text = it) } - countOf(text = line)
         )
 
         return FittedContext(
             entries = listOfNotNull(line, recalled) + kept,
             dropped = dropped
         )
+    }
+
+    // The newest entry alone over the room overflowed the call, which was then taken for an unreadable one (the bug
+    // hunt of 2026-11-17, E4): it is cut to the room, its start kept, rather than sent whole.
+    private suspend fun keptOf(
+        entries: List<String>,
+        room: Int
+    ): List<String> {
+        val newest = entries.singleOrNull() ?: return entries
+        val size = countOf(text = newest)
+        if (size <= room) return entries
+
+        val share = room.coerceAtLeast(minimumValue = 0).toDouble() / size
+
+        val cut = (0..MOST_CUTS)
+            .map {
+                val length = newest.length * share * CUT_STEP.pow(n = it)
+
+                newest.take(n = length.toInt()) + CUT
+            }
+            .firstOrNull {
+                countOf(text = it) <= room
+            } ?: CUT
+
+        return listOf(cut)
     }
 
     /**
@@ -95,16 +128,22 @@ class ContextBudget(
 
         val lead = fitted.entries.size - (entries.size - fitted.dropped)
 
-        val shownEntries = (fitted.dropped until entries.size).map {
-            if (it in folded) {
-                foldedLine(
-                    step = it + 1,
-                    entry = entries[it]
-                )
-            } else {
-                entries[it]
+        // The fitted entries, not the found ones: the newest may have been cut to the room.
+        val shownEntries = fitted
+            .entries
+            .drop(n = lead)
+            .mapIndexed { index, entry ->
+                val at = fitted.dropped + index
+
+                if (at in folded) {
+                    foldedLine(
+                        step = at + 1,
+                        entry = entries[at]
+                    )
+                } else {
+                    entry
+                }
             }
-        }
 
         return fitted.copy(
             entries = fitted.entries.take(n = lead) + shownEntries,
@@ -221,6 +260,13 @@ class ContextBudget(
         const val RECALLED =
             "(Kept aside from those earlier results, the parts this task needs, in their steps' order:)\n"
         private const val KEPT_SHARE = 0.75
+
+        /** Said where the newest entry was cut to fit what can be read. */
+        const val CUT = "\n(Cut here, to keep within what can be read.)"
+
+        // Each try cuts a tenth more, as tokens are not spread evenly over a text.
+        private const val CUT_STEP = 0.9
+        private const val MOST_CUTS = 20
 
         // A result this short is shown whole even when old: its first line would save nothing.
         private const val FOLDED_TOKENS = 120

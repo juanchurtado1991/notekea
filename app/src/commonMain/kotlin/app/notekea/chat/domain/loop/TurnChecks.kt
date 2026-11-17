@@ -102,7 +102,11 @@ internal object TurnChecks {
         state: TurnState
     ): Boolean {
         val isOpen = SingularTask.pointsAtOne(task = state.task) || state.ambiguous.isNotEmpty()
-        val isNeedless = call.name == AskUserTool.NAME && !isOpen
+
+        val isNeedless =
+            call.name == AskUserTool.NAME &&
+                !isOpen &&
+                !isAskedFor(state = state)
 
         return isNeedless && state.told.add(NOT_ASKED)
     }
@@ -113,7 +117,8 @@ internal object TurnChecks {
         call: ToolCall,
         state: TurnState
     ): String? {
-        if (call.name != AskUserTool.NAME) return null
+        val isAsking = call.name == AskUserTool.NAME && !isAskedFor(state = state)
+        if (!isAsking) return null
 
         val only = AskUserTool
             .optionsOf(call = call)
@@ -126,6 +131,24 @@ internal object TurnChecks {
 
         return held.takeIf { isHeld }
     }
+
+    // A question the loop itself told the model to ask: where the person lives, which of the notes the task left
+    // open, or a change tool's "ask_user when the task does not say". Holding it back left the model nothing to do
+    // (the bug hunt of 2026-11-17, L12).
+    private fun isAskedFor(state: TurnState): Boolean {
+        val isTold = state.told.any {
+            it in ASKED_FOR
+        }
+
+        val isLastAsking = state
+            .found
+            .lastOrNull()
+            ?.contains(other = AskUserTool.NAME) == true
+
+        return isTold || isLastAsking
+    }
+
+    private val ASKED_FOR = setOf(WebChecks.COUNTRY_UNKNOWN, UnsettledEnd.MUST_ASK)
 
     private const val ONE_OPTION = "one option"
     private const val ONE_OPTION_AGAIN = "one option again"

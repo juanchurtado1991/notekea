@@ -31,9 +31,11 @@ internal object SharedNames {
                         }
                     }
                     ?.let { paths ->
-                        "(${paths.size} notes are named \"$name\": ${paths.joinToString()}. When the task " +
-                            "means one of them and does not say which, ask_user with them as the options. " +
-                            "When it means them all, or says which, call again with each whole path.)"
+                        toldOf(
+                            name = name,
+                            paths = paths,
+                            task = state.task
+                        )
                     }
             }
     }
@@ -55,6 +57,48 @@ internal object SharedNames {
             }
     }
 
+    private fun toldOf(
+        name: String,
+        paths: List<String>,
+        task: String
+    ): String {
+        val shared = "(${paths.size} notes are named \"$name\": ${paths.joinToString()}."
+
+        // "the work budget" with Home/Budget 2026 and Work/Budget 2026 says which: its folder is a word of the task
+        // (the bug hunt of 2026-11-17, L5, where the model was told to ask).
+        val said = wordsOf(text = task).toSet()
+
+        val inFolder = paths.singleOrNull { path ->
+            val title = wordsOf(text = path.substringAfterLast(delimiter = '/'))
+
+            folderWordsOf(path = path).any {
+                it in said && it !in title
+            }
+        }
+
+        if (inFolder != null) {
+            return "$shared The task names the folder of $inFolder, so it means that one: call again with " +
+                "that whole path.)"
+        }
+
+        return "$shared When the task means one of them and does not say which, ask_user with them as the " +
+            "options. When it means them all, or says which, call again with each whole path.)"
+    }
+
+    private fun folderWordsOf(path: String): List<String> = wordsOf(
+        text = path.substringBeforeLast(
+            delimiter = '/',
+            missingDelimiterValue = ""
+        )
+    ).filter {
+        it.length >= MIN_FOLDER_WORD
+    }
+
+    private fun wordsOf(text: String): List<String> = text
+        .lowercase()
+        .split(NOT_WORD)
+        .filter { it.isNotEmpty() }
+
     // One of the notes is the one the memory means: no question.
     private fun isRemembered(
         path: String,
@@ -66,6 +110,9 @@ internal object SharedNames {
             val remembered = it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
             remembered == path.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
         }
+
+    private const val MIN_FOLDER_WORD = 3
+    private val NOT_WORD = Regex(pattern = "[^\\p{L}\\p{N}]+")
 
     private const val NOTE = "note"
     private const val NOTES = "notes"

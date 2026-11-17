@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.withKeyDown
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.notes.domain.RelativePath
@@ -150,6 +151,33 @@ class EditorTableCellsTest {
             actual = buffer.text.toString()
         )
     }
+
+    @Test
+    fun `Shift+Backspace at a cell's start and Shift+Delete at its end delete nothing`() =
+        runComposeUiTest {
+            show()
+            clickCell(text = "Salt")
+            val salt = BODY.indexOf(string = "Salt")
+
+            listOf(
+                salt to Key.Backspace,
+                salt + "Salt".length to Key.Delete
+            ).forEach { (cursor, key) ->
+                buffer.edit { selection = TextRange(index = cursor) }
+                waitForIdle()
+
+                field().performKeyInput {
+                    withKeyDown(key = Key.ShiftLeft) { pressKey(key = key) }
+                }
+
+                waitForIdle()
+            }
+
+            assertEquals(
+                expected = BODY,
+                actual = buffer.text.toString()
+            )
+        }
 
     @Test
     fun `a button of the bar edits the table from the cursor's cell`() = runComposeUiTest {

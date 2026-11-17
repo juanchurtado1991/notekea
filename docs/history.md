@@ -358,4 +358,6 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   translated tag every time without saying which to use, so the turn looped until it ran out, and an empty proposal
   ended as the model's own summary of a change never made. Both fixed. A per-note check of group changes by the
   model was built, measured worse on both models, and dropped. A bug hunt over the chat, tasks, query views, graph
-  and search followed, before measuring again.
+  and search followed, before measuring again. Ten reviews, one per area, found about 110 defects with the input that
+  triggers each; eight agents fixed them by area in one working tree with no build of their own, and the lead built,
+  tested and committed. 107 were fixed, four partly.

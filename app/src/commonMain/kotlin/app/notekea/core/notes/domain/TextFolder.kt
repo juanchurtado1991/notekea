@@ -16,13 +16,18 @@ class TextFolder {
         private val UNACCENTED: Map<Char, Char> = mapOf(
             'a' to "àáâãäåāăą",
             'c' to "çćĉċč",
+            'd' to "ďđ",
             'e' to "èéêëēĕėęě",
+            'g' to "ĝğġģ",
             'i' to "ìíîïĩīĭįı",
+            'l' to "ĺļľŀł",
             'n' to "ñńņňŉ",
             'o' to "òóôõöøōŏő",
+            'r' to "ŕŗř",
             'u' to "ùúûüũūŭůűų",
             'y' to "ýÿŷ",
             's' to "śŝşš",
+            't' to "ţťŧ",
             'z' to "źżž"
         ).flatMap { (plain, accented) ->
             accented.map {

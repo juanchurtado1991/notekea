@@ -12,16 +12,25 @@ private const val CURRENT = "."
 private const val ENCODED_BYTE_LENGTH = 3
 private const val ENCODED_SPACE = "%20"
 
-// What would end a Markdown link's target early or be read as part of it: "%" first, so the others' own "%"
-// is not encoded again. A note renamed "C# (draft)" broke every link to it (the code review of 2026-11-13).
+// What would end a Markdown link's target early, be read as part of it or split a table's cell: "%" first, so
+// the others' own "%" is not encoded again. A note renamed "C# (draft)" broke every link to it (the code review of
+// 2026-11-13).
 private val ENCODED = linkedMapOf(
     "%" to "%25",
     " " to ENCODED_SPACE,
     "#" to "%23",
     "(" to "%28",
-    ")" to "%29"
+    ")" to "%29",
+    "|" to "%7C"
 )
 private const val HEX_RADIX = 16
+private const val LABEL_ESCAPE = "\\"
+
+// A wiki link's target ends at these: a heading, a block, an alias or the link's own brackets.
+private val WIKI_BREAKING = setOf('#', '^', '|', '[', ']')
+
+// What would end a Markdown link's text early, or split a table's cell.
+private val LABEL_BREAKING = setOf('[', ']', '|')
 private const val PARENT = ".."
 private const val SPACE = " "
 private val PERCENT_RUN = Regex(pattern = "(?:%[0-9A-Fa-f]{2})+")
@@ -50,6 +59,35 @@ fun spacesEncoded(target: String): String = ENCODED
             newValue = encoded
         )
     }
+
+/** Whether a wiki link can be written to [target]: none of its characters ends a wiki link's target. */
+fun isWikiLinkable(target: String): Boolean = target.none {
+    it in WIKI_BREAKING
+}
+
+/**
+ * A Markdown link from [source] to [target] shown as [label], for a note whose name a wiki link cannot hold: its path
+ * relative to [source]'s folder and encoded, then [fragment] (`#heading`), the label's brackets and bars escaped.
+ */
+fun markdownLink(
+    label: String,
+    target: RelativePath,
+    source: RelativePath,
+    fragment: String = ""
+): String {
+    val path = relativeTo(
+        folder = source.parent ?: RelativePath.ROOT,
+        target = target
+    )
+
+    val text = label
+        .map {
+            if (it in LABEL_BREAKING) LABEL_ESCAPE + it else it.toString()
+        }
+        .joinToString(separator = "")
+
+    return "[$text](${spacesEncoded(target = path)}$fragment)"
+}
 
 /** [target] read from [folder], or null when it climbs above the vault. */
 fun resolvedFrom(

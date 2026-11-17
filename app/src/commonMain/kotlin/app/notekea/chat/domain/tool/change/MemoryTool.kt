@@ -35,9 +35,7 @@ class MemoryTool private constructor(
     override fun targetOf(
         call: ToolCall,
         context: ToolContext
-    ): String = call
-        .text(name = LINE)
-        .take(n = TARGET_CHARS)
+    ): String = call.text(name = LINE)
 
     override suspend fun run(
         call: ToolCall,
@@ -124,7 +122,6 @@ class MemoryTool private constructor(
     companion object {
         const val LINE = "line"
         const val SECTION = "section"
-        private const val TARGET_CHARS = 60
         private const val HOW = "chat: you said"
 
         val remember = MemoryTool(

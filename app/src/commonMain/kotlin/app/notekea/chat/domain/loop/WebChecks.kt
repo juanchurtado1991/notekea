@@ -263,7 +263,8 @@ internal object WebChecks {
         val title = folded(text = titleOf(path = path))
         val isSpecific = title.length >= SPECIFIC_TITLE && ' ' in title
 
-        val named = Regex(pattern = "\\b${Regex.escape(title)}(?![\\p{L}\\p{N}])")
+        // Not `\b`, ASCII on the JVM: a title that starts with "Á" was never found (the bug hunt of 2026-11-17, L6).
+        val named = Regex(pattern = "(?<![\\p{L}\\p{N}])${Regex.escape(title)}(?![\\p{L}\\p{N}])")
 
         isSpecific && named.containsMatchIn(input = query)
     }
@@ -282,7 +283,7 @@ internal object WebChecks {
     private const val SPECIFIC_TITLE = 8
 
     private const val NOTE_SEARCHED = "note searched"
-    private const val COUNTRY_UNKNOWN = "country unknown"
+    const val COUNTRY_UNKNOWN = "country unknown"
 
     // "search the web for", "look up online", "busca en la web": what follows is what is searched.
     private const val SEARCHED_FOR =

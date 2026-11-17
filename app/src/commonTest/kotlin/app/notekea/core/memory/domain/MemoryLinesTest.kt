@@ -66,6 +66,25 @@ class MemoryLinesTest {
         )
     }
 
+    // Bug hunt S10: a two-letter name never brought its line in, and a word of the linked note did.
+    @Test
+    fun `a short name brings its line in, and the linked note's words do not`() {
+        val jp = line(MemorySection.PEOPLE, "\"JP\" is [[Juan Pablo Ortiz]]")
+
+        assertEquals(
+            expected = listOf(listOf(jp), emptyList()),
+            actual = listOf("call JP tomorrow", "call Ortiz and Castro").map {
+                MemoryLines.matched(
+                    lines = MemoryLines.relevantTo(
+                        lines = listOf(jp, laura),
+                        task = it,
+                        isWeb = false
+                    )
+                )
+            }
+        )
+    }
+
     @Test
     fun `no more than the most characters are read, and the steps show only the lines the task matched`() {
         val long = (1..40).map {

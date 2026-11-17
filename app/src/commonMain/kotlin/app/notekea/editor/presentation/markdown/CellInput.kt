@@ -72,9 +72,22 @@ internal class CellInput(private val isInCell: () -> Boolean) : InputTransformat
         selection = TextRange(index = cursor)
     }
 
-    private companion object {
-        const val ESCAPE = '\\'
-        const val PIPE = '|'
-        const val SPACE = " "
+    companion object {
+        private const val ESCAPE = '\\'
+        private const val PIPE = '|'
+        private const val SPACE = " "
+
+        /** [text] as a cell holds it, for an edit no typing makes (a paste): the same rules as typing. */
+        fun cellText(text: String): String = buildString {
+            text.forEachIndexed { index, char ->
+                val isBarePipe = char == PIPE && (index == 0 || text[index - 1] != ESCAPE)
+
+                when {
+                    char == NEW_LINE_CHAR -> append(SPACE)
+                    isBarePipe -> append(ESCAPE).append(PIPE)
+                    else -> append(char)
+                }
+            }
+        }
     }
 }

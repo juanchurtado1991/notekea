@@ -46,10 +46,13 @@ class MarkdownFormatter {
         }
 
         blocks.of(action = action)?.let { build ->
+            // A table or a divider holds no text: it goes after the selection, which stays in the note.
+            val holdsNothing = action is FormatAction.Table || action == FormatAction.Divider
+
             // After an embedded file or a divider, typing goes on under it.
             return blocks.edit(
                 text = text,
-                start = start,
+                start = if (holdsNothing) end else start,
                 end = end,
                 isCursorUnder = action is FormatAction.Embed || action == FormatAction.Divider,
                 build = build

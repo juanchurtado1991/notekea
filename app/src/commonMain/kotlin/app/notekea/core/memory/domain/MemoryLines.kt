@@ -58,12 +58,32 @@ object MemoryLines {
         return wanted.isNotEmpty() && wanted.all { it in words }
     }
 
-    // What a line names, word by word: "Laura", "Castro", "recipe", "cocina"; a plural is matched as its singular.
-    private fun keysOf(line: MemoryLine): List<String> = wordsOf(text = line.text)
-        .filter {
-            it.length >= MIN_WORD && it !in COMMON
+    // What a line names, word by word: "Laura", "recipe", "cocina"; a plural is matched as its singular.
+    private fun keysOf(line: MemoryLine): List<String> {
+        val names = line.names
+
+        val keys = if (names.isEmpty()) {
+            keyWordsOf(text = line.text)
+        } else {
+            names.flatMap { nameKeysOf(said = it.said) }
         }
-        .flatMap { formsOf(word = it) }
+
+        return keys.flatMap { formsOf(word = it) }
+    }
+
+    /**
+     * The words a quoted name is said by: a name of one word whatever its length ("JP" was never matched), the
+     * telling words of a longer one. The linked note's words are not the name: "Castro" brought in "Laura"'s line.
+     */
+    private fun nameKeysOf(said: String): List<String> {
+        val words = wordsOf(text = said)
+
+        return if (words.size == 1) words else keyWordsOf(text = said)
+    }
+
+    private fun keyWordsOf(text: String): List<String> = wordsOf(text = text).filter {
+        it.length >= MIN_WORD && it !in COMMON
+    }
 
     // A word as written and without a plural's ending: "recipes" is also "recipe", "reuniones" also "reunion".
     private fun formsOf(word: String): List<String> = listOfNotNull(

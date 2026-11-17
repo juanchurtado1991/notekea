@@ -101,6 +101,9 @@ class SyncEngine(
         val settings = written.copy(remoteUrl = address.url)
         mutableStatus.value = SyncStatus.Syncing
 
+        // Connecting commits the vault as it is: never Git's conflict marks, sent from there to every device.
+        if (isInterrupted()) return@withLock Outcome.Failure(error = INTERRUPTED)
+
         val typed = token?.takeIf { it.isNotBlank() } ?: address.secret
 
         typed?.let {
@@ -162,12 +165,22 @@ class SyncEngine(
         note: RelativePath,
         choice: ConflictChoice
     ) {
-        cycle.withLock {
+        val resolved = cycle.withLock {
+            // Settling a conflict commits the vault: the merge cut short is repaired first.
+            if (isInterrupted()) return
+
             repository.resolve(
                 vaultPath = vaultPath,
                 note = note,
                 choice = choice
             )
+        }
+
+        // A conflict that could not be settled says why, as a repair that failed does.
+        if (resolved is Outcome.Failure) {
+            mutableStatus.value = statusOf(error = resolved.error)
+
+            return
         }
 
         syncNow()
@@ -215,14 +228,7 @@ class SyncEngine(
 
         // Whatever ends the cycle (stopped half way, or something thrown), the ring stops turning.
         try {
-            // Left in the middle of a merge, nothing is synced: a commit now would hold Git's conflict marks.
-            val unfinished = repository.unfinished(vaultPath = vaultPath)
-
-            if (unfinished != null) {
-                mutableStatus.value = SyncStatus.Interrupted(changedHere = unfinished.changedHere)
-
-                return@withLock
-            }
+            if (isInterrupted()) return@withLock
 
             val token = tokens.read(remoteUrl = settings.remoteUrl)
 
@@ -236,6 +242,17 @@ class SyncEngine(
         } finally {
             if (mutableStatus.value == SyncStatus.Syncing) mutableStatus.value = before
         }
+    }
+
+    /**
+     * True, and the status says so, for a vault left in the middle of a merge or a rebase: nothing is committed then,
+     * as a commit would hold Git's conflict marks.
+     */
+    private suspend fun isInterrupted(): Boolean {
+        val unfinished = repository.unfinished(vaultPath = vaultPath) ?: return false
+        mutableStatus.value = SyncStatus.Interrupted(changedHere = unfinished.changedHere)
+
+        return true
     }
 
     /** Where the vault stands once a cycle went through: a conflict, changes not pushed, or up to date. */
@@ -270,5 +287,8 @@ class SyncEngine(
     private companion object {
         val NOT_SET = SyncStatus.NotConfigured
         const val BAD_ADDRESS = "This is not the address of a Git repository"
+        const val INTERRUPTED_MESSAGE =
+            "This vault was left in the middle of a sync: repair it first"
+        val INTERRUPTED = SyncError.Failed(message = INTERRUPTED_MESSAGE)
     }
 }

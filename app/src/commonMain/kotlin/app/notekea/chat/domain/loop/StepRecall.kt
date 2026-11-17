@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.agent.AgentFinalAnswer
 import app.notekea.chat.domain.context.FittedContext
 import app.notekea.chat.domain.context.StepMemory
 import app.notekea.chat.domain.tool.ChatTool
@@ -48,7 +49,7 @@ internal object StepRecall {
             it in state.hidden
         } ?: return null
 
-        return "(Made again: its result was kept aside, so here it is whole.)\n" + state.found[at]
+        return AgentFinalAnswer.SHOWN_AGAIN + state.found[at]
     }
 
     /** The prompt's results for the next step, the results it leaves hidden kept in [state]. */

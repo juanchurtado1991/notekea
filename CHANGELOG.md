@@ -120,6 +120,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Note info mutes the counts that are zero and draws the done tasks as a bar.
 
 ### Fixed
+- A bug hunt over the whole app (2026-11-17, `docs/bug-hunt-2026-11-17.md`) fixed 107 defects, each with a test.
+  In the chat's loop: a change taken out could never be added again, two refused changes looped to the last step,
+  a figure the task writes settled which note it meant, questions the loop asked for were held back, a value could
+  not be written as a number (the `"}"` the models wrote for 3), and a refused call was repeated as it was. In its
+  tools: two tags on one note lost the first, "Pay rent" ticked "Pay", impossible changes were "added" and failed
+  at Do it, dates "a week before", "last friday" and "end of next month" were wrong. Queries, tasks, search, the
+  memory, the editor (frontmatter typed in the body saved twice, a checkbox ticking an earlier line), links and the
+  graph, the web (spoofed trusted sites, a page's size cap) and sync (conflict marks committed when connecting a
+  vault cut short in a merge, a stale Git lock blocking sync for good) were fixed too.
 
 - The chat's new loop no longer ends an answer from your notes with a link it made up: an answer links only to
   pages the request searched or read.

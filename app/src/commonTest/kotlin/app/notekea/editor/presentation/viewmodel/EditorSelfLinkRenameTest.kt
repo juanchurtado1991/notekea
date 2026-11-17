@@ -111,6 +111,25 @@ class EditorSelfLinkRenameTest : EditorViewModelTestBase() {
         )
     }
 
+    @Test
+    fun `a link update from the tree keeps the question about an outside change that came first`() =
+        runEditorTest {
+            open(path = AREPAS)
+            type(text = "See [[Arepas]], mine.\n")
+            changeOutside(text = "Theirs, see [[Arepas]].\n")
+            store.texts[AREPAS] = "Theirs, see [[Reina]].\n"
+
+            viewModel.onIntent(intent = EditorIntent.OnNoteRewritten(path = AREPAS))
+            runCurrent()
+            advanceTimeBy(delayTimeMillis = SECOND_MILLIS + 1)
+            runCurrent()
+
+            assertEquals(
+                expected = true to "Theirs, see [[Reina]].\n",
+                actual = viewModel.state.value.hasConflict to store.texts[AREPAS]
+            )
+        }
+
     private fun TestScope.rename() {
         viewModel.onIntent(intent = EditorIntent.OnTitleCommit(name = "Reina"))
         runCurrent()

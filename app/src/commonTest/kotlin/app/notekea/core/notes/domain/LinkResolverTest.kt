@@ -82,6 +82,74 @@ class LinkResolverTest {
         )
     }
 
+    // Bug hunt 2026-11-17 (G7): `/Note.md` opened `A/Note.md` from a note in `A`, before the vault's own `Note.md`.
+    @Test
+    fun `a markdown link starting with a slash is read from the vault root only`() {
+        val resolver = resolver("Note.md", "A/Note.md", "A/b.md")
+
+        assertEquals(
+            expected = ResolvedLink(
+                target = RelativePath(value = "Note.md"),
+                isRelativeToSource = false
+            ),
+            actual = resolver.resolve(
+                link = markdownLink(target = "/Note.md"),
+                source = A_NOTE
+            )
+        )
+    }
+
+    // Bug hunt 2026-11-17 (G5): `[text](Note)` opened a note found by its name, not the one beside it.
+    @Test
+    fun `a markdown link with no extension leads to the note beside the linking one`() {
+        val resolver = resolver("Note.md", "A/Note.md", "A/b.md")
+
+        assertEquals(
+            expected = ResolvedLink(
+                target = RelativePath(value = "A/Note.md"),
+                isRelativeToSource = true
+            ),
+            actual = resolver.resolve(
+                link = markdownLink(target = "Note"),
+                source = A_NOTE
+            )
+        )
+    }
+
+    // Bug hunt 2026-11-17 (A5): links and embeds to attachments resolved to nothing, so a rename left them broken.
+    @Test
+    fun `links and embeds to an attachment it knows resolve to it`() {
+        val pic = RelativePath(value = "assets/pic.png")
+
+        val resolver = LinkResolver(
+            notePaths = listOf(A_NOTE),
+            attachmentPaths = listOf(pic)
+        )
+
+        val links = listOf(
+            markdownLink(target = "../assets/pic.png"),
+            wikiLink(target = "pic.png"),
+            wikiLink(target = "assets/pic.png")
+        )
+
+        assertEquals(
+            expected = listOf(pic, pic, pic),
+            actual = links.map {
+                resolver.resolve(
+                    link = it,
+                    source = A_NOTE
+                )?.target
+            }
+        )
+    }
+
+    private fun wikiLink(target: String) = NoteLink(
+        targetStart = 0,
+        targetEnd = target.length,
+        target = target,
+        kind = LinkKind.WIKI
+    )
+
     private fun resolver(vararg paths: String) = LinkResolver(
         notePaths = paths.map { RelativePath(value = it) }
     )

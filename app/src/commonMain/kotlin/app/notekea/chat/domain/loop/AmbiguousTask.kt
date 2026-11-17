@@ -39,7 +39,7 @@ internal object AmbiguousTask {
         settled: List<MemoryLine.Named> = emptyList()
     ): List<List<RelativePath>> {
         val said = wordsOf(text = task)
-        if (said.any { it in PLURAL }) return emptyList()
+        if (isPlural(task = task)) return emptyList()
 
         val named = notes
             .map { it.file.path }
@@ -73,12 +73,8 @@ internal object AmbiguousTask {
         settled: List<MemoryLine.Named>
     ): List<Settled> {
         val said = wordsOf(text = task)
-
-        val isPlural = said.any {
-            it in PLURAL
-        }
-
-        if (settled.isEmpty() || isPlural) return emptyList()
+        val isUnsettled = settled.isEmpty() || isPlural(task = task)
+        if (isUnsettled) return emptyList()
 
         val named = notes
             .map { it.file.path }
@@ -165,16 +161,61 @@ internal object AmbiguousTask {
         said: String
     ): Boolean {
         val last = wordsOf(text = said).lastOrNull() ?: return false
-        val words = task.split(NOT_WORD).filter { it.isNotEmpty() }
+        val words = WORD.findAll(input = task).toList()
 
         val at = words.indexOfFirst {
-            folded(text = it) == last
+            folded(text = it.value) == last
         }
 
-        val next = words.getOrNull(index = at + 1) ?: return false
+        val next = words.getOrNull(index = at + 1)
+        if (at < 0 || next == null) return false
 
-        return at >= 0 && (folded(text = next) in QUALIFIERS || next.first().isUpperCase())
+        val after = words.getOrNull(index = at + 2)
+
+        // "my goals in three bullets" and "about Laura. Summarize it." say nothing of which one: a common word says
+        // which only before a name, and a capital only right after the name (the bug hunt of 2026-11-17, S2).
+        return when (folded(text = next.value)) {
+            in QUALIFIERS -> true
+            in LINKING -> isNamed(task, next, after)
+            else -> isNamed(task, words[at], next)
+        }
     }
+
+    // [word] is capitalised and only spaces stand between it and [before]: "Laura Méndez", "Laura de Contabilidad".
+    private fun isNamed(
+        task: String,
+        before: MatchResult,
+        word: MatchResult?
+    ): Boolean {
+        if (word == null) return false
+
+        val between = task.substring(
+            startIndex = before.range.last + 1,
+            endIndex = word.range.first
+        )
+
+        return between.isBlank() && word.value.first().isUpperCase()
+    }
+
+    /**
+     * Whether [task] means one note: it says no "all", "both", "notes" or "compare" outside the text it quotes. An
+     * end naming every note it could mean then settles nothing: "Laura's phone" answered with both Lauras' phones
+     * guessed for the person (the bug hunt of 2026-11-17, L10).
+     */
+    fun isSingular(task: String): Boolean = wordsOf(text = unquoted(task = task)).none {
+        it in PLURAL || it in SEVERAL
+    }
+
+    // A plural word in the text the task quotes to write ("add 'read two books' to my goals") is not the task's:
+    // it switched off the check and the memory's settled notes (the bug hunt of 2026-11-17, L13).
+    private fun isPlural(task: String): Boolean = wordsOf(text = unquoted(task = task)).any {
+        it in PLURAL
+    }
+
+    fun unquoted(task: String): String = QUOTED.replace(
+        input = task,
+        replacement = " "
+    )
 
     // The memory says which of them the words of the task mean: the note it links is one of the group.
     private fun isSettled(
@@ -283,9 +324,7 @@ internal object AmbiguousTask {
         // A first name alone: another name in the task ("Tomás … the Japan trip") or "la de…" may settle it.
         val names = FIRST_NAME
             .findAll(input = task)
-            .filter {
-                it.range.first > 0
-            }
+            .filterNot { isOpening(before = task.take(n = it.range.first)) }
             .toList()
 
         val isAlone = names.size == 1 && !DESCRIBED.containsMatchIn(input = task)
@@ -305,7 +344,7 @@ internal object AmbiguousTask {
             .filter { isBare(after = task.substring(startIndex = it.range.last + 1)) }
             .map { folded(text = it.groupValues[THING]) }
             .filterNot {
-                it in NOT_THINGS || it.endsWith(suffix = "s")
+                it in NOT_THINGS || isPluralWord(word = it)
             }
             .forEach { thing ->
                 yield(
@@ -318,6 +357,23 @@ internal object AmbiguousTask {
                     }
                 )
             }
+    }
+
+    // The word a sentence opens with is capitalised, and no name: "¿Cuál es el correo de Tomás?" counted "Cuál" as
+    // a second name, so Tomás was never alone (the bug hunt of 2026-11-17, L9).
+    private fun isOpening(before: String): Boolean {
+        val opened = before.trimEnd()
+
+        return opened.isEmpty() || opened.last() in OPENERS
+    }
+
+    // "the analysis", "the class", "el mes", "el país" are one thing though they end in "s" (the bug hunt, L13).
+    fun isPluralWord(word: String): Boolean {
+        val isSingular = SINGULAR_ENDINGS.any { word.endsWith(suffix = it) }
+
+        return word.endsWith(suffix = "s") &&
+            !isSingular &&
+            word !in SINGULAR_S
     }
 
     // "the X" said bare: the task ends after it, or after one more word ("the supplier meeting"), or goes on with
@@ -380,6 +436,15 @@ internal object AmbiguousTask {
     private const val THING = 2
 
     private val NOT_WORD = Regex(pattern = "[^\\p{L}\\p{N}]+")
+    private val WORD = Regex(pattern = "[\\p{L}\\p{N}]+")
+
+    // Quoted text, by double quotes, guillemets, or single quotes that are no apostrophe ("Laura's").
+    private val QUOTED = Regex(
+        pattern = "\"[^\"\\n]*\"|“[^”\\n]*”|«[^»\\n]*»|‘[^’\\n]*’|" +
+            "(?<![\\p{L}\\p{N}])'[^'\\n]*'(?![\\p{L}\\p{N}])"
+    )
+
+    private val OPENERS = setOf('¿', '¡')
 
     // Bounded by letters, not a word boundary, which the JVM reads as ASCII: "Ángela" and "José" are names too.
     private val FIRST_NAME = Regex(pattern = "(?<![\\p{L}\\p{N}])\\p{Lu}\\p{Ll}+(?![\\p{L}\\p{N}])")
@@ -395,16 +460,36 @@ internal object AmbiguousTask {
         option = RegexOption.IGNORE_CASE
     )
 
-    // Words that start saying which one a name means: "from", "de", "who", "at", "personal", "work".
+    // Words that start saying which one a name means: "from", "who", "personal", "work".
     private val QUALIFIERS = setOf(
-        "from", "of", "at", "in", "who", "that", "de", "del", "que", "en", "personal", "work", "trabajo", "home",
+        "from",
+        "who",
+        "del",
+        "personal",
+        "work",
+        "trabajo",
+        "home",
         "casa"
     )
+
+    // Words that say which only before a name: "Laura de Contabilidad", "Tomás at Acme".
+    private val LINKING = setOf("of", "at", "in", "that", "de", "que", "en")
 
     private val GOES = setOf("to", "into", "as", "a", "al", "en", "como")
 
     private val PLURAL = setOf(
         "all", "every", "each", "both", "todas", "todos", "cada", "ambos", "ambas", "two", "dos"
+    )
+
+    private val SEVERAL = setOf(
+        "notes", "notas", "them", "those", "these", "ones", "ellos", "ellas", "estos", "estas", "esos", "esas",
+        "compare", "compara", "comparar", "between", "entre"
+    )
+
+    private val SINGULAR_ENDINGS = listOf("ss", "sis", "us")
+
+    private val SINGULAR_S = setOf(
+        "mes", "pais", "ingles", "interes", "lunes", "martes", "miercoles", "jueves", "viernes", "gas", "atlas"
     )
 
     private val NOT_THINGS = setOf(

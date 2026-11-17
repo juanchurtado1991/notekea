@@ -176,7 +176,10 @@ class MarkdownLineStripper {
         )
         private val INLINE_CODE = Regex(pattern = "(`+)(.+?)\\1")
         private val WIKI_LINK = Regex(pattern = "!?\\[\\[([^\\]|\\n]+)(?:\\|([^\\]\\n]*))?]]")
-        private val MARKDOWN_LINK = Regex(pattern = "!?\\[([^\\]\\n]*)]\\([^)\\n]*\\)")
+
+        // One level of parentheses in the target (`wiki/Dune_(novel)`), which ended the link early.
+        private val MARKDOWN_LINK =
+            Regex(pattern = "!?\\[([^\\]\\n]*)]\\((?:[^()\\n]|\\([^()\\n]*\\))*\\)")
         private val PAIRED_EMPHASIS = Regex(pattern = "(\\*\\*|__|~~|==)(?=\\S)(.+?)(?<=\\S)\\1")
         private val SINGLE_EMPHASIS =
             Regex(pattern = "(?<![\\w*\\\\])([*_])(?=[^\\s*_])(.+?)(?<=[^\\s*_])\\1(?![\\w*])")

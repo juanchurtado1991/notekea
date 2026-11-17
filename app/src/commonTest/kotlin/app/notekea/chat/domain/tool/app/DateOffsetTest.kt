@@ -39,4 +39,27 @@ class DateOffsetTest {
             ).map { dayOf(phrase = it) }
         )
     }
+
+    // T11: today is Tuesday 2026-11-17; these named the day a week on, the coming Friday and this day next month.
+    @Test
+    fun `a weekday of next week, the last one gone, and the end of next month are those days`() {
+        assertEquals(
+            expected = listOf(
+                "2026-11-27 (Friday)",
+                "2026-11-27 (Friday)",
+                "2026-11-13 (Friday)",
+                "2026-11-13 (Friday)",
+                "2026-12-31 (Thursday)",
+                "2026-11-20 (Friday)"
+            ),
+            actual = listOf(
+                "friday next week",
+                "el viernes de la próxima semana",
+                "last friday",
+                "el viernes pasado",
+                "end of next month",
+                "next friday"
+            ).map { dayOf(phrase = it) }
+        )
+    }
 }

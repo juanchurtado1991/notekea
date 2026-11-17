@@ -82,7 +82,8 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
                         )
                         .map {
                             it.key.nameWithoutExtension to it.value.body
-                        }
+                        },
+                    task = context.task
                 ) ?: "count: I count notes, words, tasks, open tasks or done tasks, sum a property, or add up " +
                     "the figures a word is written with; nothing there writes \"$what\"."
             )

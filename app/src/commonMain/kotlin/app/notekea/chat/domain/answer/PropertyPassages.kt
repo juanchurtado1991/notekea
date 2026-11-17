@@ -3,6 +3,7 @@ package app.notekea.chat.domain.answer
 import app.notekea.chat.domain.plan.NoteProperties
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TextFolder
 
 /**
  * The properties of the notes a question names, as passages to answer from beside the index's: the index reads a
@@ -16,11 +17,14 @@ internal object PropertyPassages {
     private val ENGLISH = mapOf(
         "libr" to "books", "recet" to "recipes", "proyect" to "projects", "reuni" to "meetings",
         "diari" to "journal", "termin" to "finished", "calific" to "rating", "presupuest" to "budget",
-        "dueñ" to "owner", "vence" to "due", "porcion" to "servings"
+        "duen" to "owner", "vence" to "due", "porcion" to "servings"
     )
     private val NOT_A_LETTER = Regex(pattern = "[^\\p{L}\\p{N}]+")
 
-    private val COMMON = setOf(
+    // Words are compared without accents, so "cafe" names "Café" and "dueño" is the "duen" above.
+    private val textFolder = TextFolder()
+
+    private val COMMON = foldedSetOf(
         "the", "and", "what", "which", "who", "whom", "did", "does", "how", "many", "much", "are", "was", "for", "with",
         "about", "have", "has", "that", "this", "from", "into", "when", "where", "why", "your", "you", "notes", "note",
         "que", "qué", "los", "las", "del", "con", "por", "para", "cuál", "cual", "cuáles", "cuántos", "cuántas",
@@ -92,8 +96,12 @@ internal object PropertyPassages {
             }
     }
 
-    private fun wordsOf(text: String): List<String> = text
-        .lowercase()
+    private fun foldedSetOf(vararg words: String): Set<String> = words
+        .map { textFolder.fold(text = it) }
+        .toSet()
+
+    private fun wordsOf(text: String): List<String> = textFolder
+        .fold(text = text)
         .split(NOT_A_LETTER)
         .filter {
             it.length >= MIN_WORD

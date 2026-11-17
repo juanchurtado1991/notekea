@@ -62,7 +62,9 @@ val chatModule = module {
             proposal = get(),
             clock = get(),
             // Bound on the desktop (`SqliteStepMemory`); elsewhere the loop drops what does not fit, as before.
-            stepMemory = getOrNull()
+            stepMemory = getOrNull(),
+            // The vault's own web sources, trusted by definition (`docs/agent-web.md`).
+            sourceSites = getOrNull()
         )
     }
 

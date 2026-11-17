@@ -5,6 +5,7 @@ import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.chat.domain.plan.FoundRow
+import app.notekea.chat.domain.plan.TaskMatch
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
@@ -16,6 +17,7 @@ import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.domain.links.LinkFinder
 import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.notes.domain.links.NoteRewrite
+import app.notekea.core.notes.domain.tasks.NoteTask
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryTranslation
 import app.notekea.query.domain.QueryYaml
@@ -128,7 +130,15 @@ class VaultActionFinder(
         step: ActionStep,
         notes: Collection<NoteEntry>
     ): FoundNotes {
-        val period = PERIODS[step.period?.lowercase()]
+        // A period of no name here is no period: its tasks were every open task, shown under that name (T14).
+        val named = step
+            .period
+            ?.lowercase()
+            ?.takeIf {
+                it in PERIODS
+            }
+
+        val period = PERIODS[named]
 
         val view = TaskView(
             grouping = TaskGrouping.DATE,
@@ -152,7 +162,7 @@ class VaultActionFinder(
 
         return FoundNotes(
             isTasks = true,
-            period = step.period?.lowercase(),
+            period = named,
             rows = rows.map {
                 FoundRow(
                     note = it.path,
@@ -247,59 +257,35 @@ class VaultActionFinder(
         )
     }
 
-    /** Checks the open task of the step's note whose text reads most like the step's, and returns what was written. */
+    /**
+     * Checks the open task of [tasks], the note's as it is now, that the step's words mean ([TaskMatch]), and returns
+     * what was written. Several that read alike are no choice of the app's: the first of them was ticked (A7).
+     */
     suspend fun completeTask(
         vaultPath: String,
         step: ActionStep,
-        notes: Collection<NoteEntry>
-    ): NoteRewrite? {
-        val note = notes.firstOrNull {
-            it.file.path == step.notes.firstOrNull()
-        } ?: return null
+        tasks: List<NoteTask>
+    ): Outcome<NoteRewrite, ActionProblem> {
+        val path = step.notes.firstOrNull()
+        val unknown = Outcome.Failure(error = ActionProblem.UnknownTask(text = step.text.orEmpty()))
 
-        // The words alone: a model copies the line with its day ("Run a half marathon 📅 2027-08-15").
-        val wanted = step
-            .text
-            .orEmpty()
-            .replace(
-                regex = TASK_DAY,
-                replacement = ""
-            )
-            .trim()
-            .lowercase()
+        val match = TaskMatch.of(
+            tasks = tasks,
+            wanted = step.text.orEmpty()
+        )
 
-        val open = note
-            .metadata
-            .tasks
-            .filterNot {
-                it.isDone || it.text.isBlank()
-            }
+        if (path == null || match !is TaskMatch.One) return unknown
 
-        // The task of those words, then one that holds them, then one they hold: "Pay rent" is not "Pay".
-        val task = open.firstOrNull {
-            it
-                .text
-                .trim()
-                .lowercase() == wanted.trim()
-        }
-            ?: open.firstOrNull {
-                wanted in it.text.lowercase()
-            }
-            ?: open
-                .filter {
-                    it.text.lowercase() in wanted
-                }
-                .maxByOrNull { it.text.length }
-            ?: return null
-
-        return setTaskDone(
+        val done = setTaskDone(
             vaultPath = vaultPath,
             row = TaskRow(
-                path = note.file.path,
-                task = task,
+                path = path,
+                task = match.task,
                 due = TaskWhen.NO_DATE
             )
         )
+
+        return done?.let { Outcome.Success(value = it) } ?: unknown
     }
 
     private fun valueOf(text: String): PropertyValue {
@@ -319,7 +305,7 @@ class VaultActionFinder(
         return when {
             trimmed.equals("true", ignoreCase = true) -> PropertyValue.Checkbox(isChecked = true)
             trimmed.equals("false", ignoreCase = true) -> PropertyValue.Checkbox(isChecked = false)
-            trimmed.toDoubleOrNull() != null -> PropertyValue.Number(text = trimmed)
+            PLAIN_NUMBER.matches(input = trimmed) -> PropertyValue.Number(text = trimmed)
             date != null -> PropertyValue.Date(date = date)
             else -> PropertyValue.Text(text = trimmed)
         }
@@ -348,7 +334,9 @@ class VaultActionFinder(
                 )
 
     private companion object {
-        val TASK_DAY = Regex(pattern = "📅\\s*\\d{4}-\\d{2}-\\d{2}")
+        // Written bare only as a plain decimal: "08001", "+34600111222", "1e5" or "NaN" stay text, as a YAML reader
+        // drops the zero or the plus, or reads another number (A8).
+        val PLAIN_NUMBER = Regex(pattern = "-?(0|[1-9]\\d*)(\\.\\d+)?")
         val ISO_DATE = Regex(pattern = "(\\d{4})-(\\d{2})-(\\d{2})")
         val PERIODS = mapOf(
             "overdue" to TaskWhen.OVERDUE,

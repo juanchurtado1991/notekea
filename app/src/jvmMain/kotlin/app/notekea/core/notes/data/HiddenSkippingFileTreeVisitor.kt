@@ -14,12 +14,24 @@ import java.nio.file.attribute.BasicFileAttributes
  * Folders that cannot be read are skipped instead of stopping the walk.
  */
 class HiddenSkippingFileTreeVisitor : FileTreeVisitor {
+    // The watcher walks its vault first, then each folder created in it. Only what is below the vault is checked:
+    // the vault's own folder may be named with a dot (`~/.notes` on Linux) and is still watched.
+    @Volatile
+    private var vault: Path? = null
+
     override fun recursiveVisitFiles(
         file: Path,
         onDirectory: FileTreeVisitor.Callback,
         onFile: FileTreeVisitor.Callback
     ) {
-        if (isHidden(path = file)) return
+        val root = vault ?: file.also { vault = it }
+
+        val isInHidden = isHiddenBelow(
+            root = root,
+            path = file
+        )
+
+        if (isInHidden) return
 
         Files.walkFileTree(
             file,
@@ -49,6 +61,19 @@ class HiddenSkippingFileTreeVisitor : FileTreeVisitor {
                 ): FileVisitResult = FileVisitResult.CONTINUE
             }
         )
+    }
+
+    // A folder created inside a hidden one is not watched either: every name between the vault and it is checked.
+    private fun isHiddenBelow(
+        root: Path,
+        path: Path
+    ): Boolean {
+        if (path == root) return false
+        if (!path.startsWith(root)) return isHidden(path = path)
+
+        return root
+            .relativize(path)
+            .any { isHidden(path = it) }
     }
 
     private fun isHidden(path: Path): Boolean = path

@@ -3,6 +3,7 @@ package app.notekea.shell.data.chat
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.NoteFileName
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
 import app.notekea.core.memory.domain.MemoryEdit
@@ -33,8 +34,9 @@ internal class NoteWriter(
     suspend fun createNote(step: ActionStep): Outcome<Unit, ActionProblem> {
         val draft = step.content.firstOrNull()
 
-        val path =
-            draft?.path ?: (step.folder ?: RelativePath.ROOT).child(name = "${fileName(step.title)}.md")
+        val path = draft?.path ?: (step.folder ?: RelativePath.ROOT).child(
+            name = NoteFileName.of(title = step.title) + RelativePath.MARKDOWN_EXTENSION
+        )
 
         val text = draft?.text ?: "# ${step.title}\n"
 
@@ -52,6 +54,14 @@ internal class NoteWriter(
             note = path,
             template = template
         )
+
+        // Undo compares with the text the template made, or a note made from one stayed after Undo (A11).
+        noteContentStore
+            .read(
+                vaultPath = vaultPath,
+                path = path
+            )
+            ?.let { journal.madeTexts[path] = it }
 
         return created
     }
@@ -117,6 +127,7 @@ internal class NoteWriter(
         if (written is Outcome.Failure) return Outcome.Failure(unwritable)
 
         journal.created += path
+        journal.madeTexts[path] = text
 
         // Taken back only as it was written: a note the person changed since is theirs, and stays.
         journal.undoSteps += { vault ->
@@ -125,11 +136,13 @@ internal class NoteWriter(
                 path = path
             )
 
-            if (now == text) {
-                trash.moveToTrash(
+            if (now == journal.madeTexts[path]) {
+                val trashed = trash.moveToTrash(
                     vaultPath = vault,
                     path = path
                 )
+
+                if (trashed is Outcome.Failure) throw UndoFailed()
             }
         }
 
@@ -149,15 +162,10 @@ internal class NoteWriter(
                 path = path
             ) ?: return Outcome.Failure(ActionProblem.UnknownNote(path.nameWithoutExtension))
 
-            // In the note's own line endings: a line feed alone in a CRLF note left its tasks unable to be ticked.
-            val end = if ("\r\n" in before) "\r\n" else "\n"
-
-            val added = text.trim().replace(
-                regex = LINE_END,
-                replacement = end
+            val after = AppendedText.of(
+                before = before,
+                added = text
             )
-
-            val after = before.trimEnd() + end + end + added + end
 
             rewrite(
                 rewrite = NoteRewrite(
@@ -225,21 +233,42 @@ internal class NoteWriter(
         return Outcome.Success(value = Unit)
     }
 
+    // The note's tasks as they are now, not as the plan's index saw them: a task added before is found (T15).
     suspend fun completeTask(step: ActionStep): Outcome<Unit, ActionProblem> {
+        val path = step.notes.firstOrNull()
+
+        val text = path?.let {
+            noteContentStore.read(
+                vaultPath = vaultPath,
+                path = it
+            )
+        } ?: return Outcome.Failure(ActionProblem.UnknownTask(step.text.orEmpty()))
+
         val done = finder.completeTask(
             vaultPath = vaultPath,
             step = step,
-            notes = notes
+            tasks = CurrentTasks.of(text = text)
         )
-            ?: return Outcome.Failure(ActionProblem.UnknownTask(step.text.orEmpty()))
 
-        record(rewrite = done)
+        return when (done) {
+            is Outcome.Success -> {
+                record(rewrite = done.value)
 
-        return Outcome.Success(value = Unit)
+                Outcome.Success(value = Unit)
+            }
+
+            is Outcome.Failure -> Outcome.Failure(error = done.error)
+        }
     }
 
+    // A note that cannot be read fails the plan: a tag on a note moved away was written nowhere, and said done (A6).
     suspend fun setProperty(step: ActionStep): Outcome<Unit, ActionProblem> {
         step.notes.forEach { path ->
+            noteContentStore.read(
+                vaultPath = vaultPath,
+                path = path
+            ) ?: return Outcome.Failure(ActionProblem.UnknownNote(name = path.nameWithoutExtension))
+
             finder.setProperty(
                 vaultPath = vaultPath,
                 step = step,
@@ -270,18 +299,5 @@ internal class NoteWriter(
                 rewrites = listOf(rewrite.reversed())
             )
         }
-    }
-
-    /** [title] as a file's name: the characters no system allows in one are left out. */
-    private fun fileName(title: String?): String = title
-        .orEmpty()
-        .replace(FORBIDDEN, "")
-        .trim()
-        .ifEmpty { UNTITLED }
-
-    private companion object {
-        const val UNTITLED = "Untitled"
-        val LINE_END = Regex(pattern = "\\r?\\n")
-        val FORBIDDEN = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
     }
 }

@@ -69,6 +69,35 @@ class MemoryEditTest {
         )
     }
 
+    // Bug hunt S9: a line of another section was overwritten, and a line's second name was not seen as said again.
+    @Test
+    fun `only a line of the same section clashes, by any of its names`() {
+        val twoSections = """
+            # Memory
+
+            ## Areas
+            - "work" is [[Work]] <!-- 2026-11-15, chat: you said -->
+
+            ## People and names
+            - "Laura" and "Lau" are [[Laura Castro]] <!-- 2026-11-15, chat: asked back -->
+        """.trimIndent() + "\n"
+
+        val work = remembered("\"work\" is [[Ana Work]]", MemorySection.PEOPLE, into = twoSections)
+
+        val lau =
+            remembered("\"Lau\" is [[Laura Méndez]]", MemorySection.PEOPLE, into = twoSections)
+
+        assertEquals(
+            expected = listOf(true, true, false, true),
+            actual = listOf(
+                "- \"work\" is [[Work]]" in work,
+                "[[Ana Work]]" in work,
+                "[[Laura Castro]]" in lau,
+                "[[Laura Méndez]]" in lau
+            )
+        )
+    }
+
     @Test
     fun `a line forgotten is taken out whatever its origin, and a line the note lacks changes nothing`() {
         assertEquals(

@@ -53,6 +53,18 @@ class MarkdownLineStripperTest {
         )
     }
 
+    // Bug hunt S4: a parenthesis in the target ended the link, and the rest of the address stayed as text.
+    @Test
+    fun `a link whose target holds parentheses shows only its text`() {
+        assertEquals(
+            expected = "Read Dune tonight.",
+            actual = stripper.strip(
+                line = "Read [Dune](https://en.wikipedia.org/wiki/Dune_(novel)#Plot) tonight.",
+                ranges = emptyList()
+            ).text
+        )
+    }
+
     @Test
     fun `emphasis and code marks go, while snake_case, tags and code content stay`() {
         assertEquals(

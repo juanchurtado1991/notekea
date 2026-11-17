@@ -65,4 +65,39 @@ class WrittenFiguresTest {
             )
         )
     }
+
+    // T6: "Homework 1 (10 points), 27 August" read 27, the number after the word.
+    @Test
+    fun `the number right before the word is its figure, not the one after it`() {
+        val notes = "Homework 1 (10 points), 27 August.\nHomework 2 (15 points), 3 September."
+
+        assertEquals(
+            expected = true,
+            actual = WrittenFigures
+                .of(
+                    word = "points",
+                    place = "Statistics",
+                    texts = listOf("Statistics" to notes)
+                )
+                ?.endsWith(suffix = "These 2 figures add up to 25.")
+        )
+    }
+
+    // T5: every day's spending was added, also the days the task did not ask about.
+    @Test
+    fun `the lines a word of the task picks out are added apart from the others`() {
+        val counted = WrittenFigures.of(
+            word = "spent",
+            place = "Japan journal",
+            texts = listOf("Japan journal" to journal),
+            task = "how much did I spend in Tokyo?"
+        )
+
+        assertEquals(
+            expected = "Of them, the 2 that write \"tokyo\" add up to 16200, and the other 1 to 19600",
+            actual = counted
+                ?.substringAfter(delimiter = "35800.\n")
+                ?.substringBefore(delimiter = ":")
+        )
+    }
 }

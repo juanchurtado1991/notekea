@@ -10,7 +10,8 @@ internal object WrittenFigures {
     fun of(
         word: String,
         place: String,
-        texts: List<Pair<String, String>>
+        texts: List<Pair<String, String>>,
+        task: String = ""
     ): String? {
         val words = word
             .lowercase()
@@ -63,8 +64,53 @@ internal object WrittenFigures {
             }
             .orEmpty()
 
+        val part = partOf(
+            figures = figures,
+            task = task,
+            words = words
+        )
+
         return "count: \"$word\" is written on ${figures.ifEmpty { lines }.size} lines in $place:\n" +
-            listed + more + total
+            listed + more + total + part
+    }
+
+    // The lines a word of the task picks out, added apart: "how much did I spend in Kyoto" was answered with every
+    // day's spending (T5, 211.5 for 210). The first word of the task some figure lines write and some do not.
+    private fun partOf(
+        figures: List<Line>,
+        task: String,
+        words: List<String>
+    ): String {
+        val asked = task
+            .lowercase()
+            .split(NOT_WORD)
+            .filter {
+                it.length >= MIN_TASK_WORD &&
+                    it !in words &&
+                    it !in COMMON
+            }
+
+        val (word, picked) = asked
+            .asSequence()
+            .map { candidate ->
+                candidate to figures.filter {
+                    val under = it
+                        .heading
+                        ?.lowercase()
+                        .orEmpty()
+
+                    candidate in it.text.lowercase() || candidate in under
+                }
+            }
+            .firstOrNull { (_, picked) ->
+                picked.isNotEmpty() && picked.size < figures.size
+            } ?: return ""
+
+        val rest = figures - picked.toSet()
+
+        return "\nOf them, the ${picked.size} that write \"$word\" add up to " +
+            "${written(number = picked.sumOf { it.figure ?: 0.0 })}, and the other ${rest.size} to " +
+            "${written(number = rest.sumOf { it.figure ?: 0.0 })}: count only those the task asks for."
     }
 
     private fun linesOf(
@@ -104,7 +150,8 @@ internal object WrittenFigures {
             }
     }
 
-    // The figure right after the word ("Spent: 6,400 yen", "points: 10"), or right before it ("10 points").
+    // The figure right before the word ("10 points"), else right after it ("Spent: 6,400 yen", "points: 10"):
+    // "Homework 1 (10 points), 27 August" read 27, the number after the word, for its 10 (T6).
     private fun figureOf(
         line: String,
         word: String
@@ -112,11 +159,11 @@ internal object WrittenFigures {
         val after = Regex(pattern = "${Regex.escape(word)}\\w*[^\\p{L}\\p{N}]{1,4}($NUMBER)")
         val before = Regex(pattern = "($NUMBER)\\s+${Regex.escape(word)}")
 
-        val written = after
+        val written = before
             .find(input = line)
             ?.groupValues
             ?.get(1)
-            ?: before
+            ?: after
                 .find(input = line)
                 ?.groupValues
                 ?.get(1)
@@ -152,10 +199,20 @@ internal object WrittenFigures {
 
     private const val HEADING = "#"
     private const val MIN_WORD = 3
+    private const val MIN_TASK_WORD = 4
     private const val MOST_LINES = 40
     private const val LINE_CHARS = 160
     private const val NUMBER = "\\d[\\d.,]*\\d|\\d"
 
     private val NOT_WORD = Regex(pattern = "[^\\p{L}\\p{N}]+")
+
+    // Words of a question that pick out no lines: "how much did I spend in total".
+    private val COMMON = setOf(
+        "what", "much", "many", "does", "have", "total", "with", "from", "that", "this", "these",
+        "those", "were", "there", "they", "their", "notes", "note", "adds", "count", "spend",
+        "spent", "points", "cuánto", "cuanto", "cuántos", "cuantos", "cuántas", "cuantas", "suma",
+        "nota", "notas", "todo", "todos", "todas", "gasté", "gaste", "tengo", "para", "desde",
+        "hasta", "sobre", "entre"
+    )
     private val THOUSANDS = Regex(pattern = "\\d{1,3}([.,]\\d{3})+")
 }

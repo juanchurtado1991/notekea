@@ -48,6 +48,25 @@ class LinkMentionUseCaseTest {
             )
         }
 
+    // Bug hunt 2026-11-17 (G4): `[[Pan [del dia]]]` was written, a link that never resolves.
+    @Test
+    fun `a note whose name a wiki link cannot hold is linked with a Markdown link`() = runTest {
+        val target = RelativePath(value = "Recipes/Pan [del dia].md")
+        store.texts[LISBON] = "We ate Pan [del dia]."
+
+        val linked = linkMention(
+            vaultPath = VAULT,
+            mention = mentionAt(range = 7 until 20),
+            note = entry(path = target.value),
+            notes = listOf(target, LISBON)
+        )
+
+        assertEquals(
+            expected = true to "We ate [Pan \\[del dia\\]](../Recipes/Pan%20[del%20dia].md).",
+            actual = linked to store.texts.getValue(LISBON)
+        )
+    }
+
     // Audit: a plain `|` in a table row ended the cell in the middle of the link.
     @Test
     fun `in a table the bar before the words is escaped`() = runTest {

@@ -320,6 +320,77 @@ class SearchPassagesUseCaseTest {
         )
     }
 
+    // Bug hunt S3: a short word or a prefix chose no sentence, and a dot in "3.500" started one mid-number.
+    @Test
+    fun `the snippet starts at the sentence holding a short word or a prefix, whole`() = runTest(
+        testDispatcher
+    ) {
+        val body = "Intro " + "filler ".repeat(n = 25) +
+            "ends. The budget is 3.500 euros for JP. Then more."
+
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = body
+            )
+        )
+
+        indexed(
+            path = AREPAS,
+            body = body,
+            passage = body
+        )
+
+        assertEquals(
+            expected = listOf("jp", "euro").map {
+                "The budget is 3.500 euros for JP. Then more." to it
+            },
+            actual = listOf("jp", "euro").map { query ->
+                val result = found(
+                    notes = notes,
+                    query = query
+                ).single()
+
+                val marked = result.snippet.substring(range = result.ranges.single())
+
+                result.snippet to marked.lowercase()
+            }
+        )
+    }
+
+    // Bug hunt S8: a comment line in a code block was taken for the heading above the result.
+    @Test
+    fun `a hash line inside a code block is no heading, also when the passage starts in the block`() =
+        runTest(
+            testDispatcher
+        ) {
+            val body = "## Setup\n```bash\n# install first\nrun corn\n```\n"
+
+            val notes = listOf(
+                note(
+                    path = AREPAS,
+                    body = body
+                )
+            )
+
+            indexed(
+                path = AREPAS,
+                body = body,
+                heading = "Setup",
+                passage = "# install first\nrun corn\n```"
+            )
+
+            val result = found(
+                notes = notes,
+                query = "corn"
+            ).single()
+
+            assertEquals(
+                expected = "Setup" to "run corn",
+                actual = result.heading to result.snippet
+            )
+        }
+
     @Test
     fun `a model or an index that cannot answer says which`() = runTest(testDispatcher) {
         val notes = listOf(

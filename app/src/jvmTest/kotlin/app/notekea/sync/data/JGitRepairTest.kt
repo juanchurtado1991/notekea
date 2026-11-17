@@ -10,6 +10,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
 
 /**
  * A vault left in the middle of a merge or a rebase (the app killed half way), on real repositories: nothing is
@@ -20,7 +21,10 @@ class JGitRepairTest {
     private val remote = File(root, "remote.git")
     private val laptop = File(root, "Laptop")
     private val desktop = File(root, "Desktop")
-    private val git = JGitRepository(dispatchers = JvmAppDispatchers())
+    private val git = JGitRepository(
+        dispatchers = JvmAppDispatchers(),
+        clock = Clock.System
+    )
     private val url = remote.toURI().toString()
 
     init {

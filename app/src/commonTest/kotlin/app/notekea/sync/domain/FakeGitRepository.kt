@@ -87,6 +87,7 @@ class FakeGitRepository : GitRepository {
 
     var unfinished: UnfinishedSync? = null
     var repairError: SyncError? = null
+    var resolveError: SyncError? = null
 
     override suspend fun unfinished(vaultPath: String): UnfinishedSync? = unfinished
 
@@ -115,6 +116,11 @@ class FakeGitRepository : GitRepository {
         choice: ConflictChoice
     ): Outcome<Unit, SyncError> {
         calls += "resolve ${note.value} $choice"
+
+        resolveError?.let {
+            return Outcome.Failure(error = it)
+        }
+
         conflicts = conflicts - note
 
         return Outcome.Success(value = Unit)

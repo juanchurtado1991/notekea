@@ -98,7 +98,6 @@ fun ReadingView(
                     imagePainter = imagePainter,
                     onTaskClick = taskClicks(
                         segment = segment,
-                        text = text,
                         textStart = textStart,
                         onIntent = onIntent
                     ).takeUnless { isSelectable }
@@ -116,21 +115,21 @@ fun ReadingView(
 }
 
 /**
- * What a click on a task's checkbox of [segment] does: the task is toggled where it is in the note, [text] starting
- * [textStart] characters into it. The renderer counts the checkboxes it draws; when the text holds another number of
- * tasks (a task in indented code), which one was clicked is not known and nothing is toggled.
+ * What a click on a task's checkbox of [segment] does: the task is toggled where it is in the note, the segment's
+ * text starting [textStart] characters into it. The renderer counts the checkboxes it draws; when the text holds
+ * another number of tasks (a task in indented code), which one was clicked is not known and nothing is toggled.
  */
-private fun taskClicks(
+internal fun taskClicks(
     segment: ReadingSegment.Markdown,
-    text: String,
     textStart: Int,
     onIntent: (EditorIntent) -> Unit
 ): (Int, Int) -> Unit = { index, count ->
     val tasks = TaskFinder().tasks(text = segment.text)
-    val segmentStart = text.indexOf(string = segment.text)
 
-    if (tasks.size == count && segmentStart >= 0) {
-        val stateIndex = textStart + segmentStart + tasks[index].stateIndex
+    // The segment's own start, never a search for its text: an earlier segment with the same text would get the
+    // click.
+    if (tasks.size == count) {
+        val stateIndex = textStart + segment.start + tasks[index].stateIndex
 
         onIntent(EditorIntent.OnTaskToggle(stateIndex = stateIndex))
     }

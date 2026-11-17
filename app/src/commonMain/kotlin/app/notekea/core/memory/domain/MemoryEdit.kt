@@ -21,15 +21,13 @@ object MemoryEdit {
             .trimEnd()
             .lines()
 
-        val clash = lines.indexOfFirst {
-            isClash(
-                old = it,
-                new = line,
-                section = section
-            )
-        }
+        val clash = clashOf(
+            lines = lines,
+            new = line,
+            section = section
+        )
 
-        if (clash >= 0) {
+        if (clash != null) {
             return replacing(
                 lines = lines,
                 at = clash,
@@ -121,7 +119,30 @@ object MemoryEdit {
         return if (kept.size == lines.size) note else kept.joined()
     }
 
-    // The same name said again in People and names, or the same site again in Sources.
+    /**
+     * The index of the line of [section] that [new] says again, or null. Only a line under the same `##` heading can
+     * clash: a line of another section was overwritten when it happened to read like one of [section] (bug hunt S9).
+     */
+    private fun clashOf(
+        lines: List<String>,
+        new: String,
+        section: MemorySection
+    ): Int? {
+        val sections = lines
+            .runningFold(initial = MemorySection.OTHER) { current, written ->
+                HEADING
+                    .matchEntire(input = written.trim())
+                    ?.let { MemorySection.of(heading = it.groupValues[1]) }
+                    ?: current
+            }
+            .drop(n = 1)
+
+        return lines.indices.firstOrNull {
+            sections[it] == section && isClash(old = lines[it], new = new, section = section)
+        }
+    }
+
+    // A name said again in People and names, whichever of a line's names it is, or the same site again in Sources.
     private fun isClash(
         old: String,
         new: String,
@@ -131,9 +152,12 @@ object MemoryEdit {
 
         return when (section) {
             MemorySection.PEOPLE -> {
-                val before = MemoryLine(section, text, null).named?.said
-                val after = MemoryLine(section, new, null).named?.said
-                before != null && before.equals(other = after, ignoreCase = true)
+                val before = namesOf(text = text)
+                val after = namesOf(text = new)
+
+                before.any {
+                    it in after
+                }
             }
 
             MemorySection.SOURCES -> {
@@ -145,6 +169,15 @@ object MemoryEdit {
             else -> false
         }
     }
+
+    private fun namesOf(text: String): Set<String> = MemoryLine(
+        section = MemorySection.PEOPLE,
+        text = text,
+        origin = null
+    )
+        .names
+        .map { it.said.lowercase() }
+        .toSet()
 
     private fun textOf(written: String): String? = BULLET
         .matchEntire(input = written.trim())
@@ -165,6 +198,7 @@ object MemoryEdit {
     private fun List<String>.joined(): String = joinToString(separator = "\n") + "\n"
 
     private val BULLET = Regex(pattern = "^[-*]\\s+(.+)$")
+    private val HEADING = Regex(pattern = "^##\\s+(.+)$")
     private val ORIGIN = Regex(pattern = "<!--(.*?)-->")
     private val DOMAIN = Regex(
         pattern = "[a-z0-9*][a-z0-9.-]*\\.[a-z]{2,}",

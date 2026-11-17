@@ -18,4 +18,21 @@ class CountriesTest {
             ).map { Countries.codeIn(text = it) }
         )
     }
+
+    // The bug hunt of 2026-11-17 (E8): "usa" (the verb) and "chile" (the food) were countries, and the first country
+    // was the first of the list, not of the text.
+    @Test
+    fun `a name that is also a word is a country only after a preposition, and the first named wins`() {
+        assertEquals(
+            expected = listOf("CO", null, "CL", "US", "US", "PE"),
+            actual = listOf(
+                "usa la web para ver el precio del café en Colombia",
+                "una salsa de chile para el chile relleno",
+                "vivo en Chile",
+                "where to buy it in the USA",
+                "precio en EE. UU.",
+                "vuelos de Perú a Colombia"
+            ).map { Countries.codeIn(text = it) }
+        )
+    }
 }

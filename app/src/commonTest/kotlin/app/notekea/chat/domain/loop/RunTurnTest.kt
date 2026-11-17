@@ -255,7 +255,7 @@ class RunTurnTest {
                     "- add_tag (notes, tag):" in system,
                     "- calculate" in system,
                     "For this kind of work (meeting notes):" in system,
-                    "add_tag: not added, UnknownNote(name=Tacos)" in callPrompts()[1],
+                    "add_tag: not added, no note is named \"Tacos\"" in callPrompts()[1],
                     proposed.steps.map { it.kind },
                     proposed
                         .steps

@@ -14,6 +14,7 @@ import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.graph.presentation.model.GraphIntent
 import app.notekea.resources.Res
 import app.notekea.resources.tree_untitled_note
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
@@ -191,6 +192,14 @@ private fun followTreeEffect(
         is VaultTreeEffect.EntryRenamed -> {
             workspace.onIntent(
                 intent = WorkspaceIntent.OnRenamed(
+                    from = effect.from,
+                    to = effect.to
+                )
+            )
+
+            // The graph follows its note to its new name rather than losing its center (the bug hunt, G6).
+            viewModels.graph.onIntent(
+                intent = GraphIntent.OnRenamed(
                     from = effect.from,
                     to = effect.to
                 )

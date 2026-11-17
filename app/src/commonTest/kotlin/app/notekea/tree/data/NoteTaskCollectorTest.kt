@@ -72,6 +72,28 @@ class NoteTaskCollectorTest {
         )
     }
 
+    // Bug hunt K6: the Tasks plugin's other dates were read as due dates through the plain date.
+    @Test
+    fun `the Tasks plugin's created, start, scheduled, done and cancelled dates are no due date`() {
+        val tasks = tasksOf(
+            text = "- [ ] Plan ➕ 2026-01-01 🛫 2026-01-02 ⏳ 2026-01-03\n" +
+                "- [x] Ship ✅ 2026-01-04\n- [ ] Drop ❌ 2026-01-05 by 2026-02-01\n"
+        )
+
+        assertEquals(
+            expected = listOf(
+                null,
+                null,
+                CalendarDate(
+                    year = 2026,
+                    month = 2,
+                    day = 1
+                )
+            ),
+            actual = tasks.map { it.date }
+        )
+    }
+
     @Test
     fun `a date that is no date is none, and a task reads as text`() {
         val tasks = tasksOf(

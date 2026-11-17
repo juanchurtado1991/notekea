@@ -33,7 +33,8 @@ class FrontmatterReader {
     fun valueOf(block: FrontmatterBlocks.Block): PropertyValue {
         val inline = block.inlineValue
 
-        val continuation = block.continuation.filter { it.isNotBlank() }
+        // A comment line under a property is no part of its value: it made the value unreadable (bug hunt S6).
+        val continuation = block.continuation.filter { isValueLine(line = it) }
 
         val isList = block.key?.lowercase() in YamlValues.LIST_KEYS
 
@@ -120,6 +121,12 @@ class FrontmatterReader {
         }
 
         return null
+    }
+
+    private fun isValueLine(line: String): Boolean {
+        val isComment = line.trimStart().startsWith(prefix = YamlValues.COMMENT_MARK)
+
+        return line.isNotBlank() && !isComment
     }
 
     private fun isContinuation(line: String): Boolean =

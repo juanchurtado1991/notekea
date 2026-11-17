@@ -273,7 +273,7 @@ class ComposeNotesUseCase(
 
         val notes = made
             .map { (title, text) ->
-                fileName(title = title) to text
+                NoteFileName.of(title = title) to text
             }
             .distinctBy { it.first.lowercase() }
             .take(n = MAX_TEXT_NOTES)
@@ -344,17 +344,11 @@ class ComposeNotesUseCase(
     private fun pathOf(
         title: String,
         folder: RelativePath?
-    ): RelativePath = (folder ?: RelativePath.ROOT).child(name = fileName(title = title) + MARKDOWN)
-
-    /** [title] as a file's name: the characters no system allows in one are left out. */
-    private fun fileName(title: String): String = title
-        .replace(FORBIDDEN, "")
-        .trim()
-        .ifEmpty { UNTITLED }
+    ): RelativePath =
+        (folder ?: RelativePath.ROOT).child(name = NoteFileName.of(title = title) + MARKDOWN)
 
     private companion object {
         const val MARKDOWN = ".md"
-        const val UNTITLED = "Untitled"
         const val TEMPERATURE = 0.3f
         const val FREE_TOKENS = 600
         const val PART_TOKENS = 1_400
@@ -363,6 +357,5 @@ class ComposeNotesUseCase(
         val TITLE_LINE = Regex(pattern = "^#\\s.*")
         val WIKI_LINK = Regex(pattern = "\\[\\[([^\\]]+)]]")
         val WHITESPACE = Regex(pattern = "\\s+")
-        val FORBIDDEN = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
     }
 }

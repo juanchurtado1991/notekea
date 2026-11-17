@@ -32,7 +32,8 @@ class ChangeTool(
         ToolArgument(
             name = it.written,
             isRequired = it !in optional,
-            isList = it == ActionField.NOTES
+            isList = it == ActionField.NOTES,
+            isValue = it == ActionField.VALUE
         )
     }
 
@@ -48,62 +49,119 @@ class ChangeTool(
             if (isList) items else call.text(name = it.written)
         }
         .filter { it.isNotEmpty() }
-        .joinToString(separator = ", ") { it.take(n = TARGET_CHARS) }
+        .joinToString(separator = ", ")
 
     override suspend fun run(
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val called = PlannedStep(
-            kind = kind,
-            fields = fields
-                .filter {
-                    it != ActionField.NOTES
-                }
-                .associateWith {
-                    writtenOf(
-                        call = call,
-                        field = it
-                    )
-                }
-                .filterValues {
-                    it.isNotEmpty() && it.lowercase() !in NONE
-                },
-            notes = call.list(name = ActionField.NOTES.written)
-        )
+        val called = calledOf(call = call)
+
+        val empty = emptyOf(call = call)
+        if (empty != null) return ToolResult(forModel = "$name: not added. $empty")
 
         val step = asWritten(
             step = called,
             task = context.task
         )
 
+        // A change put right replaces the one it corrects, so it is checked in that one's place.
+        val earlier = ChangeChecks.corrected(
+            step = step,
+            changes = context.work.changes
+        )
+
+        val refused = notAddedOf(
+            call = call,
+            step = step,
+            before = context.work.changes - listOfNotNull(earlier).toSet(),
+            context = context
+        )
+
+        if (refused != null) return ToolResult(forModel = refused)
+
+        val held = heldOf(
+            step = step,
+            context = context
+        )
+
+        if (held != null) return ToolResult(forModel = held)
+
+        return added(
+            step = step,
+            called = called,
+            earlier = earlier,
+            context = context
+        )
+    }
+
+    private fun calledOf(call: ToolCall): PlannedStep = PlannedStep(
+        kind = kind,
+        fields = fields
+            .filter {
+                it != ActionField.NOTES
+            }
+            .associateWith {
+                writtenOf(
+                    call = call,
+                    field = it
+                )
+            }
+            .filterValues {
+                it.isNotEmpty() && it.lowercase() !in NONE
+            },
+        notes = call.list(name = ActionField.NOTES.written)
+    )
+
+    // Why the step is not added, every time: the vault cannot take it, or the task does not ask it.
+    private fun notAddedOf(
+        call: ToolCall,
+        step: PlannedStep,
+        before: List<PlannedStep>,
+        context: ToolContext
+    ): String? {
         // Checked with the changes before it, so a note moved into a folder the turn creates is found there.
         val checked = checkPlan(
-            steps = context.work.changes + step,
+            steps = before + step,
             notes = context.notes,
             openNote = context.openNote
         )
 
         if (checked is Outcome.Failure) {
-            return ToolResult(
-                forModel = "$name: not added, ${checked.error}. Correct it and call $name again, " +
-                    "or ask_user when the task does not say."
+            val said = ChangeChecks.said(
+                problem = checked.error,
+                call = call
             )
+
+            return "$name: not added, $said. Correct it and call $name again, or ask_user when the task does " +
+                "not say."
         }
+
+        val found = (checked as Outcome.Success).value
 
         val refused = refusedOf(
             step = step,
             context = context
+        ) ?: ChangeChecks.impossible(
+            checked = found.last(),
+            before = found.dropLast(n = 1),
+            context = context
         )
 
-        if (refused != null) return ToolResult(forModel = "$name: not added. $refused")
+        return refused?.let { "$name: not added. $it" }
+    }
 
+    // A step held once for a question: several notes for one, a name notes share, a word the task does not write.
+    private fun heldOf(
+        step: PlannedStep,
+        context: ToolContext
+    ): String? {
         val many = manyOf(
             step = step,
             context = context
         )
 
-        if (many != null) return ToolResult(forModel = many)
+        if (many != null) return many
 
         val shared = sharedOf(
             step = step,
@@ -113,20 +171,34 @@ class ChangeTool(
         val isShared = shared.isNotEmpty() && context.work.warn(about = "$name shared")
 
         if (isShared) {
-            return ToolResult(
-                forModel = "$name: not added yet. ${shared.joinToString(separator = " ")} If the task does not " +
-                    "say which, ask_user with them as the options; if it does, call $name again."
-            )
+            return "$name: not added yet. ${shared.joinToString(separator = " ")} If the task does not " +
+                "say which, ask_user with them as the options; if it does, call $name again."
         }
 
-        val unwritten = unwrittenOf(
+        return unwrittenOf(
             step = step,
             context = context
         )
+    }
 
-        if (unwritten != null) return ToolResult(forModel = unwritten)
+    private fun added(
+        step: PlannedStep,
+        called: PlannedStep,
+        context: ToolContext,
+        earlier: PlannedStep?
+    ): ToolResult {
+        val replaced = earlier
+            ?.let {
+                context.work.replace(
+                    earlier = it,
+                    step = step
+                )
 
-        context.work.change(step = step)
+                " It replaces the earlier ${describedOf(step = it)}."
+            }
+            .orEmpty()
+
+        if (earlier == null) context.work.change(step = step)
 
         val proposal = context
             .work
@@ -141,8 +213,8 @@ class ChangeTool(
             .orEmpty()
 
         return ToolResult(
-            forModel = "$name: added.$kept The proposal now holds:\n$proposal\nIf the task asks for a change that " +
-                "is not in it, add that one; else call propose now. Add nothing the task does not ask for."
+            forModel = "$name: added.$replaced$kept The proposal now holds:\n$proposal\nIf the task asks for a " +
+                "change that is not in it, add that one; else call propose now. Add nothing the task does not ask for."
         )
     }
 
@@ -235,8 +307,19 @@ class ChangeTool(
     private fun refusedOf(
         step: PlannedStep,
         context: ToolContext
-    ): String? = unasked(context.task, step) ?: misuse(context.task, step)?.takeIf {
-        context.work.warn(about = "$name misuse")
+    ): String? {
+        val template = ChangeChecks
+            .notTemplate(
+                step = step,
+                context = context
+            )
+            ?.takeIf {
+                kind == ActionKind.CREATE_NOTE
+            }
+
+        return template ?: unasked(context.task, step) ?: misuse(context.task, step)?.takeIf {
+            context.work.warn(about = "$name misuse")
+        }
     }
 
     // The tag the task writes in place of another the model wrote for it: "travel" for "con viaje", "latina" for
@@ -287,7 +370,23 @@ class ChangeTool(
     ): String {
         val text = call.text(name = field.written)
 
-        return if (field in BARE) text.trim('{', '}', '"', '\'', ' ') else text
+        return if (field in BARE) ChangeChecks.writtenOf(text = text) else text
+    }
+
+    // A field written as braces and quotes alone ("}"), said with what was written: left out, it was only "missing".
+    private fun emptyOf(call: ToolCall): String? {
+        val field = fields.firstOrNull {
+            val written = call.text(name = it.written)
+
+            val isEmptied = ChangeChecks.writtenOf(text = written).isEmpty()
+
+            it in BARE &&
+                written.isNotEmpty() &&
+                isEmptied
+        } ?: return null
+
+        return "The ${field.written} written, \"${call.text(name = field.written)}\", holds no " +
+            "${field.written}: write it as the task says it (a text, a number or true/false) and call $name again."
     }
 
     private fun describedOf(step: PlannedStep): String {

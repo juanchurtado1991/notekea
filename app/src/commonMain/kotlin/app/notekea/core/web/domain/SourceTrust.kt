@@ -32,7 +32,13 @@ class SourceTrust(
             .lowercase()
             .removePrefix(prefix = "www.")
 
+        // Only a bare host is judged: one with a query, a path or a user in it ("evil.com?x=.fao.org") could end in a
+        // trusted suffix it is not on.
+        val isHost = HOST.matches(input = site)
+
         return when {
+            !isHost -> Trust.NEW
+
             untrusted.any {
                 covers(
                     pattern = it,
@@ -77,6 +83,9 @@ class SourceTrust(
             pattern = "\\*\\.[a-z]{2,}|[a-z0-9][a-z0-9-]*(\\.[a-z0-9-]+)*\\.[a-z]{2,}",
             option = RegexOption.IGNORE_CASE
         )
+
+        // Letters of any script, for a site written in its own ("café.com").
+        val HOST = Regex(pattern = "[\\p{L}\\p{N}-]+(\\.[\\p{L}\\p{N}-]+)*")
 
         val NOT = Regex(
             pattern = "\\bnot trusted\\b|\\bno confiable\\b|\\bno conf[ií]o\\b|\\bnever\\b|\\bnunca\\b",

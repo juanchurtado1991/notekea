@@ -14,6 +14,13 @@ sealed interface GraphIntent {
         GraphIntent,
         FeedIntent
 
+    /** The note or folder at [from] was renamed or moved to [to]: the notes the graph is on follow it. */
+    data class OnRenamed(
+        val from: RelativePath,
+        val to: RelativePath
+    ) : GraphIntent,
+        FeedIntent
+
     /** The graph's tab came to be, or stopped being, the one a pane shows: it works only then. */
     data class OnShownChange(val isShown: Boolean) :
         GraphIntent,

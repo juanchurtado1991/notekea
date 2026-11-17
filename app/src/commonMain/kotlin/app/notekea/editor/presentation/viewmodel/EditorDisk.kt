@@ -26,6 +26,10 @@ internal class EditorDisk(
 ) {
     private var watchJob: Job? = null
 
+    // The file's text when the pending conflict was first seen: a rewrite by the app tells its own conflict from
+    // an outside change that came first by it.
+    private var conflictText: String? = null
+
     fun watch(path: RelativePath) {
         watchJob?.cancel()
 
@@ -70,6 +74,7 @@ internal class EditorDisk(
         val expected = (current as? Outcome.Success)?.value?.toText()
 
         host.reduce { it.copy(hasConflict = false) }
+        conflictText = null
 
         saving.write(
             path = path,
@@ -107,6 +112,8 @@ internal class EditorDisk(
                     isNewNote = false
                 )
 
+                conflictText = null
+
                 host.reduce {
                     it.copy(
                         hasConflict = false,
@@ -119,9 +126,8 @@ internal class EditorDisk(
     }
 
     /**
-     * Notekea itself rewrote the open note at [path] (a rename updated its links to itself): the editor takes the new
-     * text, or with edits of its own keeps them on top of it, so the next save is no conflict, nor is a change the
-     * watcher already took for an outside one.
+     * Notekea itself rewrote the open note at [path] (a rename updated its links): the editor takes the new text, or
+     * keeps its own edits on top of it, so the next save is no conflict; one the watcher raised on other text stays.
      */
     suspend fun followRewrite(path: RelativePath) {
         if (host.state.value.notePath != path) return
@@ -133,6 +139,11 @@ internal class EditorDisk(
             ) as? Outcome.Success
             )?.value ?: return
 
+        val isOtherConflict = host.state.value.hasConflict && conflictText != document.toText()
+        // An outside change is still waiting for an answer: taking the rewrite would drop it unseen, and the
+        // next save would undo both, so the question stays.
+        if (isOtherConflict) return
+
         if (saving.hasEdits()) {
             saving.rebase(document = document)
         } else {
@@ -142,6 +153,7 @@ internal class EditorDisk(
             )
         }
 
+        conflictText = null
         host.reduce { it.copy(hasConflict = false) }
     }
 
@@ -207,6 +219,10 @@ internal class EditorDisk(
                 val hasUnsavedWork = saving.hasEdits() || host.state.value.hasConflict
 
                 if (hasUnsavedWork) {
+                    // A conflict a failed save raised has no text yet: the watcher's first look gives it one.
+                    val isFirstLook = !host.state.value.hasConflict || conflictText == null
+                    if (isFirstLook) conflictText = change.text
+
                     host.reduce {
                         it.copy(
                             hasConflict = true,

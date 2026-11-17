@@ -79,7 +79,8 @@ class EditorViewModel(
         host = host,
         vaultPath = vaultPath,
         saveNote = saveNote,
-        noteInfo = noteInfo
+        noteInfo = noteInfo,
+        onBehind = ::saveAgainSoon
     )
     private val unsaved = EditorUnsaved(
         host = host,
@@ -314,6 +315,17 @@ class EditorViewModel(
         }
 
         reduce { it.copy(saveStatus = SaveStatus.UNSAVED) }
+        scheduleAutosave()
+    }
+
+    /** A write ended behind the text: it is saved after the usual wait, unless a save is waiting already. */
+    private fun saveAgainSoon() {
+        val isWaiting = autosaveJob?.isActive == true
+        if (!isWaiting) scheduleAutosave()
+    }
+
+    private fun scheduleAutosave() {
+        autosaveJob?.cancel()
 
         autosaveJob = launchGuarded(onError = ::showUnexpectedError) {
             delay(duration = AUTOSAVE_DELAY)
@@ -369,7 +381,10 @@ class EditorViewModel(
 
                 reduce { it.copy(isLoading = false) }
 
-                unsaved.takeDraft(path = path)?.let {
+                unsaved.takeDraft(
+                    path = path,
+                    onDisk = saving.onDisk
+                )?.let {
                     saving.replaceBuffer(
                         body = it,
                         isNewNote = false
@@ -417,7 +432,8 @@ class EditorViewModel(
             document = document.copy(
                 header = header,
                 body = buffer.text.toString()
-            )
+            ),
+            basedOn = saving.onDisk
         )
     }
 

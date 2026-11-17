@@ -12,7 +12,11 @@ import app.notekea.editor.presentation.attachments.AttachmentView
  * links.
  */
 sealed interface ReadingSegment {
-    data class Markdown(val text: String) : ReadingSegment
+    /** Markdown [text] that starts [start] characters into the text it was cut from. */
+    data class Markdown(
+        val text: String,
+        val start: Int
+    ) : ReadingSegment
 
     data class Attachment(val view: AttachmentView) : ReadingSegment
 
@@ -43,7 +47,12 @@ sealed interface ReadingSegment {
                         endIndex = end
                     )
                     .takeIf { it.isNotBlank() }
-                    ?.let { segments += Markdown(text = it) }
+                    ?.let {
+                        segments += Markdown(
+                            text = it,
+                            start = start
+                        )
+                    }
             }
 
             cutsOf(

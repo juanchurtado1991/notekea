@@ -19,13 +19,14 @@ import kotlinx.coroutines.sync.withLock
 /**
  * The open note as it is on disk, and the one way to write it: [opened] is the note as last read or written (its header
  * kept apart), [onDisk] what its file holds, so a save never replaces an outside change; saves, loads and answers to a
- * conflict run one at a time ([runSave]). Each updates what the state says about the file.
+ * conflict run one at a time ([runSave]). [onBehind] asks for another save when a write ends behind the text.
  */
 internal class EditorSaving(
     private val host: EditorHost,
     private val vaultPath: String,
     private val saveNote: SaveNoteUseCase,
-    private val noteInfo: EditorNoteInfo
+    private val noteInfo: EditorNoteInfo,
+    private val onBehind: () -> Unit
 ) {
     var opened: NoteDocument? = null
     var onDisk: String? = null
@@ -55,49 +56,72 @@ internal class EditorSaving(
         expectedOnDisk: String?
     ) {
         when (val outcome = saveNote(vaultPath, path, document, expectedOnDisk)) {
-            is Outcome.Success -> {
-                // Note info counts the properties' tags: a save that changed them counts again; the text's own
-                // changes are counted as they are typed.
-                val isHeaderChanged = opened?.header != document.header
-
-                // The header as the file holds it: a body typed after a closing `---` gave that line its line break.
-                val saved = document.copy(
-                    header = NoteDocument.fromText(text = outcome.value).header
-                )
-
-                opened = saved
-                onDisk = outcome.value
-
-                val isCurrent = host
-                    .buffer
-                    .text
-                    .toString() == document.body
-
-                host.reduce {
-                    describeFile(
-                        state = it,
-                        document = saved
-                    ).copy(
-                        info = it.info.copy(modifiedAt = noteInfo.now()),
-                        saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
-                        saveError = null,
-                        hasConflict = false,
-                        isDeleted = false
-                    )
-                }
-
-                if (isHeaderChanged) {
-                    noteInfo.updateStats(
-                        body = host
-                            .buffer
-                            .text
-                            .toString()
-                    )
-                }
-            }
+            is Outcome.Success -> onWritten(
+                document = document,
+                written = outcome.value
+            )
 
             is Outcome.Failure -> reduceFailure(error = outcome.error)
         }
+    }
+
+    /**
+     * Takes the file as [written] from [document]: it is split again, as the next read would split it, so frontmatter
+     * typed at the top of the body, or a `---` typed in the properties' source, moves between header and body once.
+     */
+    private fun onWritten(
+        document: NoteDocument,
+        written: String
+    ) {
+        val isCurrent = host
+            .buffer
+            .text
+            .toString() == document.body
+
+        val reread = NoteDocument.fromText(text = written)
+        val isSplitMoved = reread.body != document.body
+        // Text typed during the write is kept on the split it was typed against, so the next save does not write
+        // the moved lines twice; that save is current and splits the file again.
+        val saved = if (isSplitMoved && !isCurrent) document else reread
+        // Note info counts the properties' tags: a save that changed them counts again; the text's own
+        // changes are counted as they are typed.
+        val isHeaderChanged = opened?.header != saved.header
+
+        opened = saved
+        onDisk = written
+
+        if (isSplitMoved && isCurrent) {
+            replaceBuffer(
+                body = reread.body,
+                isNewNote = false
+            )
+        }
+
+        host.reduce {
+            describeFile(
+                state = it,
+                document = saved
+            ).copy(
+                info = it.info.copy(modifiedAt = noteInfo.now()),
+                saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
+                saveError = null,
+                hasConflict = false,
+                isDeleted = false
+            )
+        }
+
+        if (isHeaderChanged) {
+            noteInfo.updateStats(
+                body = host
+                    .buffer
+                    .text
+                    .toString()
+            )
+        }
+
+        // Text that changed during the write is saved again: an edit undone back to the text from before the write
+        // sends no change that differs from it, so nothing else would schedule that save.
+        if (!isCurrent) onBehind()
     }
 
     /** Takes [document] as what the file holds now, the text in the editor staying as it is. */

@@ -34,6 +34,9 @@ internal class TurnState(
     // The changes refused, so one refused again as it was counts as made again.
     val refused = mutableListOf<String>()
 
+    // The tool of the last call made, when it was refused: not offered until another call is made.
+    val withheld = mutableListOf<String>()
+
     /** The notes the task can mean and does not say which of: the person is asked before the turn ends. */
     val ambiguous by lazy {
         AmbiguousTask.notesOf(

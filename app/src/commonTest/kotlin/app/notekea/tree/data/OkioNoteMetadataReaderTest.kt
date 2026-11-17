@@ -136,14 +136,34 @@ class OkioNoteMetadataReaderTest {
         }
 
     @Test
-    fun `windows line endings, a byte order mark and a dots closing fence are accepted`() =
+    fun `windows line endings, a byte order mark and fences with trailing spaces are accepted`() =
         runReaderTest {
-            writeNote(content = "\uFEFF---\r\ntitle: Arepas\r\n...\r\nBody\r\n")
+            writeNote(content = "\uFEFF---  \r\ntitle: Arepas\r\n--- \r\nBody\r\n")
 
             assertEquals(
                 expected = "Arepas",
                 actual = readNote()?.title
             )
+        }
+
+    // Bug hunt K2: the reader closed on `...` and the editor did not, so a task listed there was never toggled.
+    @Test
+    fun `the frontmatter ends where the note's document says, so a task's place is in its body`() =
+        runReaderTest {
+            listOf(
+                "---\ntitle: Plan\n--- \n- [ ] Write\n",
+                "---\ntitle: Plan\n...\n- [ ] Write\n"
+            ).forEach { content ->
+                writeNote(content = content)
+
+                val task = requireNotNull(readNote()).tasks.single()
+                val body = NoteDocument.fromText(text = content).body
+
+                assertEquals(
+                    expected = "- [ ] Write",
+                    actual = body.substring(task.stateIndex - 3, task.endIndex)
+                )
+            }
         }
 
     @Test

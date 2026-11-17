@@ -8,7 +8,7 @@ import app.notekea.query.domain.VaultQuery
 import com.ghost.serialization.Ghost
 import com.ghost.serialization.exception.GhostJsonException
 
-/** [QueryJsonReader] over Ghost; a filter with a condition the query tab does not have is left out. */
+/** [QueryJsonReader] over Ghost; a filter with a condition the query tab does not have fails the whole query. */
 class GhostQueryJsonReader : QueryJsonReader {
     override fun read(json: String): VaultQuery? {
         val dto = try {
@@ -17,16 +17,17 @@ class GhostQueryJsonReader : QueryJsonReader {
             return null
         }
 
+        // Leaving the filter out would widen the result: the notes it should have kept out would match.
+        val filters = dto.filters.map { filter ->
+            QueryFilter(
+                condition = QueryCondition.of(text = filter.condition) ?: return null,
+                property = filter.property.trim(),
+                value = filter.value.trim()
+            )
+        }
+
         return VaultQuery(
-            filters = dto.filters.mapNotNull { filter ->
-                QueryCondition.of(text = filter.condition)?.let {
-                    QueryFilter(
-                        condition = it,
-                        property = filter.property.trim(),
-                        value = filter.value.trim()
-                    )
-                }
-            },
+            filters = filters,
             sort = dto
                 .sort
                 ?.trim()

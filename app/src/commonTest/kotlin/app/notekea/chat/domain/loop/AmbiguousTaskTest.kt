@@ -103,4 +103,82 @@ class AmbiguousTaskTest {
             actual = held
         )
     }
+
+    // The bug hunt of 2026-11-17, L9: "Cuál" after "¿" was counted as a second name, so José was never alone.
+    @Test
+    fun `a capital that opens a sentence after an inverted mark is no name`() {
+        assertEquals(
+            expected = listOf(
+                listOf("People/José Mora.md", "People/José Vega.md"),
+                listOf("People/Ángela Ruiz.md", "People/Ángela Soto.md")
+            ),
+            actual = listOf(
+                heldOf(task = "¿Cuál es el correo de José?"),
+                heldOf(task = "¡Llama a Ángela hoy!")
+            )
+        )
+    }
+
+    // L13: "two" in the quoted text switched the check off; "the analysis" was never "the X" for ending in "s".
+    @Test
+    fun `a plural word inside quoted text, and a singular word ending in s, leave the task about one note`() {
+        val goals = listOf("Personal/Goals 2027.md", "Work/Goals 2027.md").map { entry(path = it) }
+
+        val analyses = listOf("Reports/Sales analysis.md", "Reports/Cost analysis.md").map {
+            entry(path = it)
+        }
+
+        val held = listOf(
+            "add 'read two books' to Goals 2027" to goals,
+            "summarize the analysis" to analyses
+        ).map { (task, notes) ->
+            AmbiguousTask
+                .notesOf(
+                    task = task,
+                    notes = notes
+                )
+                .size
+        }
+
+        assertEquals(
+            expected = listOf(2, 2),
+            actual = held
+        )
+    }
+
+    // S2: "in three bullets" and a new sentence's capital dropped the memory's note as if the task said which.
+    @Test
+    fun `a common word or a new sentence after the memory's name says nothing of which one`() {
+        val qualified = listOf(
+            "Summarize my goals in three bullets" to "my goals",
+            "Tell me about Laura. Summarize it." to "Laura",
+            "el correo de Laura de Contabilidad" to "Laura",
+            "call Laura Méndez" to "Laura",
+            "the phone of Tomás from the chess club" to "Tomás"
+        ).map { (task, said) ->
+            AmbiguousTask.isQualified(
+                task = task,
+                said = said
+            )
+        }
+
+        assertEquals(
+            expected = listOf(false, false, true, true, true),
+            actual = qualified
+        )
+    }
+
+    // L10: a task about one note may not be settled by an end that names every note it could mean.
+    @Test
+    fun `a task about one thing is singular, quoting a plural word too, and one about several is not`() {
+        assertEquals(
+            expected = listOf(true, true, false, false),
+            actual = listOf(
+                "what is Laura's phone?",
+                "add 'call both parents' to Goals 2027",
+                "compare the budgets",
+                "summarize both leases"
+            ).map { AmbiguousTask.isSingular(task = it) }
+        )
+    }
 }

@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.agent
 
+import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.chat.domain.prompt.AnswerLinks
 import app.notekea.core.llm.domain.GenerationOptions
@@ -23,7 +24,7 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
         memory: List<String> = emptyList()
     ): String {
         // "(search … again: its result is above)" is no result.
-        val looked = found.filterNot { it.startsWith(prefix = AGAIN) }
+        val looked = found.filter { isResult(entry = it) }
         if (looked.isEmpty()) return summary
 
         // Every search came back empty: there is nothing to write from, and the reply is the not found one.
@@ -71,7 +72,22 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
     }
 
     companion object {
-        const val AGAIN = "("
+        private const val AGAIN = "("
+
+        /** Said before a result kept aside and made again, which is then shown whole once more. */
+        const val SHOWN_AGAIN = "(Made again: its result was kept aside, so here it is whole.)\n"
+
+        // What the loop says in brackets is no result, but what the budget kept aside of the dropped results and a
+        // result shown again are (the bug hunt of 2026-11-17: both began with "(" and were never answered from).
+        private val KEPT = listOf(ContextBudget.RECALLED, SHOWN_AGAIN)
+
+        /** Whether [entry] of what a turn found is something it looked up, not a line of the loop's own. */
+        fun isResult(entry: String): Boolean {
+            val isKept = KEPT.any { entry.startsWith(prefix = it) }
+
+            return isKept || !entry.startsWith(prefix = AGAIN)
+        }
+
         private const val NOTHING = "nothing found"
         private const val ANSWER_TOKENS = 700
     }

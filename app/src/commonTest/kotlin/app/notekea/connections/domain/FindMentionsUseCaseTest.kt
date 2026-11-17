@@ -143,6 +143,29 @@ class FindMentionsUseCaseTest {
         )
     }
 
+    @Test
+    fun `a Markdown link holding the name percent-encoded beyond spaces is a backlink`() {
+        val cafe = RelativePath(value = "Recipes/Café (draft).md")
+        val source = RelativePath(value = "Welcome.md")
+        val body = "Coffee: [the café](Recipes/Caf%C3%A9%20%28draft%29.md)."
+
+        val mentions = findMentions(
+            note = entry(path = cafe.value),
+            notes = listOf(cafe, source),
+            texts = mapOf(
+                source to NoteText(
+                    body = body,
+                    folded = body.lowercase()
+                )
+            )
+        )
+
+        assertEquals(
+            expected = listOf(source),
+            actual = mentions.linked.map { it.source }
+        )
+    }
+
     private fun find(vararg notes: Pair<String, String>): NoteMentions {
         val texts = notes.associate { (path, body) ->
             RelativePath(value = path) to

@@ -125,7 +125,7 @@ object MemoryCheck {
     )
 
     private val HEDGE = Regex(
-        pattern = "\\b(seems|probably|maybe|perhaps|likely|parece|probablemente|quiz[aá]s?|tal vez)\\b",
+        pattern = "\\b(seems|probably|maybe|perhaps|likely|parece|probablemente|quiz[aá]s?|tal vez)(?![\\p{L}\\p{N}])",
         option = RegexOption.IGNORE_CASE
     )
 }

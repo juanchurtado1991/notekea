@@ -24,7 +24,8 @@ internal object TurnSetup {
         today: String,
         remembered: List<MemoryLine>,
         openNote: RelativePath?,
-        told: List<AmbiguousTask.Settled> = emptyList()
+        told: List<AmbiguousTask.Settled> = emptyList(),
+        sources: List<String> = emptyList()
     ): ToolContext = ToolContext(
         vaultPath = vaultPath,
         notes = notes,
@@ -36,7 +37,7 @@ internal object TurnSetup {
             remembered = remembered
         ),
         trust = SourceTrust(
-            sources = emptyList(),
+            sources = sources,
             memory = remembered
         ),
         remembered = settledOf(
@@ -161,7 +162,10 @@ internal object TurnSetup {
         val before = Regex.escape(words.dropLast(n = 1).joinToString(separator = " "))
         val last = Regex.escape(words.last())
 
-        return Regex(pattern = "\\b$before\\s+(\\p{L}{4,})\\s+$last(?![\\p{L}\\p{N}])")
+        // Bounded by letters both sides: `\b` is ASCII on the JVM, and a name may start with "Á" (bug hunt, L6).
+        val inside = "(?<![\\p{L}\\p{N}])$before\\s+(\\p{L}{4,})\\s+$last(?![\\p{L}\\p{N}])"
+
+        return Regex(pattern = inside)
             .find(input = task.lowercase())
             ?.groupValues
             ?.get(1)

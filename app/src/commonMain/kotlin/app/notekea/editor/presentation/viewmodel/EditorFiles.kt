@@ -7,6 +7,7 @@ import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.YouTubeLinks
+import app.notekea.core.notes.domain.isTableRow
 import app.notekea.editor.domain.AttachmentSource
 import app.notekea.editor.domain.CompressStep
 import app.notekea.editor.domain.Embed
@@ -15,6 +16,7 @@ import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.VideoLimits
 import app.notekea.editor.presentation.attachments.AttachmentTools
 import app.notekea.editor.presentation.attachments.EditorAttachments
+import app.notekea.editor.presentation.markdown.CellInput
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorState
@@ -150,19 +152,30 @@ internal class EditorFiles(
             text?.replace(
                 oldValue = WINDOWS_NEW_LINE,
                 newValue = NEW_LINE
-            )?.let { pasted ->
-                host.buffer.edit {
-                    val start = selection.min
+            )?.let { insertPasted(pasted = it) }
+        }
+    }
 
-                    replace(
-                        start = start,
-                        end = selection.max,
-                        text = pasted
-                    )
+    /** Puts [pasted] in place of the selection; in a table's cell, by the cell's rules as typing would. */
+    private fun insertPasted(pasted: String) {
+        host.buffer.edit {
+            val start = selection.min
 
-                    selection = TextRange(index = start + pasted.length)
-                }
-            }
+            // An edit made here skips the field's own rules, so a cell's are applied here.
+            val isInRow = isTableRow(
+                text = asCharSequence().toString(),
+                offset = start
+            )
+
+            val kept = if (isInRow) CellInput.cellText(text = pasted) else pasted
+
+            replace(
+                start = start,
+                end = selection.max,
+                text = kept
+            )
+
+            selection = TextRange(index = start + kept.length)
         }
     }
 

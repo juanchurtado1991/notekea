@@ -423,6 +423,11 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
     that added no change ends saying so (`RunTurnUseCase.unchanged`: an empty proposal ended as its summary,
     "Lowered the rating to 3…"). On the 34 long-note and memory tasks the 4B went from 6 failures to 5 and the 9B
     from 5 to 3.
+  - **Bug hunt (2026-11-17), `docs/bug-hunt-2026-11-17.md`:** asked whether the failures were the model's or the
+    code's, ten read-only reviews found about 110 defects across the app; 107 are fixed with tests, four are partly
+    fixed (listed there). Several made the model fail on their own: a change dropped could not be added again, every
+    tool value was a string in the grammar (so 3 came out as `"}"`), refused calls looped, a phone number settled a
+    note. The loop is to be measured again with all of them in.
   - **Tried and dropped:** each note of a change to several checked alone by the model, a yes or a no, before the
     card. On the 40 tasks that change a group it made both models worse (4B 11 failures to 12, 9B 9 to 13): it took
     out notes the task asks for ("both of my Goals 2027 notes", a book rated 5). The code is not in the branch.

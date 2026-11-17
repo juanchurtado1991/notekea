@@ -1,5 +1,7 @@
 package app.notekea.chat.domain.tool.change
 
+import app.notekea.chat.domain.loop.AmbiguousTask
+
 /**
  * The one thing a task names with "the" (the project, the supplier meeting; el, la in Spanish), when it names one
  * and no more: a change that acts on several notes for it may have guessed which one was meant.
@@ -37,8 +39,7 @@ internal object SingularTask {
 
     /** "it" when [task] points at one thing with no name ("tag it as urgent") and names no several. */
     fun pointedIn(task: String): String? {
-        val isSeveral =
-            PLURAL.containsMatchIn(input = task) || SEVERAL.containsMatchIn(input = task)
+        val isSeveral = isSeveral(task = task)
 
         return IT
             .find(input = task)
@@ -53,10 +54,7 @@ internal object SingularTask {
 
     /** "the project" when [task] names one thing so; null when it names several or none. */
     fun oneIn(task: String): String? {
-        val isSeveral =
-            PLURAL.containsMatchIn(input = task) || SEVERAL.containsMatchIn(input = task)
-
-        if (isSeveral) return null
+        if (isSeveral(task = task)) return null
 
         return THE
             .findAll(input = task)
@@ -68,7 +66,14 @@ internal object SingularTask {
                     .orEmpty()
                     .lowercase()
 
-                word !in NOT_THINGS && !word.endsWith(suffix = "s")
+                word !in NOT_THINGS && !AmbiguousTask.isPluralWord(word = word)
             }
+    }
+
+    // Words inside quoted text to add say nothing of how many notes: "add 'read two books' to my goals".
+    private fun isSeveral(task: String): Boolean {
+        val said = AmbiguousTask.unquoted(task = task)
+
+        return PLURAL.containsMatchIn(input = said) || SEVERAL.containsMatchIn(input = said)
     }
 }

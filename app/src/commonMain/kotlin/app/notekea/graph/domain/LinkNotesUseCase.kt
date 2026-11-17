@@ -6,11 +6,13 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.notes.domain.links.NoteRewrite
+import app.notekea.core.notes.domain.links.isWikiLinkable
+import app.notekea.core.notes.domain.links.markdownLink
 
 /**
- * Links two notes from the graph, only because the person clicked Link: `[[target]]` goes at the end
- * of [source]'s body, as short as stays unambiguous ([LinkResolver.wikiTarget]). The note is written only if it does
- * not change meanwhile. Returns what was written, which [NoteRewrite.reversed] takes back, or null if nothing was.
+ * Links two notes when the person clicks Link: `[[target]]` at the end of [source]'s body, as short as stays clear
+ * ([LinkResolver.wikiTarget]), or a Markdown link when it cannot; written only if the note did not change meanwhile.
+ * Returns what was written, which [NoteRewrite.reversed] takes back, or null.
  */
 class LinkNotesUseCase(
     private val noteContentStore: NoteContentStore,
@@ -28,9 +30,22 @@ class LinkNotesUseCase(
         ) ?: return null
 
         val document = NoteDocument.fromText(text = original)
-        val link = "[[${LinkResolver(notePaths = notes).wikiTarget(path = target)}]]\n"
-        val written = document.body.trimEnd()
-        val body = if (written.isEmpty()) link else "$written\n\n$link"
+        val wikiTarget = LinkResolver(notePaths = notes).wikiTarget(path = target)
+
+        // A name with `#`, `^`, `|` or brackets would end a wiki link early: such a note gets a Markdown link.
+        val written = if (isWikiLinkable(target = wikiTarget)) {
+            "[[$wikiTarget]]"
+        } else {
+            markdownLink(
+                label = target.nameWithoutExtension,
+                target = target,
+                source = source
+            )
+        }
+
+        val link = "$written\n"
+        val kept = document.body.trimEnd()
+        val body = if (kept.isEmpty()) link else "$kept\n\n$link"
 
         val rewrite = NoteRewrite(
             path = source,

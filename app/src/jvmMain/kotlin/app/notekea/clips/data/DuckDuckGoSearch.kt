@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.net.URLDecoder
 import java.net.URLEncoder
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,23 +44,40 @@ class DuckDuckGoSearch(private val fetcher: PageFetcher) : WebSearchProvider {
 
         when (val fetched = fetcher.fetch(url = url)) {
             is Outcome.Failure -> Outcome.Failure(error = problemOf(error = fetched.error))
+            is Outcome.Success -> outcomeOf(html = fetched.value.html)
+        }
+    }
 
-            is Outcome.Success -> {
-                val results = resultsOf(html = fetched.value.html)
+    // A page with no results is either DuckDuckGo's "no results" or its challenge for bots, which a rate-limited search
+    // gets (HTTP 202, its "anomaly" form): that one is a block, not nothing found (the bug hunt of 2026-11-17, E6).
+    private fun outcomeOf(html: String): Outcome<List<WebResult>, WebSearchProblem> {
+        val page = Jsoup.parse(html)
+        val results = resultsOf(page = page)
 
-                if (results.isEmpty()) {
-                    Outcome.Failure(error = WebSearchProblem.NOTHING_FOUND)
-                } else {
-                    Outcome.Success(value = results.take(n = MOST_RESULTS))
-                }
-            }
+        val saysBots = page
+            .text()
+            .contains(
+                other = BOTS_TOO,
+                ignoreCase = true
+            )
+
+        val isChallenge = page.selectFirst(CHALLENGE) != null || saysBots
+
+        val isBlocked =
+            results.isEmpty() &&
+                page.selectFirst(NO_RESULTS) == null &&
+                isChallenge
+
+        return when {
+            isBlocked -> Outcome.Failure(error = WebSearchProblem.BLOCKED)
+            results.isEmpty() -> Outcome.Failure(error = WebSearchProblem.NOTHING_FOUND)
+            else -> Outcome.Success(value = results.take(n = MOST_RESULTS))
         }
     }
 
     // Each result's title, its address out of DuckDuckGo's redirect, and its snippet. Ads are left out: their link is
     // DuckDuckGo's own click address, which the eval saw ticked as a source and read as nothing (2026-11-16).
-    private fun resultsOf(html: String): List<WebResult> = Jsoup
-        .parse(html)
+    private fun resultsOf(page: Document): List<WebResult> = page
         .select(".result:not(.result--ad)")
         .mapNotNull { result ->
             val link = result.selectFirst("a.result__a") ?: return@mapNotNull null
@@ -112,6 +130,10 @@ class DuckDuckGoSearch(private val fetcher: PageFetcher) : WebSearchProvider {
         const val ADDRESS = "https://html.duckduckgo.com/html/"
         const val MOST_RESULTS = 8
         val PAUSE = 2_500.milliseconds
+        const val CHALLENGE =
+            "[class*=anomaly], [id*=anomaly], form[action*=anomaly], #challenge-form"
+        const val NO_RESULTS = ".no-results"
+        const val BOTS_TOO = "bots use DuckDuckGo too"
         val LANGUAGES = mapOf(
             "US" to "en", "GB" to "en", "CA" to "en", "BR" to "pt", "PT" to "pt", "FR" to "fr", "DE" to "de",
             "IT" to "it", "JP" to "jp"

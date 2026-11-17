@@ -41,4 +41,34 @@ class SourceTrustTest {
             }
         )
     }
+
+    // The bug hunt of 2026-11-17 (E10): the host was cut only at `/` and `:`, so a query or a user before the host
+    // made a page on evil.com pass as fao.org.
+    @Test
+    fun `a trusted suffix in an address's query, fragment or user is not its site`() {
+        val domains = listOf(
+            "https://evil.com?x=.fao.org",
+            "https://evil.com#.fao.org",
+            "https://evil.com\\.fao.org",
+            "https://www.fao.org@evil.com/page",
+            "https://user:pass@www.FAO.org:443/tomato"
+        ).map {
+            WebResult(
+                title = "",
+                url = it,
+                snippet = ""
+            ).domain
+        }
+
+        assertEquals(
+            expected = listOf<Any>(
+                listOf("evil.com", "evil.com", "evil.com", "evil.com", "fao.org"),
+                SourceTrust.Trust.NEW
+            ),
+            actual = listOf(
+                domains,
+                trust.of(domain = "evil.com?x=.fao.org")
+            )
+        )
+    }
 }

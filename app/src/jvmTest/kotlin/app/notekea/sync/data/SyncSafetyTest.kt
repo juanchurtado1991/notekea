@@ -2,6 +2,7 @@ package app.notekea.sync.data
 
 import app.notekea.sync.domain.SyncError
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.errors.TransportException
 import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.createFile
@@ -40,6 +41,45 @@ class SyncSafetyTest {
         )
     }
 
+    // Bug hunt, 2026-11-17: a conflict copy whose move failed stayed where it was, and the next was written over it.
+    @Test
+    fun `a move aside that cannot happen throws and leaves the file where it was`() {
+        val folder = Files.createTempDirectory("notekea-move").toFile()
+        val copy = File(folder, "Plan (conflict).md").apply { writeText("The first conflict.") }
+        val unreachable = File(folder, "Gone/Plan (mine).md")
+
+        val isThrown = runCatching {
+            FreeFile.moveBeside(
+                file = copy,
+                wanted = unreachable
+            )
+        }.isFailure
+
+        assertEquals(
+            expected = true to "The first conflict.",
+            actual = isThrown to copy.readText()
+        )
+    }
+
+    // Bug hunt, 2026-11-17: a "401" in the address made any error a refused token, and the token was deleted.
+    @Test
+    fun `a transport error is a refused token by what Git says, never by the numbers in the address`() {
+        val errors = listOf(
+            "https://example.com/team401/notes403.git: connection reset",
+            "https://example.com/me/notes.git: not authorized",
+            "https://example.com/me/notes.git: git-receive-pack not permitted on 'https://example.com/me/notes.git/'"
+        ).map { JGitErrors.of(throwable = TransportException(it)) }
+
+        assertEquals(
+            expected = listOf(
+                SyncError.Failed(message = "https://example.com/team401/notes403.git: connection reset"),
+                SyncError.AuthFailed,
+                SyncError.AuthFailed
+            ),
+            actual = errors
+        )
+    }
+
     // A file over the host's limit, once committed, had every push refused for good.
     @Test
     fun `a new file over the limit is left out of the repository, and the rest is still seen`() {
@@ -55,6 +95,10 @@ class SyncSafetyTest {
 
                 val left = LargeFiles.leaveOut(
                     git = git,
+                    untracked = git
+                        .status()
+                        .call()
+                        .untracked,
                     maxBytes = LIMIT
                 )
 

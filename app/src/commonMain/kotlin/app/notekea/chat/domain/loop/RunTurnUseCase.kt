@@ -13,6 +13,7 @@ import app.notekea.chat.domain.context.StepMemory
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.skill.VaultGuide
+import app.notekea.chat.domain.sources.SourceSites
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolCallJson
@@ -58,7 +59,8 @@ class RunTurnUseCase(
     private val proposal: ProposalCheck,
     private val clock: Clock,
     private val stepMemory: StepMemory? = null,
-    private val wholeLast: Int? = null
+    private val wholeLast: Int? = null,
+    private val sourceSites: SourceSites? = null
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
 
@@ -78,8 +80,17 @@ class RunTurnUseCase(
         val remembered = vaultGuide.memoryOf(vaultPath, notes)
         val apart = TurnSetup.apartOf(task, vaultPath, notes, vaultGuide, remembered)
 
-        val turn =
-            TurnSetup.contextOf(task, vaultPath, notes, context.today, remembered, openNote, apart)
+        // The vault's own web sources are trusted by definition (`docs/agent-web.md`): none were (bug hunt, E7).
+        val turn = TurnSetup.contextOf(
+            task = task,
+            vaultPath = vaultPath,
+            notes = notes,
+            today = context.today,
+            remembered = remembered,
+            openNote = openNote,
+            told = apart,
+            sources = sourceSites?.sitesOf(vaultPath = vaultPath).orEmpty()
+        )
 
         val route = router.route(
             task = task,
@@ -129,7 +140,8 @@ class RunTurnUseCase(
                 llmEngine = llmEngine,
                 tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,
                 fixed = LoopPrompt.fixedOf(system, task, context),
-                replyTokens = CALL_TOKENS + WORK_TOKENS,
+                // The retry's room: less overflowed a small context (the bug hunt of 2026-11-17, E4).
+                replyTokens = RETRY_TOKENS + WORK_TOKENS,
                 memory = stepMemory,
                 need = task,
                 space = Random.nextLong().toString(),
@@ -246,6 +258,9 @@ class RunTurnUseCase(
     ) {
         val target = tool.targetOf(call, state.turn)
 
+        // Another call is made: a tool withheld for its refusal is offered again.
+        state.withheld.clear()
+
         val shared = SharedNames.of(
             call = call,
             state = state
@@ -298,6 +313,10 @@ class RunTurnUseCase(
         // A change not added (refused, or held back with a question) may be asked again as it was.
         val isRefused = tool.effect == ToolEffect.PROPOSES && state.turn.work.changes.size == before
         if (isRefused) state.made.remove(element = key)
+
+        // A refused tool is not offered until another call is made: at temperature 0 the 4B made one refused call
+        // four times running (the bug hunt of 2026-11-17, E3).
+        if (isRefused) state.withheld += call.name
 
         // Refused again as it was, it counts as made again and is not offered next: refused over and over, it
         // ends the turn.
@@ -378,7 +397,11 @@ class RunTurnUseCase(
             .only(name = AskUserTool.NAME)
             .takeIf { UnsettledEnd.mustAsk(state = state) }
 
-        val tools = asking ?: again?.let { offered.without(name = it) } ?: offered
+        val withheld = (listOfNotNull(again) + state.withheld)
+            .fold(initial = offered) { left, name -> left.without(name = name) }
+            .takeIf { it.tools.isNotEmpty() }
+
+        val tools = asking ?: withheld ?: offered
 
         val json = StringBuilder()
 
@@ -413,9 +436,7 @@ class RunTurnUseCase(
 
     // No call could be read, or the steps ran out: what it found is still worth an answer; with nothing, it stopped.
     private suspend fun unread(state: TurnState): AgentStep {
-        val hasLooked = state.found.any {
-            !it.startsWith(prefix = AgentFinalAnswer.AGAIN)
-        }
+        val hasLooked = state.found.any { AgentFinalAnswer.isResult(entry = it) }
 
         // Changes already added are what it was asked for: they go on the card, not into an answer.
         if (state.turn.work.changes.isNotEmpty()) return turnEnd.proposed(state, "")

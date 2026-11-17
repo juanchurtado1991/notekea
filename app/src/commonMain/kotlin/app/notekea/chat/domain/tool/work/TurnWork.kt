@@ -28,6 +28,16 @@ class TurnWork {
         proposed += step
     }
 
+    /** [earlier] in the proposal put right by [step], in its place: a change corrected is not added beside it. */
+    fun replace(
+        earlier: PlannedStep,
+        step: PlannedStep
+    ) {
+        val at = proposed.indexOf(element = earlier)
+
+        if (at < 0) proposed += step else proposed[at] = step
+    }
+
     /**
      * The notes [isDropped] picks taken out of the changes; a change left with none goes. A new note's sources are
      * not what it changes: it is kept as it is.

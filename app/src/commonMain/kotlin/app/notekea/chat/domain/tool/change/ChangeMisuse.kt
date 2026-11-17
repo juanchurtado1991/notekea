@@ -88,10 +88,18 @@ internal object ChangeMisuse {
         task: String,
         step: PlannedStep
     ): String? {
-        val words = task.lowercase()
+        // The task's own words: "add 'set up the router' to Home" names no change in what it quotes (T12).
+        val words = QUOTED
+            .replace(
+                input = task.lowercase(),
+                replacement = " "
+            )
 
-        val isUnasked =
-            OTHER_CHANGE.containsMatchIn(input = words) && !ASKS_TASK.containsMatchIn(input = words)
+        val isAdded =
+            ADDS_TO.containsMatchIn(input = words) && !ADDS_OTHER.containsMatchIn(input = words)
+
+        val isAsked = ASKS_TASK.containsMatchIn(input = words) || isAdded
+        val isUnasked = OTHER_CHANGE.containsMatchIn(input = words) && !isAsked
 
         return if (isUnasked && step[ActionField.TEXT] != null) {
             "The task asks for no task, and nothing it does not ask for is added. When the proposal holds " +
@@ -139,6 +147,15 @@ internal object ChangeMisuse {
         pattern = "\\b(task|tasks|to-?do|to-?dos|remind|reminder|tarea|tareas|pendiente|pendientes|recuérdame|" +
             "recuerdame|recordatorio)\\b"
     )
+
+    // A span the task quotes: "…", “…”, «…», or '…' opened after a space (not the one in "don't").
+    private val QUOTED = Regex(pattern = "\"[^\"]*\"|“[^”]*”|«[^»]*»|(?:^|(?<=\\s))'[^']*'")
+
+    // "add X to Home", "pon X en mi lista": something put into a note, a task unless it is a tag or a property.
+    private val ADDS_TO = Regex(pattern = "\\b(add|put|añade|agrega|pon)\\b.*\\b(to|a|al|en)\\b")
+    private val ADDS_OTHER =
+        Regex(pattern = "\\b(tag|tags|etiqueta|etiquetas|property|propiedad|link|enlace|text|texto)\\b")
+
     private val OTHER_CHANGE = Regex(
         pattern = "\\b(tag|tags|etiqueta|etiquetas|etiquetar|etiquétalas|etiquetalas|etiquétalos|move|mueve|mover|" +
             "rename|renombra|renombrar|set|property|propiedad|link|enlaza|enlazar)\\b"

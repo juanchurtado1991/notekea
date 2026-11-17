@@ -18,14 +18,17 @@ internal object UnreadChoice {
         val isChoice = call.name == AskUserTool.NAME && state.ambiguous.isEmpty()
         if (!isChoice) return null
 
+        val options = AskUserTool.optionsOf(call = call)
+
+        if (isOneName(options = options, state = state)) return null
+
         val read = state
             .turn
             .reads
             .read
             .toSet()
 
-        val unread = AskUserTool
-            .optionsOf(call = call)
+        val unread = options
             .mapNotNull {
                 noteOf(
                     option = it,
@@ -46,6 +49,28 @@ internal object UnreadChoice {
             null
         }
     }
+
+    // The paths of one bare name several notes share: the question `SharedNames` itself told the model to ask
+    // ("2 notes are named Goals 2027 … ask_user with them as the options"), held back as unread (the bug hunt of
+    // 2026-11-17, L4).
+    private fun isOneName(
+        options: List<String>,
+        state: TurnState
+    ): Boolean {
+        val names = options
+            .map { titleOf(option = it) }
+            .distinct()
+
+        val name = names.singleOrNull() ?: return false
+
+        return options.size > 1 && state.turn.sharing(name = name).size > 1
+    }
+
+    private fun titleOf(option: String): String = option
+        .trim()
+        .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        .substringAfterLast(delimiter = '/')
+        .lowercase()
 
     // The note an answer names, by its path or its name, whatever its case.
     private fun noteOf(

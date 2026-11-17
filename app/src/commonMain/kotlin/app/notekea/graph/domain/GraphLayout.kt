@@ -19,17 +19,30 @@ class GraphLayout {
     ): Map<RelativePath, GraphPoint> {
         val points = HashMap<RelativePath, GraphPoint>()
 
+        // Each ring sits past the one inside it: a crowded inner ring measured alone would land outside a sparse
+        // outer one, and the rings would cross.
+        var previousRadius = 0f
+
         graph
             .nodes
             .groupBy {
                 depths[it.path] ?: 0
             }
+            .entries
+            .sortedBy { it.key }
             .forEach { (depth, nodes) ->
                 val ring = nodes.sortedWith(compareBy({ it.folder }, { it.name }))
 
+                val radius = if (depth == 0) {
+                    0f
+                } else {
+                    max(previousRadius + RING_GAP, ring.size * MIN_ARC / TURN)
+                }
+
+                previousRadius = radius
+
                 ring.forEachIndexed { index, node ->
                     val angle = START_ANGLE + TURN * index / ring.size + depth * RING_TWIST
-                    val radius = max(depth * RING_GAP, ring.size * MIN_ARC / TURN)
 
                     points[node.path] = if (depth == 0) {
                         ORIGIN

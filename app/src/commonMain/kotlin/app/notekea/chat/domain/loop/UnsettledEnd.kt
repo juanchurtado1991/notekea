@@ -24,10 +24,14 @@ internal object UnsettledEnd {
 
         val open = state.ambiguous
 
-        val isSettled = open.isEmpty() || AmbiguousTask.coversAll(
+        // A task that means one note is not settled by an end naming them all: "Laura's phone" answered with both
+        // Lauras' (the loop's eighth run, the bug hunt of 2026-11-17, L10). Only a task about several may cover them.
+        val isCovered = !AmbiguousTask.isSingular(task = state.task) && AmbiguousTask.coversAll(
             paths = open,
             text = endOf(call = call, state = state)
         )
+
+        val isSettled = open.isEmpty() || isCovered
 
         if (isSettled) return null
 
@@ -61,5 +65,5 @@ internal object UnsettledEnd {
         return (call.arguments.values + changed).joinToString(separator = "\n")
     }
 
-    private const val MUST_ASK = "must ask"
+    const val MUST_ASK = "must ask"
 }
