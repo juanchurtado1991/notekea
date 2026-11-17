@@ -223,7 +223,15 @@ private fun followTreeEffect(
 
         is VaultTreeEffect.LinksRewritten -> viewModels.editors.forEach { editor ->
             val open = editor.state.value.notePath ?: return@forEach
-            if (open in effect.notes) editor.onIntent(EditorIntent.OnNoteRewritten(path = open))
+
+            if (open in effect.notes) {
+                editor.onIntent(
+                    EditorIntent.OnNoteRewritten(
+                        path = open,
+                        original = effect.originals[open]
+                    )
+                )
+            }
         }
 
         is VaultTreeEffect.ChooseTemplate -> viewModels.onTemplatePicker(
@@ -293,9 +301,13 @@ internal fun followSwitcherEffect(
         is QuickSwitcherEffect.LinkNote -> {
             val target = LinkResolver(notePaths = notes).wikiTarget(path = effect.path)
 
-            editors.active.onIntent(
-                EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target))
+            val link = FormatAction.NoteLink(
+                target = target,
+                path = effect.path,
+                source = editors.active.state.value.notePath
             )
+
+            editors.active.onIntent(EditorIntent.OnFormat(action = link))
         }
 
         QuickSwitcherEffect.Dismissed -> editors.active.onIntent(

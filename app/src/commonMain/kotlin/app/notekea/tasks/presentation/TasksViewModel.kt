@@ -146,7 +146,12 @@ class TasksViewModel(
             if (rewrite == null) {
                 reduce { it.copy(isWriteFailed = true) }
             } else {
-                emit(effect = TasksEffect.NoteRewritten(path = row.path))
+                emit(
+                    effect = TasksEffect.NoteRewritten(
+                        path = row.path,
+                        original = rewrite.original
+                    )
+                )
 
                 notes = notes.map {
                     if (it.file.path == row.path) {

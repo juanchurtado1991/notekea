@@ -14,7 +14,10 @@ sealed interface VaultTreeEffect {
     ) : VaultTreeEffect
 
     /** A rename's link update rewrote [notes]: an editor holding one takes the new text instead of a false conflict. */
-    data class LinksRewritten(val notes: List<RelativePath>) : VaultTreeEffect
+    data class LinksRewritten(
+        val notes: List<RelativePath>,
+        val originals: Map<RelativePath, String> = emptyMap()
+    ) : VaultTreeEffect
 
     /** [path] was moved to the trash from the tree: its tabs close. */
     data class EntryDeleted(val path: RelativePath) : VaultTreeEffect

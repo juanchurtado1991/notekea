@@ -120,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Note info mutes the counts that are zero and draws the done tasks as a bar.
 
 ### Fixed
-- A bug hunt over the whole app (2026-11-17, `docs/bug-hunt-2026-11-17.md`) fixed 107 defects, each with a test.
+- A bug hunt over the whole app (2026-11-17, `docs/bug-hunt-2026-11-17.md`) fixed its defects, each with a test.
   In the chat's loop: a change taken out could never be added again, two refused changes looped to the last step,
   a figure the task writes settled which note it meant, questions the loop asked for were held back, a value could
   not be written as a number (the `"}"` the models wrote for 3), and a refused call was repeated as it was. In its

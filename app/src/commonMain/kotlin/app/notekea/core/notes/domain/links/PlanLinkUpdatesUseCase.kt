@@ -4,9 +4,9 @@ import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * Prepares, without writing anything, the notes whose links must change after `from` was renamed or moved to [to];
- * `notesBefore` are the vault's notes before, so old links resolve as they did. A moved note's own relative links are
- * rewritten too. A rewritten link keeps its style (bare, a path, `.md`, relative, encoded) where it still resolves.
+ * Prepares, without writing anything, the notes whose links must change after `from` was renamed or moved to [to],
+ * from the vault's notes and attachments before it, so old links resolve as they did; a moved note's links included.
+ * A rewritten link keeps its style (bare, a path, `.md`, relative, encoded) where it still resolves.
  */
 class PlanLinkUpdatesUseCase(
     private val noteContentStore: NoteContentStore,
@@ -15,30 +15,32 @@ class PlanLinkUpdatesUseCase(
     suspend operator fun invoke(
         vaultPath: String,
         notesBefore: Set<RelativePath>,
+        attachmentsBefore: Set<RelativePath>,
         from: RelativePath,
         to: RelativePath
     ): List<NoteRewrite> {
-        // A renamed file that is not a note and holds none is an attachment (`pic.png`): its links follow it too.
-        val isAttachment = !from.isMarkdown && notesBefore.none { it.isWithin(folder = from) }
-        val attachments = listOfNotNull(from.takeIf { isAttachment })
-
+        // Every attachment of the vault is known, not only the renamed one: a folder of pictures follows its rename,
+        // and a bare `![[pic.png]]` that two pictures share leads to neither, so it is never rewritten to one.
         val rename = Rename(
             from = from,
             to = to,
             before = LinkResolver(
                 notePaths = notesBefore,
-                attachmentPaths = attachments
+                attachmentPaths = attachmentsBefore
             ),
             after = LinkResolver(
-                notePaths = notesBefore.map {
-                    it.rebased(
-                        from = from,
-                        to = to
-                    )
-                },
-                attachmentPaths = listOfNotNull(to.takeIf { isAttachment })
+                notePaths = rebased(
+                    paths = notesBefore,
+                    from = from,
+                    to = to
+                ),
+                attachmentPaths = rebased(
+                    paths = attachmentsBefore,
+                    from = from,
+                    to = to
+                )
             ),
-            hasAttachments = isAttachment
+            hasAttachments = attachmentsBefore.isNotEmpty()
         )
 
         return notesBefore.mapNotNull { oldSource ->
@@ -71,6 +73,17 @@ class PlanLinkUpdatesUseCase(
         }
     }
 
+    private fun rebased(
+        paths: Set<RelativePath>,
+        from: RelativePath,
+        to: RelativePath
+    ): List<RelativePath> = paths.map {
+        it.rebased(
+            from = from,
+            to = to
+        )
+    }
+
     /** Whether [text] holds [name] at all: a Markdown link may only hold it encoded (`My%20Note.md`). */
     private fun mayName(
         text: String,
@@ -84,6 +97,7 @@ class PlanLinkUpdatesUseCase(
         source: RelativePath,
         rename: Rename
     ): NoteRewrite? {
+        // In a vault with no attachments, a link to anything but a note leads nowhere, so only note links are read.
         val links = if (rename.hasAttachments) {
             linkFinder.findWithAttachments(markdown = text)
         } else {

@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.NoteLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -278,7 +279,11 @@ class MarkdownFormatterTest {
 
     @Test
     fun `links to a note keep the selection as their label, web links select what is left to type`() {
-        val link = FormatAction.NoteLink(target = "Arepas")
+        val link = FormatAction.NoteLink(
+            target = "Arepas",
+            path = RelativePath(value = "Arepas.md"),
+            source = RelativePath(value = "Dinner.md")
+        )
 
         assertEquals(
             expected = listOf(
@@ -307,6 +312,35 @@ class MarkdownFormatterTest {
                     text = "Open ",
                     cursor = 5,
                     action = FormatAction.WebLink(placeholder = "link text")
+                )
+            )
+        )
+    }
+
+    // `[[C# notes]]` points to note "C" (the bug hunt, G4): such a name gets a link that reaches it.
+    @Test
+    fun `a link to a note whose name ends a wiki link early is a Markdown link from the open note`() {
+        val link = FormatAction.NoteLink(
+            target = "C# notes",
+            path = RelativePath(value = "Code/C# notes.md"),
+            source = RelativePath(value = "Daily/Today.md")
+        )
+
+        assertEquals(
+            expected = listOf(
+                "See [C# notes](../Code/C%23%20notes.md)" to "",
+                "See [the \\[draft\\]](../Code/C%23%20notes.md)" to ""
+            ),
+            actual = listOf(
+                apply(
+                    text = "See ",
+                    cursor = 4,
+                    action = link
+                ),
+                apply(
+                    text = "See the [draft]",
+                    selected = "the [draft]",
+                    action = link
                 )
             )
         )

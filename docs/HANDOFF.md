@@ -424,8 +424,8 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
     "Lowered the rating to 3…"). On the 34 long-note and memory tasks the 4B went from 6 failures to 5 and the 9B
     from 5 to 3.
   - **Bug hunt (2026-11-17), `docs/bug-hunt-2026-11-17.md`:** asked whether the failures were the model's or the
-    code's, ten read-only reviews found about 110 defects across the app; 107 are fixed with tests, four are partly
-    fixed (listed there). Several made the model fail on their own: a change dropped could not be added again, every
+    code's, ten read-only reviews found about 110 defects across the app; all are fixed with tests but for two narrow
+    cases listed there (a trash a later step needs; a rewrite from Clips or Study onto unsaved edits). Several made the model fail on their own: a change dropped could not be added again, every
     tool value was a string in the grammar (so 3 came out as `"}"`), refused calls looped, a phone number settled a
     note. The loop is to be measured again with all of them in.
   - **Tried and dropped:** each note of a change to several checked alone by the model, a yes or a no, before the

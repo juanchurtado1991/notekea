@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 /**
  * The chat's changes as the bug hunt of 2026-11-17 found them done (T13, T15, A3, A6, A10, A11): a task line kept the
  * model's own marker, ticks read a stale list, Undo trashed a daily note the person wrote in, a tag on a note that was
- * not there said done, a link went to either of two notes, and a note from a template stayed after Undo.
+ * not there said done, a link went to either of two notes, and a note from a template or the trash stayed.
  */
 class VaultActionRunnerFixesTest {
     private val fixture = ChatRunnerFixture()
@@ -187,6 +187,36 @@ class VaultActionRunnerFixesTest {
                 )
             )
         }
+
+    // A11: a trash cannot be taken back, so a plan that failed after one left the note in the trash.
+    @Test
+    fun `a plan whose last step fails leaves the note it trashed in place`() = runTest {
+        fixture.operations.existing += HOME
+
+        val failed = fixture.run(
+            notes,
+            ActionStep(
+                kind = ActionKind.TRASH,
+                notes = listOf(HOME)
+            ),
+            ActionStep(
+                kind = ActionKind.MOVE,
+                notes = listOf(BLANK),
+                target = RelativePath(value = "..")
+            )
+        )
+
+        assertEquals(
+            expected = listOf<Any>(true, emptyList<RelativePath>()),
+            actual = listOf(
+                failed is Outcome.Failure,
+                fixture
+                    .trash
+                    .trashed
+                    .toList()
+            )
+        )
+    }
 
     private fun task(
         text: String,

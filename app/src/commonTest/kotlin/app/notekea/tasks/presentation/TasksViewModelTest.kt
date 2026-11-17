@@ -176,7 +176,10 @@ class TasksViewModelTest {
             )
 
             assertEquals(
-                expected = TasksEffect.NoteRewritten(path = PATH),
+                expected = TasksEffect.NoteRewritten(
+                    path = PATH,
+                    original = TEXT
+                ),
                 actual = effect
             )
 

@@ -7,12 +7,13 @@ import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.NoteScanner
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.VaultListing
 import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
 import app.notekea.tree.domain.Trash
 
 /**
  * The plan's steps that move what is in the vault: renames and moves, which update the links to what moved as the
- * tree does and are taken back by Undo, and trashing, which is not (what went to the system's trash stays there).
+ * tree does and are taken back by Undo, and trashing, which is not, so the runner trashes last ([TrashLast]).
  */
 internal class EntryMoves(
     private val noteFileOperations: NoteFileOperations,
@@ -28,7 +29,7 @@ internal class EntryMoves(
     ): Outcome<Unit, ActionProblem> {
         val from = step.folder ?: step.notes.singleOrNull() ?: return Outcome.Success(value = Unit)
         val newName = step.title.orEmpty()
-        val notesBefore = notesOf(vaultPath = vaultPath)
+        val before = listingOf(vaultPath = vaultPath)
 
         val renamed =
             when (val result = renameEntry(vaultPath = vaultPath, path = from, newName = newName)) {
@@ -36,9 +37,9 @@ internal class EntryMoves(
                 is Outcome.Failure -> return Outcome.Failure(ActionProblem.UnknownNote(from.value))
             }
 
-        updateLinksAfterRename(
+        updateLinks(
             vaultPath = vaultPath,
-            notesBefore = notesBefore,
+            before = before,
             from = from,
             to = renamed
         )
@@ -101,7 +102,7 @@ internal class EntryMoves(
 
         if (isTaken) return Outcome.Failure(error = ActionProblem.Exists(path = to))
 
-        val notesBefore = notesOf(vaultPath = vaultPath)
+        val before = listingOf(vaultPath = vaultPath)
 
         val moved = noteFileOperations.move(
             vaultPath = vaultPath,
@@ -111,9 +112,9 @@ internal class EntryMoves(
 
         if (moved is Outcome.Failure) return Outcome.Failure(ActionProblem.UnknownNote(from.value))
 
-        updateLinksAfterRename(
+        updateLinks(
             vaultPath = vaultPath,
-            notesBefore = notesBefore,
+            before = before,
             from = from,
             to = to
         )
@@ -137,7 +138,7 @@ internal class EntryMoves(
         from: RelativePath,
         to: RelativePath
     ) {
-        val notesBefore = notesOf(vaultPath = vaultPath)
+        val before = listingOf(vaultPath = vaultPath)
 
         val moved = noteFileOperations.move(
             vaultPath = vaultPath,
@@ -147,21 +148,34 @@ internal class EntryMoves(
 
         if (moved is Outcome.Failure) throw UndoFailed()
 
-        updateLinksAfterRename(
+        updateLinks(
             vaultPath = vaultPath,
-            notesBefore = notesBefore,
+            before = before,
             from = from,
             to = to
         )
     }
 
-    // A note the trash refuses fails the plan, as it was said trashed (A11).
+    // A note the trash refuses fails the plan, as it was said trashed (A11). The trash cannot be taken back, so
+    // every entry is checked first: one missing fails the step before anything went to the trash.
     suspend fun trashed(
         vaultPath: String,
         step: ActionStep,
         journal: ActionJournal
     ): Outcome<Unit, ActionProblem> {
-        listOfNotNull(step.folder).ifEmpty { step.notes }.forEach { path ->
+        val paths = listOfNotNull(step.folder).ifEmpty { step.notes }
+
+        val missing = paths.firstOrNull { path ->
+            !noteFileOperations.exists(
+                vaultPath = vaultPath,
+                path = path
+            )
+        }
+
+        val unknown = missing?.let { ActionProblem.UnknownNote(name = it.value) }
+        if (unknown != null) return Outcome.Failure(error = unknown)
+
+        paths.forEach { path ->
             val moved = trash.moveToTrash(
                 vaultPath = vaultPath,
                 path = path
@@ -176,14 +190,30 @@ internal class EntryMoves(
         return Outcome.Success(value = Unit)
     }
 
-    private suspend fun notesOf(vaultPath: String): Set<RelativePath> =
-        when (val listing = noteScanner.scan(vaultPath = vaultPath)) {
-            is Outcome.Success ->
-                listing
-                    .value
-                    .files
-                    .mapTo(destination = HashSet()) { it.path }
+    // The vault's attachments go along with its notes, so links to pictures and files follow a move too (A5).
+    private suspend fun updateLinks(
+        vaultPath: String,
+        before: VaultListing,
+        from: RelativePath,
+        to: RelativePath
+    ) {
+        updateLinksAfterRename(
+            vaultPath = vaultPath,
+            notesBefore = before.files.mapTo(destination = HashSet()) { it.path },
+            attachmentsBefore = before.attachments.mapTo(destination = HashSet()) { it.path },
+            from = from,
+            to = to
+        )
+    }
 
-            is Outcome.Failure -> emptySet()
+    // A vault that cannot be listed updates no links, as there is nothing to read them from.
+    private suspend fun listingOf(vaultPath: String): VaultListing =
+        when (val listing = noteScanner.scan(vaultPath = vaultPath)) {
+            is Outcome.Success -> listing.value
+
+            is Outcome.Failure -> VaultListing(
+                folders = emptySet(),
+                files = emptyList()
+            )
         }
 }

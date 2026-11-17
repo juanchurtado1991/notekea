@@ -96,8 +96,14 @@ sealed interface EditorIntent {
     /** The open note was renamed or moved in Notekea and now lives at [path]; nothing is saved to the old place. */
     data class OnNoteMoved(val path: RelativePath) : Note
 
-    /** A rename's link update rewrote the open note at [path]. */
-    data class OnNoteRewritten(val path: RelativePath) : Note
+    /**
+     * Notekea rewrote the note at [path] (links, a task, a query's result); [original] is its text before, when the
+     * sender knows it, so unsaved edits get the same change instead of undoing it on the next save.
+     */
+    data class OnNoteRewritten(
+        val path: RelativePath,
+        val original: String? = null
+    ) : Note
 
     /** Open [path], saving the current note first; null closes the editor. */
     data class OnOpen(val path: RelativePath?) : Note

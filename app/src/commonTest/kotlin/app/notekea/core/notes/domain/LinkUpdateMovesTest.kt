@@ -25,6 +25,7 @@ class LinkUpdateMovesTest {
             val rewrites = planLinkUpdates(
                 vaultPath = VAULT,
                 notesBefore = setOf(path(DAY), path("Journal/Plan.md"), path(AREPAS)),
+                attachmentsBefore = emptySet(),
                 from = path(DAY),
                 to = path(MOVED)
             )
@@ -43,7 +44,8 @@ class LinkUpdateMovesTest {
         val rewrites = planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = setOf(path(WELCOME)),
-            from = path("assets/pic.png"),
+            attachmentsBefore = setOf(path(PIC)),
+            from = path(PIC),
             to = path("assets/photo.png")
         )
 
@@ -52,6 +54,46 @@ class LinkUpdateMovesTest {
             actual = rewrites.single().updated
         )
     }
+
+    // A5: a renamed folder of attachments left the links into it pointing at the old folder.
+    @Test
+    fun `links and embeds into a renamed folder of attachments follow it, a bare name left as written`() =
+        runTest {
+            store.texts[path(WELCOME)] = "![[assets/pic.png]] ![](assets/pic.png) [doc](assets/a.pdf) ![[pic.png]]"
+
+            val rewrites = planLinkUpdates(
+                vaultPath = VAULT,
+                notesBefore = setOf(path(WELCOME)),
+                attachmentsBefore = setOf(path(PIC), path("assets/a.pdf")),
+                from = path("assets"),
+                to = path("media")
+            )
+
+            assertEquals(
+                expected = "![[media/pic.png]] ![](media/pic.png) [doc](media/a.pdf) ![[pic.png]]",
+                actual = rewrites.single().updated
+            )
+        }
+
+    // A5: a bare name two pictures share was rewritten to the renamed one, which it may not have meant.
+    @Test
+    fun `a bare name two attachments share is not rewritten, a path to the renamed one is`() =
+        runTest {
+            store.texts[path(WELCOME)] = "![[pic.png]] ![[assets/pic.png]]"
+
+            val rewrites = planLinkUpdates(
+                vaultPath = VAULT,
+                notesBefore = setOf(path(WELCOME)),
+                attachmentsBefore = setOf(path(PIC), path("old/pic.png")),
+                from = path(PIC),
+                to = path("assets/photo.png")
+            )
+
+            assertEquals(
+                expected = "![[pic.png]] ![[assets/photo.png]]",
+                actual = rewrites.single().updated
+            )
+        }
 
     // G4: `[[C# arepas]]` was written, which leads to the heading "arepas" of a note "C".
     @Test
@@ -92,6 +134,7 @@ class LinkUpdateMovesTest {
         return planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = setOf(path(AREPAS), path(WELCOME)),
+            attachmentsBefore = emptySet(),
             from = path(AREPAS),
             to = path(to)
         )
@@ -103,6 +146,7 @@ class LinkUpdateMovesTest {
         const val AREPAS = "Recipes/Arepas.md"
         const val DAY = "Journal/Day.md"
         const val MOVED = "Archive/2026/Day.md"
+        const val PIC = "assets/pic.png"
         const val WELCOME = "Welcome.md"
     }
 }

@@ -203,7 +203,10 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
         runCurrent()
 
         assertEquals(
-            expected = VaultTreeEffect.LinksRewritten(notes = listOf(path(ROADMAP))),
+            expected = VaultTreeEffect.LinksRewritten(
+                notes = listOf(path(ROADMAP)),
+                originals = mapOf(path(ROADMAP) to "Begin with [[Welcome]].")
+            ),
             actual = effects.filterIsInstance<VaultTreeEffect.LinksRewritten>().single()
         )
     }

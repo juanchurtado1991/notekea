@@ -267,7 +267,12 @@ internal class TreeRenaming(
             LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size
         }
 
-        host.emit(effect = VaultTreeEffect.LinksRewritten(notes = result.updated))
+        host.emit(
+            effect = VaultTreeEffect.LinksRewritten(
+                notes = result.updated,
+                originals = result.originals
+            )
+        )
 
         host.reduce {
             reduceLinksUpdated(
@@ -285,42 +290,69 @@ internal class TreeRenaming(
         val updated = mutableListOf<RelativePath>()
         var skipped = emptyList<RelativePath>()
 
+        // The text a note had before its first rewrite, the one an open editor last saw (bug hunt D2).
+        val originals = mutableMapOf<RelativePath, String>()
+
         do {
             val seen = renames
 
-            val notesBefore = host
+            val tree = host
                 .state
                 .value
                 .tree
-                .notes
-                .keys
-                .mapTo(destination = mutableSetOf()) {
-                    it.rebased(
-                        from = to,
-                        to = from
-                    )
-                }
 
+            // The attachments too: a renamed folder of pictures takes the links into it along (A5).
             val pass = updateLinksAfterRename(
                 vaultPath = vaultPath,
-                notesBefore = notesBefore,
+                notesBefore = before(
+                    paths = tree.notes.keys,
+                    from = from,
+                    to = to
+                ),
+                attachmentsBefore = before(
+                    paths = tree.attachments.keys,
+                    from = from,
+                    to = to
+                ),
                 from = from,
                 to = to
             )
 
             updated += pass?.updated.orEmpty()
+
+            pass
+                ?.originals
+                .orEmpty()
+                .forEach { (path, text) ->
+                    originals.getOrPut(key = path) { text }
+                }
+
             skipped = pass?.skipped.orEmpty()
         } while (seen != renames)
 
         val result = LinkUpdateResult(
             updated = updated,
-            skipped = skipped
+            skipped = skipped,
+            originals = originals
         )
 
         return result.takeIf {
             updated.isNotEmpty() || skipped.isNotEmpty()
         }
     }
+
+    /** [paths] as they were before `from` became [to], whether the tree shows the rename yet or not. */
+    private fun before(
+        paths: Set<RelativePath>,
+        from: RelativePath,
+        to: RelativePath
+    ): Set<RelativePath> = paths
+        .mapTo(destination = mutableSetOf()) {
+            it.rebased(
+                from = to,
+                to = from
+            )
+        }
 
     companion object {
         private const val LINKS_UPDATED_MESSAGE = "Links updated after a rename: "

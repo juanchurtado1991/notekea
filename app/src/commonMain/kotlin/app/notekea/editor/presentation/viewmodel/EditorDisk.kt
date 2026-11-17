@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.CarriedEdit
 import app.notekea.editor.domain.NoteDiskChange
 import app.notekea.editor.domain.ObserveNoteOnDiskUseCase
 import app.notekea.editor.domain.OpenNoteUseCase
@@ -126,10 +127,13 @@ internal class EditorDisk(
     }
 
     /**
-     * Notekea itself rewrote the open note at [path] (a rename updated its links): the editor takes the new text, or
-     * keeps its own edits on top of it, so the next save is no conflict; one the watcher raised on other text stays.
+     * Notekea itself rewrote the open note at [path] from [original] (null when unknown): the editor takes the new
+     * text, or keeps its own edits on top of it, so the next save is no conflict; one raised on other text stays.
      */
-    suspend fun followRewrite(path: RelativePath) {
+    suspend fun followRewrite(
+        path: RelativePath,
+        original: String? = null
+    ) {
         if (host.state.value.notePath != path) return
 
         val document = (
@@ -144,10 +148,24 @@ internal class EditorDisk(
         // next save would undo both, so the question stays.
         if (isOtherConflict) return
 
-        if (saving.hasEdits()) {
-            saving.rebase(document = document)
-        } else {
-            saving.show(
+        // The edits were made on the text the rewrite started from, so the rewrite can be made on them too.
+        val base = original?.takeIf {
+            saving.hasEdits() && it == saving.onDisk
+        }
+
+        when {
+            base != null -> {
+                val isCarried = carryRewrite(
+                    original = base,
+                    document = document
+                )
+
+                if (!isCarried) return
+            }
+
+            saving.hasEdits() -> saving.rebase(document = document)
+
+            else -> saving.show(
                 document = document,
                 isNewNote = false
             )
@@ -155,6 +173,49 @@ internal class EditorDisk(
 
         conflictText = null
         host.reduce { it.copy(hasConflict = false) }
+    }
+
+    /**
+     * Makes the rewrite from [original] to [document] on the unsaved text too, or asks, as for an outside change,
+     * when the person edited the same part: their text is never dropped and the rewrite never silently undone.
+     */
+    private fun carryRewrite(
+        original: String,
+        document: NoteDocument
+    ): Boolean {
+        val edit = CarriedEdit.of(
+            base = NoteDocument.fromText(text = original).body,
+            theirs = document.body,
+            mine = host
+                .buffer
+                .text
+                .toString()
+        )
+
+        if (edit == null) {
+            conflictText = document.toText()
+
+            host.reduce {
+                it.copy(
+                    hasConflict = true,
+                    isDeleted = false
+                )
+            }
+
+            return false
+        }
+
+        saving.rebase(document = document)
+
+        host.buffer.edit {
+            replace(
+                start = edit.start,
+                end = edit.end,
+                text = edit.replacement
+            )
+        }
+
+        return true
     }
 
     /**

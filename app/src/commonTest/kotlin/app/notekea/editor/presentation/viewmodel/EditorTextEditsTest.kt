@@ -2,6 +2,7 @@ package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.LinkKind
 import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.ListAction
@@ -241,9 +242,13 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
             viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
             pickerTakesFocus()
 
-            viewModel.onIntent(
-                intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = "Flour"))
+            val link = FormatAction.NoteLink(
+                target = "Flour",
+                path = RelativePath(value = "Flour.md"),
+                source = viewModel.state.value.notePath
             )
+
+            viewModel.onIntent(intent = EditorIntent.OnFormat(action = link))
 
             assertEquals(
                 expected = TextRange(

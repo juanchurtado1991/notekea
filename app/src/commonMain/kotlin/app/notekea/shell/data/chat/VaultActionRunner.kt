@@ -97,11 +97,12 @@ class VaultActionRunner(
         )
 
         // A plan is done whole or not at all: what it did before the step that failed, threw or was cancelled is
-        // taken back (the code review of 2026-11-13: only a step that said it failed was).
+        // taken back (the code review of 2026-11-13: only a step that said it failed was). The trash cannot give
+        // back what it took, so it goes last, after every other step succeeded (A11).
         val links = LinkResolver(notePaths = notes.map { it.file.path })
 
         try {
-            steps.forEach { step ->
+            TrashLast.ordered(steps = steps).forEach { step ->
                 val done = runStep(
                     vaultPath = vaultPath,
                     step = step,

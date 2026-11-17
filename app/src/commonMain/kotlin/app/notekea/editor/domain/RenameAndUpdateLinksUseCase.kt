@@ -46,6 +46,10 @@ class RenameAndUpdateLinksUseCase(
                             .files
                             .map { it.path }
                             .toSet(),
+                        attachmentsBefore = listing
+                            .attachments
+                            .map { it.path }
+                            .toSet(),
                         from = path,
                         to = renamed.value
                     )

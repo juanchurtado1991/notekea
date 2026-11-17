@@ -78,6 +78,7 @@ class LinkUpdateUseCasesTest {
         val rewrites = planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = notes,
+            attachmentsBefore = emptySet(),
             from = path(AREPAS),
             to = path(RENAMED)
         )
@@ -96,6 +97,7 @@ class LinkUpdateUseCasesTest {
         val rewrites = planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = notes,
+            attachmentsBefore = emptySet(),
             from = path("Recipes"),
             to = path("Cooking")
         )
@@ -117,6 +119,7 @@ class LinkUpdateUseCasesTest {
             val renamedNote = planLinkUpdates(
                 vaultPath = VAULT,
                 notesBefore = notes,
+                attachmentsBefore = emptySet(),
                 from = path(note),
                 to = path("Travel/New.md")
             )
@@ -124,6 +127,7 @@ class LinkUpdateUseCasesTest {
             val renamedFolder = planLinkUpdates(
                 vaultPath = VAULT,
                 notesBefore = notes,
+                attachmentsBefore = emptySet(),
                 from = path("My Folder"),
                 to = path("Other")
             )
@@ -154,6 +158,7 @@ class LinkUpdateUseCasesTest {
         val rewrites = planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = setOf(path(AREPAS)),
+            attachmentsBefore = emptySet(),
             from = path(AREPAS),
             to = path(RENAMED)
         )
@@ -167,7 +172,7 @@ class LinkUpdateUseCasesTest {
     }
 
     @Test
-    fun `only notes unchanged since planning are written`() = runTest {
+    fun `only notes unchanged since planning are written, each with its text before`() = runTest {
         val rewrites = listOf("A.md", "B.md", "C.md").map { name ->
             store.texts[path(name)] = "[[Arepas]]"
 
@@ -190,7 +195,8 @@ class LinkUpdateUseCasesTest {
         assertEquals(
             expected = LinkUpdateResult(
                 updated = listOf(path("A.md")),
-                skipped = listOf(path("B.md"), path("C.md"))
+                skipped = listOf(path("B.md"), path("C.md")),
+                originals = mapOf(path("A.md") to "[[Arepas]]")
             ),
             actual = result
         )
@@ -211,6 +217,7 @@ class LinkUpdateUseCasesTest {
         return planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = setOf(path(AREPAS), path(sourcePath)) + others,
+            attachmentsBefore = emptySet(),
             from = path(AREPAS),
             to = path(RENAMED)
         )

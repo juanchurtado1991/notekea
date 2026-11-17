@@ -7,6 +7,9 @@ sealed interface TasksEffect {
     /** Opens the note at [path] with its [range], the task's text, selected. */
     data class OpenNote(val path: RelativePath, val range: IntRange) : TasksEffect
 
-    /** The note at [path] was written, for the editors that have it open. */
-    data class NoteRewritten(val path: RelativePath) : TasksEffect
+    /** The note at [path] was written from [original], for the editors that have it open. */
+    data class NoteRewritten(
+        val path: RelativePath,
+        val original: String
+    ) : TasksEffect
 }

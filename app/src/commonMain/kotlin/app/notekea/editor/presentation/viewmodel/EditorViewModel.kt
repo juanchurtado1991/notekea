@@ -216,7 +216,10 @@ class EditorViewModel(
             is EditorIntent.OnNoteMoved -> disk.moveTo(path = intent.path)
 
             is EditorIntent.OnNoteRewritten -> saving.runSave {
-                disk.followRewrite(path = intent.path)
+                disk.followRewrite(
+                    path = intent.path,
+                    original = intent.original
+                )
             }
 
             is EditorIntent.OnTitleCommit -> saving.runSave { renaming.rename(name = intent.name) }
