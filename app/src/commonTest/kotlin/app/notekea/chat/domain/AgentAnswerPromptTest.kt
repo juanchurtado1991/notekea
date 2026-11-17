@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 /**
  * The answer's instructions carry no example figures: the 4B and the 9B wrote "(17 of 24 read, 7 left)", the
  * example the prompt gave, into their answers as if it were a source (the web's evaluation, 2026-11-16). A page is
- * cited by its link.
+ * cited by its link, not "page 1", and is not called a note (the third run: "las notas no contienen…" of pages read).
  */
 class AgentAnswerPromptTest {
     @Test
@@ -19,8 +19,13 @@ class AgentAnswerPromptTest {
             ).joinToString(separator = "\n") { it.text }
 
         assertEquals(
-            expected = listOf(false, true),
-            actual = listOf("17 of 24" in asked, "a page by its link" in asked)
+            expected = listOf(false, true, true, true),
+            actual = listOf(
+                "17 of 24" in asked,
+                "Markdown link to its whole address" in asked,
+                "never \"page 1\"" in asked,
+                "A page read is a page, not a note." in asked
+            )
         )
     }
 
