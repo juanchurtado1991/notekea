@@ -428,6 +428,11 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
     cases listed there (a trash a later step needs; a rewrite from Clips or Study onto unsaved edits). Several made the model fail on their own: a change dropped could not be added again, every
     tool value was a string in the grammar (so 3 came out as `"}"`), refused calls looped, a phone number settled a
     note. The loop is to be measured again with all of them in.
+  - **A fresh vault written blind (2026-11-17, `docs/eval-fresh.md`):** 77 tasks never tuned on. 4B 62 %, 9B 74 %,
+    against about 88 % on the tuned sets. Confident wrong figures and facts are the biggest kind (the 4B about 16,
+    the 9B 6, one of them a medicine allergy missed), then questions the loop's word lists forced, then requests
+    about one entry of a note not asked back. The word-list checks do not generalise; the next step is a structured
+    step that says which notes a task means, and figures computed by the code.
   - **Tried and dropped:** each note of a change to several checked alone by the model, a yes or a no, before the
     card. On the 40 tasks that change a group it made both models worse (4B 11 failures to 12, 9B 9 to 13): it took
     out notes the task asks for ("both of my Goals 2027 notes", a book rated 5). The code is not in the branch.
