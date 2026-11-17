@@ -133,6 +133,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Asked to make a note of a page, the chat clips the page instead of writing an empty note or one from your other
   notes; asked to add what pages say to a note, it appends it with each page's link instead of only answering.
 - A search for where to buy something names your country, so it finds shops where you live.
+- With no country in your request or memory, a search for where to buy asks where you live first, instead of
+  showing shops in the United States.
+- "Search the web for my weekly review" reads your note instead of searching the web, even after reading it.
+- The chat no longer adds the same line to a note over and over when two notes share its name.
+- Answers from web pages link each page by its address, not "page 1", and no longer call pages "notes".
 - DuckDuckGo's ads no longer show as sources.
 - The chat's answers no longer carry an example figure from its instructions, or notes about its own reasoning.
 - "The notes do not contain…" is read as not found, so the chat offers to search the web.

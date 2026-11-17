@@ -152,7 +152,7 @@ class WebChecksTest {
 
         script(
             first = """{"tool":"web_search","query":"my weekly review"}""",
-            told = "is a note of the vault",
+            told = "the person's own note",
             then = """{"tool":"read","note":"Personal/Weekly review"}"""
         )
 
@@ -166,6 +166,82 @@ class WebChecksTest {
             actual = listOf(steps.last() is AgentStep.Finished, searched)
         )
     }
+
+    // The web's third run: the 4B read its weekly review, then searched "weekly review template" and appended it.
+    @Test
+    fun `the person's own note searched for is refused even once it is read`() = runTest {
+        store.texts[RelativePath(value = "Personal/Weekly review.md")] = "# Weekly review\n\nDone: 4."
+
+        engine.reply = { messages ->
+            val asked = messages.first().text
+
+            when {
+                asked.startsWith(prefix = "You say how a request") -> """{"work":"web","skill":"none"}"""
+                !asked.startsWith(prefix = CALLS) -> DONE
+                messages.any { "the person's own note" in it.text } -> """{"tool":"answer","text":"$DONE"}"""
+                messages.any { "Done: 4." in it.text } -> """{"tool":"web_search","query":"weekly review template"}"""
+                else -> """{"tool":"read","note":"Personal/Weekly review"}"""
+            }
+        }
+
+        val steps = run(
+            task = "search the web for my weekly review",
+            paths = listOf("Personal/Weekly review.md")
+        )
+
+        assertEquals(
+            expected = listOf(true, emptyList<String>()),
+            actual = listOf(steps.last() is AgentStep.Finished, searched)
+        )
+    }
+
+    @Test
+    fun `a search for the web added to the person's note is not refused as the note searched`() {
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(
+                "search the web for my weekly review",
+                "look up things to do and add them to my weekly review"
+            ).map {
+                WebChecks.isOwnNoteSearched(
+                    task = it,
+                    titles = listOf("Weekly review")
+                )
+            }
+        )
+    }
+
+    // The web's third run: "buy soil moisture sensor" with no country known brought shops in the United States.
+    @Test
+    fun `a search for where to buy with no country known is held once, to ask where the person lives`() =
+        runTest {
+            val buy = """{"tool":"web_search","query":"buy soil moisture sensor"}"""
+
+            engine.reply = { messages ->
+                val asked = messages.first().text
+
+                when {
+                    asked.startsWith(prefix = "You say how a request") -> """{"work":"web","skill":"none"}"""
+                    !asked.startsWith(prefix = CALLS) -> DONE
+                    else -> buy
+                }
+            }
+
+            val steps = run(task = "where can I buy a soil moisture sensor?")
+
+            val told = engine
+                .generated
+                .any { prompt ->
+                    prompt.any {
+                        "where the person lives is not known" in it.text
+                    }
+                }
+
+            assertEquals(
+                expected = listOf(true, true, listOf("buy soil moisture sensor")),
+                actual = listOf(steps.last() is AgentStep.SourcesFound, told, searched)
+            )
+        }
 
     @Test
     fun `a person's phone is never searched for, even once the note is read`() = runTest {

@@ -133,6 +133,9 @@ class WebSearchTool(private val provider: WebSearchProvider) : ChatTool {
         const val QUERY = "query"
         private const val MOST_QUERY_CHARS = 120
 
+        /** Whether [query] looks for where to buy something: it is made in the person's country. */
+        fun isBuying(query: String): Boolean = BUYING.containsMatchIn(input = query)
+
         private val BUYING = Regex(
             pattern = "\\b(buy|purchase|shop|shops|store|stores|sell|sells|offers?|deals?|comprar?|compro|" +
                 "venden?|tiendas?|ofertas?|dónde consigo|donde consigo)\\b",

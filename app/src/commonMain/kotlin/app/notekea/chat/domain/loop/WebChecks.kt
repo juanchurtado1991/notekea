@@ -9,11 +9,13 @@ import app.notekea.chat.domain.tool.change.ProposeTool
 import app.notekea.chat.domain.tool.lookup.FetchTool
 import app.notekea.chat.domain.tool.web.WebSearchTool
 import app.notekea.chat.domain.tool.work.AnswerTool
+import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.web.domain.Countries
 
 /**
- * The web's checks (`docs/agent-web.md`, "The web's checks"), each from what the web's evaluation of 2026-11-16 saw
- * the 4B and the 9B do; each is told once, but a person's phone, address or email is refused every time.
+ * The web's checks (`docs/agent-web.md`, "The web's checks"), from what the web's evaluation of 2026-11-16 saw the
+ * 4B and the 9B do; each is told once, but a person's details and their own note searched are refused every time.
  */
 internal object WebChecks {
     fun heldOf(
@@ -24,7 +26,10 @@ internal object WebChecks {
         call.name == WebSearchTool.NAME -> detailsSearched(
             call = call,
             state = state
-        ) ?: noteSearched(
+        ) ?: ownNoteSearched(state = state) ?: noteSearched(
+            call = call,
+            state = state
+        ) ?: countryUnknown(
             call = call,
             state = state
         )
@@ -62,6 +67,67 @@ internal object WebChecks {
 
         return "(Not searched: a person's phone, address or email is never looked up on the web. Answer from the " +
             "note $note, or say the notes do not hold it.)"
+    }
+
+    // Refused every time: "search the web for my weekly review" searches the person's own note (not "add … to my
+    // Lisbon trip note"); the 4B read it, searched "weekly review template" and appended it (the web's third run).
+    private fun ownNoteSearched(state: TurnState): String? {
+        val owned = state
+            .turn
+            .notes
+            .map { it.file.path }
+            .filter {
+                isOwnNoteSearched(
+                    task = state.task,
+                    titles = listOf(titleOf(path = it))
+                )
+            }
+
+        if (owned.isEmpty()) return null
+
+        val notes = owned.joinToString {
+            it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        }
+
+        return "(Not searched: the task means the person's own note, $notes, not a page of the web. Read it and " +
+            "answer from it; when two notes share its name, ask which.)"
+    }
+
+    /** Whether [task] searches for the person's own note by its title: "search the web for my weekly review". */
+    fun isOwnNoteSearched(
+        task: String,
+        titles: List<String>
+    ): Boolean {
+        val folded = folded(text = task)
+
+        return titles
+            .filter {
+                it.length >= SPECIFIC_TITLE && ' ' in it
+            }
+            .any {
+                val title = Regex.escape(folded(text = it))
+                val searched = Regex(pattern = "$SEARCHED_FOR(my|mi|mis)\\s+$title\\b")
+
+                searched.containsMatchIn(input = folded)
+            }
+    }
+
+    // Held once: with no country in the request or the memory, "buy soil moisture sensor" brought shops in the
+    // United States to a person living in Costa Rica (the web's third run); where they live is asked first.
+    private fun countryUnknown(
+        call: ToolCall,
+        state: TurnState
+    ): String? {
+        val query = call.text(name = WebSearchTool.QUERY)
+        val isUnknown = state.turn.country == null && WebSearchTool.isBuying(query = query)
+        val isNamed = Countries.codeIn(text = query) != null
+        if (!isUnknown || isNamed) return null
+
+        val held =
+            "(Not searched yet: where the person lives is not known, and shops depend on it. Ask them " +
+                "which country with ${AskUserTool.NAME}, or search once more to look anywhere.)"
+
+        return held.takeIf { state.told.add(element = COUNTRY_UNKNOWN) }
     }
 
     private fun noteSearched(
@@ -212,6 +278,12 @@ internal object WebChecks {
     private const val SPECIFIC_TITLE = 8
 
     private const val NOTE_SEARCHED = "note searched"
+    private const val COUNTRY_UNKNOWN = "country unknown"
+
+    // "search the web for", "look up online", "busca en la web": what follows is what is searched.
+    private const val SEARCHED_FOR =
+        "\\b(search|look up|find|busca|buscar|encuentra)( the web| on the web| online| en la web| en internet)?" +
+            "( for| por)?\\s+"
     private const val PAGES_UNREAD = "pages unread"
     private const val NEVER_SEARCHED = "never searched"
     private val WRITTEN_FROM_NOTES = setOf(ChangeTools.writeNote.name, ChangeTools.createNote.name)

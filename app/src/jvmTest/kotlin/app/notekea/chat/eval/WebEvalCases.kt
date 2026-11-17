@@ -69,7 +69,8 @@ internal object WebEvalCases {
         case(
             "where can I buy a soil moisture sensor?",
             Kind.WHERE_TO_BUY,
-            "Costa Rican electronics or farm shops with links.",
+            "No country in the request or the memory: asks once where the person lives, or names the shops' " +
+                "countries with links; never offers shops of one country as if it were theirs.",
             memory = null
         )
     )
