@@ -382,6 +382,41 @@ class RunTurnTest {
             )
         }
 
+    // The web's third run: the 4B appended to "Ideas", which two notes share, 29 times and never ended.
+    @Test
+    fun `a bare name two notes share asked again counts as made again, and the turn can end`() =
+        runTest {
+            val read = """{"tool":"read","note":"Lease"}"""
+
+            val ask =
+                """{"tool":"ask_user","question":"Which lease?","options":["Home/Lease","Work/Lease"]}"""
+
+            script(read, read, read, read, ask)
+
+            val steps = run(
+                task = "summarize the lease",
+                notes = notes + entry(path = office.value)
+            )
+
+            val last = engine
+                .options
+                .filter {
+                    it.jsonSchema != null
+                }
+                .last()
+                .jsonSchema
+                .orEmpty()
+
+            assertEquals(
+                expected = listOf(true, true, false),
+                actual = listOf(
+                    steps.last() is AgentStep.Asked,
+                    "again: its result is above. (2 notes are named" in callPrompts()[2],
+                    "\"read\"" in last
+                )
+            )
+        }
+
     @Test
     fun `a call is read from the model's JSON, lists a line an item, escapes undone, and what is no call is none`() {
         assertEquals(

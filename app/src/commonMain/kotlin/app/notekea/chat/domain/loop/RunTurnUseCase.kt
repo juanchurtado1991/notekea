@@ -253,15 +253,16 @@ class RunTurnUseCase(
             )
         )
 
-        if (shared != null) {
-            state.found += shared
-
-            return
-        }
-
         val key = state.tools.keyOf(call, state.turn)
         val isNew = state.made.add(key)
         if (!isNew) state.repeated += key
+
+        // A shared name asked again counts as made again: the 4B appended to "Ideas" 29 times (the web's third run).
+        if (shared != null) {
+            state.found += if (isNew) shared else "(${call.name} $target $AGAIN $shared"
+
+            return
+        }
 
         // A change asked again is in the proposal already: the next one, or the end, is what is left.
         val isChange = tool.effect == ToolEffect.PROPOSES
