@@ -31,6 +31,6 @@ internal object RouteWords {
     // "which notes did I tag with…", "¿qué escribí en una nota…?": a question changes nothing.
     private val QUESTION = Regex(
         pattern = "^\\W*(what|which|how|who|when|where|why|is|are|does|do|did|qué|que|cuál|cual|cuáles|cuales|cómo|" +
-            "como|cuánto|cuánta|cuántos|cuántas|quién|dónde|cuándo)\\b"
+            "como|cuánto|cuánta|cuántos|cuántas|quién|dónde|cuándo)(?![\\p{L}\\p{N}])"
     )
 }

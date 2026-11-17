@@ -59,7 +59,7 @@ object MarkdownSyntax {
     const val WEB_ADDRESS = "https://"
 
     /** The opening or closing line of a fenced code block: up to three spaces, then three or more ` or ~. */
-    val FENCE_LINE = Regex(pattern = "^\\s{0,3}(`{3,}|~{3,})")
+    val FENCE_LINE = Regex(pattern = "^\\s{0,3}(`{3,}(?![^`]*`)|~{3,})")
 
     /** A tag's name: letters, digits, `_`, `-` and `/`, not only digits. */
     const val TAG_NAME_PATTERN = "[\\p{L}\\p{N}_/-]*[\\p{L}_/-][\\p{L}\\p{N}_/-]*"

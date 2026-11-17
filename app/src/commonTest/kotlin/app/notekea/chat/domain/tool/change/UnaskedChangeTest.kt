@@ -89,6 +89,22 @@ class UnaskedChangeTest {
             )
         }
 
+    // The loop's eighth run: "tag it as urgent" tagged two notes with no question.
+    @Test
+    fun `tag it with two notes is held, as it points at one`() = runTest {
+        assertEquals(
+            expected = "add_tag: not added yet",
+            actual = said(
+                tool = ChangeTools.addTag,
+                context = contextOf(task = "tag it as urgent"),
+                arguments = mapOf(
+                    "notes" to "Home\nProjects/Trip to Lisbon",
+                    "tag" to "urgent"
+                )
+            )
+        )
+    }
+
     @Test
     fun `the tag a task names is the word after its last with, or after as, and no word of the sentence`() {
         assertEquals(

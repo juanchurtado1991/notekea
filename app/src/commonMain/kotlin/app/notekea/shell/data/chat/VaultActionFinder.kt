@@ -99,6 +99,12 @@ class VaultActionFinder(
                 return Outcome.Failure(error = ActionProblem.UnknownQuery(property = null))
         }
 
+        // No filter and no order chooses nothing: every note came back as if it matched ("projects with open
+        // tasks", which no property says).
+        if (query.filters.isEmpty() && query.sort == null) {
+            return Outcome.Failure(error = ActionProblem.UnknownQuery(property = null))
+        }
+
         val result = runQuery(
             query = query,
             notes = notes
@@ -221,28 +227,18 @@ class VaultActionFinder(
         path: RelativePath,
         notes: Collection<NoteEntry>
     ): NoteRewrite? {
-        val property = if (step.kind == ActionKind.ADD_TAG) {
-            val tags = notes
-                .firstOrNull {
-                    it.file.path == path
-                }
-                ?.metadata
-                ?.tags
-                .orEmpty()
-
-            val tag = step.tag.orEmpty()
-            if (tag in tags) return null
-
-            NoteProperty(
-                key = TAGS,
-                value = PropertyValue.Items(items = tags + tag)
-            )
-        } else {
-            NoteProperty(
-                key = step.property.orEmpty(),
-                value = valueOf(text = step.value.orEmpty())
+        if (step.kind == ActionKind.ADD_TAG) {
+            return setPropertyUseCase.withTag(
+                vaultPath = vaultPath,
+                path = path,
+                tag = step.tag.orEmpty()
             )
         }
+
+        val property = NoteProperty(
+            key = step.property.orEmpty(),
+            value = valueOf(text = step.value.orEmpty())
+        )
 
         return setPropertyUseCase(
             vaultPath = vaultPath,
@@ -261,18 +257,39 @@ class VaultActionFinder(
             it.file.path == step.notes.firstOrNull()
         } ?: return null
 
+        // The words alone: a model copies the line with its day ("Run a half marathon 📅 2027-08-15").
         val wanted = step
             .text
             .orEmpty()
+            .replace(
+                regex = TASK_DAY,
+                replacement = ""
+            )
+            .trim()
             .lowercase()
 
-        val task = note
+        val open = note
             .metadata
             .tasks
-            .filterNot { it.isDone }
-            .firstOrNull {
-                wanted in it.text.lowercase() || it.text.lowercase() in wanted
+            .filterNot {
+                it.isDone || it.text.isBlank()
             }
+
+        // The task of those words, then one that holds them, then one they hold: "Pay rent" is not "Pay".
+        val task = open.firstOrNull {
+            it
+                .text
+                .trim()
+                .lowercase() == wanted.trim()
+        }
+            ?: open.firstOrNull {
+                wanted in it.text.lowercase()
+            }
+            ?: open
+                .filter {
+                    it.text.lowercase() in wanted
+                }
+                .maxByOrNull { it.text.length }
             ?: return null
 
         return setTaskDone(
@@ -331,7 +348,7 @@ class VaultActionFinder(
                 )
 
     private companion object {
-        const val TAGS = "tags"
+        val TASK_DAY = Regex(pattern = "📅\\s*\\d{4}-\\d{2}-\\d{2}")
         val ISO_DATE = Regex(pattern = "(\\d{4})-(\\d{2})-(\\d{2})")
         val PERIODS = mapOf(
             "overdue" to TaskWhen.OVERDUE,

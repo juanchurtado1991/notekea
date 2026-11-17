@@ -16,6 +16,13 @@ class ToolRegistry(val tools: List<ChatTool>) {
         context: ToolContext
     ): String = "${call.name}:${byName[call.name]?.targetOf(call, context).orEmpty()}".lowercase()
 
+    /** The tools that end the turn and no other. */
+    fun ends(): ToolRegistry = ToolRegistry(
+        tools = tools.filter {
+            it.effect == ToolEffect.ENDS
+        }
+    )
+
     /** The tools that change or end, none that looks: what a call may be once the turn has looked enough. */
     fun ending(): ToolRegistry = ToolRegistry(
         tools = tools.filter {

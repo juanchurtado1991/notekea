@@ -23,7 +23,8 @@ object QueryPrompt {
         """You turn a request for notes into a query of their properties, as JSON.
 Each filter has a property (one of the vault's, or "" for "in folder" and "has tag"), a condition and a value.
 Conditions: is, contains, more than, less than (numbers), before, after (dates YYYY-MM-DD), is empty (value ""),
-in folder (value: a folder), has tag (value: a tag without #). "more than" and "less than" are strict: "4 or more" is
+in folder (value: a folder), has tag (value: a tag without #). A note that has a property, whatever its value, is
+"is" with the value ""; one that lacks it, or "no X", "without X", "sin X", is "is empty". "more than" and "less than" are strict: "4 or more" is
 "more than 3", "in 2026" is after 2025-12-31 and before 2027-01-01. A checkbox is "true" or "false": "marked as
 finished", "finished" or "terminados", with a checkbox finished, is finished is true.
 "sort" names a property to order by ("" for none), "descending" true for the highest first. Use only the properties,
@@ -37,6 +38,8 @@ Examples: "libros con más de 3" -> {"filters":[{"property":"","condition":"in f
 {"property":"finished","condition":"is","value":"true"}]}
 "el libro que más me gustó" -> {"filters":[{"property":"","condition":"in folder","value":"Books"}],"sort":"rating",
 "descending":true}
+"projects with a status but no priority" -> {"filters":[{"property":"","condition":"in folder","value":"Projects"},
+{"property":"status","condition":"is","value":""},{"property":"priority","condition":"is empty","value":""}]}
 "notes by price", with no property for a price -> {"filters":[],"sort":"price"}"""
 
     fun messages(

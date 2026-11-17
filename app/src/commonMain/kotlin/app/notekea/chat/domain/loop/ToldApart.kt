@@ -28,7 +28,10 @@ internal object ToldApart {
             )
         )
             .filter {
+                // A figure is what the task writes, not which note: "añade a Mario Solís, 8890-1122, a Contactos"
+                // settled the Contactos whose text held another phone starting 8890 (the loop's eighth run).
                 it.length >= MIN_WORD &&
+                    it.none(Char::isDigit) &&
                     it !in COMMON &&
                     it !in titles
             }

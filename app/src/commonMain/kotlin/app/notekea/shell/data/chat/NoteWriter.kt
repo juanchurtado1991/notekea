@@ -149,7 +149,15 @@ internal class NoteWriter(
                 path = path
             ) ?: return Outcome.Failure(ActionProblem.UnknownNote(path.nameWithoutExtension))
 
-            val after = before.trimEnd() + "\n\n" + text.trim() + "\n"
+            // In the note's own line endings: a line feed alone in a CRLF note left its tasks unable to be ticked.
+            val end = if ("\r\n" in before) "\r\n" else "\n"
+
+            val added = text.trim().replace(
+                regex = LINE_END,
+                replacement = end
+            )
+
+            val after = before.trimEnd() + end + end + added + end
 
             rewrite(
                 rewrite = NoteRewrite(
@@ -273,6 +281,7 @@ internal class NoteWriter(
 
     private companion object {
         const val UNTITLED = "Untitled"
+        val LINE_END = Regex(pattern = "\\r?\\n")
         val FORBIDDEN = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
     }
 }

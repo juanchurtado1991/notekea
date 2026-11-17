@@ -153,7 +153,10 @@ class ChangeTool(
         step: PlannedStep,
         context: ToolContext
     ): String? {
-        val one = SingularTask.oneIn(task = context.task).takeIf {
+        val said =
+            SingularTask.oneIn(task = context.task) ?: SingularTask.pointedIn(task = context.task)
+
+        val one = said.takeIf {
             kind != ActionKind.WRITE_FROM_NOTES
         }
 

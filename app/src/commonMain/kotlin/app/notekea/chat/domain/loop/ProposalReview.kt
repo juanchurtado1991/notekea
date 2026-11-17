@@ -4,6 +4,7 @@ import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.NoteProperties
 import app.notekea.chat.domain.tool.ToolCall
+import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.change.ProposeTool
 import app.notekea.core.notes.domain.RelativePath
 
@@ -51,6 +52,12 @@ internal object ProposalReview {
             .drop {
                 state.turn.noteNamed(name = it) in dropped
             }
+
+        // A change taken out may be asked for again: its call is no longer one already made (the loop's eighth run
+        // answered "is in the proposal" for a change the drop had removed, and the turn ended with nothing).
+        state.made.removeAll { key ->
+            state.tools[key.substringBefore(delimiter = ':')]?.effect == ToolEffect.PROPOSES
+        }
     }
 
     // The notes the changes act on, each once, as they were written: a new note's sources are what it is written

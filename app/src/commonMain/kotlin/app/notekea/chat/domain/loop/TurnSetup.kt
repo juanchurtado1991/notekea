@@ -161,7 +161,7 @@ internal object TurnSetup {
         val before = Regex.escape(words.dropLast(n = 1).joinToString(separator = " "))
         val last = Regex.escape(words.last())
 
-        return Regex(pattern = "\\b$before\\s+(\\p{L}{4,})\\s+$last\\b")
+        return Regex(pattern = "\\b$before\\s+(\\p{L}{4,})\\s+$last(?![\\p{L}\\p{N}])")
             .find(input = task.lowercase())
             ?.groupValues
             ?.get(1)

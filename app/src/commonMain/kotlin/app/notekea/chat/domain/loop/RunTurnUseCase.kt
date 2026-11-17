@@ -159,6 +159,10 @@ class RunTurnUseCase(
 
             val tool = state.tools[call.name]
 
+            // Looping still on a change after it may only end: the turn ends on what it has.
+            val isStopped = state.mustStop && tool?.effect != ToolEffect.ENDS
+            if (isStopped) return emit(value = unread(state = state))
+
             val held = TurnChecks.heldOf(
                 call = call,
                 state = state,
@@ -363,7 +367,11 @@ class RunTurnUseCase(
         val looking =
             if (state.hidden.isEmpty()) state.tools.without(name = RecallTool.NAME) else state.tools
 
-        val offered = if (isEnding) state.tools.ending() else looking
+        val offered = when {
+            state.mustStop -> state.tools.ends()
+            isEnding -> state.tools.ending()
+            else -> looking
+        }
 
         val asking = state
             .tools

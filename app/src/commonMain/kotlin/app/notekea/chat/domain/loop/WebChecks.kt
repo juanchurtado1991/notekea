@@ -106,7 +106,9 @@ internal object WebChecks {
             }
             .any {
                 val title = Regex.escape(folded(text = it))
-                val searched = Regex(pattern = "$SEARCHED_FOR(my|mi|mis)\\s+$title\\b")
+
+                val searched =
+                    Regex(pattern = "$SEARCHED_FOR(my|mi|mis)\\s+$title(?![\\p{L}\\p{N}])")
 
                 searched.containsMatchIn(input = folded)
             }
@@ -261,7 +263,9 @@ internal object WebChecks {
         val title = folded(text = titleOf(path = path))
         val isSpecific = title.length >= SPECIFIC_TITLE && ' ' in title
 
-        isSpecific && Regex(pattern = "\\b${Regex.escape(title)}\\b").containsMatchIn(input = query)
+        val named = Regex(pattern = "\\b${Regex.escape(title)}(?![\\p{L}\\p{N}])")
+
+        isSpecific && named.containsMatchIn(input = query)
     }
 
     private fun titleOf(path: RelativePath): String = path

@@ -43,6 +43,24 @@ class QueryYamlTest {
     }
 
     @Test
+    fun `a property held, written as is with no value, reads back the same`() {
+        val query = VaultQuery(
+            filters = listOf(
+                QueryFilter(
+                    condition = QueryCondition.IS,
+                    property = "rating",
+                    value = ""
+                )
+            )
+        )
+
+        assertEquals(
+            expected = QueryParse.Valid(query = query),
+            actual = yaml.read(text = yaml.write(query = query))
+        )
+    }
+
+    @Test
     fun `the block reads as a person would write it, comments and quotes included`() {
         val text = """
             # Books I liked

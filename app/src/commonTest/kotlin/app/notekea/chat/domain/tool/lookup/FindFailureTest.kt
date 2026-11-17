@@ -2,9 +2,12 @@ package app.notekea.chat.domain.tool.lookup
 
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -49,4 +52,26 @@ class FindFailureTest {
                 )
             )
         }
+
+    @Test
+    fun `more rows than are shown are said, with how many in all`() = runTest {
+        runner.problem = null
+
+        runner.found = FoundNotes(
+            rows = (1..31).map { FoundRow(note = RelativePath(value = "Notes/N$it.md")) }
+        )
+
+        val said = FindTool(actionRunner = runner).run(
+            call = ToolCall(
+                name = FindTool.NAME,
+                arguments = mapOf(FindTool.QUERY to "notes with a status")
+            ),
+            context = context
+        ).forModel
+
+        assertEquals(
+            expected = "(1 more, 31 in all: narrow the request to see them.)",
+            actual = said.substringAfterLast(delimiter = '\n')
+        )
+    }
 }

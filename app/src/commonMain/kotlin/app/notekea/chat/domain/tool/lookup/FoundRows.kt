@@ -48,7 +48,15 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
                     whenOf(row = it)
             }
 
-        return ToolResult(forModel = "${step.kind.written} ${step.request.orEmpty()}:\n$lines")
+        // Said, so 30 rows are not taken for all of them.
+        val more = (rows.size - ROWS)
+            .takeIf {
+                it > 0
+            }
+            ?.let { "\n($it more, ${rows.size} in all: narrow the request to see them.)" }
+            .orEmpty()
+
+        return ToolResult(forModel = "${step.kind.written} ${step.request.orEmpty()}:\n$lines$more")
     }
 
     // Why it found nothing, and where else to look: "nothing found" alone had the 9B ask for "notes tagged idea"

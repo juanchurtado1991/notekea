@@ -80,7 +80,8 @@ internal object DatePhrases {
             }
         }
 
-        return written(said = said)
+        return offset(said = said)
+            ?: written(said = said)
             ?: named(
                 said = said,
                 today = today
@@ -123,6 +124,21 @@ internal object DatePhrases {
             )
 
         return "${date.year}-$month-$day (${NAMES[date.dayOfWeek - 1]})"
+    }
+
+    // A span before or after a written day: "una semana antes de 2026-04-03" was answered 2026-04-03 itself (the
+    // loop's eighth run), as a written day was taken alone.
+    private fun offset(said: String): CalendarDate? {
+        val from = written(said = said) ?: return null
+        val span = OFFSET.find(input = said)?.groupValues ?: return null
+        val count = span[1].toLongOrNull() ?: COUNTS[span[1]] ?: 1L
+        val isBefore = span[3].startsWith(prefix = "before") || span[3].startsWith(prefix = "antes")
+
+        return shifted(
+            today = from,
+            count = if (isBefore) -count else count,
+            unit = span[2]
+        )
     }
 
     private fun written(said: String): CalendarDate? = ISO.find(input = said)?.let { match ->
@@ -304,4 +320,16 @@ internal object DatePhrases {
     }
 
     private const val LAST_DAY_OF_YEAR = 31
+
+    private val OFFSET = Regex(
+        pattern = "(\\d+|an?|one|two|three|un|una|dos|tres)\\s+(days?|weeks?|months?|dias?|semanas?|mes|meses)" +
+            "\\s+(before|after|antes|despues)"
+    )
+
+    private val COUNTS = mapOf(
+        "two" to 2L,
+        "dos" to 2L,
+        "three" to 3L,
+        "tres" to 3L
+    )
 }

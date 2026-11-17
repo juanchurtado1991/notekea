@@ -179,8 +179,15 @@ class QueryYaml {
         val property = parts[PROPERTY].orEmpty()
         val value = parts[VALUE].orEmpty()
 
-        val isWhole = (!condition.needsProperty || property.isNotBlank()) &&
-            (!condition.needsValue || value.isNotBlank())
+        // "is" with an empty value keeps the notes that have the property: written so, it is read back so.
+        val isHeld = condition == QueryCondition.IS && VALUE in parts
+
+        val isValued =
+            !condition.needsValue ||
+                value.isNotBlank() ||
+                isHeld
+
+        val isWhole = (!condition.needsProperty || property.isNotBlank()) && isValued
 
         return QueryFilter(
             condition = condition,

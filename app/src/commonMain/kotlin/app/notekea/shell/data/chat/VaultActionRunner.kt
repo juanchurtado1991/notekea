@@ -296,7 +296,7 @@ class VaultActionRunner(
     private fun taskLine(step: ActionStep): String {
         val due = step
             .due
-            ?.takeIf { DATE.matches(input = it) }
+            ?.let { DATE.find(input = it)?.value }
             ?.let { " 📅 $it" }
             .orEmpty()
 

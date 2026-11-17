@@ -35,6 +35,22 @@ internal object SingularTask {
     fun pointsAtOne(task: String): Boolean =
         oneIn(task = task) != null || POINTED.containsMatchIn(input = task)
 
+    /** "it" when [task] points at one thing with no name ("tag it as urgent") and names no several. */
+    fun pointedIn(task: String): String? {
+        val isSeveral =
+            PLURAL.containsMatchIn(input = task) || SEVERAL.containsMatchIn(input = task)
+
+        return IT
+            .find(input = task)
+            ?.value
+            .takeUnless { isSeveral }
+    }
+
+    private val IT = Regex(
+        pattern = "\\b(it|this|esto|eso)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
+
     /** "the project" when [task] names one thing so; null when it names several or none. */
     fun oneIn(task: String): String? {
         val isSeveral =

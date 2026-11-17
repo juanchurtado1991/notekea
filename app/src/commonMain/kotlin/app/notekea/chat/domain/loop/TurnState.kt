@@ -62,6 +62,12 @@ internal class TurnState(
     /** A call made again three times is a loop: the next call may only end the turn, a grammar seeing to it. */
     val mustEnd: Boolean get() = repeated.size >= MOST_REPEATS
 
+    /**
+     * Twice that many: the turn may only end, no change tool offered. Two refused changes took turns for 28 steps
+     * (the loop's eighth run), as a change tool is still an ending call.
+     */
+    val mustStop: Boolean get() = repeated.size >= MOST_REPEATS * 2
+
     private companion object {
         const val MOST_REPEATS = 3
     }
