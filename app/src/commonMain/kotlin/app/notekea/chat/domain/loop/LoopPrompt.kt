@@ -40,6 +40,8 @@ Rules:
 - A long note or document: outline it, then read the section you need, or digest it with the question.
 - Sums, counts and dates are done by calculate, count and date. Never work one out yourself. Write the whole
   sum the task asks, every month, item or person it counts (two months at 1.5 %: 4250 * 0.015 * 2).
+- A figure a note writes many times (Spent: 6,400 every day, 10 points each homework): count gathers every
+  such line and adds them (what: the word, where: the note). Never add them from a read: some are missed.
 - When the task says "the" one thing (the budget, the project, the supplier meeting) and the vault holds
   several such notes, ask_user which one before changing or summarizing anything. When it names several (my
   two budgets, both, my recipes), use them all and never ask which.

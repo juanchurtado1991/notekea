@@ -19,8 +19,9 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
     override val name = NAME
 
     override val description =
-        "what to count (notes, words, tasks, open tasks or done tasks), or a property to sum (servings), and " +
-            "where (a folder, a #tag or a note's name; the whole vault when left out); you get the number."
+        "what to count (notes, words, tasks, open tasks or done tasks), or a property to sum (servings), or a " +
+            "word a note writes with a figure many times (Spent, points), and where (a folder, a #tag or a " +
+            "note's name; the whole vault when left out); you get the number, or every such line and their sum."
 
     override val arguments = listOf(
         ToolArgument(name = WHAT),
@@ -71,7 +72,19 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
                 forModel = summed(
                     property = what,
                     notes = notes
-                ) ?: "count: I count notes, words, tasks, open tasks or done tasks, or sum a property."
+                ) ?: WrittenFigures.of(
+                    word = what,
+                    place = where.ifEmpty { "the vault" },
+                    texts = noteTextCache
+                        .textsOf(
+                            vaultPath = context.vaultPath,
+                            notes = notes
+                        )
+                        .map {
+                            it.key.nameWithoutExtension to it.value.body
+                        }
+                ) ?: "count: I count notes, words, tasks, open tasks or done tasks, sum a property, or add up " +
+                    "the figures a word is written with; nothing there writes \"$what\"."
             )
         }
 

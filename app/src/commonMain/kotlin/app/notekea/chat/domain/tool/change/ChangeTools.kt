@@ -66,7 +66,8 @@ object ChangeTools {
             "tool when the task has a day. Call it once for each task. Never a task marked done (complete_task).",
         kind = ActionKind.ADD_TASK,
         fields = listOf(ActionField.NOTE, ActionField.TEXT, ActionField.DUE),
-        optional = setOf(ActionField.DUE)
+        optional = setOf(ActionField.DUE),
+        unasked = ChangeMisuse::taskUnasked
     )
 
     val completeTask = ChangeTool(

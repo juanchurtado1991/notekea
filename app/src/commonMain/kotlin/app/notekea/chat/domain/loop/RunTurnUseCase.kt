@@ -71,7 +71,7 @@ class RunTurnUseCase(
         openNote: RelativePath?
     ): Flow<AgentStep> = flow {
         val remembered = vaultGuide.memoryOf(vaultPath, notes)
-        val apart = TurnSetup.apartOf(task, vaultPath, notes, vaultGuide)
+        val apart = TurnSetup.apartOf(task, vaultPath, notes, vaultGuide, remembered)
 
         val turn =
             TurnSetup.contextOf(task, vaultPath, notes, context.today, remembered, openNote, apart)
@@ -331,7 +331,8 @@ class RunTurnUseCase(
                 summary = finalAnswer.written(
                     task = state.task,
                     found = fittedOf(state = state),
-                    summary = call.text(name = AnswerTool.TEXT)
+                    summary = call.text(name = AnswerTool.TEXT),
+                    memory = state.memory.map { it.text }
                 )
             )
         }
@@ -467,7 +468,8 @@ class RunTurnUseCase(
         val answer = finalAnswer.written(
             task = state.task,
             found = fittedOf(state = state),
-            summary = ""
+            summary = "",
+            memory = state.memory.map { it.text }
         )
 
         return AgentStep.Finished(summary = answer)

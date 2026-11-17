@@ -80,6 +80,44 @@ internal object ChangeMisuse {
         }
     }
 
+    /**
+     * add_task where the task names another change and no task: "tag the notes about my home renovation" got "Task to
+     * tag home renovation notes" added to one of them, and four more like it (the loop's seventh run). Every time.
+     */
+    fun taskUnasked(
+        task: String,
+        step: PlannedStep
+    ): String? {
+        val words = task.lowercase()
+
+        val isUnasked =
+            OTHER_CHANGE.containsMatchIn(input = words) && !ASKS_TASK.containsMatchIn(input = words)
+
+        return if (isUnasked && step[ActionField.TEXT] != null) {
+            "The task asks for no task, and nothing it does not ask for is added. When the proposal holds " +
+                "what the task asks, call propose now."
+        } else {
+            null
+        }
+    }
+
+    /** A tag the task does not write, where it writes the tag itself (with X, con X): "travel" for "con viaje". */
+    fun isTagNamed(task: String): Boolean {
+        val words = task.lowercase()
+
+        return TAGS.containsMatchIn(input = words) && TAG_NAMED.containsMatchIn(input = words)
+    }
+
+    private val TAG_NAMED = Regex(pattern = "\\b(with|con)\\s+#?[\\p{L}\\p{N}_/-]+")
+    private val ASKS_TASK = Regex(
+        pattern = "\\b(task|tasks|to-?do|to-?dos|remind|reminder|tarea|tareas|pendiente|pendientes|recuérdame|" +
+            "recuerdame|recordatorio)\\b"
+    )
+    private val OTHER_CHANGE = Regex(
+        pattern = "\\b(tag|tags|etiqueta|etiquetas|etiquetar|etiquétalas|etiquetalas|etiquétalos|move|mueve|mover|" +
+            "rename|renombra|renombrar|set|property|propiedad|link|enlaza|enlazar)\\b"
+    )
+
     private val TAGS =
         Regex(pattern = "\\b(tag|tags|etiqueta|etiquetas|etiquétalas|etiquetalas|etiquetar)\\b")
 

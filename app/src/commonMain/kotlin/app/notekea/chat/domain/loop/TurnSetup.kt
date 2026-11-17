@@ -71,7 +71,8 @@ internal object TurnSetup {
         task: String,
         vaultPath: String,
         notes: Collection<NoteEntry>,
-        vaultGuide: VaultGuide
+        vaultGuide: VaultGuide,
+        remembered: List<MemoryLine> = emptyList()
     ): List<AmbiguousTask.Settled> {
         val byPath = notes.associateBy { it.file.path }
 
@@ -86,13 +87,84 @@ internal object TurnSetup {
                 }
             }
 
-        if (groups.isEmpty()) return emptyList()
+        val qualified = qualifiedOf(
+            task = task,
+            notes = notes,
+            remembered = remembered
+        )
 
-        return ToldApart.settledOf(
+        val all = groups + qualified.map { it.second }
+        if (all.isEmpty()) return emptyList()
+
+        val texts = vaultGuide.textsOf(vaultPath, all.flatten().distinct())
+
+        val told = ToldApart.settledOf(
             task = task,
             groups = groups,
-            texts = vaultGuide.textsOf(vaultPath, groups.flatten().distinct())
+            texts = texts
         )
+
+        // Only the word written inside the remembered name tells its notes apart: any other is about the work.
+        return told + qualified.flatMap { (word, group) ->
+            ToldApart.settledOf(
+                task = word,
+                groups = listOf(group),
+                texts = texts
+            )
+        }
+    }
+
+    // The notes that share a name with one the memory names, where the task writes a word inside that name: "the
+    // household budget" is not "the budget" the memory settled when only the other Budget 2026 writes "household"
+    // (the loop's seventh run held back the right answer for the memory's note).
+    private fun qualifiedOf(
+        task: String,
+        notes: Collection<NoteEntry>,
+        remembered: List<MemoryLine>
+    ): List<Pair<String, List<NoteEntry>>> = remembered
+        .flatMap { it.names }
+        .mapNotNull { named ->
+            val word = insideOf(
+                task = task,
+                said = named.said
+            ) ?: return@mapNotNull null
+
+            val title = named
+                .note
+                .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                .substringAfterLast(delimiter = '/')
+
+            val sharing = notes.filter {
+                it.file.path.isMarkdown &&
+                    it.file.path.nameWithoutExtension.equals(
+                        other = title,
+                        ignoreCase = true
+                    )
+            }
+
+            (word to sharing).takeIf {
+                sharing.size > 1
+            }
+        }
+
+    private fun insideOf(
+        task: String,
+        said: String
+    ): String? {
+        val words = said
+            .lowercase()
+            .split(' ')
+            .filter { it.isNotEmpty() }
+
+        if (words.size < 2) return null
+
+        val before = Regex.escape(words.dropLast(n = 1).joinToString(separator = " "))
+        val last = Regex.escape(words.last())
+
+        return Regex(pattern = "\\b$before\\s+(\\p{L}{4,})\\s+$last\\b")
+            .find(input = task.lowercase())
+            ?.groupValues
+            ?.get(1)
     }
 
     /** The lines the model is given: the relevant ones, but a name the task says which one of is the request's. */

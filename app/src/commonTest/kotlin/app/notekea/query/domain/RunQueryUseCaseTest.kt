@@ -128,6 +128,16 @@ class RunQueryUseCaseTest {
         )
     }
 
+    // "books with rating" is run as "rating is" and no value: the 4B was told nothing was found (the loop's seventh
+    // run), read four of five books and added their ratings.
+    @Test
+    fun `is with no value keeps the notes that have the property`() {
+        assertEquals(
+            expected = listOf("Dune", "Emma", "Sapiens"),
+            actual = namesOf(filter(QueryCondition.IS, "rating", ""))
+        )
+    }
+
     @Test
     fun `a sort over mixed types keeps one order`() {
         val notes = listOf("1.5", "1.10").map { note("Books/$it.md", number("v", it)) } +

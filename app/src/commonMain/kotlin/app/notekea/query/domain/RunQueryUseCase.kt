@@ -85,7 +85,12 @@ class RunQueryUseCase {
 
             QueryCondition.IS_EMPTY -> values.isEmpty(value = value)
 
-            QueryCondition.IS -> value != null && isEqual(value = value, other = filter.value)
+            // "books with rating" reaches here as "rating is" and no value: the property is there, whatever it holds.
+            QueryCondition.IS -> if (filter.value.isBlank()) {
+                !values.isEmpty(value = value)
+            } else {
+                value != null && isEqual(value = value, other = filter.value)
+            }
 
             QueryCondition.CONTAINS ->
                 value != null &&

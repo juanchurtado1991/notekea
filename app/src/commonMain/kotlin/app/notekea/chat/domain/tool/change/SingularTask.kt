@@ -13,6 +13,15 @@ internal object SingularTask {
         pattern = "\\b(all|every|everyone|everybody|each|both|todas|todos|cada|ambos|ambas)\\b",
         option = RegexOption.IGNORE_CASE
     )
+
+    // Several notes are meant, so "the garden" in "the journal notes that mention the garden" names what they say,
+    // and "la etiqueta money" in "los proyectos con la etiqueta money" the tag: neither is the one note to change
+    // (the loop's seventh run asked which note for both).
+    private val SEVERAL = Regex(
+        pattern = "\\b(notes|notas|ones|them|those|these|los|las|estos|estas|esos|esas)\\b|" +
+            "\\p{L}{4,}(los|las)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
     private val NOT_THINGS =
         setOf("notes", "note", "nota", "notas", "vault", "folder", "carpeta", "tasks", "task") +
             setOf("two", "three", "four", "dos", "tres", "cuatro")
@@ -28,7 +37,10 @@ internal object SingularTask {
 
     /** "the project" when [task] names one thing so; null when it names several or none. */
     fun oneIn(task: String): String? {
-        if (PLURAL.containsMatchIn(input = task)) return null
+        val isSeveral =
+            PLURAL.containsMatchIn(input = task) || SEVERAL.containsMatchIn(input = task)
+
+        if (isSeveral) return null
 
         return THE
             .findAll(input = task)

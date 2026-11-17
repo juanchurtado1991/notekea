@@ -16,7 +16,7 @@ import app.notekea.core.notes.domain.RelativePath
 /**
  * A change to the vault as a tool (step 5): it only adds a step of [kind] to the proposal confirmed on the card. A
  * step the vault cannot take (a note not there, a field left out) is not added and the result says why; nor, once,
- * a call the task's words say another tool is for ([misuse]).
+ * a call the task's words say another tool is for ([misuse]); nor ever a change the task does not ask ([unasked]).
  */
 class ChangeTool(
     override val name: String,
@@ -25,6 +25,7 @@ class ChangeTool(
     private val fields: List<ActionField>,
     private val optional: Set<ActionField> = emptySet(),
     private val misuse: (task: String, step: PlannedStep) -> String? = { _, _ -> null },
+    private val unasked: (task: String, step: PlannedStep) -> String? = { _, _ -> null },
     private val checkPlan: CheckPlanUseCase = CheckPlanUseCase()
 ) : ChatTool {
     override val arguments = fields.map {
@@ -59,7 +60,12 @@ class ChangeTool(
                 .filter {
                     it != ActionField.NOTES
                 }
-                .associateWith { call.text(name = it.written) }
+                .associateWith {
+                    writtenOf(
+                        call = call,
+                        field = it
+                    )
+                }
                 .filterValues {
                     it.isNotEmpty() && it.lowercase() !in NONE
                 },
@@ -80,11 +86,12 @@ class ChangeTool(
             )
         }
 
-        val misused = misuse(context.task, step)
+        val refused = refusedOf(
+            step = step,
+            context = context
+        )
 
-        if (misused != null && context.work.warn(about = "$name misuse")) {
-            return ToolResult(forModel = "$name: not added. $misused")
-        }
+        if (refused != null) return ToolResult(forModel = "$name: not added. $refused")
 
         val many = manyOf(
             step = step,
@@ -109,17 +116,10 @@ class ChangeTool(
 
         val unwritten = unwrittenOf(
             step = step,
-            task = context.task
+            context = context
         )
 
-        val isUnwritten = unwritten != null && context.work.warn(about = "$name words")
-
-        if (isUnwritten) {
-            return ToolResult(
-                forModel = "$name: not added yet. The task does not write \"$unwritten\". When the task names " +
-                    "it, use its words as the task writes them; if the task leaves it to you, call $name again."
-            )
-        }
+        if (unwritten != null) return ToolResult(forModel = unwritten)
 
         context.work.change(step = step)
 
@@ -216,18 +216,44 @@ class ChangeTool(
         ?.lowercase()
         ?.takeIf { it.isNotEmpty() } ?: "\u0000"
 
-    // A tag or a property name the task does not write (travel for "viaje"): the task's own words are kept.
+    // A change the task does not ask, every time; a call another tool is for, once.
+    private fun refusedOf(
+        step: PlannedStep,
+        context: ToolContext
+    ): String? = unasked(context.task, step) ?: misuse(context.task, step)?.takeIf {
+        context.work.warn(about = "$name misuse")
+    }
+
+    // A tag or a property name the task does not write (travel for "viaje"): the task's own words are kept. Every
+    // time where the task writes the tag itself (with X); else once, as the task may leave the word to the model.
     private fun unwrittenOf(
         step: PlannedStep,
-        task: String
+        context: ToolContext
     ): String? {
-        val words = task.lowercase()
+        val words = context.task.lowercase()
 
-        return listOf(ActionField.TAG, ActionField.PROPERTY)
+        val unwritten = listOf(ActionField.TAG, ActionField.PROPERTY)
             .mapNotNull { step[it]?.trim('#') }
             .firstOrNull {
                 it.lowercase() !in words
-            }
+            } ?: return null
+
+        val isNamed = kind == ActionKind.ADD_TAG && ChangeMisuse.isTagNamed(task = context.task)
+        val isHeld = isNamed || context.work.warn(about = "$name words")
+        if (!isHeld) return null
+
+        return "$name: not added yet. The task does not write \"$unwritten\". When the task names it, use its " +
+            "words as the task writes them; if the task leaves it to you, call $name again."
+    }
+
+    // A tag, a property or a value as written, without the braces and quotes of a call that broke: "{2}", "}".
+    private fun writtenOf(
+        call: ToolCall,
+        field: ActionField
+    ): String {
+        val text = call.text(name = field.written)
+
+        return if (field in BARE) text.trim('{', '}', '"', '\'', ' ') else text
     }
 
     private fun describedOf(step: PlannedStep): String {
@@ -245,5 +271,6 @@ class ChangeTool(
 
         // What a model writes in a field it leaves empty: the field is left out.
         val NONE = setOf("none", "null", "n/a")
+        val BARE = setOf(ActionField.TAG, ActionField.PROPERTY, ActionField.VALUE)
     }
 }

@@ -11,11 +11,16 @@ import app.notekea.core.llm.domain.LlmException
  * smoke of 2026-11-13): shaped with Markdown, and saying what the notes do not hold instead of filling it in.
  */
 internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
-    /** The answer to [task] from [found]; the move's own [summary] when it looked nothing up or the model fails. */
+    /**
+     * The answer to [task] from [found]; the move's own [summary] when it looked nothing up or the model fails. What
+     * the person's [memory] says is true as the notes are: "my sister" is Rosa Quesada, so her phone is the sister's
+     * (the loop's seventh run answered that no note says who Rosa is).
+     */
     suspend fun written(
         task: String,
         found: List<String>,
-        summary: String
+        summary: String,
+        memory: List<String> = emptyList()
     ): String {
         // "(search … again: its result is above)" is no result.
         val looked = found.filterNot { it.startsWith(prefix = AGAIN) }
@@ -35,7 +40,7 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
                 .generate(
                     messages = AgentTaskPrompt.answer(
                         task = task,
-                        found = looked,
+                        found = saidOf(memory = memory) + looked,
                         conclusion = summary
                     ),
                     options = GenerationOptions(
@@ -54,6 +59,15 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
                 known = (looked + task).joinToString(separator = "\n")
             )
             .ifEmpty { summary }
+    }
+
+    private fun saidOf(memory: List<String>): List<String> = if (memory.isEmpty()) {
+        emptyList()
+    } else {
+        listOf(
+            "The person's memory, what they told the chat before, as true as the notes:\n" +
+                memory.joinToString(separator = "\n") { "- $it" }
+        )
     }
 
     companion object {

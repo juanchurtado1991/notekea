@@ -40,9 +40,12 @@ class TurnRouter(private val llmEngine: LlmEngine) {
         val fields = ToolCallJson.fields(json = json.toString()) ?: return NONE
 
         return TurnRoute(
-            kind = WorkKind.entries.firstOrNull {
-                it.written == fields[WORK]
-            } ?: WorkKind.ASK,
+            kind = RouteWords.kindOf(
+                task = task,
+                routed = WorkKind.entries.firstOrNull {
+                    it.written == fields[WORK]
+                } ?: WorkKind.ASK
+            ),
             skill = skills.firstOrNull {
                 it.name == fields[SKILL]
             }

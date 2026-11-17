@@ -113,6 +113,7 @@ internal object ToldApart {
         "rename", "delete", "trash", "read", "find", "search", "show", "tell", "give", "know", "need", "want",
         "summarize", "summary", "change", "update", "edit", "append", "remove", "archive", "open", "done", "last",
         "next", "first", "new", "old", "more", "less", "other", "same", "says", "said", "mean", "means", "is",
+        "total", "totals", "amount", "count", "suma", "sumar", "cuenta", "cantidad",
         "como", "cual", "cuales", "cuando", "donde", "para", "pero", "este", "esta", "esto", "esos", "esas",
         "todo", "toda", "todos", "todas", "cada", "sobre", "desde", "hasta", "entre", "tiene", "tienen", "hace",
         "hacer", "nota", "notas", "tarea", "tareas", "texto", "linea", "lista", "pagina", "carpeta", "archivo",

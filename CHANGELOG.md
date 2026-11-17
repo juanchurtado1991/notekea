@@ -130,6 +130,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   asking which of them you meant or dropping them.
 - The chat's new loop finds a group of notes in one step: a search names every note that writes its words, a
   folder's list shows each note's tags and open tasks, and links are followed when organizing and writing.
+- The chat's new loop adds up a figure a note writes many times ("what do the daily Spent figures add up to?")
+  from every line that writes it, instead of from the few it happened to read.
+- The chat's new loop adds only what you ask: no task of its own on a note you asked it to tag, the tag as you
+  wrote it ("viaje", not "travel"), and no "which one?" when you named several notes.
+- The chat's new loop goes by your request over its memory when both name a note ("the household budget" is not
+  "the budget" it remembered), and answers knowing what the memory says ("my sister's phone").
+- The chat's new loop takes "etiquétalas con…" and "compare … in a note" as changes, not as questions, and
+  finds notes "with a rating" whatever the rating is.
 - The chat's new loop adds up a property across notes, understands "15 de noviembre" and "November 3rd" as
   dates, tags instead of setting a property when asked to tag, and says why a choice by properties found nothing.
 - The chat no longer asks which of two notes you mean when both answers are the same note, once by its name and
