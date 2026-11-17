@@ -241,6 +241,21 @@ class AgentEvalChatModelTest {
             Unit
         }
 
+    // docs/eval-fresh.md: a vault and tasks written blind, to tell whether the loop generalises.
+    @Test
+    fun `the one loop is measured on a fresh vault it was never tuned on`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        measured(
+            vault = AgentFreshCases.VAULT,
+            all = AgentFreshCases.all.map { it.forLoop() },
+            name = "loop-fresh",
+            isLoop = true
+        )
+
+        Unit
+    }
+
     /** The share of [cases] done right on [vault], and the report written to `build/reports/[name]-<size>.md`. */
     private suspend fun measured(
         vault: String,
