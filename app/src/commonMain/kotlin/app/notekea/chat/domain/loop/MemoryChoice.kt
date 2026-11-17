@@ -53,8 +53,9 @@ internal object MemoryChoice {
             (settled.others + settled.meant).count { path ->
                 val whole = bare(path = path).lowercase()
 
+                // An option names a note with words of its own too: "Goals 2027 (work)" is Work/Goals 2027.
                 options.any {
-                    it == whole || it == whole.substringAfterLast(delimiter = '/')
+                    it == whole || whole.substringAfterLast(delimiter = '/') in it
                 }
             } >= 2
         } ?: return null

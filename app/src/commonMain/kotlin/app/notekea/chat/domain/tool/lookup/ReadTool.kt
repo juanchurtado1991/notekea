@@ -102,7 +102,12 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
 
         val more = if (read.text.length > NOTE_CHARS) {
             "\n(Its first $NOTE_CHARS of ${read.text.length} characters. A write_from_notes step that names " +
-                "this note reads all of it.)"
+                "this note reads all of it.)" +
+                LongNote.restOf(
+                    text = read.text,
+                    task = context.task,
+                    shown = NOTE_CHARS
+                )
         } else {
             ""
         }

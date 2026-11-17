@@ -101,14 +101,40 @@ internal object ChangeMisuse {
         }
     }
 
-    /** A tag the task does not write, where it writes the tag itself (with X, con X): "travel" for "con viaje". */
-    fun isTagNamed(task: String): Boolean {
-        val words = task.lowercase()
+    /**
+     * The tag the task itself writes (tag … with X, etiqueta con X, tag it as X), as written; null when it leaves
+     * the word to the model. The loop's eighth run refused "travel" for "con viaje" ten times in a row: the tag is
+     * the task's, so it is used, not argued over.
+     */
+    fun tagNamed(task: String): String? {
+        if (!TAGS.containsMatchIn(input = task.lowercase())) return null
 
-        return TAGS.containsMatchIn(input = words) && TAG_NAMED.containsMatchIn(input = words)
+        val named = TAG_AS.find(input = task) ?: TAG_NAMED.findAll(input = task).lastOrNull()
+
+        return named
+            ?.groupValues
+            ?.get(index = 1)
+            ?.takeIf {
+                it.lowercase() !in NO_TAG
+            }
     }
 
-    private val TAG_NAMED = Regex(pattern = "\\b(with|con)\\s+#?[\\p{L}\\p{N}_/-]+")
+    private val TAG_NAMED = Regex(
+        pattern = "\\b(?:with|con)\\s+#?([\\p{L}\\p{N}_/-]+)",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    private val TAG_AS = Regex(
+        pattern = "\\b(?:as|como)\\s+#?([\\p{L}\\p{N}_/-]+)",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    // A word after "with" that is no tag: "with my sister", "with the open tasks", "as I asked".
+    private val NO_TAG = setOf(
+        "the", "a", "an", "my", "its", "their", "that", "this", "those", "open", "i", "you", "it", "tasks",
+        "el", "la", "los", "las", "un", "una", "mi", "mis", "su", "sus", "ese", "esa", "tareas"
+    )
+
     private val ASKS_TASK = Regex(
         pattern = "\\b(task|tasks|to-?do|to-?dos|remind|reminder|tarea|tareas|pendiente|pendientes|recuérdame|" +
             "recuerdame|recordatorio)\\b"

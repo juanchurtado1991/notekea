@@ -416,6 +416,16 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
   - **Eighth run:** 4B 225 of 259 (28, 60, 65, 18 on the 201; memory 32 of 34; unseen 22 of 24), 9B 224 (27, 58,
     65, 18; 34 of 34; 22). 17 failures of the 4B and 10 of the 9B are gone; 11 and 7 tasks that were right now
     fail, by the model's variance and not by a change that touches them, so a few tasks between runs is noise.
+  - **After the eighth run, not measured whole yet:** a long note is read with the headings of the rest and the
+    paragraphs that write the task's words (`LongNote`); a question whose options add words to the notes the memory
+    settles is held (`MemoryChoice`); the tag a task names is used in place of the model's (`ChangeMisuse.tagNamed`:
+    refused each time, as `5aaafa81` did, both models wrote the same tag ten times and the turn ran out); a turn
+    that added no change ends saying so (`RunTurnUseCase.unchanged`: an empty proposal ended as its summary,
+    "Lowered the rating to 3…"). On the 34 long-note and memory tasks the 4B went from 6 failures to 5 and the 9B
+    from 5 to 3.
+  - **Tried and dropped:** each note of a change to several checked alone by the model, a yes or a no, before the
+    card. On the 40 tasks that change a group it made both models worse (4B 11 failures to 12, 9B 9 to 13): it took
+    out notes the task asks for ("both of my Goals 2027 notes", a book rated 5). The code is not in the branch.
   - **Still failing, by kind:** a request that needs two notes put together (the lease's rent plus the moving
     note's bills), a filter the model must read each note for ("every meeting that lists its attendees" went on to
     tag the others too), a note meant through another ("the project the vendor call is about"), and "the trip" with

@@ -60,17 +60,13 @@ class UnaskedChangeTest {
         }
 
     @Test
-    fun `a tag the task writes is kept as written each time, and a value loses a broken call's braces`() =
+    fun `a tag the task writes is used in place of the model's, and a value loses a broken call's braces`() =
         runTest {
             val context =
                 contextOf(task = "¿Puedes etiquetar con viaje todas las notas que escriben la palabra Lisbon?")
 
-            val travel = mapOf(
-                "notes" to "Projects/Trip to Lisbon",
-                "tag" to "travel"
-            )
-
             val priority = contextOf(task = "set priority 2 on my Lisbon trip")
+            val open = contextOf(task = "give my Lisbon trip a tag that fits")
 
             said(
                 tool = ChangeTools.setProperty,
@@ -83,21 +79,38 @@ class UnaskedChangeTest {
             )
 
             assertEquals(
-                expected = listOf(HELD, HELD, "add_tag: added", "2"),
+                expected = listOf("add_tag: added", "viaje", "add_tag: not added yet", "2"),
                 actual = listOf(
-                    said(ChangeTools.addTag, context, travel),
-                    said(ChangeTools.addTag, context, travel),
-                    said(ChangeTools.addTag, context, travel + ("tag" to "viaje")),
-                    priority
-                        .work
-                        .changes
-                        .single()
-                        .fields
-                        .values
-                        .last()
+                    said(ChangeTools.addTag, context, TRAVEL),
+                    lastOf(context = context),
+                    said(ChangeTools.addTag, open, TRAVEL),
+                    lastOf(context = priority)
                 )
             )
         }
+
+    @Test
+    fun `the tag a task names is the word after its last with, or after as, and no word of the sentence`() {
+        assertEquals(
+            expected = listOf("on-menu", "pending", "urgent", "latina", null, null),
+            actual = listOf(
+                "tag the recipes the weekly menu uses with on-menu",
+                "tag the projects with open tasks with pending",
+                "tag it as urgent",
+                "busca las recetas venezolanas y etiquétalas con latina",
+                "tag the notes I wrote with my sister",
+                "add a task to call the bank with Ana"
+            ).map { ChangeMisuse.tagNamed(task = it) }
+        )
+    }
+
+    private fun lastOf(context: ToolContext): String = context
+        .work
+        .changes
+        .single()
+        .fields
+        .values
+        .last()
 
     @Test
     fun `a request that tags or writes a note is not a question, and a question about them still is`() {
@@ -119,7 +132,11 @@ class UnaskedChangeTest {
     }
 
     private companion object {
-        const val HELD = "add_tag: not added yet"
+        val TRAVEL = mapOf(
+            "notes" to "Projects/Trip to Lisbon",
+            "tag" to "travel"
+        )
+
         val ORGANIZE = WorkKind.ORGANIZE
         val WRITE = WorkKind.WRITE
         val ASK = WorkKind.ASK

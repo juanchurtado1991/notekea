@@ -130,6 +130,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   asking which of them you meant or dropping them.
 - The chat's new loop finds a group of notes in one step: a search names every note that writes its words, a
   folder's list shows each note's tags and open tasks, and links are followed when organizing and writing.
+- The chat's new loop uses the tag a request names ("etiquetar con viaje", "tag them with latin") in place of
+  another the model wrote for it: refused each time, as it was since the fix before, the models wrote "travel" and
+  "latina" again until the turn ran out of steps.
+- A turn of the chat's new loop that tried to change the notes and added no change says so, and never ends on
+  "Lowered the rating to 3…" with nothing proposed.
+- The chat's new loop reads a long note with the headings of what its first part leaves out and the paragraphs that
+  write the request's words, so it no longer answers "the agreement does not say" from the first 2,500 characters.
+- A question about notes the chat's memory already settles is not asked when its options add words to their names
+  ("Goals 2027 (work)").
 - The chat's new loop adds up a figure a note writes many times ("what do the daily Spent figures add up to?")
   from every line that writes it, instead of from the few it happened to read.
 - The chat's new loop adds only what you ask: no task of its own on a note you asked it to tag, the tag as you

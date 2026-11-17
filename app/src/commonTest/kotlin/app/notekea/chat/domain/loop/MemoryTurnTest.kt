@@ -154,7 +154,39 @@ class MemoryTurnTest {
         )
     }
 
+    // The loop's eighth run: "my goals" asked back with "Goals 2027 (personal)" and "Goals 2027 (work)".
+    @Test
+    fun `a question whose options add words to the notes the memory settles is not asked`() =
+        runTest {
+            store.texts[VaultGuide.MEMORY] = memory
+
+            engine.reply = { messages ->
+                val asked = messages.first().text
+
+                when {
+                    asked.startsWith(prefix = "You say how a request") -> ROUTE
+
+                    asked.startsWith(prefix = CALLS) && "Not asked" in messages.last().text ->
+                        """{"tool":"answer","text":"8712-6650"}"""
+
+                    asked.startsWith(prefix = CALLS) -> WORDY_QUESTION
+
+                    else -> "Laura's phone is 8712-6650."
+                }
+            }
+
+            assertEquals(
+                expected = true,
+                actual = run().last() is AgentStep.Finished
+            )
+        }
+
     private companion object {
+        const val ROUTE = """{"work":"ask","skill":"none"}"""
+
+        const val WORDY_QUESTION = """{"tool":"ask_user","question":"Which?",""" +
+            """"options":"Laura Castro (friend)\nLaura Méndez (work)"}"""
+
         const val CALLS = "You work on a task in the person's notes"
     }
 }

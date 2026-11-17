@@ -1,0 +1,118 @@
+package app.notekea.chat.domain.loop
+
+import app.notekea.chat.domain.agent.AgentFinalAnswer
+import app.notekea.chat.domain.agent.AgentStep
+import app.notekea.chat.domain.agent.AgentTaskMove
+import app.notekea.chat.domain.agent.GroundedSteps
+import app.notekea.chat.domain.agent.ProposalCheck
+import app.notekea.chat.domain.agent.ProposalVault
+import app.notekea.chat.domain.tool.ChatTool
+import app.notekea.chat.domain.tool.ToolCall
+import app.notekea.chat.domain.tool.change.ProposeTool
+import app.notekea.chat.domain.tool.work.AnswerTool
+import app.notekea.chat.domain.tool.work.AskUserTool
+
+/**
+ * How a turn of the loop ends, by the call that ends it: a question, the card of its changes, or an answer written
+ * from what it found. A turn that tried to change the notes and added no change says so.
+ */
+internal class TurnEnd(
+    private val finalAnswer: AgentFinalAnswer,
+    private val proposal: ProposalCheck
+) {
+    suspend fun stepOf(
+        call: ToolCall,
+        tool: ChatTool,
+        state: TurnState
+    ): AgentStep {
+        val isEmpty = state
+            .turn
+            .work
+            .changes
+            .isEmpty()
+
+        val isRefused = isEmpty && state.refused.isNotEmpty()
+
+        return when (tool.name) {
+            AskUserTool.NAME -> AgentStep.Asked(
+                question = call.text(name = AskUserTool.QUESTION),
+                options = AskUserTool.optionsOf(call = call),
+                remembering = SharedNames.rememberingOf(state = state)
+            )
+
+            ProposeTool.NAME -> if (isEmpty) {
+                unchanged(state = state)
+            } else {
+                proposed(
+                    state = state,
+                    summary = call.text(name = ProposeTool.SUMMARY)
+                )
+            }
+
+            else -> if (isRefused) {
+                unchanged(state = state)
+            } else {
+                AgentStep.Finished(
+                    summary = finalAnswer.written(
+                        task = state.task,
+                        found = fittedOf(state = state),
+                        summary = call.text(name = AnswerTool.TEXT),
+                        memory = state.memory.map { it.text }
+                    )
+                )
+            }
+        }
+    }
+
+    /** What the answer is written from: what was found, as far as the context goes. */
+    suspend fun fittedOf(state: TurnState): List<String> = state
+        .budget
+        .fit(state.found, state.dropped)
+        .entries
+
+    /**
+     * The changes the turn added, checked against the vault and written out for the card; the notes it read are
+     * what a note it writes is written from.
+     */
+    suspend fun proposed(
+        state: TurnState,
+        summary: String
+    ): AgentStep {
+        val move = GroundedSteps.of(
+            move = AgentTaskMove(
+                move = ProposeTool.NAME,
+                summary = summary,
+                steps = state.turn.work.changes
+            ),
+            read = state.turn.reads.read
+        )
+
+        return proposal.stepOf(
+            move = move,
+            unreadable = state.turn.reads.blind,
+            task = state.task,
+            vault = ProposalVault(
+                path = state.turn.vaultPath,
+                notes = state.turn.notes,
+                openNote = state.turn.openNote
+            )
+        )
+    }
+
+    // The loop's eighth run ended "Lowered the rating to 3 for Atomic Habits and Sapiens" with every set_property
+    // refused: the summary of an empty proposal shown as done.
+    private suspend fun unchanged(state: TurnState): AgentStep = AgentStep.Finished(
+        summary = finalAnswer.written(
+            task = state.task,
+            found = fittedOf(state = state) + NOTHING_CHANGED,
+            summary = "",
+            memory = state.memory.map { it.text }
+        )
+    )
+
+    companion object {
+        const val NOTHING_CHANGED =
+            "No change was added in this turn, so the notes are as they were. The answer says so plainly, " +
+                "with what stopped it, and never says a change was made."
+    }
+}

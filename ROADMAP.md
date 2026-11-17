@@ -425,7 +425,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    (9B 203, was 212; 4B 201, was 204), so it is off by default (`-PstepMemory=fold` turns it on). With it off and
    the fixes of the seventh run (no invented links, the note a task means settled before the turn, groups of notes
    found in one step): 9B 221, 4B 219. With the fixes of the eighth (sums gathered from every line, no change the
-   task does not ask, the task's words over the memory): 4B 225, 9B 224. Across turns it is still not turned on.
+   task does not ask, the task's words over the memory): 4B 225, 9B 224. Fixed after it and not measured whole yet:
+   long notes read by the part asked about, the task's own tag used, a turn with no change says so. Across turns it is still not turned on.
 
 ## Out of scope for the MVP
 

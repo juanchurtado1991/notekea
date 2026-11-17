@@ -54,7 +54,7 @@ class ChangeTool(
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val step = PlannedStep(
+        val called = PlannedStep(
             kind = kind,
             fields = fields
                 .filter {
@@ -70,6 +70,11 @@ class ChangeTool(
                     it.isNotEmpty() && it.lowercase() !in NONE
                 },
             notes = call.list(name = ActionField.NOTES.written)
+        )
+
+        val step = asWritten(
+            step = called,
+            task = context.task
         )
 
         // Checked with the changes before it, so a note moved into a folder the turn creates is found there.
@@ -128,8 +133,15 @@ class ChangeTool(
             .changes
             .joinToString(separator = "\n") { "- ${describedOf(step = it)}" }
 
+        val kept = step[ActionField.TAG]
+            ?.takeIf {
+                step != called
+            }
+            ?.let { " The tag is \"$it\", as the task writes it." }
+            .orEmpty()
+
         return ToolResult(
-            forModel = "$name: added. The proposal now holds:\n$proposal\nIf the task asks for a change that " +
+            forModel = "$name: added.$kept The proposal now holds:\n$proposal\nIf the task asks for a change that " +
                 "is not in it, add that one; else call propose now. Add nothing the task does not ask for."
         )
     }
@@ -224,8 +236,29 @@ class ChangeTool(
         context.work.warn(about = "$name misuse")
     }
 
-    // A tag or a property name the task does not write (travel for "viaje"): the task's own words are kept. Every
-    // time where the task writes the tag itself (with X); else once, as the task may leave the word to the model.
+    // The tag the task writes in place of another the model wrote for it: "travel" for "con viaje", "latina" for
+    // "with latin". Changed here and said, as told to change it the models wrote the same tag again.
+    private fun asWritten(
+        step: PlannedStep,
+        task: String
+    ): PlannedStep {
+        val tag = step[ActionField.TAG]?.trim('#')
+
+        val named = ChangeMisuse.tagNamed(task = task).takeIf {
+            kind == ActionKind.ADD_TAG
+        }
+
+        val isOther =
+            tag != null &&
+                named != null &&
+                tag.lowercase() !in task.lowercase()
+
+        if (!isOther) return step
+
+        return step.copy(fields = step.fields + (ActionField.TAG to named.orEmpty()))
+    }
+
+    // A tag or a property name the task does not write, told once: the task may leave the word to the model.
     private fun unwrittenOf(
         step: PlannedStep,
         context: ToolContext
@@ -238,9 +271,7 @@ class ChangeTool(
                 it.lowercase() !in words
             } ?: return null
 
-        val isNamed = kind == ActionKind.ADD_TAG && ChangeMisuse.isTagNamed(task = context.task)
-        val isHeld = isNamed || context.work.warn(about = "$name words")
-        if (!isHeld) return null
+        if (!context.work.warn(about = "$name words")) return null
 
         return "$name: not added yet. The task does not write \"$unwritten\". When the task names it, use its " +
             "words as the task writes them; if the task leaves it to you, call $name again."

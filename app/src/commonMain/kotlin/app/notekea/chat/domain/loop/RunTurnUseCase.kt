@@ -61,6 +61,11 @@ class RunTurnUseCase(
     private val wholeLast: Int? = null
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
+
+    private val turnEnd = TurnEnd(
+        finalAnswer = finalAnswer,
+        proposal = proposal
+    )
     private val router = TurnRouter(llmEngine = llmEngine)
 
     operator fun invoke(
@@ -228,12 +233,6 @@ class RunTurnUseCase(
         emit(value = unread(state = state))
     }
 
-    // What the answer is written from: what was found, as far as the context goes.
-    private suspend fun fittedOf(state: TurnState): List<String> = state
-        .budget
-        .fit(state.found, state.dropped)
-        .entries
-
     // A call that reads or works: shown as a step, run once, and told when it is made again.
     private suspend fun FlowCollector<AgentStep>.made(
         number: Int,
@@ -314,58 +313,7 @@ class RunTurnUseCase(
         call: ToolCall,
         tool: ChatTool,
         state: TurnState
-    ) {
-        val step = when (tool.name) {
-            AskUserTool.NAME -> AgentStep.Asked(
-                question = call.text(name = AskUserTool.QUESTION),
-                options = AskUserTool.optionsOf(call = call),
-                remembering = SharedNames.rememberingOf(state = state)
-            )
-
-            ProposeTool.NAME -> proposed(
-                state = state,
-                summary = call.text(name = ProposeTool.SUMMARY)
-            )
-
-            else -> AgentStep.Finished(
-                summary = finalAnswer.written(
-                    task = state.task,
-                    found = fittedOf(state = state),
-                    summary = call.text(name = AnswerTool.TEXT),
-                    memory = state.memory.map { it.text }
-                )
-            )
-        }
-
-        emit(value = step)
-    }
-
-    // The changes the turn added, checked against the vault and written out for the card; the notes it read are
-    // what a note it writes is written from.
-    private suspend fun proposed(
-        state: TurnState,
-        summary: String
-    ): AgentStep {
-        val move = GroundedSteps.of(
-            move = AgentTaskMove(
-                move = ProposeTool.NAME,
-                summary = summary,
-                steps = state.turn.work.changes
-            ),
-            read = state.turn.reads.read
-        )
-
-        return proposal.stepOf(
-            move = move,
-            unreadable = state.turn.reads.blind,
-            task = state.task,
-            vault = ProposalVault(
-                path = state.turn.vaultPath,
-                notes = state.turn.notes,
-                openNote = state.turn.openNote
-            )
-        )
-    }
+    ) = emit(value = turnEnd.stepOf(call, tool, state))
 
     // The next call, asked again once with more room when it cannot be read; null when it cannot twice.
     private suspend fun callOf(
@@ -462,12 +410,12 @@ class RunTurnUseCase(
         }
 
         // Changes already added are what it was asked for: they go on the card, not into an answer.
-        if (state.turn.work.changes.isNotEmpty()) return proposed(state, "")
+        if (state.turn.work.changes.isNotEmpty()) return turnEnd.proposed(state, "")
         if (!hasLooked) return AgentStep.Stopped(problem = null)
 
         val answer = finalAnswer.written(
             task = state.task,
-            found = fittedOf(state = state),
+            found = turnEnd.fittedOf(state = state),
             summary = "",
             memory = state.memory.map { it.text }
         )

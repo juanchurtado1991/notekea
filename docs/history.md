@@ -353,4 +353,9 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   tasks nobody asked for added to a tagging, a question asked for a plural request, the memory winning over the
   task's own words) and fixed for the eighth: 4B 225, 9B 224. Between the two runs 11 tasks of the 4B and 7 of
   the 9B went from right to wrong with no change that touches them, so a few tasks of difference is noise, and
-  the measure of reliability is the kind of each failure, not the total.
+  the measure of reliability is the kind of each failure, not the total. Asked by the developer whether the
+  failures could be bugs in the feature and not the model, two were: the tag check of the commit before refused a
+  translated tag every time without saying which to use, so the turn looped until it ran out, and an empty proposal
+  ended as the model's own summary of a change never made. Both fixed. A per-note check of group changes by the
+  model was built, measured worse on both models, and dropped. A bug hunt over the chat, tasks, query views, graph
+  and search followed, before measuring again.

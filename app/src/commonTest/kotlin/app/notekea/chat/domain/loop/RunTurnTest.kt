@@ -267,11 +267,10 @@ class RunTurnTest {
         }
 
     @Test
-    fun `a tag the task does not write is held once, and each change added shows the proposal so far`() =
+    fun `a tag the task names is used in place of the model's, and the change added shows the proposal so far`() =
         runTest {
             script(
                 """{"tool":"add_tag","notes":["Lease"],"tag":"home"}""",
-                """{"tool":"add_tag","notes":["Lease"],"tag":"hogar"}""",
                 """{"tool":"propose","summary":"$SUMMARY"}""",
                 work = "organize"
             )
@@ -279,10 +278,10 @@ class RunTurnTest {
             val steps = run(task = "etiqueta el contrato Lease como hogar")
 
             assertEquals(
-                expected = listOf(true, true, "hogar"),
+                expected = listOf(true, "hogar"),
                 actual = listOf(
-                    "add_tag: not added yet. The task does not write \"home\"." in callPrompts()[1],
-                    "The proposal now holds:\n- add_tag, Lease, hogar\n" in callPrompts()[2],
+                    "add_tag: added. The tag is \"hogar\", as the task writes it. The proposal now holds:\n" +
+                        "- add_tag, Lease, hogar\n" in callPrompts()[1],
                     (steps.last() as AgentStep.Proposed)
                         .steps
                         .single()
