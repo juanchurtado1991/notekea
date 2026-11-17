@@ -3,9 +3,9 @@ package app.notekea.chat.domain.context
 import app.notekea.core.llm.domain.LlmEngine
 
 /**
- * What a turn's prompt may hold of what the turn found, counted in the model's tokens (`docs/agent-loop.md`, step
- * 2): whole entries, the oldest dropped first and several at once, so the prompt's start stays as the model already
- * read it; the newest is always kept. One for a turn, which carries on what was dropped ([FittedContext.dropped]).
+ * What a turn's prompt may hold of what the turn found, in the model's tokens (`docs/agent-loop.md`, step 2): whole
+ * entries, the oldest dropped first and several at once; the newest always kept. With a [memory] and [wholeLast], the
+ * step's prompt shows less on purpose ([shown]); one budget a turn, carrying on [FittedContext.dropped].
  */
 class ContextBudget(
     private val llmEngine: LlmEngine,
@@ -14,7 +14,8 @@ class ContextBudget(
     private val replyTokens: Int,
     private val memory: StepMemory? = null,
     private val need: String = "",
-    private val space: String = ""
+    private val space: String = "",
+    private val wholeLast: Int? = null
 ) {
     private val counted = mutableMapOf<String, Int>()
     private val stored = mutableSetOf<Int>()
@@ -69,25 +70,67 @@ class ContextBudget(
         )
     }
 
+    /**
+     * What the model is shown to pick its next step: [fit], with every long result before the [wholeLast] newest
+     * folded to its first line and kept aside, so a small model reads less and asks back what it needs. The answer
+     * is written from [fit], which shows them whole.
+     */
+    suspend fun shown(
+        entries: List<String>,
+        droppedBefore: Int = 0
+    ): FittedContext {
+        val fitted = fit(entries, droppedBefore)
+        val whole = wholeLast ?: return fitted
+        if (memory == null) return fitted
+
+        val firstWhole = (entries.size - whole).coerceAtLeast(minimumValue = fitted.dropped)
+
+        val folded = (fitted.dropped until firstWhole)
+            .filter {
+                countOf(text = entries[it]) > FOLDED_TOKENS
+            }
+            .toSet()
+
+        if (folded.isEmpty()) return fitted
+
+        val lead = fitted.entries.size - (entries.size - fitted.dropped)
+
+        val shownEntries = (fitted.dropped until entries.size).map {
+            if (it in folded) {
+                foldedLine(
+                    step = it + 1,
+                    entry = entries[it]
+                )
+            } else {
+                entries[it]
+            }
+        }
+
+        return fitted.copy(
+            entries = fitted.entries.take(n = lead) + shownEntries,
+            folded = folded
+        )
+    }
+
     /** Forgets what the turn kept aside: called once, when the turn ends. */
     suspend fun forget() {
         memory?.forget(space = space)
     }
 
     /**
-     * What the model asks back with recall: the parts of the dropped results about [about], [RECALL_TOKENS] at most;
-     * null when nothing is dropped or nothing matches.
+     * What the model asks back with recall: the parts of the [hidden] results (dropped or folded) about [about],
+     * [RECALL_TOKENS] at most; null when nothing is hidden.
      */
     suspend fun recalled(
         about: String,
         entries: List<String>,
-        dropped: Int
+        hidden: Set<Int>
     ): String? {
-        if (dropped == 0) return null
+        if (hidden.isEmpty()) return null
 
         val parts = partsOf(
             entries = entries,
-            dropped = dropped,
+            hidden = hidden,
             need = about,
             room = RECALL_TOKENS
         ) ?: return "recall \"$about\": nothing about it in the earlier results. Look it up again if it is needed."
@@ -103,7 +146,7 @@ class ContextBudget(
         free: Int
     ): String? = partsOf(
         entries = entries,
-        dropped = dropped,
+        hidden = (0 until dropped).toSet(),
         need = need,
         room = free - countOf(text = RECALLED)
     )?.let {
@@ -112,7 +155,7 @@ class ContextBudget(
 
     private suspend fun partsOf(
         entries: List<String>,
-        dropped: Int,
+        hidden: Set<Int>,
         need: String,
         room: Int
     ): String? {
@@ -136,7 +179,7 @@ class ContextBudget(
         val ranked = memory.ranked(
             space = space,
             need = need,
-            entries = (0 until dropped).toSet(),
+            entries = hidden,
             most = MOST_RECALLED
         )
 
@@ -178,6 +221,16 @@ class ContextBudget(
         const val RECALLED =
             "(Kept aside from those earlier results, the parts this task needs, in their steps' order:)\n"
         private const val KEPT_SHARE = 0.75
+
+        // A result this short is shown whole even when old: its first line would save nothing.
+        private const val FOLDED_TOKENS = 120
+
+        /** Said in place of a result kept aside, so the model knows what it was and asks it back by name. */
+        fun foldedLine(
+            step: Int,
+            entry: String
+        ): String =
+            "(Step $step, kept aside: recall it to see it whole. It began: ${StepChunks.headingOf(entry)})"
 
         /** Said in place of what was dropped, so the model knows something was there and does not look again blind. */
         fun droppedLine(

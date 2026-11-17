@@ -41,11 +41,15 @@ was dropped stays dropped, and the kept-aside parts sit before the newer results
   ("memorizar" also matches "memorizing"), without the words that only say what to do ("make", "note", "busca").
 - **Not changed:** what the model is told it found, word for word; the old agent's budget.
 
-## Not built yet
+## Shown less on purpose
 
-- Showing less on purpose: older results whole until the room is full is what the model reads today. Keeping only
-  the last few whole and the earlier ones as their parts the task needs would lighten a small model's prompt
-  further; it is the next lever if the measurement asks for it.
+The fourth web run (2026-11-16) dropped nothing: every turn's results fit the room, so the memory was never asked
+and nothing changed (the loop 212 against 212 on the 9B, 204 against 207 on the 4B). Holding a result in mind
+was still the model's load. So the prompt the model picks its next step from now shows only the last three results
+whole (`StepRecall.WHOLE_LAST`); each longer one before them is one line, its first, saying it is kept aside and
+can be recalled. A short result (under 120 tokens) stays whole: its line would save nothing. The answer is still
+written from every result whole. A read made again of a folded result gets it back whole rather than "its result
+is above". `-PstepMemory=whole` turns the folding off, to measure one against the other.
 
 ## What it does not do
 

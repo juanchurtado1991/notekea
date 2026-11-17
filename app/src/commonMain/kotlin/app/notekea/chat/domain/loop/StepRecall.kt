@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.context.FittedContext
 import app.notekea.chat.domain.context.StepMemory
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
@@ -30,8 +31,37 @@ internal object StepRecall {
             .recalled(
                 about = call.text(name = RecallTool.ABOUT),
                 entries = state.found,
-                dropped = state.dropped
+                hidden = state.hidden
             )
             ?: RecallTool.NOTHING
     }
+
+    /**
+     * What a read made again is told when its result is kept aside: the result again, whole, as "its result is
+     * above" would not be true; null when it is still shown.
+     */
+    fun againOf(
+        key: String,
+        state: TurnState
+    ): String? {
+        val at = state.foundAt[key]?.takeIf {
+            it in state.hidden
+        } ?: return null
+
+        return "(Made again: its result was kept aside, so here it is whole.)\n" + state.found[at]
+    }
+
+    /** The prompt's results for the next step, the results it leaves hidden kept in [state]. */
+    suspend fun shownOf(state: TurnState): FittedContext {
+        val fitted = state.budget.shown(state.found, state.dropped)
+
+        state.drops += fitted.dropped
+        state.hidden.clear()
+        state.hidden += fitted.hidden
+
+        return fitted
+    }
+
+    /** The results shown whole when the model picks its next step, the longer ones before them folded. */
+    const val WHOLE_LAST = 3
 }

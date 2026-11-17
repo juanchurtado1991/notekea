@@ -86,13 +86,13 @@ class StepMemoryBudgetTest {
         val asked = budget.recalled(
             about = "spaced repetition",
             entries = entries,
-            dropped = dropped
+            hidden = (0 until dropped).toSet()
         )
 
         val missing = budget.recalled(
             about = "arepas",
             entries = entries,
-            dropped = dropped
+            hidden = (0 until dropped).toSet()
         )
 
         assertEquals(
@@ -103,9 +103,81 @@ class StepMemoryBudgetTest {
                 budget.recalled(
                     about = "spaced repetition",
                     entries = entries,
-                    dropped = 0
+                    hidden = emptySet()
                 ) != null
             )
+        )
+    }
+
+    // The user's design: a small model holds less in mind when it can ask back what it read. Nothing was dropped
+    // in the web's fourth run, so the memory was never asked; the long results are now folded on purpose.
+    @Test
+    fun `long results before the last three are folded to their first line, and recall brings them back`() =
+        runTest {
+            val long = { text: String ->
+                "$text\n\n" + "Spaced repetition helps memorizing. ".repeat(n = 20)
+            }
+
+            val entries = listOf(long("fetch \"https://athenify.io/es\":"), "write_note: added.") +
+                (2..4).map { long("read \"Notes $it\":") }
+
+            val budget = ContextBudget(
+                llmEngine = engine,
+                tokens = 4_000,
+                fixed = "The task.",
+                replyTokens = 100,
+                memory = memory,
+                need = "memorizing",
+                space = "turn",
+                wholeLast = 3
+            )
+
+            val shown = budget.shown(entries = entries)
+
+            val recalled = budget.recalled(
+                about = "spaced repetition",
+                entries = entries,
+                hidden = shown.hidden
+            )
+
+            assertEquals(
+                expected = listOf(
+                    ContextBudget.foldedLine(
+                        step = 1,
+                        entry = entries[0]
+                    ),
+                    "write_note: added."
+                ) + entries.drop(n = 2),
+                actual = shown.entries
+            )
+
+            assertEquals(
+                expected = listOf(entries, setOf(0), true),
+                actual = listOf(
+                    budget.fit(entries = entries).entries,
+                    shown.hidden,
+                    recalled.orEmpty().contains(other = "From step 1, fetch")
+                )
+            )
+        }
+
+    @Test
+    fun `with no memory nothing is folded`() = runTest {
+        val entries = (1..5).map {
+            "read \"Notes $it\":\n\n" + "x".repeat(n = 800)
+        }
+
+        val shown = ContextBudget(
+            llmEngine = engine,
+            tokens = 4_000,
+            fixed = "The task.",
+            replyTokens = 100,
+            wholeLast = 3
+        ).shown(entries = entries)
+
+        assertEquals(
+            expected = entries,
+            actual = shown.entries
         )
     }
 

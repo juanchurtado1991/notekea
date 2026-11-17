@@ -26,6 +26,10 @@ internal class TurnState(
     val repeated = mutableListOf<String>()
     val drops = mutableListOf<Int>()
 
+    // The results not shown whole at the last step (dropped or folded), and where each call's result is in [found].
+    val hidden = mutableSetOf<Int>()
+    val foundAt = mutableMapOf<String, Int>()
+
     // The changes refused, so one refused again as it was counts as made again.
     val refused = mutableListOf<String>()
 

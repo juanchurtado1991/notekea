@@ -57,7 +57,8 @@ class RunTurnUseCase(
     private val vaultGuide: VaultGuide,
     private val proposal: ProposalCheck,
     private val clock: Clock,
-    private val stepMemory: StepMemory? = null
+    private val stepMemory: StepMemory? = null,
+    private val wholeLast: Int? = StepRecall.WHOLE_LAST
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
     private val router = TurnRouter(llmEngine = llmEngine)
@@ -125,7 +126,8 @@ class RunTurnUseCase(
                 replyTokens = CALL_TOKENS + WORK_TOKENS,
                 memory = stepMemory,
                 need = task,
-                space = Random.nextLong().toString()
+                space = Random.nextLong().toString(),
+                wholeLast = wholeLast
             )
         )
 
@@ -275,12 +277,13 @@ class RunTurnUseCase(
         }
 
         if (!isNew) {
-            state.found += again
+            state.found += StepRecall.againOf(key, state).takeUnless { isChange } ?: again
 
             return
         }
 
         val before = state.turn.work.changes.size
+        state.foundAt[key] = state.found.size
 
         state.found += StepRecall.resultOf(
             call = call,
@@ -392,8 +395,7 @@ class RunTurnUseCase(
         isEnding: Boolean,
         tokens: Int
     ): ToolCall? {
-        val fitted = state.budget.fit(state.found, state.dropped)
-        state.drops += fitted.dropped
+        val fitted = StepRecall.shownOf(state = state)
 
         // A call just made again is not offered for the next one: the model takes another way.
         val again = state
@@ -409,7 +411,7 @@ class RunTurnUseCase(
 
         // Recall is offered once something is no longer shown: before, there is nothing to ask back.
         val looking =
-            if (state.dropped == 0) state.tools.without(name = RecallTool.NAME) else state.tools
+            if (state.hidden.isEmpty()) state.tools.without(name = RecallTool.NAME) else state.tools
 
         val offered = if (isEnding) state.tools.ending() else looking
 

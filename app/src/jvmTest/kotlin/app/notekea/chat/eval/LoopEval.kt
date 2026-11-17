@@ -6,6 +6,7 @@ import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
+import app.notekea.chat.domain.loop.StepRecall
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
@@ -61,6 +62,10 @@ internal object LoopEval {
             clock = Clock.System,
             stepMemory = SqliteStepMemory().takeIf {
                 System.getProperty("notekea.stepmemory") != "off"
+            },
+            // -PstepMemory=whole shows every result whole, to measure folding against it.
+            wholeLast = StepRecall.WHOLE_LAST.takeIf {
+                System.getProperty("notekea.stepmemory") != "whole"
             }
         )
     }

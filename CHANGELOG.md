@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   without asking, and it can remember which sites you trust or not.
 - The chat's new loop keeps what a request's steps found aside, so a page read early is not lost when later
   reads fill what the model can see: the parts the request needs come back, and the model can ask for one back
-  (`recall`). Kept only while the request runs, never written to a file.
+  (`recall`). Kept only while the request runs, never written to a file. To lighten a small model's load, it
+  sees only its last three results whole while it works; the longer ones before them are one line it can recall.
 - The web's evaluation: 50 tasks the chat works on the real web, graded by hand. They are where to buy in your
   country, facts and prices with their sources, pages clipped, deep notes, research, and what must stay safe.
 - The chat's new loop reads its memory, `Notekea/Memory.md`: what you approved it to remember, such as which
