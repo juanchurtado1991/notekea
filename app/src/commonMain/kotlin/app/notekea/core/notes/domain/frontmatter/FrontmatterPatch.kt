@@ -11,6 +11,7 @@ import app.notekea.core.domain.time.MomentFormat
  */
 class FrontmatterPatch {
     private val momentFormat = MomentFormat()
+    private val reader = FrontmatterReader()
 
     /** [header] with [key]'s value set to [value]; as it is when the note has no such property. */
     fun set(
@@ -20,6 +21,15 @@ class FrontmatterPatch {
     ): String {
         val frontmatter = FrontmatterBlocks.of(header = header) ?: return header
         val old = frontmatter.blockOf(key = key) ?: return header
+
+        // The value it already has is kept as written: `record: off` was rewritten as `record: "off"`, a note's
+        // frontmatter changed though nothing in it did (seen on a blind evaluation vault, 2026-11-17).
+        val isSame = valueOf(
+            header = header,
+            key = key
+        ) == value
+
+        if (isSame) return header
 
         val keyText = old
             .lines
@@ -53,6 +63,16 @@ class FrontmatterPatch {
             }
         ).toHeader()
     }
+
+    private fun valueOf(
+        header: String,
+        key: String
+    ): PropertyValue? = (reader.read(header = header) as? FrontmatterContent.Properties)
+        ?.properties
+        ?.firstOrNull {
+            it.key == key
+        }
+        ?.value
 
     /**
      * [lines] with the comment that ended [old]'s key line (`status: draft # for now`), while the value still fits on

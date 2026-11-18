@@ -1,7 +1,9 @@
 package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
 import app.notekea.core.notes.domain.frontmatter.FrontmatterPatch
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -195,6 +197,27 @@ class FrontmatterPatchTest {
         assertEquals(
             expected = "---\nstatus: done # for now\ntags: [a, b] # mine\n---\n",
             actual = edited
+        )
+    }
+
+    // Seen on a blind evaluation vault (2026-11-17): writing back the value a property already has rewrote
+    // `record: off` as `record: "off"`, a frontmatter changed though nothing in it did.
+    @Test
+    fun `a value set as it already is keeps the property as written, unquoted words included`() {
+        val written = "---\nrecord: off\nstatus: yes\n---\n"
+        val reader = FrontmatterReader()
+
+        val properties = (reader.read(header = written) as FrontmatterContent.Properties).properties
+
+        assertEquals(
+            expected = listOf(written, written),
+            actual = properties.map {
+                patch.set(
+                    header = written,
+                    key = it.key,
+                    value = it.value
+                )
+            }
         )
     }
 }
