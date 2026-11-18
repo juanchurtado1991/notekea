@@ -117,7 +117,7 @@ class FrameGroupsTest {
         )
 
         assertEquals(
-            expected = listOf(listOf(vargas), emptyList()),
+            expected = listOf(listOf(vargas), emptyList(), emptyList()),
             actual = listOf(
                 FrameGroups.toldOf(
                     task = "the phone of Tomás from the chess club",
@@ -125,6 +125,11 @@ class FrameGroupsTest {
                 ),
                 FrameGroups.toldOf(
                     task = "Tomás's phone",
+                    group = listOf(herrera, vargas)
+                ),
+                // What it quotes is what it writes: Japan tells no Tomás apart.
+                FrameGroups.toldOf(
+                    task = "add 'Japan photos' to Tomás's note",
                     group = listOf(herrera, vargas)
                 )
             )

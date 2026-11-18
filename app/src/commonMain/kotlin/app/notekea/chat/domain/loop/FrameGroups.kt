@@ -70,7 +70,14 @@ internal object FrameGroups {
         task: String,
         group: List<FrameCandidates.Candidate>
     ): List<FrameCandidates.Candidate> {
-        val words = FrameWords.of(text = task)
+        // What the task quotes is what it writes, not what it is about: "add 'get a first-aid certificate' to my
+        // 2027 goals" was told apart by the Goals 2027 that writes certificate (the loop, 2026-11-18).
+        val words = FrameWords.of(
+            text = task.replace(
+                regex = QUOTED,
+                replacement = " "
+            )
+        )
 
         return group.filter { candidate ->
             val others = group
@@ -117,4 +124,8 @@ internal object FrameGroups {
     }
 
     private const val MOST = 6
+
+    // A quote opens where no letter is before it, so "Laura's" opens none.
+    private val QUOTED =
+        Regex(pattern = "(?<!\\p{L})'[^']*'(?!\\p{L})|\"[^\"]*\"|‘[^’]*’|“[^”]*”|«[^»]*»")
 }
