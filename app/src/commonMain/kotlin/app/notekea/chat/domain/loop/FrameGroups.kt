@@ -1,33 +1,39 @@
 package app.notekea.chat.domain.loop
 
 /**
- * The sets of shown notes a task's words fit alike (`docs/agent-frame.md`): those whose names, not folders, share a
- * word the task writes (two Budget 2026, two Lauras). Found by the vault's own names, never a list of words; a set
- * the names alone tell apart is settled by them ([settledOf]), and the model is asked of the rest.
+ * The set of shown notes a task's words fit alike (`docs/agent-frame.md`): those whose names, not folders, write
+ * every word of the task any shown name writes (two Budget 2026, two Lauras). Found by the vault's own names, never a
+ * list of words; a set the names tell apart is settled by them ([settledOf]), the model is asked of the rest.
  */
 internal object FrameGroups {
+    /**
+     * The one set, or none. Notes sharing one word of several the names write are no set: "the food in the Azores"
+     * was open between Food bank shifts and Vocabulary - Food while it meant the Azores trip (the frame alone,
+     * 2026-11-18). One name writing them all, among others writing some, is a set of one: that note.
+     */
     fun of(
         task: String,
         candidates: List<FrameCandidates.Candidate>
-    ): List<List<FrameCandidates.Candidate>> = FrameWords
-        .of(text = task)
-        .filter { word ->
-            word.any { it.isLetter() }
-        }
-        .map { word ->
-            candidates.filter { candidate ->
-                nameOf(candidate = candidate).any {
-                    FrameWords.isSame(
-                        one = it,
-                        other = word
-                    )
-                }
+    ): List<List<FrameCandidates.Candidate>> {
+        val named = FrameWords
+            .of(text = task)
+            .filter { word ->
+                word.any { it.isLetter() } && candidates.any { isNamed(it, word) }
             }
+
+        val holding = candidates.filter { candidate ->
+            named.any { isNamed(candidate, it) }
         }
-        .filter {
-            it.size in 2..MOST
+
+        val full = holding.filter { candidate ->
+            named.all { isNamed(candidate, it) }
         }
-        .distinct()
+
+        // One name writing them all among others writing some is that note, as its name settles a set.
+        return listOf(full).filter {
+            holding.size >= 2 && it.size in 1..MOST
+        }
+    }
 
     /**
      * The one note of [group] whose name has a word the others' names do not and the task writes ("Laura Castro's
@@ -102,6 +108,16 @@ internal object FrameGroups {
                 }
             }
         }
+    }
+
+    private fun isNamed(
+        candidate: FrameCandidates.Candidate,
+        word: String
+    ): Boolean = nameOf(candidate = candidate).any {
+        FrameWords.isSame(
+            one = it,
+            other = word
+        )
     }
 
     // Every word a note writes, with those of its path.
