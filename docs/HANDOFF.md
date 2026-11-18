@@ -4,7 +4,8 @@ The state of the work for the next agent, whichever it is (`AGENTS.md` has the r
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
 Last updated: 2026-11-17, with the loop's foundations on #145 (the task's frame, figures worked out by the app, a
-topic read whole) and the blind evaluation pool; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
+topic read whole), the blind evaluation pool, and **the plan to reach the blind targets, `docs/loop-goal-plan.md`,
+which is the next work: follow it step by step**; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
 ([notekea#142](https://github.com/juanchurtado1991/notekea/pull/142), draft), the developer's macOS smoke test under
 way, its fixes and the code review's refactors in it.
 

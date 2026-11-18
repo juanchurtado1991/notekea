@@ -54,3 +54,35 @@ The checks are substrings, so a right answer worded differently can fail:
 
 These weak points are the same before and after a change, so they lower both numbers alike. They do not favour
 either side.
+
+## Since 2026-11-17: the nine are the development set
+
+The plan to reach the blind targets (`docs/loop-goal-plan.md`) was drawn from these nine exams' failures, read task
+by task. So they are no longer blind: from then on they are the **development set**, read task by task like the
+tuned sets, and the pool below replaces them as the blind measure.
+
+## The pool
+
+50 exams written and checked blind on 2026-11-17 the same way as the nine (`BlindPool`, vaults
+`smoke-data/vaults/Blind *`), each with about 44 tasks, on other kinds of people and other topics.
+
+- **Ten are sealed** and never measured until the final number: AcademiaIdiomas, CareHome, Choir, ClubFutbol,
+  Conductor, Expedition, FilmStudent, FishingCharter, Homeschool and TouringBand. Picked at random with the seed
+  20261117.
+- **The reference:** one commit measured on all 40 unsealed exams with both models
+  (`-PchatPool=all`, `scripts/loop-eval/measure.sh reference reference <size>`).
+- **A round** measures ten of the 40 picked by a seed (`-PchatPool=sample -PchatPoolSeed=<n>`), at its opening and
+  after each change in it. Exams differ a lot in how hard they are, so a sample is compared with the reference on
+  the same exams, never with another sample.
+- **Read by cause only**, with `scripts/loop-eval/buckets.py` and `compare.py`: never task by task.
+
+## Runs
+
+Right answers by set. "Tuned" is the 259 tasks the loop was tuned on. "Blind" is the nine exams of this file, 393
+tasks; with Fresh Eval (77) they make 470 tasks never tuned on. Since 2026-11-17 the nine are the development set
+and the pool is the blind measure: see `docs/loop-goal-plan.md`, section 7, for the runs after that.
+
+| Run | Commit | 4B tuned | 4B fresh | 4B blind | 4B never tuned on | 9B tuned | 9B fresh | 9B blind | 9B never tuned on |
+|---|---|---|---|---|---|---|---|---|---|
+| Baseline, before the foundations | `6aea8474` | 228 (88 %) | 53 (68 %) | 261 (66 %) | 314 (67 %) | 234 (90 %) | 58 (75 %) | 277 (70 %) | 335 (71 %) |
+| The foundations, first run | `9d319805` | 198 (76 %) | 53 (69 %) | 258 (66 %) | 311 (66 %) | 201 (78 %) | 57 (74 %) | 282 (72 %) | 339 (72 %) |
