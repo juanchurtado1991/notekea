@@ -488,6 +488,12 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s23-quotes` | `fe69455b` | 2.2: something added is about the note; quotes tell nothing apart | dev 36 / 17; tuned 11 / 5 | | | | | yes |
 | 2026-11-18 | `s23-tuned` | `fe69455b` | the same, level 4 | | | 213 of 259 (82 %; fresh 53) | | | yes |
 | 2026-11-18 | `reference` | `fe69455b` | pool reference, 40 unsealed exams, level 5 | | | | 1210 of 1744 (69.4 %): ask missed 187, needless ask 81, days 13, figure 85, change 125, fact 35, other 8 | 1270 of 1744 (72.8 %): ask missed 211, needless ask 59, days 9, figure 59, change 104, fact 25, other 7 | yes |
+| 2026-11-18 | `s24-write` | `9e138a58` | 2.5, a turn that writes framed as a change, level 1 | dev 32 / 18 (was 36 / 17); tuned 8 / 5 (was 13 / 5) | | | | | yes |
+| 2026-11-18 | `s25-told` | `1426b7f4` | 2.2, only the thing's words tell namesakes apart, level 1 | dev 26 / 26; tuned 8 / 4 | | | | | kept with s26 |
+| 2026-11-18 | `s26-sets` | `27ea0b68` | 2.3, a set is the notes whose names write every word the names write, level 1 | dev 27 / 17; tuned 8 / 4 | | | | | yes |
+| 2026-11-18 | `s27-whole` | `4861c042` | 2.3, the note whose whole name the task writes settles its set, level 1 | dev 28 / 12; tuned 8 / 4 | | | | | yes |
+| 2026-11-18 | `s28-any` | `091f37aa` | 2.3, no name writing every word: the notes writing any, level 1 | dev 29 / 16; tuned 8 / 4 | | | | | no, reverted |
+| 2026-11-18 | `s29-every` | `57af56c9` | 2.2, entries marked yes for every one that could fit (prompt), level 1 | dev 26 / 22; tuned 8 / 5 | | | | | no, reverted |
 
 Notes as the plan is carried out:
 
