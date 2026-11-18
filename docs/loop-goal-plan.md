@@ -458,6 +458,11 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s0-fixes` | `8517111f` | 0.4, memory and folder fixes, fair check | | | 213 of 259 (82 %; fresh 52) | | | yes |
 | 2026-11-18 | `s0-again` | `8517111f` | 0.4, the same commit again: **noise** | | | 209 of 259 (fresh 54) | | | |
 | 2026-11-18 | `s1-frame` | `8517111f` | 1.2, the frame alone, first numbers | dev 37 of 74 / 52 of 319 (9B 32 / 41); tuned 8 of 29 / 10 of 126 (9B 10 / 10) | | | | | |
+| 2026-11-18 | `s22-marks` | `e661a7ea` | 2.2, marks for notes and entries, no folder fallback | dev 43 / 25; tuned 20 / 3 | | | | | no: misses grew |
+| 2026-11-18 | `s22-none` | `a56eb4ac` | 2.2, none marked stays open | dev 25 / 116; tuned 7 / 33 | | | | | no: entries open on 99 |
+| 2026-11-18 | `s22-words` | `cfcc4ec9` | 2.2, namesakes told apart by their own words | dev 35 / 38; tuned 13 / 7 | | | | | yes |
+| 2026-11-18 | `s22-change` | `e1c5153b` | 2.2, entries marked for changes only | dev 36 / 15; tuned 13 / 5 | | | | | yes |
+| 2026-11-18 | `s22-dev` | `e1c5153b` | 2.2 in the loop, level 3 | | 275 of 393 (70 %, was 258): asked needlessly 40 → 17 | | | | yes |
 
 Notes as the plan is carried out:
 
@@ -477,3 +482,13 @@ Notes as the plan is carried out:
   entries were asked only for changes, and only those the task's words touched.
 - The reference (step 1.4) is run after step 2's first changes, not before: it takes seven hours with no Gradle
   meanwhile, and the frame alone needs Gradle every few minutes.
+- **Step 2.2 as measured on the frame alone (4B):** the model's marks are no better than its picks. On a set of
+  namesakes it marked one "yes" with nothing to tell them apart, or all "no"; on the entries of a question's note it
+  marked several "yes" for tasks that add them up. What worked is the method of section 3 taken further: **the code
+  tells namesakes apart by the words only one of their notes writes**, and leaves them open when none does; the
+  model marks only the notes that each write words of their own, and only a change marks entries. From the first
+  numbers to `s22-change`: false alarms 52 → 15 of 319 (16 % → 4.7 %) on the development exams and 10 → 5 of 126 on
+  the tuned ones; misses 37 → 36 of 74. The misses that remain are spread: words common enough to tell apart by
+  chance ("number", "week"), sets by kind ("the project"), tasks that point ("tag it"), and routes.
+- Level 3 was run after `s22-change`, before the targets of level 2 were met, to see whether false alarms this low
+  already pay in the loop: the frame's verdict only changes the loop through `UnsettledEnd` and `TurnChecks`.
