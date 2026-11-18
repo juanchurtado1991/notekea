@@ -89,15 +89,8 @@ class RunTurnUseCase(
 
         val relevant = TurnSetup.relevantOf(task, remembered, route.kind)
 
-        // Which notes, and which entries in them, the task means: said by the model, held to by the code.
-        val frame = frames?.of(
-            task = task,
-            vaultPath = vaultPath,
-            notes = notes,
-            memory = relevant,
-            openNote = openNote,
-            isChange = route.kind == WorkKind.ORGANIZE || route.kind == WorkKind.WRITE
-        )
+        val frame =
+            TurnSetup.frameOf(task, vaultPath, notes, relevant, route.kind, frames, openNote)
 
         // The vault's own web sources are trusted by definition (`docs/agent-web.md`): none were (bug hunt, E7).
         val turn = TurnSetup.contextOf(

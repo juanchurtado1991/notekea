@@ -42,6 +42,31 @@ internal object TurnSetup {
         frame = frame
     )
 
+    /**
+     * Which notes, and which entries in them, the task means: said by the model, held to by the code. A note to write
+     * is no note of the vault: what it is written from are its sources, all of them, never one to ask about.
+     */
+    suspend fun frameOf(
+        task: String,
+        vaultPath: String,
+        notes: Collection<NoteEntry>,
+        memory: List<MemoryLine>,
+        kind: WorkKind,
+        frames: FrameSource?,
+        openNote: RelativePath?
+    ): TaskFrame? = frames
+        ?.takeIf {
+            kind != WorkKind.WRITE
+        }
+        ?.of(
+            task = task,
+            vaultPath = vaultPath,
+            notes = notes,
+            memory = memory,
+            openNote = openNote,
+            isChange = kind == WorkKind.ORGANIZE
+        )
+
     /** The memory's lines that bear on [task]: those the frame's model and the loop's model are given. */
     fun relevantOf(
         task: String,

@@ -25,7 +25,7 @@ class TaskFramer(llmEngine: LlmEngine) {
         ) ?: return null
 
         val targets = when (count) {
-            FrameCount.ONE -> oneOf(task, candidates, memory, isChange)
+            FrameCount.ONE -> oneOf(task, words, candidates, memory, isChange)
 
             FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.map {
                 FrameTarget(note = it.path)
@@ -46,13 +46,16 @@ class TaskFramer(llmEngine: LlmEngine) {
     // of it the task could mean.
     private suspend fun oneOf(
         task: String,
+        words: String,
         candidates: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>,
         isChange: Boolean
     ): List<FrameTarget>? {
+        // The set is made by the task's own words for its thing, not every word it writes: in "a property budget on
+        // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
         val group = FrameGroups
             .of(
-                task = task,
+                task = words.ifBlank { task },
                 candidates = candidates
             )
             .firstOrNull()
