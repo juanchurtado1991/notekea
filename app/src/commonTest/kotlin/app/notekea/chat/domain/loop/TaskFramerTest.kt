@@ -7,113 +7,128 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The frame's two questions (`docs/agent-frame.md`): how many things the task means, from its words alone; then
- * which shown note and entry, named only by number under a grammar, or every one its words fit when it is unclear.
+ * The frame's small questions (`docs/agent-frame.md`): the code finds the namesakes a task's words fit, the model
+ * only says whether the task says which; for a change, which entry of the note; each named by number under a grammar.
  */
 class TaskFramerTest {
     private val engine = FakeLlmEngine()
     private val framer = TaskFramer(llmEngine = engine)
 
-    private val home = FrameCandidates.Candidate(
-        path = RelativePath(value = "Home/Budget.md"),
-        gist = "The household's money.",
-        entries = emptyList()
-    )
+    private val home = candidate(path = "Home/Budget.md")
+    private val work = candidate(path = "Work/Budget.md")
 
-    private val dentist = FrameCandidates.Candidate(
-        path = RelativePath(value = "Health/Dentist.md"),
-        gist = "Dr. Paz.",
+    private val dentist = candidate(
+        path = "Health/Dentist.md",
         entries = listOf("- 12/01 10:00 cleaning", "- 12/09 16:30 filling")
     )
 
-    // The model counts with [count]; then picks with [pick].
+    private fun candidate(
+        path: String,
+        entries: List<String> = emptyList()
+    ) = FrameCandidates.Candidate(
+        path = RelativePath(value = path),
+        gist = "",
+        entries = entries
+    )
+
+    // Each question's reply, by the prompt that asks it.
     private suspend fun frameOf(
-        count: String,
-        pick: String,
-        candidates: List<FrameCandidates.Candidate> = listOf(home, dentist)
+        task: String,
+        candidates: List<FrameCandidates.Candidate>,
+        replies: Map<String, String>,
+        isChange: Boolean = false
     ): TaskFrame? {
-        engine.reply = { messages ->
-            if (messages.first().text == FramePrompts.COUNT) count else pick
-        }
+        engine.reply = { messages -> replies[messages.first().text].orEmpty() }
 
         return framer.frameOf(
-            task = "move the appointment to 11:00",
+            task = task,
             candidates = candidates,
-            memory = emptyList()
+            memory = emptyList(),
+            isChange = isChange
         )
     }
 
-    @Test
-    fun `one thing meant and two entries fitting it is open between the entries`() = runTest {
-        val frame = frameOf(
-            count = """{"count":"one","words":"the appointment"}""",
-            pick = """{"note":"N2","fit":[],"entry":"unclear","fit_entries":["E1","E2"]}"""
-        )
-
-        assertEquals(
-            expected = listOf(true, dentist.entries, "the appointment"),
-            actual = listOf(frame?.isOpen, frame?.options, frame?.words)
-        )
-    }
+    private val one = """{"count":"one","words":"the budget"}"""
 
     @Test
-    fun `an unclear note is every note its words fit, and a clear one is settled`() = runTest {
-        val unclear = frameOf(
-            count = """{"count":"one","words":"it"}""",
-            pick = """{"note":"unclear","fit":["N1","N2"],"entry":"none","fit_entries":[]}"""
-        )
+    fun `namesakes the task does not say which of are open, and one it says is settled`() =
+        runTest {
+            val open = frameOf(
+                task = "what is the total of the budget?",
+                candidates = listOf(home, work),
+                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.SAID to """{"pick":"not said"}""")
+            )
 
-        val clear = frameOf(
-            count = """{"count":"one","words":"it"}""",
-            pick = """{"note":"N1","fit":[],"entry":"none","fit_entries":[]}"""
-        )
+            val said = frameOf(
+                task = "what is the total of the work budget?",
+                candidates = listOf(home, work),
+                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.SAID to """{"pick":"N2"}""")
+            )
 
-        assertEquals(
-            expected = listOf(listOf(home.path, dentist.path), home.path),
-            actual = listOf(unclear?.openNotes, clear?.meant)
-        )
-    }
+            assertEquals(
+                expected = listOf(listOf(home.path, work.path), work.path),
+                actual = listOf(open?.openNotes, said?.meant)
+            )
+        }
 
     @Test
-    fun `the count is asked without notes, and the pick names only what was shown`() = runTest {
+    fun `a change to one entry the task does not say which of is open between the entries`() =
+        runTest {
+            val frame = frameOf(
+                task = "move the appointment to 11:00",
+                candidates = listOf(dentist),
+                replies = mapOf(
+                    FramePrompts.COUNT to """{"count":"one","words":"the appointment"}""",
+                    FramePrompts.PICK to """{"pick":"N1"}""",
+                    FramePrompts.ENTRY to """{"pick":"not said"}"""
+                ),
+                isChange = true
+            )
+
+            assertEquals(
+                expected = listOf(true, dentist.entries),
+                actual = listOf(frame?.isOpen, frame?.options)
+            )
+        }
+
+    @Test
+    fun `the count is asked without notes, and a question about a note asks no entry`() = runTest {
         frameOf(
-            count = """{"count":"one","words":""}""",
-            pick = """{"note":"N1","fit":[]}""",
-            candidates = listOf(home)
+            task = "when is the appointment?",
+            candidates = listOf(dentist),
+            replies = mapOf(FramePrompts.COUNT to one, FramePrompts.PICK to """{"pick":"N1"}""")
         )
 
-        val counted = engine
-            .generated
-            .first()
-            .last()
-            .text
-
-        val schemas = engine.options.map { it.jsonSchema.orEmpty() }
+        val asked = engine.generated.map { it.first().text }
 
         assertEquals(
-            expected = listOf(false, true, false, false),
+            expected = listOf(false, listOf(FramePrompts.COUNT, FramePrompts.PICK)),
             actual = listOf(
-                "Home/Budget" in counted,
-                "\"N1\"" in schemas.last(),
-                "\"N2\"" in schemas.last(),
-                "entry" in schemas.last()
+                "Health/Dentist" in engine
+                    .generated
+                    .first()
+                    .last()
+                    .text,
+                asked
             )
         )
     }
 
     @Test
-    fun `every and none ask nothing more, a reply cut short is no frame, and nothing shown makes no call`() =
+    fun `every asks nothing more, a reply cut short is no frame, and nothing shown makes no call`() =
         runTest {
             val every = frameOf(
-                count = """{"count":"every","words":"my recipes"}""",
-                pick = ""
+                task = "tag my recipes",
+                candidates = listOf(home),
+                replies = mapOf(FramePrompts.COUNT to """{"count":"every","words":"my recipes"}""")
             )
 
             val calls = engine.generated.size
 
             val cut = frameOf(
-                count = """{"count":"o""",
-                pick = ""
+                task = "tag it",
+                candidates = listOf(home),
+                replies = mapOf(FramePrompts.COUNT to """{"count":"o""")
             )
 
             val before = engine.generated.size

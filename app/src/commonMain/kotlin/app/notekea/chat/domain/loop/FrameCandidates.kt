@@ -8,11 +8,15 @@ import app.notekea.core.notes.domain.RelativePath
  * from the memory, the open note, names, the search, and every namesake; the model only says which it means.
  */
 internal object FrameCandidates {
-    /** A note shown to the frame's model: its path, its first line, and the entries the task's words touch. */
+    /**
+     * A note shown to the frame's model: its path, its first line, the entries the task's words touch, and the
+     * [lines] that write one of them, which can tell it apart from a note of the same name.
+     */
     data class Candidate(
         val path: RelativePath,
         val gist: String,
-        val entries: List<String>
+        val entries: List<String>,
+        val lines: List<String> = emptyList()
     )
 
     fun of(
@@ -28,8 +32,32 @@ internal object FrameCandidates {
             entries = entriesOf(
                 task = task,
                 text = text
+            ),
+            lines = linesOf(
+                task = task,
+                text = text
             )
         )
+    }
+
+    // The lines of [text] that write a word of [task], headings left out: what tells a note apart from its namesake.
+    private fun linesOf(
+        task: String,
+        text: String
+    ): List<String> {
+        val words = FrameWords.of(text = task)
+
+        return text
+            .lineSequence()
+            .map { it.trim() }
+            .filter {
+                it.isNotEmpty() &&
+                    !it.startsWith(prefix = "#") &&
+                    touches(line = it, words = words)
+            }
+            .map { it.take(n = ENTRY) }
+            .take(n = MOST_LINES)
+            .toList()
     }
 
     /** The paths shown, at most [MOST]: [first] (the memory's, the open note), named, found, then their namesakes. */
@@ -154,6 +182,7 @@ internal object FrameCandidates {
     private const val MOST = 10
     private const val NAMESAKES = 4
     private const val MOST_ENTRIES = 8
+    private const val MOST_LINES = 3
     private const val GIST = 120
     private const val ENTRY = 140
 }

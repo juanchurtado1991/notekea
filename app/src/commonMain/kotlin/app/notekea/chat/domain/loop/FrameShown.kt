@@ -1,126 +1,91 @@
 package app.notekea.chat.domain.loop
 
 /**
- * The candidates as the frame's model is shown them, by number (N1, N2…, and E1, E2… for the entries inside them),
- * the grammars that let it name only those, and its picks read back as targets (`docs/agent-frame.md`).
+ * What the frame's model is shown for one question, by number (N1, N2… for notes, E1, E2… for the entries of one),
+ * the grammar that lets it name only those or one of [extra], and its pick read back (`docs/agent-frame.md`).
  */
-internal class FrameShown(private val candidates: List<FrameCandidates.Candidate>) {
-    private val entries = candidates.flatMap { candidate ->
-        candidate.entries.map {
-            candidate to it
+internal class FrameShown(
+    private val notes: List<FrameCandidates.Candidate>,
+    private val extra: List<String>,
+    private val entries: List<String> = emptyList()
+) {
+    /** The notes with their first line and the lines that write the task's words, or the one note's entries. */
+    val text: String = if (entries.isEmpty()) notesText() else entriesText()
+
+    fun schema(): String {
+        val ids = if (entries.isEmpty()) {
+            idsOf(
+                prefix = NOTE_ID,
+                size = notes.size
+            )
+        } else {
+            idsOf(
+                prefix = ENTRY_ID,
+                size = entries.size
+            )
         }
+
+        val all = (ids + extra.map { "\"$it\"" }).joinToString(separator = ",")
+
+        return "{\"type\":\"object\",\"properties\":{\"$PICK\":{\"enum\":[$all]}},\"required\":[\"$PICK\"]}"
     }
 
-    val text: String = "Notes:\n" + candidates
-        .mapIndexed { at, candidate ->
-            val inside = entries
-                .withIndex()
-                .filter {
-                    it.value.first == candidate
-                }
-                .joinToString(separator = "") { "\n    $ENTRY_ID${it.index + 1} ${it.value.second}" }
+    /** Several notes, as a list: every one the task names. */
+    fun listSchema(): String {
+        val ids = idsOf(
+            prefix = NOTE_ID,
+            size = notes.size
+        ).joinToString(separator = ",")
 
-            val gist = candidate
+        return "{\"type\":\"object\",\"properties\":{\"$PICKS\":{\"type\":\"array\",\"items\":{\"enum\":[$ids]}}}," +
+            "\"required\":[\"$PICKS\"]}"
+    }
+
+    /** The note picked; null for one of [extra] or a reply that names none. */
+    fun noteOf(fields: Map<String, String>): FrameCandidates.Candidate? = indexOf(
+        id = fields[PICK].orEmpty(),
+        prefix = NOTE_ID
+    )?.let { notes.getOrNull(index = it) }
+
+    /** The entry picked; null for one of [extra] or a reply that names none. */
+    fun entryOf(fields: Map<String, String>): String? = indexOf(
+        id = fields[PICK].orEmpty(),
+        prefix = ENTRY_ID
+    )?.let { entries.getOrNull(index = it) }
+
+    /** Which of [extra] was picked, if one was. */
+    fun extraOf(fields: Map<String, String>): String? = fields[PICK]?.takeIf {
+        it in extra
+    }
+
+    fun notesOf(fields: Map<String, String>): List<FrameCandidates.Candidate> = fields[PICKS]
+        .orEmpty()
+        .lines()
+        .mapNotNull { id ->
+            indexOf(
+                id = id.trim(),
+                prefix = NOTE_ID
+            )?.let { notes.getOrNull(index = it) }
+        }
+        .distinct()
+
+    private fun notesText(): String = "Notes:\n" + notes
+        .mapIndexed { at, note ->
+            val gist = note
                 .gist
                 .takeIf { it.isNotEmpty() }
                 ?.let { " — $it" }
                 .orEmpty()
 
-            "$NOTE_ID${at + 1} ${candidate.path.value}$gist$inside"
+            val lines = note.lines.joinToString(separator = "") { "\n    | $it" }
+
+            "$NOTE_ID${at + 1} ${note.path.value}$gist$lines"
         }
         .joinToString(separator = "\n")
 
-    fun oneSchema(): String {
-        val notes = idsOf(
-            prefix = NOTE_ID,
-            size = candidates.size
-        )
-
-        val note =
-            "\"$NOTE\":{\"enum\":[$notes,\"$UNCLEAR\"]},\"$FIT\":{\"type\":\"array\",\"items\":{\"enum\":[$notes]}}"
-
-        // An enum of nothing is no grammar: with no entries shown, the entry fields are not asked for.
-        if (entries.isEmpty()) return "{\"type\":\"object\",\"properties\":{$note},\"required\":[\"$NOTE\",\"$FIT\"]}"
-
-        val ids = idsOf(
-            prefix = ENTRY_ID,
-            size = entries.size
-        )
-
-        val entry = ",\"$ENTRY\":{\"enum\":[$ids,\"$NONE\",\"$UNCLEAR\"]}," +
-            "\"$FIT_ENTRIES\":{\"type\":\"array\",\"items\":{\"enum\":[$ids]}}"
-
-        return "{\"type\":\"object\",\"properties\":{$note$entry}," +
-            "\"required\":[\"$NOTE\",\"$FIT\",\"$ENTRY\",\"$FIT_ENTRIES\"]}"
-    }
-
-    fun severalSchema(): String {
-        val notes = idsOf(
-            prefix = NOTE_ID,
-            size = candidates.size
-        )
-
-        return "{\"type\":\"object\",\"properties\":{\"$NOTES\":{\"type\":\"array\",\"items\":{\"enum\":[$notes]}}}," +
-            "\"required\":[\"$NOTES\"]}"
-    }
-
-    /** The note picked, with its entry; or every note its words fit, when the model says it is unclear. */
-    fun oneOf(fields: Map<String, String>): List<FrameTarget>? {
-        val picked = fields[NOTE].orEmpty()
-
-        if (picked == UNCLEAR) {
-            val fit = notesOf(written = fields[FIT])
-            if (fit.isEmpty()) return null
-
-            return fit.map { FrameTarget(note = it.path) }
-        }
-
-        val note = noteOf(id = picked) ?: return null
-
-        val inside = when (val entry = fields[ENTRY].orEmpty()) {
-            UNCLEAR -> entriesOf(written = fields[FIT_ENTRIES]).filter {
-                it.first == note
-            }
-
-            else -> listOfNotNull(entryOf(id = entry)).filter {
-                it.first == note
-            }
-        }
-
-        return listOf(
-            FrameTarget(
-                note = note.path,
-                entries = inside.map { it.second }
-            )
-        )
-    }
-
-    fun severalOf(fields: Map<String, String>): List<FrameTarget> =
-        notesOf(written = fields[NOTES]).map { FrameTarget(note = it.path) }
-
-    private fun noteOf(id: String): FrameCandidates.Candidate? = indexOf(
-        id = id,
-        prefix = NOTE_ID
-    )
-        ?.let { candidates.getOrNull(index = it) }
-
-    private fun entryOf(id: String): Pair<FrameCandidates.Candidate, String>? = indexOf(
-        id = id,
-        prefix = ENTRY_ID
-    )
-        ?.let { entries.getOrNull(index = it) }
-
-    private fun notesOf(written: String?): List<FrameCandidates.Candidate> = written
-        .orEmpty()
-        .lines()
-        .mapNotNull { noteOf(id = it.trim()) }
-        .distinct()
-
-    private fun entriesOf(written: String?): List<Pair<FrameCandidates.Candidate, String>> = written
-        .orEmpty()
-        .lines()
-        .mapNotNull { entryOf(id = it.trim()) }
-        .distinct()
+    private fun entriesText(): String = "Note: ${notes.single().path.value}\nEntries:\n" + entries
+        .mapIndexed { at, entry -> "$ENTRY_ID${at + 1} $entry" }
+        .joinToString(separator = "\n")
 
     private fun indexOf(
         id: String,
@@ -134,16 +99,11 @@ internal class FrameShown(private val candidates: List<FrameCandidates.Candidate
     private fun idsOf(
         prefix: String,
         size: Int
-    ): String = (1..size).joinToString(separator = ",") { "\"$prefix$it\"" }
+    ): List<String> = (1..size).map { "\"$prefix$it\"" }
 
     private companion object {
-        const val NOTE = "note"
-        const val NOTES = "notes"
-        const val FIT = "fit"
-        const val ENTRY = "entry"
-        const val FIT_ENTRIES = "fit_entries"
-        const val UNCLEAR = "unclear"
-        const val NONE = "none"
+        const val PICK = "pick"
+        const val PICKS = "picks"
         const val NOTE_ID = "N"
         const val ENTRY_ID = "E"
     }

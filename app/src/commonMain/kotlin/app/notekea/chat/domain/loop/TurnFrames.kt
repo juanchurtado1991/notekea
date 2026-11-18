@@ -23,7 +23,8 @@ class TurnFrames(
         vaultPath: String,
         notes: Collection<NoteEntry>,
         memory: List<MemoryLine>,
-        openNote: RelativePath?
+        openNote: RelativePath?,
+        isChange: Boolean
     ): TaskFrame? {
         val found = (answerFromNotes.excerpts(vaultPath, notes, task) as? Outcome.Success)
             ?.value
@@ -54,7 +55,8 @@ class TurnFrames(
                 paths = paths,
                 texts = texts
             ),
-            memory = memory
+            memory = memory,
+            isChange = isChange
         )
     }
 

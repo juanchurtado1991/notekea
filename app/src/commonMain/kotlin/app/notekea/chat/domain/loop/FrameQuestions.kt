@@ -9,9 +9,9 @@ import app.notekea.core.llm.domain.LlmException
 import app.notekea.core.memory.domain.MemoryLine
 
 /**
- * The frame's questions to the model (`docs/agent-frame.md`), each under a grammar that names only what it was
- * shown: how many things a task means, which one, which several. A 4B asked them all at once said "several" for
- * "Laura Castro's email" and listed every note it saw; asked one at a time, each is a choice it can make.
+ * The frame's questions to the model (`docs/agent-frame.md`), each a small choice under a grammar: how many things
+ * a task means; whether it says which of a set of namesakes; which note; which entry; which several. Asked to judge
+ * all at once, the 4B said "several" for "Laura Castro's email"; asked to pick one, it never said "unclear".
  */
 internal class FrameQuestions(private val llmEngine: LlmEngine) {
     /** How many things [task] means, and its own words for them; from the task and the memory, no notes shown. */
@@ -25,8 +25,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
             system = FramePrompts.COUNT,
             user = "${remembered(memory = memory)}Request: $task",
             schema = "{\"type\":\"object\",\"properties\":{\"$COUNT\":{\"enum\":[$counts]}," +
-                "\"$WORDS\":{\"type\":\"string\"}},\"required\":[\"$COUNT\",\"$WORDS\"]}",
-            tokens = COUNT_TOKENS
+                "\"$WORDS\":{\"type\":\"string\"}},\"required\":[\"$COUNT\",\"$WORDS\"]}"
         ) ?: return null
 
         val count = FrameCount.entries.firstOrNull {
@@ -36,25 +35,55 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         return count to fields[WORDS].orEmpty()
     }
 
-    /**
-     * The one note [task] means and the entry in it, or every note (or entry) its words fit equally when nothing
-     * says which; null when the reply cannot be read or names no note.
-     */
-    suspend fun oneOf(
+    /** The one of [group] that [task] or the memory says it means; null when nothing says which. */
+    suspend fun saidOf(
+        task: String,
+        group: List<FrameCandidates.Candidate>,
+        memory: List<MemoryLine>
+    ): FrameCandidates.Candidate? = picked(
+        system = FramePrompts.SAID,
+        task = task,
+        memory = memory,
+        shown = FrameShown(
+            notes = group,
+            extra = listOf(FramePrompts.NOT_SAID)
+        )
+    )?.let { (shown, fields) -> shown.noteOf(fields = fields) }
+
+    /** The shown note [task] is about; null when none is. */
+    suspend fun pickOf(
         task: String,
         candidates: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>
-    ): List<FrameTarget>? {
-        val shown = FrameShown(candidates = candidates)
+    ): FrameCandidates.Candidate? = picked(
+        system = FramePrompts.PICK,
+        task = task,
+        memory = memory,
+        shown = FrameShown(
+            notes = candidates,
+            extra = listOf(FramePrompts.NOT_SAID)
+        )
+    )?.let { (shown, fields) -> shown.noteOf(fields = fields) }
 
-        val fields = asked(
-            system = FramePrompts.ONE,
-            user = "${remembered(memory = memory)}${shown.text}\n\nRequest: $task",
-            schema = shown.oneSchema(),
-            tokens = PICK_TOKENS
-        ) ?: return null
+    /** The entries of [note] [task] changes: the one it says, all when it does not say which, none for the note. */
+    suspend fun entriesOf(
+        task: String,
+        note: FrameCandidates.Candidate,
+        memory: List<MemoryLine>
+    ): List<String> {
+        val shown = FrameShown(
+            notes = listOf(note),
+            extra = listOf(FramePrompts.NOT_SAID, FramePrompts.WHOLE),
+            entries = note.entries
+        )
 
-        return shown.oneOf(fields = fields)
+        val (_, fields) = picked(FramePrompts.ENTRY, task, memory, shown) ?: return emptyList()
+
+        return when (shown.extraOf(fields = fields)) {
+            FramePrompts.NOT_SAID -> note.entries
+            FramePrompts.WHOLE -> emptyList()
+            else -> listOfNotNull(shown.entryOf(fields = fields))
+        }
     }
 
     /** The notes [task] names, each of them; null when the reply cannot be read. */
@@ -62,24 +91,38 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         task: String,
         candidates: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>
-    ): List<FrameTarget>? {
-        val shown = FrameShown(candidates = candidates)
+    ): List<FrameCandidates.Candidate>? {
+        val shown = FrameShown(
+            notes = candidates,
+            extra = emptyList()
+        )
 
         val fields = asked(
             system = FramePrompts.SEVERAL,
             user = "${remembered(memory = memory)}${shown.text}\n\nRequest: $task",
-            schema = shown.severalSchema(),
-            tokens = PICK_TOKENS
+            schema = shown.listSchema()
         ) ?: return null
 
-        return shown.severalOf(fields = fields)
+        return shown.notesOf(fields = fields)
+    }
+
+    private suspend fun picked(
+        system: String,
+        task: String,
+        memory: List<MemoryLine>,
+        shown: FrameShown
+    ): Pair<FrameShown, Map<String, String>>? = asked(
+        system = system,
+        user = "${remembered(memory = memory)}${shown.text}\n\nRequest: $task",
+        schema = shown.schema()
+    )?.let {
+        shown to it
     }
 
     private suspend fun asked(
         system: String,
         user: String,
-        schema: String,
-        tokens: Int
+        schema: String
     ): Map<String, String>? {
         val json = StringBuilder()
 
@@ -97,7 +140,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
                         )
                     ),
                     options = GenerationOptions(
-                        maxTokens = tokens,
+                        maxTokens = TOKENS,
                         temperature = 0f,
                         jsonSchema = schema
                     )
@@ -122,7 +165,6 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
     private companion object {
         const val COUNT = "count"
         const val WORDS = "words"
-        const val COUNT_TOKENS = 60
-        const val PICK_TOKENS = 120
+        const val TOKENS = 100
     }
 }

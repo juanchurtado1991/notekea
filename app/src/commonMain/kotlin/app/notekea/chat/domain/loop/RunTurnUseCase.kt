@@ -95,7 +95,8 @@ class RunTurnUseCase(
             vaultPath = vaultPath,
             notes = notes,
             memory = relevant,
-            openNote = openNote
+            openNote = openNote,
+            isChange = route.kind == WorkKind.ORGANIZE || route.kind == WorkKind.WRITE
         )
 
         // The vault's own web sources are trusted by definition (`docs/agent-web.md`): none were (bug hunt, E7).

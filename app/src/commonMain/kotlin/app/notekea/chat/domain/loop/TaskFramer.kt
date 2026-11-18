@@ -4,9 +4,9 @@ import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.memory.domain.MemoryLine
 
 /**
- * The first step of a turn on notes (`docs/agent-frame.md`), as two small questions a small model answers well: how
- * many things the task means, from its words alone; then which shown note (and entry) it means, or that its words
- * fit several equally. Null when nothing is shown or a reply cannot be read: no frame, nothing held back for one.
+ * The first step of a turn on notes (`docs/agent-frame.md`). The code finds the sets of namesakes the task's words
+ * fit ([FrameGroups]); the model answers small choices: how many things, whether the task says which of a set, which
+ * note, and for a change which entry. Null when nothing is shown or a reply cannot be read.
  */
 class TaskFramer(llmEngine: LlmEngine) {
     private val asking = FrameQuestions(llmEngine = llmEngine)
@@ -14,7 +14,8 @@ class TaskFramer(llmEngine: LlmEngine) {
     internal suspend fun frameOf(
         task: String,
         candidates: List<FrameCandidates.Candidate>,
-        memory: List<MemoryLine>
+        memory: List<MemoryLine>,
+        isChange: Boolean = false
     ): TaskFrame? {
         if (candidates.isEmpty()) return null
 
@@ -24,8 +25,12 @@ class TaskFramer(llmEngine: LlmEngine) {
         ) ?: return null
 
         val targets = when (count) {
-            FrameCount.ONE -> asking.oneOf(task, candidates, memory)
-            FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)
+            FrameCount.ONE -> oneOf(task, candidates, memory, isChange)
+
+            FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.map {
+                FrameTarget(note = it.path)
+            }
+
             else -> emptyList()
         } ?: return null
 
@@ -34,6 +39,40 @@ class TaskFramer(llmEngine: LlmEngine) {
             count = count,
             candidates = candidates.map { it.path },
             words = words
+        )
+    }
+
+    // A set of namesakes the task does not say which of is open; else the note meant, and for a change the entries
+    // of it the task could mean.
+    private suspend fun oneOf(
+        task: String,
+        candidates: List<FrameCandidates.Candidate>,
+        memory: List<MemoryLine>,
+        isChange: Boolean
+    ): List<FrameTarget>? {
+        val group = FrameGroups
+            .of(
+                task = task,
+                candidates = candidates
+            )
+            .firstOrNull()
+
+        val said = group?.let { asking.saidOf(task, it, memory) }
+        if (group != null && said == null) return group.map { FrameTarget(note = it.path) }
+
+        val meant = said ?: asking.pickOf(task, candidates, memory) ?: return emptyList()
+
+        val entries = if (isChange && meant.entries.size > 1) {
+            asking.entriesOf(task, meant, memory)
+        } else {
+            emptyList()
+        }
+
+        return listOf(
+            FrameTarget(
+                note = meant.path,
+                entries = entries
+            )
         )
     }
 }
