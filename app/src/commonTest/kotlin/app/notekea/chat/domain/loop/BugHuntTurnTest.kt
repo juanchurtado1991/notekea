@@ -76,7 +76,7 @@ class BugHuntTurnTest {
             )
         ),
         clock = Clock.System,
-        frames = FrameSource { _, _, _, _, _ -> frames.lastOrNull() }
+        frames = FrameSource { _, _, _, _, _, _ -> frames.lastOrNull() }
     )
 
     private fun frameOf(

@@ -62,7 +62,7 @@ class MemoryTurnTest {
             )
         ),
         clock = Clock.System,
-        frames = FrameSource { _, _, _, memory, _ ->
+        frames = FrameSource { _, _, _, memory, _, _ ->
             if (memory.isEmpty()) open else settled
         }
     )

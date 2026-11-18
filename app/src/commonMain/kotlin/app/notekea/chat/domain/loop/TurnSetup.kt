@@ -63,7 +63,8 @@ internal object TurnSetup {
             vaultPath = vaultPath,
             notes = notes,
             memory = memory,
-            openNote = openNote
+            openNote = openNote,
+            isChange = kind == WorkKind.ORGANIZE
         )
 
     /** The memory's lines that bear on [task]: those the frame's model and the loop's model are given. */

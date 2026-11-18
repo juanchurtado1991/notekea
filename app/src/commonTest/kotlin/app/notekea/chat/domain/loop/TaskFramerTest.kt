@@ -48,14 +48,16 @@ class TaskFramerTest {
     private suspend fun frameOf(
         task: String,
         candidates: List<FrameCandidates.Candidate>,
-        replies: Map<String, String>
+        replies: Map<String, String>,
+        isChange: Boolean = true
     ): TaskFrame? {
         engine.reply = { messages -> replies[messages.first().text].orEmpty() }
 
         return framer.frameOf(
             task = task,
             candidates = candidates,
-            memory = emptyList()
+            memory = emptyList(),
+            isChange = isChange
         )
     }
 
@@ -145,6 +147,22 @@ class TaskFramerTest {
                 actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.isOpen)
             )
         }
+
+    // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
+    @Test
+    fun `a question about an item marks no entry, as it may add them up`() = runTest {
+        frameOf(
+            task = "when is the appointment?",
+            candidates = listOf(dentist),
+            replies = mapOf(FramePrompts.COUNT to appointment, FramePrompts.PICK to """{"pick":"N1"}"""),
+            isChange = false
+        )
+
+        assertEquals(
+            expected = listOf(FramePrompts.COUNT, FramePrompts.PICK),
+            actual = engine.generated.map { it.first().text }
+        )
+    }
 
     @Test
     fun `the count is asked without notes, and a question about a note asks no entry`() = runTest {

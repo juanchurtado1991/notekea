@@ -80,7 +80,7 @@ class TurnVerifierTest {
             )
         ),
         clock = Clock.System,
-        frames = FrameSource { _, _, _, _, _ -> frames.lastOrNull() }
+        frames = FrameSource { _, _, _, _, _, _ -> frames.lastOrNull() }
     )
 
     // The frame a test gives its turn, as the frame's model would say it; none when a test gives none.

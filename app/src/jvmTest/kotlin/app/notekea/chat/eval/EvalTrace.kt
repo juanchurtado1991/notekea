@@ -48,8 +48,10 @@ internal class EvalTrace(private val engine: LlmEngine) {
 
     /** [source], each frame it builds kept under its task, for the report's frame line. */
     fun framed(source: FrameSource): FrameSource =
-        FrameSource { task, vaultPath, notes, memory, openNote ->
-            source.of(task, vaultPath, notes, memory, openNote)?.also { frames[task] = it }
+        FrameSource { task, vaultPath, notes, memory, openNote, isChange ->
+            source.of(task, vaultPath, notes, memory, openNote, isChange)?.also {
+                frames[task] = it
+            }
         }
 
     /** The frame built for [task], or null when it had none. */

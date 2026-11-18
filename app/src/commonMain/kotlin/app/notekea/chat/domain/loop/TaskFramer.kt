@@ -14,7 +14,8 @@ class TaskFramer(llmEngine: LlmEngine) {
     internal suspend fun frameOf(
         task: String,
         candidates: List<FrameCandidates.Candidate>,
-        memory: List<MemoryLine>
+        memory: List<MemoryLine>,
+        isChange: Boolean = false
     ): TaskFrame? {
         if (candidates.isEmpty()) return null
 
@@ -24,7 +25,7 @@ class TaskFramer(llmEngine: LlmEngine) {
         ) ?: return null
 
         val (targets, reason) = when (reply.count) {
-            FrameCount.ONE -> oneOf(task, reply, candidates, memory)
+            FrameCount.ONE -> oneOf(task, reply.copy(isItem = reply.isItem && isChange), candidates, memory)
 
             FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.let { several ->
                 targetsOf(several) to FrameReason.NONE
@@ -97,7 +98,8 @@ class TaskFramer(llmEngine: LlmEngine) {
         return entriesOf(task, reply, meant, memory, by)
     }
 
-    // The entries of the note meant the task could be about, when its thing is an item and the note has several:
+    // The entries of the note meant a change could be about, when its thing is an item and the note has several
+    // (a question about "the budget" sums its rows: marking them asked on 26 of 319 tasks, the frame alone):
     // one fits, that entry; several, open between them; none, the whole note.
     private suspend fun entriesOf(
         task: String,
