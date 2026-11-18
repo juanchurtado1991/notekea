@@ -51,41 +51,35 @@ class TaskFramerTest {
 
     // docs/loop-goal-plan.md, step 2.2: asked to pick one or say "not said", the model always picked one.
     @Test
-    fun `namesakes are marked and the code counts, both open, one settled, none as if no set`() =
-        runTest {
-            val both = frameOf(
-                task = "what is the total of the budget?",
-                candidates = listOf(home, work),
-                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"yes","N2":"yes"}""")
-            )
+    fun `namesakes are marked and the code counts, one settled and both or none open`() = runTest {
+        val both = frameOf(
+            task = "what is the total of the budget?",
+            candidates = listOf(home, work),
+            replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"yes","N2":"yes"}""")
+        )
 
-            val single = frameOf(
-                task = "what is the total of the budget?",
-                candidates = listOf(home, work),
-                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"no","N2":"yes"}""")
-            )
+        val single = frameOf(
+            task = "what is the total of the budget?",
+            candidates = listOf(home, work),
+            replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"no","N2":"yes"}""")
+        )
 
-            val none = frameOf(
-                task = "what is the total of the budget?",
-                candidates = listOf(home, work),
-                replies = mapOf(
-                    FramePrompts.COUNT to one,
-                    FramePrompts.MARK_NOTES to """{"N1":"no","N2":"no"}""",
-                    FramePrompts.PICK to """{"pick":"N1"}"""
-                )
-            )
+        val none = frameOf(
+            task = "what is the total of the budget?",
+            candidates = listOf(home, work),
+            replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"no","N2":"no"}""")
+        )
 
-            assertEquals(
-                expected = listOf(
-                    listOf(home.path, work.path),
-                    work.path,
-                    FrameReason.MARKS,
-                    home.path,
-                    FrameReason.PICK
-                ),
-                actual = listOf(both?.openNotes, single?.meant, single?.reason, none?.meant, none?.reason)
-            )
-        }
+        assertEquals(
+            expected = listOf(
+                listOf(home.path, work.path),
+                work.path,
+                FrameReason.MARKS,
+                listOf(home.path, work.path)
+            ),
+            actual = listOf(both?.openNotes, single?.meant, single?.reason, none?.openNotes)
+        )
+    }
 
     @Test
     fun `a reply that does not mark every note is no frame`() = runTest {
@@ -102,27 +96,26 @@ class TaskFramerTest {
     }
 
     @Test
-    fun `the entries of an item are marked, two open, one settled, none the whole note`() =
-        runTest {
-            suspend fun marked(marks: String) = frameOf(
-                task = "move the appointment to 11:00",
-                candidates = listOf(dentist),
-                replies = mapOf(
-                    FramePrompts.COUNT to appointment,
-                    FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.MARK_ENTRIES to marks
-                )
+    fun `the entries of an item are marked, one settled and two or none open`() = runTest {
+        suspend fun marked(marks: String) = frameOf(
+            task = "move the appointment to 11:00",
+            candidates = listOf(dentist),
+            replies = mapOf(
+                FramePrompts.COUNT to appointment,
+                FramePrompts.PICK to """{"pick":"N1"}""",
+                FramePrompts.MARK_ENTRIES to marks
             )
+        )
 
-            val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
-            val single = marked(marks = """{"E1":"no","E2":"yes"}""")
-            val none = marked(marks = """{"E1":"no","E2":"no"}""")
+        val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
+        val single = marked(marks = """{"E1":"no","E2":"yes"}""")
+        val none = marked(marks = """{"E1":"no","E2":"no"}""")
 
-            assertEquals(
-                expected = listOf(dentist.entries, dentist.entries[1], FrameReason.ENTRY, false, null),
-                actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.isOpen, none?.entry)
-            )
-        }
+        assertEquals(
+            expected = listOf(dentist.entries, dentist.entries[1], FrameReason.ENTRY, dentist.entries),
+            actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.openEntries)
+        )
+    }
 
     @Test
     fun `the count is asked without notes, and a question about a note asks no entry`() = runTest {

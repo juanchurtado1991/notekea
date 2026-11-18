@@ -6,7 +6,7 @@ import app.notekea.core.memory.domain.MemoryLine
 /**
  * The first step of every turn on notes (`docs/agent-frame.md`). The code finds the sets of notes the task's words
  * fit alike and settles those their names or the memory tell apart; the model marks each of the rest yes or no, and
- * the code counts. Then, for an item inside a note, the same for its entries. Null when nothing is shown or read.
+ * the code counts: one marked is settled, any other count open. Then the same for the entries of an item.
  */
 class TaskFramer(llmEngine: LlmEngine) {
     private val asking = FrameQuestions(llmEngine = llmEngine)
@@ -65,7 +65,9 @@ class TaskFramer(llmEngine: LlmEngine) {
             }
             ?: (emptyList<FrameCandidates.Candidate>() to FrameReason.PICK)
 
-        if (fits.size > 1) return targetsOf(fits) to reason
+        // None marked is no answer either: the 4B marks every one "no" when it cannot tell them apart (the frame
+        // alone, 2026-11-18), so the set stays open, as when several are marked.
+        if (group != null && fits.size != 1) return targetsOf(fits.ifEmpty { group }) to reason
 
         val picked = fits.singleOrNull()
             ?: asking.pickOf(task, candidates, memory)
@@ -83,25 +85,20 @@ class TaskFramer(llmEngine: LlmEngine) {
                 )
         }
 
-        val pickedBy = if (fits.isEmpty()) FrameReason.PICK else reason
-
-        // Marked none of the namesakes: as if there were no set, the note picked.
         val (meant, by) = if (group == null && namesakes.size > 1) {
             val (fitting, said) = fitsOf(task, namesakes, memory) ?: return null
-            if (fitting.size > 1) return targetsOf(fitting) to said
+            if (fitting.size != 1) return targetsOf(fitting.ifEmpty { namesakes }) to said
 
-            fitting.singleOrNull()?.let {
-                it to said
-            } ?: (picked to pickedBy)
+            fitting.single() to said
         } else {
-            picked to pickedBy
+            picked to if (fits.isEmpty()) FrameReason.PICK else reason
         }
 
         return entriesOf(task, reply, meant, memory, by)
     }
 
     // The entries of the note meant the task could be about, when its thing is an item and the note has several:
-    // one fits, that entry; several, open between them; none, the whole note.
+    // one fits, that entry; several or none, open between them.
     private suspend fun entriesOf(
         task: String,
         reply: FrameCountReply,
@@ -109,8 +106,11 @@ class TaskFramer(llmEngine: LlmEngine) {
         memory: List<MemoryLine>,
         reason: FrameReason
     ): Pair<List<FrameTarget>, FrameReason>? {
+        // As for notes, none marked leaves every entry open.
         val entries = if (reply.isItem && meant.entries.size > 1) {
-            asking.markedEntriesOf(task, meant, memory) ?: return null
+            asking
+                .markedEntriesOf(task, meant, memory)
+                ?.ifEmpty { meant.entries } ?: return null
         } else {
             emptyList()
         }
