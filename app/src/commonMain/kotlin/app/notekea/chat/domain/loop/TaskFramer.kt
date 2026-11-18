@@ -4,9 +4,9 @@ import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.memory.domain.MemoryLine
 
 /**
- * The first step of a turn on notes (`docs/agent-frame.md`). The code finds the sets of namesakes the task's words
- * fit ([FrameGroups]); the model answers small choices: how many things, whether the task says which of a set, which
- * note, and for a change which entry. Null when nothing is shown or a reply cannot be read.
+ * The first step of a turn on notes (`docs/agent-frame.md`). The code finds the sets of notes the task's words fit
+ * alike and settles those their names tell apart ([FrameGroups]); the model answers small choices: how many things,
+ * whether the task says which of a set, which note, which entry of it. Null when nothing is shown or read.
  */
 class TaskFramer(llmEngine: LlmEngine) {
     private val asking = FrameQuestions(llmEngine = llmEngine)
@@ -57,7 +57,11 @@ class TaskFramer(llmEngine: LlmEngine) {
             )
             .firstOrNull()
 
-        val said = group?.let { asking.saidOf(task, it, memory) }
+        // The names settle it when only one of the set has a word the task writes; else the model reads the notes.
+        val said = group?.let {
+            FrameGroups.settledOf(task, it) ?: asking.saidOf(task, it, memory)
+        }
+
         if (group != null && said == null) return group.map { FrameTarget(note = it.path) }
 
         val meant = said ?: asking.pickOf(task, candidates, memory) ?: return emptyList()
