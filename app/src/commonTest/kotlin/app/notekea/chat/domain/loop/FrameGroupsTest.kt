@@ -47,7 +47,7 @@ class FrameGroupsTest {
 
     // The frame alone, 2026-11-18: "the food in the Azores" was open between two notes named Food.
     @Test
-    fun `notes sharing one word of several the names write are no set, and one name writing them all is one`() {
+    fun `notes sharing one word of several the names write are no set alone, and one name writing them all is one`() {
         val bank = candidate(path = "Hobbies/Food bank shifts.md")
         val vocabulary = candidate(path = "Japanese/Vocabulary - Food.md")
         val azores = candidate(path = "Travel/Azores trip.md")
@@ -63,9 +63,18 @@ class FrameGroupsTest {
             candidates = listOf(bank, vocabulary, azores, azoresFood)
         )
 
+        val told = FrameGroups.toldOf(
+            task = "the food in the azores",
+            group = none.single()
+        )
+
         assertEquals(
-            expected = listOf(emptyList(), listOf(listOf(azoresFood))),
-            actual = listOf(none, named)
+            expected = listOf(
+                listOf(listOf(bank, vocabulary, azores)),
+                listOf(azores),
+                listOf(listOf(azoresFood))
+            ),
+            actual = listOf(none, told, named)
         )
     }
 

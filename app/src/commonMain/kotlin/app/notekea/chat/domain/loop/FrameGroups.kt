@@ -7,9 +7,9 @@ package app.notekea.chat.domain.loop
  */
 internal object FrameGroups {
     /**
-     * The one set, or none. Notes sharing one word of several the names write are no set: "the food in the Azores"
-     * was open between Food bank shifts and Vocabulary - Food while it meant the Azores trip (the frame alone,
-     * 2026-11-18). One name writing them all, among others writing some, is a set of one: that note.
+     * The one set, or none: the notes whose names write every word of the task the names write, or, when none does,
+     * those that write any. Notes sharing one word of several are not the set alone: "the food in the Azores" was
+     * open between Food bank shifts and Vocabulary - Food while it meant the Azores trip (the frame alone, 2026-11-18).
      */
     fun of(
         task: String,
@@ -29,8 +29,10 @@ internal object FrameGroups {
             named.all { isNamed(candidate, it) }
         }
 
-        // One name writing them all among others writing some is that note, as its name settles a set.
-        return listOf(full).filter {
+        // One name writing them all among others writing some is that note, as its name settles a set. None writing
+        // them all leaves every note that writes one: "cuánto le pago a Luis por turno?" is two Luis and Turnos
+        // semana 46, and what the notes write tells them apart (the frame alone, 2026-11-18).
+        return listOf(full.ifEmpty { holding }).filter {
             holding.size >= 2 && it.size in 1..MOST
         }
     }
