@@ -26,15 +26,18 @@ expressions: `AmbiguousTask`, `SingularTask`, `ToldApart`, `SharedNames`, `Memor
    That is at most 14 notes. Inside each note, the entries the task's words touch are shown too: list items, tasks
    and table rows, by a word of their own or by the heading of their section. Words are matched by their stem (four
    letters or more, or three with a capital for names). No word list says what the task means.
-2. **The model says what the task means** (`TaskFramer`). It answers in one call under a JSON grammar that can only
-   name the candidates, by number:
-   - `notes`: every shown note the task could mean;
-   - `entries`: every shown entry it could mean;
-   - `count`: one, several, every or none;
-   - `words`: the task's own words for the thing.
+2. **The model says what the task means** (`TaskFramer`, `FrameQuestions`), in small questions under grammars that
+   name only what it was shown:
+   - **How many?** Asked from the task's words and the memory alone, with no notes shown: one, several, every or
+     none, and the task's own words for the thing.
+   - **Which one?** Asked when the task means one thing. The answer is the note it means, or "unclear" with every
+     note its words fit equally. Inside that note, the entry it means: one, "unclear" with the entries that fit,
+     or "none" for the whole note.
+   - **Which ones?** Asked when the task means several: the notes it names.
 
-   The prompt asks for every note and entry that fits, not the likeliest one. A reply that cannot be read is no
-   frame.
+   A reply that cannot be read is no frame. The first design asked everything in one call: the 4B said "several"
+   for "Laura Castro's email" and listed every note it saw, and the tuned tasks that ask back fell from 24 of 24 to
+   10. Measured on 2026-11-17 with the unseen set only, which is tuned, before any blind set.
 3. **The code holds the turn to it** (`TaskFrame`). What it does depends on what the frame says:
 
    | Frame | What the loop does |
