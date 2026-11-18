@@ -494,6 +494,8 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s27-whole` | `4861c042` | 2.3, the note whose whole name the task writes settles its set, level 1 | dev 28 / 12; tuned 8 / 4 | | | | | yes |
 | 2026-11-18 | `s28-any` | `091f37aa` | 2.3, no name writing every word: the notes writing any, level 1 | dev 29 / 16; tuned 8 / 4 | | | | | no, reverted |
 | 2026-11-18 | `s29-every` | `57af56c9` | 2.2, entries marked yes for every one that could fit (prompt), level 1 | dev 26 / 22; tuned 8 / 5 | | | | | no, reverted |
+| 2026-11-18 | `s30-dev` | `6003e12c` | 2.2 and 2.3 kept so far (s24 to s27), level 3 | | 290 of 393 (74 %, was 275): asked missed 10 won 2 lost, needless ask 9 won 4 lost | | | | yes |
+| 2026-11-18 | `s30-tuned` | `6003e12c` | the same, level 4 | | | 220 of 259 (85 %, was 213; fresh 55, was 53) | | | yes |
 
 Notes as the plan is carried out:
 
