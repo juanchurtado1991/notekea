@@ -21,7 +21,9 @@ class FrameGroupsTest {
     private val home = candidate(path = "Home/Budget 2026.md")
     private val work = candidate(path = "Work/Budget 2026.md")
 
-    private val shown = listOf(castro, mendez, contacts, home, work)
+    private val dune = candidate(path = "Books/Dune.md")
+    private val habits = candidate(path = "Books/Atomic Habits.md")
+    private val shown = listOf(castro, mendez, contacts, home, work, dune, habits)
 
     @Test
     fun `the notes whose names share a word the task writes are a set`() {
@@ -39,6 +41,18 @@ class FrameGroupsTest {
                     task = "what is the total of the budget?",
                     candidates = shown
                 )
+            )
+        )
+    }
+
+    // The loop's run of 2026-11-17: "the books budget" was a set of every note in Books.
+    @Test
+    fun `a folder's word makes no set`() {
+        assertEquals(
+            expected = listOf(listOf(home, work)),
+            actual = FrameGroups.of(
+                task = "how much of the books budget is still unspent?",
+                candidates = shown
             )
         )
     }

@@ -1,9 +1,9 @@
 package app.notekea.chat.domain.loop
 
 /**
- * The sets of shown notes a task's words fit alike (`docs/agent-frame.md`): the notes whose names share a word the
- * task writes (two Budget 2026, two Lauras, three supplier meetings). Found by the vault's own names, never by a list
- * of words; a set the names alone tell apart is settled by them ([settledOf]), and the model is asked of the rest.
+ * The sets of shown notes a task's words fit alike (`docs/agent-frame.md`): those whose names, not folders, share a
+ * word the task writes (two Budget 2026, two Lauras). Found by the vault's own names, never a list of words; a set
+ * the names alone tell apart is settled by them ([settledOf]), and the model is asked of the rest.
  */
 internal object FrameGroups {
     fun of(
@@ -16,7 +16,7 @@ internal object FrameGroups {
         }
         .map { word ->
             candidates.filter { candidate ->
-                titleOf(candidate = candidate).any {
+                nameOf(candidate = candidate).any {
                     FrameWords.isSame(
                         one = it,
                         other = word
@@ -59,6 +59,11 @@ internal object FrameGroups {
 
         return named.singleOrNull()
     }
+
+    // The words of a note's name: what a set is made by. A folder's words made "the books budget" a set of every note
+    // in Books (the loop's run of 2026-11-17).
+    private fun nameOf(candidate: FrameCandidates.Candidate): Set<String> =
+        FrameWords.of(text = candidate.path.nameWithoutExtension)
 
     // The words of a note's path: its name and its folders, which tell Home/Budget from Work/Budget.
     private fun titleOf(candidate: FrameCandidates.Candidate): Set<String> = FrameWords.of(
