@@ -222,6 +222,25 @@ third (all of them) were graded side by side, by one standard, strict on links: 
   page as a note" asks whether the page alone or its section, as decided; the 2B answers questions with a
   multiple-choice question back, and keeps the old agent.
 
+### How to run and grade it
+
+1. **Run it** (one Gradle build at a time; never while a loop measurement runs):
+   ```bash
+   ./gradlew :app:chatModelTest --rerun --console=plain --tests "*WebEvalChatModelTest*" \
+     -PchatModels=<models folder> -PchatSize=medium -PwebPages=<pages folder>
+   ```
+   - `-PchatSize`: `medium` (4B) or `large` (9B).
+   - `-PwebPages`: a folder outside the repository, where every search and page is kept (other people's text).
+   - `-PwebReplay=true`: runs again from the pages kept, with no network, so a change is compared on the same pages.
+   - `-PchatTasks=<words>,<words>`: only the tasks whose text holds one of them.
+2. **Read the report**, `app/build/reports/web-eval-<size>.md`: for each task its kind, its rubric, every turn
+   with its searches and pages, and the whole end. Its first line counts only what the run can tell (ended,
+   searched, seconds a task).
+3. **Grade each task against its rubric:** 1 a pass, ½ right but without links or one part of two, 0 otherwise.
+   Strict on links: a site or "page 1" named without its address is ½ at most.
+4. **Write the grades** by kind in a table like the ones above, with the date, the commit and the model, and the
+   failures by cause, never only the total.
+
 ## The steps
 
 They follow the memory's three (`docs/agent-memory.md`).
