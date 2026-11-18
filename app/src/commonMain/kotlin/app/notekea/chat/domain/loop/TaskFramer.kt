@@ -24,33 +24,34 @@ class TaskFramer(llmEngine: LlmEngine) {
             memory = memory
         ) ?: return null
 
-        val targets = when (count) {
+        val (targets, reason) = when (count) {
             FrameCount.ONE -> oneOf(task, words, candidates, memory, isChange)
 
-            FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.map {
-                FrameTarget(note = it.path)
+            FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.let { several ->
+                several.map { FrameTarget(note = it.path) } to FrameReason.NONE
             }
 
-            else -> emptyList()
+            else -> emptyList<FrameTarget>() to FrameReason.NONE
         } ?: return null
 
         return TaskFrame(
             targets = targets,
             count = count,
             candidates = candidates.map { it.path },
-            words = words
+            words = words,
+            reason = reason
         )
     }
 
     // A set of namesakes the task does not say which of is open; else the note meant, and for a change the entries
-    // of it the task could mean.
+    // of it the task could mean. With what settled it, or left it open.
     private suspend fun oneOf(
         task: String,
         words: String,
         candidates: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>,
         isChange: Boolean
-    ): List<FrameTarget>? {
+    ): Pair<List<FrameTarget>, FrameReason>? {
         // The set is made by the task's own words for its thing, not every word it writes: in "a property budget on
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
         val group = FrameGroups
@@ -60,14 +61,13 @@ class TaskFramer(llmEngine: LlmEngine) {
             )
             .firstOrNull()
 
-        // The names settle it when only one of the set has a word the task writes; else the model reads the notes.
-        val said = group?.let {
-            FrameGroups.settledOf(task, it) ?: asking.saidOf(task, it, memory)
-        }
+        val said = group?.let { settledOf(task, it, memory) }
 
-        if (group != null && said == null) return group.map { FrameTarget(note = it.path) }
+        if (group != null && said?.first == null) return targetsOf(group) to FrameReason.SAID
 
-        val picked = said ?: asking.pickOf(task, candidates, memory) ?: return emptyList()
+        val picked = said?.first
+            ?: asking.pickOf(task, candidates, memory)
+            ?: return emptyList<FrameTarget>() to FrameReason.PICK
 
         // The note picked has namesakes the task's words did not find, in another language ("el presupuesto" for two
         // Budget 2026): the same question, whether the task says which.
@@ -83,11 +83,13 @@ class TaskFramer(llmEngine: LlmEngine) {
 
         val isUnasked = said == null && namesakes.size > 1
 
-        val meant = if (isUnasked) {
-            FrameGroups.settledOf(task, namesakes) ?: asking.saidOf(task, namesakes, memory)
+        val (meant, reason) = if (isUnasked) {
+            settledOf(task, namesakes, memory)
         } else {
-            picked
-        } ?: return namesakes.map { FrameTarget(note = it.path) }
+            picked to (said?.second ?: FrameReason.PICK)
+        }
+
+        meant ?: return targetsOf(namesakes) to FrameReason.SAID
 
         val entries = if (isChange && meant.entries.size > 1) {
             asking.entriesOf(task, meant, memory)
@@ -95,11 +97,32 @@ class TaskFramer(llmEngine: LlmEngine) {
             emptyList()
         }
 
-        return listOf(
-            FrameTarget(
-                note = meant.path,
-                entries = entries
-            )
+        val target = FrameTarget(
+            note = meant.path,
+            entries = entries
         )
+
+        return listOf(target) to if (entries.isEmpty()) reason else FrameReason.ENTRY
+    }
+
+    private fun targetsOf(group: List<FrameCandidates.Candidate>): List<FrameTarget> =
+        group.map { FrameTarget(note = it.path) }
+
+    // Which of a set the task means: its own words first ("Laura Castro's email"), then the memory ("Laura" is
+    // [[Laura Castro]]), both by the code; only then the model, which lost the memory's say (the run of 2026-11-17).
+    private suspend fun settledOf(
+        task: String,
+        group: List<FrameCandidates.Candidate>,
+        memory: List<MemoryLine>
+    ): Pair<FrameCandidates.Candidate?, FrameReason> {
+        FrameGroups.settledOf(task, group)?.let {
+            return it to FrameReason.NAMES
+        }
+
+        FrameMemory.settledOf(task, group, memory)?.let {
+            return it to FrameReason.MEMORY
+        }
+
+        return asking.saidOf(task, group, memory) to FrameReason.SAID
     }
 }

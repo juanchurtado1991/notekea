@@ -57,6 +57,21 @@ class FrameGroupsTest {
         )
     }
 
+    // The loop's run of 2026-11-17: "move the project to Archive" moved one of two projects without asking.
+    @Test
+    fun `a word no name has makes a set of the folder that has it`() {
+        val greenhouse = candidate(path = "Projects/Greenhouse.md")
+        val orchard = candidate(path = "Projects/Orchard.md")
+
+        assertEquals(
+            expected = listOf(listOf(greenhouse, orchard)),
+            actual = FrameGroups.of(
+                task = "the project",
+                candidates = shown + greenhouse + orchard
+            )
+        )
+    }
+
     @Test
     fun `a word of one name or folder the task writes settles the set, and none leaves it to the notes`() {
         assertEquals(

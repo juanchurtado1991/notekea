@@ -5,13 +5,14 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What a task is about (`docs/agent-frame.md`): every note, and entry inside one, of those shown ([candidates]) the
- * task's words fit, and how many it means ([count]). One meant and several fitting is open: the person is asked.
+ * task's words fit, how many it means ([count]) and what settled it ([reason]). One meant and several fitting is open.
  */
 data class TaskFrame(
     val targets: List<FrameTarget>,
     val count: FrameCount,
     val candidates: List<RelativePath>,
-    val words: String? = null
+    val words: String? = null,
+    val reason: FrameReason = FrameReason.NONE
 ) {
     val notes: List<RelativePath> = targets.map { it.note }.distinct()
 
