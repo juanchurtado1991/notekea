@@ -64,7 +64,27 @@ class TaskFramer(llmEngine: LlmEngine) {
 
         if (group != null && said == null) return group.map { FrameTarget(note = it.path) }
 
-        val meant = said ?: asking.pickOf(task, candidates, memory) ?: return emptyList()
+        val picked = said ?: asking.pickOf(task, candidates, memory) ?: return emptyList()
+
+        // The note picked has namesakes the task's words did not find, in another language ("el presupuesto" for two
+        // Budget 2026): the same question, whether the task says which.
+        val namesakes = candidates.filter {
+            it
+                .path
+                .nameWithoutExtension
+                .equals(
+                    other = picked.path.nameWithoutExtension,
+                    ignoreCase = true
+                )
+        }
+
+        val isUnasked = said == null && namesakes.size > 1
+
+        val meant = if (isUnasked) {
+            FrameGroups.settledOf(task, namesakes) ?: asking.saidOf(task, namesakes, memory)
+        } else {
+            picked
+        } ?: return namesakes.map { FrameTarget(note = it.path) }
 
         val entries = if (isChange && meant.entries.size > 1) {
             asking.entriesOf(task, meant, memory)
