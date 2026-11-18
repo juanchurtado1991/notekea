@@ -32,6 +32,7 @@ class TaskFramerTest {
         words = setOf("servers")
     )
     private val worded = "the budget for the kitchen servers"
+    private val wordedOne = """{"count":"one","words":"$worded","thing":"note"}"""
 
     private fun candidate(
         path: String,
@@ -77,7 +78,9 @@ class TaskFramerTest {
             val told = frameOf(
                 task = "what is the total of the kitchen budget?",
                 candidates = listOf(kitchen, work),
-                replies = mapOf(FramePrompts.COUNT to one)
+                replies = mapOf(
+                    FramePrompts.COUNT to """{"count":"one","words":"the kitchen budget","thing":"note"}"""
+                )
             )
 
             assertEquals(
@@ -91,6 +94,22 @@ class TaskFramerTest {
             )
         }
 
+    // The frame alone, 2026-11-18: "add a task in Tom's note: call him about the March trip" was told apart by the
+    // one Tom whose note writes March, a word of what to add, not of which note.
+    @Test
+    fun `only the task's words for its thing tell namesakes apart`() = runTest {
+        val frame = frameOf(
+            task = "add a task to the budget: ask about the kitchen",
+            candidates = listOf(kitchen, work),
+            replies = mapOf(FramePrompts.COUNT to one)
+        )
+
+        assertEquals(
+            expected = listOf(home.path, work.path),
+            actual = frame?.openNotes
+        )
+    }
+
     // docs/loop-goal-plan.md, step 2.2: asked to pick one or say "not said", the model always picked one.
     @Test
     fun `namesakes with words of their own are marked and the code counts, one settled, both or none open`() =
@@ -98,7 +117,7 @@ class TaskFramerTest {
             suspend fun marked(marks: String) = frameOf(
                 task = worded,
                 candidates = listOf(kitchen, servers),
-                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to marks)
+                replies = mapOf(FramePrompts.COUNT to wordedOne, FramePrompts.MARK_NOTES to marks)
             )
 
             val both = marked(marks = """{"N1":"yes","N2":"yes"}""")
@@ -121,7 +140,10 @@ class TaskFramerTest {
         val frame = frameOf(
             task = worded,
             candidates = listOf(kitchen, servers),
-            replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"yes"}""")
+            replies = mapOf(
+                FramePrompts.COUNT to wordedOne,
+                FramePrompts.MARK_NOTES to """{"N1":"yes"}"""
+            )
         )
 
         assertEquals(

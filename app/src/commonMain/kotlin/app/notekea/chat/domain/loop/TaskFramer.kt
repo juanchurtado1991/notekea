@@ -56,16 +56,18 @@ class TaskFramer(llmEngine: LlmEngine) {
     ): Pair<List<FrameTarget>, FrameReason>? {
         // The set is made by the task's own words for its thing, not every word it writes: in "a property budget on
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
+        val words = reply.words.ifBlank { task }
+
         val group = FrameGroups
             .of(
-                task = reply.words.ifBlank { task },
+                task = words,
                 candidates = candidates
             )
             .firstOrNull()
 
         val (fits, reason) = group
             ?.let {
-                fitsOf(task, it, memory) ?: return null
+                fitsOf(task, words, it, memory) ?: return null
             }
             ?: (emptyList<FrameCandidates.Candidate>() to FrameReason.PICK)
 
@@ -90,7 +92,7 @@ class TaskFramer(llmEngine: LlmEngine) {
         }
 
         val (meant, by) = if (group == null && namesakes.size > 1) {
-            val (fitting, said) = fitsOf(task, namesakes, memory) ?: return null
+            val (fitting, said) = fitsOf(task, words, namesakes, memory) ?: return null
             if (fitting.size != 1) return targetsOf(fitting.ifEmpty { namesakes }) to said
 
             fitting.single() to said
@@ -131,6 +133,7 @@ class TaskFramer(llmEngine: LlmEngine) {
     // [[Laura Castro]]), both by the code; only then the model's marks. Null when the marks cannot be read.
     private suspend fun fitsOf(
         task: String,
+        words: String,
         group: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>
     ): Pair<List<FrameCandidates.Candidate>, FrameReason>? {
@@ -144,8 +147,9 @@ class TaskFramer(llmEngine: LlmEngine) {
 
         // Then the words only one note writes, by the code; none is nothing to tell them apart by. Only when
         // several notes write words of their own is the model asked: the 4B marked one note of two Lauras "yes"
-        // with nothing to tell them apart (the frame alone, 2026-11-18).
-        val told = FrameGroups.toldOf(task, group)
+        // with nothing to tell them apart (the frame alone, 2026-11-18). Only the task's words for its thing tell
+        // them apart: "call him about the March trip" told one of two Toms by a note that writes March.
+        val told = FrameGroups.toldOf(words, group)
         if (told.size < 2) return told.ifEmpty { group } to FrameReason.WORDS
 
         return asking.markedNotesOf(task, told, memory)?.let {
