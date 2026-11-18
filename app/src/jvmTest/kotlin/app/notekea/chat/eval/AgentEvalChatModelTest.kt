@@ -15,6 +15,7 @@ import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
 import app.notekea.chat.domain.skill.VaultGuide
+import app.notekea.chat.eval.blind.BlindExams
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
@@ -254,6 +255,16 @@ class AgentEvalChatModelTest {
         )
 
         Unit
+    }
+
+    // docs/eval-blind.md: nine more vaults written blind, measured before and after a change to the loop only.
+    @Test
+    fun `blind exams on nine vaults the loop was never tuned on`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        BlindExams.all.forEach { exam ->
+            measured(exam.vault, exam.cases.map { it.forLoop() }, "blind-${exam.id}", isLoop = true)
+        }
     }
 
     /** The share of [cases] done right on [vault], and the report written to `build/reports/[name]-<size>.md`. */
