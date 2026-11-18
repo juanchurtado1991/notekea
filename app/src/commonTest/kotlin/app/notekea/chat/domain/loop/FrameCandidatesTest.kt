@@ -92,4 +92,23 @@ class FrameCandidatesTest {
             )
         )
     }
+
+    // The frame alone, 2026-11-18: "my physio appointment" touched one session of two, which settled it.
+    @Test
+    fun `fewer than two entries touched shows every entry, for the model to mark`() {
+        val text = """
+            # Physio
+            ## Sessions
+            - 2026-11-13 07:30 strength progression
+            - 2026-11-20 07:30 physio review
+        """.trimIndent()
+
+        assertEquals(
+            expected = listOf("- 2026-11-13 07:30 strength progression", "- 2026-11-20 07:30 physio review"),
+            actual = FrameCandidates.entriesOf(
+                task = "move my physio appointment to 8:00",
+                text = text
+            )
+        )
+    }
 }

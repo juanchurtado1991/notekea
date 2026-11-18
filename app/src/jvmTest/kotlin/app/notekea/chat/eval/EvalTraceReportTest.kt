@@ -137,7 +137,7 @@ class EvalTraceReportTest {
                 messages = listOf(
                     ChatMessage(
                         role = ChatRole.SYSTEM,
-                        text = FramePrompts.SAID
+                        text = FramePrompts.MARK_NOTES
                     ),
                     ChatMessage(
                         role = ChatRole.USER,
@@ -168,13 +168,13 @@ class EvalTraceReportTest {
 
         val open = settled.copy(
             targets = listOf(FrameTarget(note = home), FrameTarget(note = work)),
-            reason = FrameReason.SAID
+            reason = FrameReason.MARKS
         )
 
         assertEquals(
             expected = listOf(
                 "one, settled by memory: Work/Budget",
-                "one, open between: Home/Budget; Work/Budget (by said)"
+                "one, open between: Home/Budget; Work/Budget (by marks)"
             ),
             actual = listOf(settled, open).map { EvalTraceReport.frameOf(frame = it) }
         )

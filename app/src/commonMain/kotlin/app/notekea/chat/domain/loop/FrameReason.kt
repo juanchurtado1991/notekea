@@ -8,13 +8,13 @@ enum class FrameReason {
     /** The code: a line of the person's memory names one note of the set ("Laura" is [[Laura Castro]]). */
     MEMORY,
 
-    /** The model, asked whether the task says which note of a set it means. */
-    SAID,
+    /** The model, which marked each note of a set yes or no, and the code, which counted the marks. */
+    MARKS,
 
     /** The model, asked which shown note the task is about, when no set fits its words. */
     PICK,
 
-    /** The model, asked which entry of the note a change is about. */
+    /** The model, which marked each entry of the note yes or no, and the code, which counted the marks. */
     ENTRY,
 
     /** Nothing was settled: the task means several things, every one, or none. */

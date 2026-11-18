@@ -51,7 +51,7 @@ class FrameTurnTest {
             composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader())
         ),
         clock = Clock.System,
-        frames = FrameSource { _, _, _, _, _, _ -> frame }
+        frames = FrameSource { _, _, _, _, _ -> frame }
     )
 
     // The model's first call is [first]; once the loop has told it anything, its next one is [then].

@@ -1,24 +1,14 @@
 package app.notekea.chat.domain.loop
 
 /**
- * The sets of shown notes a task's words fit alike (`docs/agent-frame.md`): those whose names share a word the task
- * writes (two Budget 2026, two Lauras), else whose folder does. Found by the vault's own names, never a word list;
- * a set the names alone tell apart is settled by them ([settledOf]), and the model is asked of the rest.
+ * The sets of shown notes a task's words fit alike (`docs/agent-frame.md`): those whose names, not folders, share a
+ * word the task writes (two Budget 2026, two Lauras). Found by the vault's own names, never a list of words; a set
+ * the names alone tell apart is settled by them ([settledOf]), and the model is asked of the rest.
  */
 internal object FrameGroups {
     fun of(
         task: String,
         candidates: List<FrameCandidates.Candidate>
-    ): List<List<FrameCandidates.Candidate>> = groupsOf(task, candidates, ::nameOf).ifEmpty {
-        // A word no name has but a folder does names a kind: "the project" with Projects/Greenhouse and
-        // Projects/Orchard (the loop's run of 2026-11-17). Only then: in "the books budget" the names say budget.
-        groupsOf(task, candidates, ::folderOf)
-    }
-
-    private fun groupsOf(
-        task: String,
-        candidates: List<FrameCandidates.Candidate>,
-        wordsOf: (FrameCandidates.Candidate) -> Set<String>
     ): List<List<FrameCandidates.Candidate>> = FrameWords
         .of(text = task)
         .filter { word ->
@@ -26,7 +16,7 @@ internal object FrameGroups {
         }
         .map { word ->
             candidates.filter { candidate ->
-                wordsOf(candidate).any {
+                nameOf(candidate = candidate).any {
                     FrameWords.isSame(
                         one = it,
                         other = word
@@ -47,7 +37,8 @@ internal object FrameGroups {
         task: String,
         group: List<FrameCandidates.Candidate>
     ): FrameCandidates.Candidate? {
-        val words = FrameWords.of(text = task)
+        // A number of a name is a word of it too: "ADR-015", "sprint 47", "chapter 2" (the frame alone, 2026-11-18).
+        val words = FrameWords.of(text = task) + FrameWords.numbersOf(text = task)
 
         val named = group.filter { candidate ->
             val others = group
@@ -75,24 +66,15 @@ internal object FrameGroups {
     private fun nameOf(candidate: FrameCandidates.Candidate): Set<String> =
         FrameWords.of(text = candidate.path.nameWithoutExtension)
 
-    // The words of a note's folders, the kind of thing it is.
-    private fun folderOf(candidate: FrameCandidates.Candidate): Set<String> = FrameWords.of(
-        text = candidate
-            .path
-            .value
-            .substringBeforeLast(
-                delimiter = '/',
-                missingDelimiterValue = ""
-            )
-    )
-
-    // The words of a note's path: its name and its folders, which tell Home/Budget from Work/Budget.
-    private fun titleOf(candidate: FrameCandidates.Candidate): Set<String> = FrameWords.of(
-        text = candidate
+    // The words and numbers of a note's path: its name and its folders, which tell Home/Budget from Work/Budget.
+    private fun titleOf(candidate: FrameCandidates.Candidate): Set<String> {
+        val title = candidate
             .path
             .value
             .removeSuffix(suffix = ".md")
-    )
+
+        return FrameWords.of(text = title) + FrameWords.numbersOf(text = title)
+    }
 
     private const val MOST = 6
 }

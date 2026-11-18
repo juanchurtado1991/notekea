@@ -455,6 +455,9 @@ One row for each measurement. Keep it short.
 |---|---|---|---|---|---|---|---|---|---|
 | 2026-11-17 | `baseline` | `6aea8474` | | | 261 of 393 | 228 of 259 | | | |
 | 2026-11-17 | `frame` | `9d319805` | foundations, first run | | 258 of 393 (9B: 282) | 198 of 259 (9B: 201) | | | |
+| 2026-11-18 | `s0-fixes` | `8517111f` | 0.4, memory and folder fixes, fair check | | | 213 of 259 (82 %; fresh 52) | | | yes |
+| 2026-11-18 | `s0-again` | `8517111f` | 0.4, the same commit again: **noise** | | | 209 of 259 (fresh 54) | | | |
+| 2026-11-18 | `s1-frame` | `8517111f` | 1.2, the frame alone, first numbers | dev 37 of 74 / 52 of 319 (9B 32 / 41); tuned 8 of 29 / 10 of 126 (9B 10 / 10) | | | | | |
 
 Notes as the plan is carried out:
 
@@ -463,3 +466,14 @@ Notes as the plan is carried out:
   uncommitted notes in `smoke-data/vaults/Sample Vault` (42 notes, not 40), which are never committed. The commits
   of this plan are made with `--no-verify` after running the tests by hand; every other test passes.
   `SmokeCasesConsistencyTest` of `:auto-test` already failed at `9d319805`, before this plan.
+- **The noise (step 0.4):** two runs of `8517111f` on the 4B differ in 6 of 336 tasks (4 tuned, all lost; 2 fresh,
+  both won), though the loop runs at temperature 0: four slots answer in parallel, and llama.cpp's batches are not
+  bit-for-bit the same. Scaled to a pool sample of 440 tasks that is about 8, so **a change must win at least 16
+  tasks on a pool sample** (twice the noise) to stay.
+- **The frame alone, first numbers (step 1.2):** on the development exams the 4B misses 50 % of the tasks that must
+  ask and raises 16 % false alarms (the 9B 43 % and 12 %). Every false alarm is a set opened by the `SAID` question,
+  and among them: names told apart only by a number ("ADR-015", "sprint 47", "chapter 2"), and sets made by the
+  folder fallback ("food truck", "eventos"), so the fallback goes. The misses are mostly one entry of several:
+  entries were asked only for changes, and only those the task's words touched.
+- The reference (step 1.4) is run after step 2's first changes, not before: it takes seven hours with no Gradle
+  meanwhile, and the frame alone needs Gradle every few minutes.

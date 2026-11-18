@@ -2,7 +2,7 @@ package app.notekea.chat.domain.loop
 
 /**
  * What the frame's model is shown for one question, by number (N1, N2… for notes, E1, E2… for the entries of one),
- * the grammar that lets it name only those or one of [extra], and its pick read back (`docs/agent-frame.md`).
+ * the grammar that lets it name only those or one of [extra], or mark each yes or no, and its reply read back.
  */
 internal class FrameShown(
     private val notes: List<FrameCandidates.Candidate>,
@@ -30,6 +30,40 @@ internal class FrameShown(
         return "{\"type\":\"object\",\"properties\":{\"$PICK\":{\"enum\":[$all]}},\"required\":[\"$PICK\"]}"
     }
 
+    /** One "yes" or "no" for every id shown, each required (`docs/loop-goal-plan.md`, step 2.2). */
+    fun marksSchema(): String {
+        val ids = if (entries.isEmpty()) {
+            idsOf(
+                prefix = NOTE_ID,
+                size = notes.size
+            )
+        } else {
+            idsOf(
+                prefix = ENTRY_ID,
+                size = entries.size
+            )
+        }
+
+        val mark = "{\"enum\":[\"${FramePrompts.YES}\",\"${FramePrompts.NO}\"]}"
+        val properties = ids.joinToString(separator = ",") { "$it:$mark" }
+
+        return "{\"type\":\"object\",\"properties\":{$properties},\"required\":[${ids.joinToString(separator = ",")}]}"
+    }
+
+    /** The notes marked "yes"; null when a note shown has no mark, as a reply cut short has none. */
+    fun markedNotesOf(fields: Map<String, String>): List<FrameCandidates.Candidate>? = markedOf(
+        fields = fields,
+        prefix = NOTE_ID,
+        items = notes
+    )
+
+    /** The entries marked "yes"; null when an entry shown has no mark. */
+    fun markedEntriesOf(fields: Map<String, String>): List<String>? = markedOf(
+        fields = fields,
+        prefix = ENTRY_ID,
+        items = entries
+    )
+
     /** Several notes, as a list: every one the task names. */
     fun listSchema(): String {
         val ids = idsOf(
@@ -47,17 +81,6 @@ internal class FrameShown(
         prefix = NOTE_ID
     )?.let { notes.getOrNull(index = it) }
 
-    /** The entry picked; null for one of [extra] or a reply that names none. */
-    fun entryOf(fields: Map<String, String>): String? = indexOf(
-        id = fields[PICK].orEmpty(),
-        prefix = ENTRY_ID
-    )?.let { entries.getOrNull(index = it) }
-
-    /** Which of [extra] was picked, if one was. */
-    fun extraOf(fields: Map<String, String>): String? = fields[PICK]?.takeIf {
-        it in extra
-    }
-
     fun notesOf(fields: Map<String, String>): List<FrameCandidates.Candidate> = fields[PICKS]
         .orEmpty()
         .lines()
@@ -68,6 +91,22 @@ internal class FrameShown(
             )?.let { notes.getOrNull(index = it) }
         }
         .distinct()
+
+    private fun <T> markedOf(
+        fields: Map<String, String>,
+        prefix: String,
+        items: List<T>
+    ): List<T>? {
+        val marks = items.indices.map {
+            fields["$prefix${it + 1}"]
+        }
+
+        if (marks.any { it != FramePrompts.YES && it != FramePrompts.NO }) return null
+
+        return items.filterIndexed { at, _ ->
+            marks[at] == FramePrompts.YES
+        }
+    }
 
     private fun notesText(): String = "Notes:\n" + notes
         .mapIndexed { at, note ->

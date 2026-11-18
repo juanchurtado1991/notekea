@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 
 /**
  * The frame's small questions (`docs/agent-frame.md`): the code finds the namesakes a task's words fit, the model
- * only says whether the task says which; for a change, which entry of the note; each named by number under a grammar.
+ * marks each yes or no and the code counts; for an item inside a note, the same for its entries.
  */
 class TaskFramerTest {
     private val engine = FakeLlmEngine()
@@ -35,59 +35,92 @@ class TaskFramerTest {
     private suspend fun frameOf(
         task: String,
         candidates: List<FrameCandidates.Candidate>,
-        replies: Map<String, String>,
-        isChange: Boolean = false
+        replies: Map<String, String>
     ): TaskFrame? {
         engine.reply = { messages -> replies[messages.first().text].orEmpty() }
 
         return framer.frameOf(
             task = task,
             candidates = candidates,
-            memory = emptyList(),
-            isChange = isChange
+            memory = emptyList()
         )
     }
 
-    private val one = """{"count":"one","words":"the budget"}"""
+    private val one = """{"count":"one","words":"the budget","thing":"note"}"""
+    private val appointment = """{"count":"one","words":"the appointment","thing":"item"}"""
 
+    // docs/loop-goal-plan.md, step 2.2: asked to pick one or say "not said", the model always picked one.
     @Test
-    fun `namesakes the task does not say which of are open, and one it says is settled`() =
+    fun `namesakes are marked and the code counts, both open, one settled, none as if no set`() =
         runTest {
-            val open = frameOf(
+            val both = frameOf(
                 task = "what is the total of the budget?",
                 candidates = listOf(home, work),
-                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.SAID to """{"pick":"not said"}""")
+                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"yes","N2":"yes"}""")
             )
 
-            val said = frameOf(
-                task = "what is the total of the work budget?",
+            val single = frameOf(
+                task = "what is the total of the budget?",
                 candidates = listOf(home, work),
-                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.SAID to """{"pick":"N2"}""")
+                replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"no","N2":"yes"}""")
+            )
+
+            val none = frameOf(
+                task = "what is the total of the budget?",
+                candidates = listOf(home, work),
+                replies = mapOf(
+                    FramePrompts.COUNT to one,
+                    FramePrompts.MARK_NOTES to """{"N1":"no","N2":"no"}""",
+                    FramePrompts.PICK to """{"pick":"N1"}"""
+                )
             )
 
             assertEquals(
-                expected = listOf(listOf(home.path, work.path), work.path),
-                actual = listOf(open?.openNotes, said?.meant)
+                expected = listOf(
+                    listOf(home.path, work.path),
+                    work.path,
+                    FrameReason.MARKS,
+                    home.path,
+                    FrameReason.PICK
+                ),
+                actual = listOf(both?.openNotes, single?.meant, single?.reason, none?.meant, none?.reason)
             )
         }
 
     @Test
-    fun `a change to one entry the task does not say which of is open between the entries`() =
+    fun `a reply that does not mark every note is no frame`() = runTest {
+        val frame = frameOf(
+            task = "what is the total of the budget?",
+            candidates = listOf(home, work),
+            replies = mapOf(FramePrompts.COUNT to one, FramePrompts.MARK_NOTES to """{"N1":"yes"}""")
+        )
+
+        assertEquals(
+            expected = null,
+            actual = frame
+        )
+    }
+
+    @Test
+    fun `the entries of an item are marked, two open, one settled, none the whole note`() =
         runTest {
-            val frame = frameOf(
+            suspend fun marked(marks: String) = frameOf(
                 task = "move the appointment to 11:00",
                 candidates = listOf(dentist),
                 replies = mapOf(
-                    FramePrompts.COUNT to """{"count":"one","words":"the appointment"}""",
+                    FramePrompts.COUNT to appointment,
                     FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.ENTRY to """{"pick":"not said"}"""
-                ),
-                isChange = true
+                    FramePrompts.MARK_ENTRIES to marks
+                )
             )
 
+            val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
+            val single = marked(marks = """{"E1":"no","E2":"yes"}""")
+            val none = marked(marks = """{"E1":"no","E2":"no"}""")
+
             assertEquals(
-                expected = listOf(true, dentist.entries),
-                actual = listOf(frame?.isOpen, frame?.options)
+                expected = listOf(dentist.entries, dentist.entries[1], FrameReason.ENTRY, false, null),
+                actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.isOpen, none?.entry)
             )
         }
 
@@ -120,7 +153,7 @@ class TaskFramerTest {
             val every = frameOf(
                 task = "tag my recipes",
                 candidates = listOf(home),
-                replies = mapOf(FramePrompts.COUNT to """{"count":"every","words":"my recipes"}""")
+                replies = mapOf(FramePrompts.COUNT to """{"count":"every","words":"my recipes","thing":"note"}""")
             )
 
             val calls = engine.generated.size

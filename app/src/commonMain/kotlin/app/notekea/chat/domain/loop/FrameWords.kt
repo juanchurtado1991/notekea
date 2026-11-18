@@ -15,6 +15,12 @@ internal object FrameWords {
         .map { folded(text = it) }
         .toSet()
 
+    /** The numbers [text] writes, as written: a number names a note only exactly, "47" is no "470". */
+    fun numbersOf(text: String): Set<String> = NUMBER
+        .findAll(input = text)
+        .map { it.value }
+        .toSet()
+
     fun isSame(
         one: String,
         other: String
@@ -39,6 +45,7 @@ internal object FrameWords {
         .joinToString(separator = "")
 
     private val WORD = Regex(pattern = "[\\p{L}\\p{N}]+")
+    private val NUMBER = Regex(pattern = "(?<![\\p{L}\\p{N}])\\p{N}+(?![\\p{L}\\p{N}])")
 
     private const val LONG = 4
     private const val NAME = 3

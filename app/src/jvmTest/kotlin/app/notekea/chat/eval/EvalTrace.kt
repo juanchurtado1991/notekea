@@ -48,10 +48,8 @@ internal class EvalTrace(private val engine: LlmEngine) {
 
     /** [source], each frame it builds kept under its task, for the report's frame line. */
     fun framed(source: FrameSource): FrameSource =
-        FrameSource { task, vaultPath, notes, memory, openNote, isChange ->
-            source.of(task, vaultPath, notes, memory, openNote, isChange)?.also {
-                frames[task] = it
-            }
+        FrameSource { task, vaultPath, notes, memory, openNote ->
+            source.of(task, vaultPath, notes, memory, openNote)?.also { frames[task] = it }
         }
 
     /** The frame built for [task], or null when it had none. */
@@ -90,9 +88,9 @@ internal class EvalTrace(private val engine: LlmEngine) {
 
         val FRAME_PROMPTS = setOf(
             FramePrompts.COUNT,
-            FramePrompts.SAID,
+            FramePrompts.MARK_NOTES,
             FramePrompts.PICK,
-            FramePrompts.ENTRY,
+            FramePrompts.MARK_ENTRIES,
             FramePrompts.SEVERAL
         )
         const val ROUTER = "You say how a request"

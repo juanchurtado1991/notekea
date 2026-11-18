@@ -60,7 +60,7 @@ class SettledTurnTest {
         ),
         clock = Clock.System,
         frames = frame?.let {
-            FrameSource { _, _, _, _, _, _ -> it }
+            FrameSource { _, _, _, _, _ -> it }
         }
     )
 

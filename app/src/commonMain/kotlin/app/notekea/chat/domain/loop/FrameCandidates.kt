@@ -120,7 +120,8 @@ internal object FrameCandidates {
 
     /**
      * The lines of a list, a task list or a table in [text] that the task's words touch: by a word of their own, or
-     * by the heading of the section they are in ("## Appointments" holds the appointments whatever they say).
+     * by the heading of the section they are in ("## Appointments" holds the appointments whatever they say); every
+     * entry when fewer than two are touched.
      */
     fun entriesOf(
         task: String,
@@ -147,11 +148,23 @@ internal object FrameCandidates {
                 }
             }
 
-        return lines
+        val entries = lines
             .zip(other = sections.drop(n = 1))
-            .filter { (line, isSection) ->
-                isEntry(line = line) && (isSection || touches(line = line, words = words))
+            .filter { (line, _) -> isEntry(line = line) }
+
+        val touched = entries.filter { (line, isSection) ->
+            isSection || touches(line = line, words = words)
+        }
+
+        // Fewer than two touched: every entry, for the model to mark. "My physio appointment" touched the one
+        // entry that says physio, and the other sessions of the note were never asked about (the frame alone,
+        // 2026-11-18).
+        return touched
+            .takeIf {
+                it.size > 1
             }
+            .orEmpty()
+            .ifEmpty { entries }
             .map { (line, _) -> line.take(n = ENTRY) }
             .distinct()
             .take(n = MOST_ENTRIES)
@@ -181,7 +194,7 @@ internal object FrameCandidates {
 
     private const val MOST = 10
     private const val NAMESAKES = 4
-    private const val MOST_ENTRIES = 8
+    private const val MOST_ENTRIES = 12
     private const val MOST_LINES = 3
     private const val GIST = 120
     private const val ENTRY = 140

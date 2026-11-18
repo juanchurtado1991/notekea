@@ -57,21 +57,6 @@ class FrameGroupsTest {
         )
     }
 
-    // The loop's run of 2026-11-17: "move the project to Archive" moved one of two projects without asking.
-    @Test
-    fun `a word no name has makes a set of the folder that has it`() {
-        val greenhouse = candidate(path = "Projects/Greenhouse.md")
-        val orchard = candidate(path = "Projects/Orchard.md")
-
-        assertEquals(
-            expected = listOf(listOf(greenhouse, orchard)),
-            actual = FrameGroups.of(
-                task = "the project",
-                candidates = shown + greenhouse + orchard
-            )
-        )
-    }
-
     @Test
     fun `a word of one name or folder the task writes settles the set, and none leaves it to the notes`() {
         assertEquals(
@@ -88,6 +73,29 @@ class FrameGroupsTest {
                 FrameGroups.settledOf(
                     task = "the budget's total",
                     group = listOf(home, work)
+                )
+            )
+        )
+    }
+
+    // The frame alone, 2026-11-18: "mark ADR-015 as accepted" was asked which ADR.
+    @Test
+    fun `a number of one name the task writes settles the set, and a number of none does not`() {
+        val sprints = listOf(
+            candidate(path = "Projects/Sprint 46.md"),
+            candidate(path = "Projects/Sprint 47.md")
+        )
+
+        assertEquals(
+            expected = listOf(sprints[1], null),
+            actual = listOf(
+                FrameGroups.settledOf(
+                    task = "rename sprint 47 to Sprint 47 beta",
+                    group = sprints
+                ),
+                FrameGroups.settledOf(
+                    task = "add a task to the sprint for 470 users",
+                    group = sprints
                 )
             )
         )

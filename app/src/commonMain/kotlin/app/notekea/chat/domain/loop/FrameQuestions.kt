@@ -10,45 +10,55 @@ import app.notekea.core.memory.domain.MemoryLine
 
 /**
  * The frame's questions to the model (`docs/agent-frame.md`), each a small choice under a grammar: how many things
- * a task means; whether it says which of a set of namesakes; which note; which entry; which several. Asked to judge
- * all at once, the 4B said "several" for "Laura Castro's email"; asked to pick one, it never said "unclear".
+ * a task means; which notes of a set, or entries of a note, it could be about, each marked; which note; which
+ * several. Asked to pick one, the 4B never said "unclear": so it marks each one, and the code counts.
  */
 internal class FrameQuestions(private val llmEngine: LlmEngine) {
-    /** How many things [task] means, and its own words for them; from the task and the memory, no notes shown. */
+    /** How many things [task] means, its own words for them, and whether the thing is an item inside a note. */
     suspend fun countOf(
         task: String,
         memory: List<MemoryLine>
-    ): Pair<FrameCount, String>? {
+    ): FrameCountReply? {
         val counts = FrameCount.entries.joinToString(separator = ",") { "\"${it.written}\"" }
+        val things = "\"${FramePrompts.NOTE}\",\"${FramePrompts.ITEM}\""
 
         val fields = asked(
             system = FramePrompts.COUNT,
             user = "${remembered(memory = memory)}Request: $task",
             schema = "{\"type\":\"object\",\"properties\":{\"$COUNT\":{\"enum\":[$counts]}," +
-                "\"$WORDS\":{\"type\":\"string\"}},\"required\":[\"$COUNT\",\"$WORDS\"]}"
+                "\"$WORDS\":{\"type\":\"string\"},\"$THING\":{\"enum\":[$things]}}," +
+                "\"required\":[\"$COUNT\",\"$WORDS\",\"$THING\"]}"
         ) ?: return null
 
         val count = FrameCount.entries.firstOrNull {
             it.written == fields[COUNT]
         } ?: return null
 
-        return count to fields[WORDS].orEmpty()
+        return FrameCountReply(
+            count = count,
+            words = fields[WORDS].orEmpty(),
+            isItem = fields[THING] == FramePrompts.ITEM
+        )
     }
 
-    /** The one of [group] that [task] or the memory says it means; null when nothing says which. */
-    suspend fun saidOf(
+    /**
+     * The notes of [group] [task] could be about, each marked yes or no by the model and counted by the code
+     * (`docs/loop-goal-plan.md`, step 2.2); null when the reply cannot be read.
+     */
+    suspend fun markedNotesOf(
         task: String,
         group: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>
-    ): FrameCandidates.Candidate? = picked(
-        system = FramePrompts.SAID,
-        task = task,
-        memory = memory,
-        shown = FrameShown(
-            notes = group,
-            extra = listOf(FramePrompts.NOT_SAID)
+    ): List<FrameCandidates.Candidate>? {
+        val shown = FrameShown(
+            notes = group.take(n = MOST_MARKED),
+            extra = emptyList()
         )
-    )?.let { (shown, fields) -> shown.noteOf(fields = fields) }
+
+        val fields = marked(FramePrompts.MARK_NOTES, task, memory, shown) ?: return null
+
+        return shown.markedNotesOf(fields = fields)
+    }
 
     /** The shown note [task] is about; null when none is. */
     suspend fun pickOf(
@@ -65,25 +75,21 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         )
     )?.let { (shown, fields) -> shown.noteOf(fields = fields) }
 
-    /** The entries of [note] [task] changes: the one it says, all when it does not say which, none for the note. */
-    suspend fun entriesOf(
+    /** The entries of [note] [task] could be about, each marked yes or no; null when the reply cannot be read. */
+    suspend fun markedEntriesOf(
         task: String,
         note: FrameCandidates.Candidate,
         memory: List<MemoryLine>
-    ): List<String> {
+    ): List<String>? {
         val shown = FrameShown(
             notes = listOf(note),
-            extra = listOf(FramePrompts.NOT_SAID, FramePrompts.WHOLE),
-            entries = note.entries
+            extra = emptyList(),
+            entries = note.entries.take(n = MOST_MARKED)
         )
 
-        val (_, fields) = picked(FramePrompts.ENTRY, task, memory, shown) ?: return emptyList()
+        val fields = marked(FramePrompts.MARK_ENTRIES, task, memory, shown) ?: return null
 
-        return when (shown.extraOf(fields = fields)) {
-            FramePrompts.NOT_SAID -> note.entries
-            FramePrompts.WHOLE -> emptyList()
-            else -> listOfNotNull(shown.entryOf(fields = fields))
-        }
+        return shown.markedEntriesOf(fields = fields)
     }
 
     /** The notes [task] names, each of them; null when the reply cannot be read. */
@@ -119,10 +125,24 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         shown to it
     }
 
+    // A mark is about eight tokens of JSON: room for every one shown, so the reply is never cut short.
+    private suspend fun marked(
+        system: String,
+        task: String,
+        memory: List<MemoryLine>,
+        shown: FrameShown
+    ): Map<String, String>? = asked(
+        system = system,
+        user = "${remembered(memory = memory)}${shown.text}\n\nRequest: $task",
+        schema = shown.marksSchema(),
+        tokens = TOKENS + MARK_TOKENS * MOST_MARKED
+    )
+
     private suspend fun asked(
         system: String,
         user: String,
-        schema: String
+        schema: String,
+        tokens: Int = TOKENS
     ): Map<String, String>? {
         val json = StringBuilder()
 
@@ -140,7 +160,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
                         )
                     ),
                     options = GenerationOptions(
-                        maxTokens = TOKENS,
+                        maxTokens = tokens,
                         temperature = 0f,
                         jsonSchema = schema
                     )
@@ -165,6 +185,9 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
     private companion object {
         const val COUNT = "count"
         const val WORDS = "words"
+        const val THING = "thing"
         const val TOKENS = 100
+        const val MARK_TOKENS = 10
+        const val MOST_MARKED = 12
     }
 }
