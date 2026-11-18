@@ -9,14 +9,15 @@ import app.notekea.core.notes.domain.RelativePath
  */
 internal object FrameCandidates {
     /**
-     * A note shown to the frame's model: its path, its first line, the entries the task's words touch, and the
-     * [lines] that write one of them, which can tell it apart from a note of the same name.
+     * A note shown to the frame's model: its path, its first line, the entries the task's words touch, the [lines]
+     * that write one of them, and every word it writes ([words]): what tells it apart from a note of the same name.
      */
     data class Candidate(
         val path: RelativePath,
         val gist: String,
         val entries: List<String>,
-        val lines: List<String> = emptyList()
+        val lines: List<String> = emptyList(),
+        val words: Set<String> = emptySet()
     )
 
     fun of(
@@ -36,7 +37,8 @@ internal object FrameCandidates {
             lines = linesOf(
                 task = task,
                 text = text
-            )
+            ),
+            words = FrameWords.of(text = text)
         )
     }
 

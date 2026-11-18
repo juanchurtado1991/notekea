@@ -6,7 +6,7 @@ import app.notekea.core.memory.domain.MemoryLine
 /**
  * The first step of every turn on notes (`docs/agent-frame.md`). The code finds the sets of notes the task's words
  * fit alike and settles those their names or the memory tell apart; the model marks each of the rest yes or no, and
- * the code counts: one marked is settled, any other count open. Then the same for the entries of an item.
+ * the code counts. Then the same for the entries of an item. Null when nothing is shown or a reply is unread.
  */
 class TaskFramer(llmEngine: LlmEngine) {
     private val asking = FrameQuestions(llmEngine = llmEngine)
@@ -98,7 +98,7 @@ class TaskFramer(llmEngine: LlmEngine) {
     }
 
     // The entries of the note meant the task could be about, when its thing is an item and the note has several:
-    // one fits, that entry; several or none, open between them.
+    // one fits, that entry; several, open between them; none, the whole note.
     private suspend fun entriesOf(
         task: String,
         reply: FrameCountReply,
@@ -106,11 +106,10 @@ class TaskFramer(llmEngine: LlmEngine) {
         memory: List<MemoryLine>,
         reason: FrameReason
     ): Pair<List<FrameTarget>, FrameReason>? {
-        // As for notes, none marked leaves every entry open.
+        // None marked is the whole note: leaving them open made the 4B ask on 99 of 319 tasks that need no
+        // question (the frame alone, 2026-11-18), as it marks every entry "no" for a question about the note.
         val entries = if (reply.isItem && meant.entries.size > 1) {
-            asking
-                .markedEntriesOf(task, meant, memory)
-                ?.ifEmpty { meant.entries } ?: return null
+            asking.markedEntriesOf(task, meant, memory) ?: return null
         } else {
             emptyList()
         }
@@ -138,7 +137,13 @@ class TaskFramer(llmEngine: LlmEngine) {
             return listOf(it) to FrameReason.MEMORY
         }
 
-        return asking.markedNotesOf(task, group, memory)?.let {
+        // Then the words only one note writes, by the code; none is nothing to tell them apart by. Only when
+        // several notes write words of their own is the model asked: the 4B marked one note of two Lauras "yes"
+        // with nothing to tell them apart (the frame alone, 2026-11-18).
+        val told = FrameGroups.toldOf(task, group)
+        if (told.size < 2) return told.ifEmpty { group } to FrameReason.WORDS
+
+        return asking.markedNotesOf(task, told, memory)?.let {
             it to FrameReason.MARKS
         }
     }

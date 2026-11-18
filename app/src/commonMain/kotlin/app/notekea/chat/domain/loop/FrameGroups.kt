@@ -61,6 +61,46 @@ internal object FrameGroups {
         return named.singleOrNull()
     }
 
+    /**
+     * The notes of [group] that write a word of [task] no other note of the group writes (`docs/loop-goal-plan.md`,
+     * step 2.2): "Tomás from the chess club" for the Tomás whose note says chess. One is the note meant, none says
+     * nothing tells them apart, several leave it to the model.
+     */
+    fun toldOf(
+        task: String,
+        group: List<FrameCandidates.Candidate>
+    ): List<FrameCandidates.Candidate> {
+        val words = FrameWords.of(text = task)
+
+        return group.filter { candidate ->
+            val others = group
+                .filter {
+                    it != candidate
+                }
+                .flatMap { wordsOf(candidate = it) }
+
+            words.any { word ->
+                val isOwn = wordsOf(candidate = candidate).any {
+                    FrameWords.isSame(
+                        one = it,
+                        other = word
+                    )
+                }
+
+                isOwn && others.none {
+                    FrameWords.isSame(
+                        one = it,
+                        other = word
+                    )
+                }
+            }
+        }
+    }
+
+    // Every word a note writes, with those of its path.
+    private fun wordsOf(candidate: FrameCandidates.Candidate): Set<String> =
+        candidate.words + titleOf(candidate)
+
     // The words of a note's name: what a set is made by. A folder's words made "the books budget" a set of every note
     // in Books (the loop's run of 2026-11-17).
     private fun nameOf(candidate: FrameCandidates.Candidate): Set<String> =

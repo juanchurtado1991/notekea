@@ -100,4 +100,34 @@ class FrameGroupsTest {
             )
         )
     }
+
+    // The frame alone, 2026-11-18: "Tomás from the chess club" is the Tomás whose note writes chess.
+    @Test
+    fun `the notes that write a task word no other writes are told apart, and none tells nothing`() {
+        val herrera = FrameCandidates.Candidate(
+            path = RelativePath(value = "People/Tomás Herrera.md"),
+            gist = "",
+            entries = emptyList(),
+            words = setOf("tomas", "herrera", "japan", "phone")
+        )
+
+        val vargas = herrera.copy(
+            path = RelativePath(value = "People/Tomás Vargas.md"),
+            words = setOf("tomas", "vargas", "chess", "club", "phone")
+        )
+
+        assertEquals(
+            expected = listOf(listOf(vargas), emptyList()),
+            actual = listOf(
+                FrameGroups.toldOf(
+                    task = "the phone of Tomás from the chess club",
+                    group = listOf(herrera, vargas)
+                ),
+                FrameGroups.toldOf(
+                    task = "Tomás's phone",
+                    group = listOf(herrera, vargas)
+                )
+            )
+        )
+    }
 }

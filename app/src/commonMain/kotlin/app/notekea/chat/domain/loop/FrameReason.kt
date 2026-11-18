@@ -8,6 +8,9 @@ enum class FrameReason {
     /** The code: a line of the person's memory names one note of the set ("Laura" is [[Laura Castro]]). */
     MEMORY,
 
+    /** The code: only one note of the set writes a word of the task, or none does and the set stays open. */
+    WORDS,
+
     /** The model, which marked each note of a set yes or no, and the code, which counted the marks. */
     MARKS,
 
