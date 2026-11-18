@@ -38,9 +38,8 @@ below (N1, N2…) it is about, or "$NOT_SAID" when none of them is."""
 task. For each entry (E1, E2…), say "yes" when the request could be about it: everything the request says about its
 thing matches the entry, and what the request asks is still possible for it (an order already delivered cannot be
 marked delivered, a task done cannot be marked done). Say "no" when something the request says does not match it. A
-new value the request gives, such as a new time, date or amount to set, says nothing about which entry it is. Do not
-choose the likeliest: say "yes" for every entry the request could be about, several when several fit, so the person
-can be asked which. Reply with JSON: every entry's id with "yes" or "no"."""
+new value the request gives, such as a new time, date or amount to set, says nothing about which entry it is. Reply
+with JSON: every entry's id with "yes" or "no"."""
 
     const val SEVERAL =
         """A request made to a notes app is about several things it names. You are shown the notes it may be about
