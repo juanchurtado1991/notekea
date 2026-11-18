@@ -14,8 +14,8 @@ internal object UnreadChoice {
         call: ToolCall,
         state: TurnState
     ): String? {
-        // Notes the task cannot tell apart are not told apart by reading them.
-        val isChoice = call.name == AskUserTool.NAME && state.ambiguous.isEmpty()
+        // Notes the frame says the task cannot tell apart are not told apart by reading them.
+        val isChoice = call.name == AskUserTool.NAME && state.frame?.isOpen != true
         if (!isChoice) return null
 
         val options = AskUserTool.optionsOf(call = call)

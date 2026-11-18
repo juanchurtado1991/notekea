@@ -38,7 +38,7 @@ class SettledTurnTest {
         textFolder = TextFolder()
     )
 
-    private val runTurn = RunTurnUseCase(
+    private fun runTurn(frame: TaskFrame?) = RunTurnUseCase(
         llmEngine = engine,
         toolsets = Toolsets(
             byKind = mapOf(
@@ -58,11 +58,24 @@ class SettledTurnTest {
                 planReader = GhostActionPlanReader()
             )
         ),
-        clock = Clock.System
+        clock = Clock.System,
+        frames = frame?.let {
+            FrameSource { _, _, _, _, _ -> it }
+        }
+    )
+
+    private val herrera = RelativePath(value = "People/Tomás Herrera.md")
+    private val vargas = RelativePath(value = "People/Tomás Vargas.md")
+
+    // What the frame's model says of "Tomás from the chess club": Vargas, of the two Tomás it was shown.
+    private val chessClub = TaskFrame(
+        targets = listOf(FrameTarget(note = vargas)),
+        count = FrameCount.ONE,
+        candidates = listOf(herrera, vargas)
     )
 
     @Test
-    fun `the note a word of the task tells apart is said first, and an answer from the other one is held back`() =
+    fun `the note the frame says is told first, and an answer from the other one is held back`() =
         runTest {
             val people = listOf(
                 entry(path = "People/Tomás Herrera.md"),
@@ -78,6 +91,7 @@ class SettledTurnTest {
             val prompts = promptsOf(
                 task = "what is the phone number of Tomás from the chess club?",
                 notes = people,
+                frame = chessClub,
                 calls = listOf(
                     """{"tool":"read","note":"People/Tomás Herrera"}""",
                     """{"tool":"answer","text":"8890-3317"}""",
@@ -90,44 +104,45 @@ class SettledTurnTest {
             assertEquals(
                 expected = listOf(true, true),
                 actual = listOf(
-                    "- People/Tomás Vargas (only it writes \"club\")" in prompts
+                    "The task means People/Tomás Vargas. Work on it" in prompts
                         .first()
                         .first()
                         .text,
-                    "Read People/Tomás Vargas and answer from it." in prompts[2].last().text
+                    "you have not read it. Read it and answer from it." in prompts[2].last().text
                 )
             )
         }
 
     // The run after the bug hunt: "the budget" answered with both budgets, though one was the note meant.
     @Test
-    fun `an answer after reading the note meant and another is told to keep to the one meant`() =
+    fun `an answer after reading the note meant and its namesake is told to keep to the one meant`() =
         runTest {
-            val people = listOf(
-                entry(path = "People/Tomás Herrera.md"),
-                entry(
-                    path = "People/Tomás Vargas.md",
-                    metadata = tags("people", "club")
-                )
-            )
+            val budgets = listOf("Home/Budget 2026.md", "Work/Budget 2026.md").map {
+                entry(path = it)
+            }
 
-            store.texts[people[0].file.path] = "# Tomás Herrera\n\nphone: 8890-3317"
-            store.texts[people[1].file.path] = "# Tomás Vargas\n\nphone: 8712-6650"
+            store.texts[budgets[0].file.path] = "# Budget 2026\n\n9,600 USD in all."
+            store.texts[budgets[1].file.path] = "# Budget 2026\n\n68,000 USD in all."
 
             val prompts = promptsOf(
-                task = "what is the phone number of Tomás from the chess club?",
-                notes = people,
+                task = "what's the total of the household budget?",
+                notes = budgets,
+                frame = TaskFrame(
+                    targets = listOf(FrameTarget(note = budgets[0].file.path)),
+                    count = FrameCount.ONE,
+                    candidates = budgets.map { it.file.path }
+                ),
                 calls = listOf(
-                    """{"tool":"read","note":"People/Tomás Vargas"}""",
-                    """{"tool":"read","note":"People/Tomás Herrera"}""",
-                    """{"tool":"answer","text":"8712-6650 or 8890-3317"}""",
-                    """{"tool":"answer","text":"8712-6650"}"""
+                    """{"tool":"read","note":"Home/Budget 2026"}""",
+                    """{"tool":"read","note":"Work/Budget 2026"}""",
+                    """{"tool":"answer","text":"9,600 or 68,000 USD"}""",
+                    """{"tool":"answer","text":"9,600 USD"}"""
                 )
             )
 
             assertEquals(
                 expected = true,
-                actual = "Answer from People/Tomás Vargas alone" in prompts[3].last().text
+                actual = "Answer from it alone" in prompts[3].last().text
             )
         }
 
@@ -148,6 +163,7 @@ class SettledTurnTest {
             val prompts = promptsOf(
                 task = "what is the phone number of Tomás from the chess club?",
                 notes = people,
+                frame = chessClub,
                 calls = listOf(
                     """{"tool":"read","note":"People/Tomás Vargas"}""",
                     """{"tool":"ask_user","question":"Which?","options":["The chess one","The other"]}""",
@@ -157,7 +173,7 @@ class SettledTurnTest {
 
             assertEquals(
                 expected = true,
-                actual = "so there is nothing to ask" in prompts[2].last().text
+                actual = "Not asked: the task names what it means" in prompts[2].last().text
             )
         }
 
@@ -171,10 +187,15 @@ class SettledTurnTest {
         val prompts = promptsOf(
             task = "which of my two budgets is larger, and by how much?",
             notes = budgets,
+            frame = TaskFrame(
+                targets = budgets.map { FrameTarget(note = it.file.path) },
+                count = FrameCount.SEVERAL,
+                candidates = budgets.map { it.file.path }
+            ),
             calls = listOf(
                 """{"tool":"read","note":"Home/Budget 2026"}""",
                 """{"tool":"answer","text":"There is no second budget."}""",
-                """{"tool":"answer","text":"The work one, by 58,400 USD."}"""
+                """{"tool":"answer","text":"The work one is larger."}"""
             )
         )
 
@@ -209,7 +230,8 @@ class SettledTurnTest {
     private suspend fun promptsOf(
         task: String,
         notes: List<NoteEntry>,
-        calls: List<String>
+        calls: List<String>,
+        frame: TaskFrame? = null
     ): List<List<ChatMessage>> {
         val left = ArrayDeque(elements = calls)
 
@@ -223,7 +245,7 @@ class SettledTurnTest {
             }
         }
 
-        runTurn(
+        runTurn(frame = frame)(
             task = task,
             vaultPath = VAULT,
             notes = notes,

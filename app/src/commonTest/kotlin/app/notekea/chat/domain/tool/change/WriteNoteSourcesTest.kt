@@ -75,12 +75,4 @@ class WriteNoteSourcesTest {
             actual = work.changes.map { it.notes }
         )
     }
-
-    @Test
-    fun `everyone names many, not one`() {
-        assertEquals(
-            expected = null,
-            actual = SingularTask.oneIn(task = "a note with the phone of everyone in the trip")
-        )
-    }
 }

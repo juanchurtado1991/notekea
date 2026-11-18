@@ -19,6 +19,7 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -40,6 +41,9 @@ class BugHuntTurnTest {
     )
 
     private val searched = mutableListOf<String>()
+
+    // The frame a test gives its turn, as the frame's model would say it; none when a test gives none.
+    private val frames = mutableListOf<TaskFrame>()
 
     private val webSearch = WebSearchTool { query, _ ->
         searched += query
@@ -71,7 +75,18 @@ class BugHuntTurnTest {
                 planReader = GhostActionPlanReader()
             )
         ),
-        clock = Clock.System
+        clock = Clock.System,
+        frames = FrameSource { _, _, _, _, _ -> frames.lastOrNull() }
+    )
+
+    private fun frameOf(
+        count: FrameCount,
+        meant: List<String>,
+        shown: List<String>
+    ) = TaskFrame(
+        targets = meant.map { FrameTarget(note = RelativePath(value = it)) },
+        count = count,
+        candidates = shown.map { RelativePath(value = it) }
     )
 
     // The model makes [calls] in turn, then answers; every answer written is [WRITTEN].
@@ -141,8 +156,16 @@ class BugHuntTurnTest {
 
     // L5: "the work budget" with Home/Budget 2026 and Work/Budget 2026 was told to ask which.
     @Test
-    fun `a shared name whose folder the task names is told to be called again with that path`() =
+    fun `a shared name the frame says which of is told to be called again with that path`() =
         runTest {
+            val budgets = listOf("Home/Budget 2026.md", "Work/Budget 2026.md")
+
+            frames += frameOf(
+                FrameCount.ONE,
+                meant = budgets.drop(n = 1),
+                shown = budgets
+            )
+
             run(
                 task = "what is the total of the work budget?",
                 paths = listOf("Home/Budget 2026.md", "Work/Budget 2026.md"),
@@ -151,7 +174,8 @@ class BugHuntTurnTest {
 
             assertEquals(
                 expected = true,
-                actual = "The task names the folder of Work/Budget 2026" in callPrompts()[1]
+                actual = "The task means Work/Budget 2026: call again with that whole path" in
+                    callPrompts()[1]
             )
         }
 
@@ -159,6 +183,14 @@ class BugHuntTurnTest {
     @Test
     fun `a task about one note that ends naming every note it could mean is held for the question`() =
         runTest {
+            val lauras = listOf("People/Laura Castro.md", "People/Laura Méndez.md")
+
+            frames += frameOf(
+                FrameCount.ONE,
+                meant = lauras,
+                shown = lauras
+            )
+
             val steps = run(
                 task = "what is the phone of Laura?",
                 paths = listOf("People/Laura Castro.md", "People/Laura Méndez.md"),

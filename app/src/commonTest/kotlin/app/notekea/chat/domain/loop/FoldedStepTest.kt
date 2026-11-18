@@ -97,7 +97,7 @@ class FoldedStepTest {
                 """{"tool":"calculate","expression":"2 + 2"}""",
                 """{"tool":"calculate","expression":"3 + 3"}""",
                 """{"tool":"read","note":"Lease"}""",
-                """{"tool":"answer","text":"11,400 euros a year."}"""
+                """{"tool":"answer","text":"950 euros a month."}"""
             )
         )
 

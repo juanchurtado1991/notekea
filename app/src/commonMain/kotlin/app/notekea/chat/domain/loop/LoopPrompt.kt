@@ -6,7 +6,6 @@ import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.memory.domain.MemoryLine
-import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What the model is given at each step of the one loop (`docs/agent-loop.md`, step 5): how it works, the tools of
@@ -26,10 +25,8 @@ internal object LoopPrompt {
             "name means, that is settled: use that note and never ask which."
     private const val MAX_NAMES = 120
 
-    // The note the task means among several of its name, worked out from what the notes say (`ToldApart`).
-    private const val APART_HEADING =
-        "The note this task means, where several share its name: settled by the task's own words. Use that " +
-            "note and never ask which."
+    // What the task means, said before the turn by its frame (`docs/agent-frame.md`).
+    private const val FRAME_HEADING = "What this task means, settled before this turn (follow it):"
 
     private const val RULES =
         """You work on a task in the person's notes app, one step at a time. Each step you call one tool and see
@@ -38,13 +35,12 @@ what it gives back. You know nothing of the notes but what the tools give you.
 Rules:
 - Say only what the tools gave you. What they do not say is not in the notes: say so, never fill it in.
 - A long note or document: outline it, then read the section you need, or digest it with the question.
-- Sums, counts and dates are done by calculate, count and date. Never work one out yourself. Write the whole
-  sum the task asks, every month, item or person it counts (two months at 1.5 %: 4250 * 0.015 * 2).
+- Every figure you give is worked out by a tool, never by you. tally adds, averages or counts figures from
+  lines of the notes you read: name each line that counts with its figure, and each line you leave out with
+  why (refunded, already paid, another year). calculate works out an expression (two months at 1.5 %:
+  4250 * 0.015 * 2). days counts the days between two dates, date names a day.
 - A figure a note writes many times (Spent: 6,400 every day, 10 points each homework): count gathers every
   such line and adds them (what: the word, where: the note). Never add them from a read: some are missed.
-- When the task says "the" one thing (the budget, the project, the supplier meeting) and the vault holds
-  several such notes, ask_user which one before changing or summarizing anything. When it names several (my
-  two budgets, both, my recipes), use them all and never ask which.
 - ask_user only between ways the task leaves open: never to confirm what the tools already found.
 - Make a change the way the task asks, even when the notes already hold something like it: "tag them latina"
   adds latina to notes tagged venezuelan.
@@ -52,9 +48,8 @@ Rules:
   find is only for notes chosen by a property ("books with finished true"), search for words in their text.
 - Look first: search, find or list what the task names before deciding anything about it. "My books", "the
   recipes", "my open tasks" mean all of them: work on all, do not ask which.
-- ask_user only when the task means one note and several could be it (a tool tells you so, or the task says
-  "it" or "the note" and nothing says which), or when it lacks something no tool can find. Never ask what a
-  tool can tell you, and never ask whether to go on.
+- ask_user only when what this task means (below) leaves it open, or when it lacks something no tool can
+  find. Never ask what a tool can tell you, and never ask whether to go on.
 - A tool that changes the vault only adds the change to a proposal the person confirms: add every change the
   task asks for, each with its own call, then end with propose. Nothing is changed until then.
 - A note about what notes say is written from them: read them first, then write_note naming them, with one
@@ -78,7 +73,7 @@ Tools:
         instructions: String?,
         skill: Skill?,
         memory: List<MemoryLine> = emptyList(),
-        apart: List<AmbiguousTask.Settled> = emptyList()
+        frame: TaskFrame? = null
     ): String = RULES + tools.described() +
         instructions
             ?.let { "\n\nThe person's instructions for this vault (follow them):\n$it" }
@@ -90,19 +85,10 @@ Tools:
                 prefix = "\n\n$MEMORY_HEADING\n"
             ) { "- ${it.text}" }
             .orEmpty() +
-        apart
-            .takeIf { it.isNotEmpty() }
-            ?.joinToString(
-                separator = "\n",
-                prefix = "\n\n$APART_HEADING\n"
-            ) {
-                val meant = it
-                    .meant
-                    .value
-                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
-
-                "- $meant (only it writes \"${it.said}\")"
-            }
+        frame
+            ?.described()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { "\n\n$FRAME_HEADING\n$it" }
             .orEmpty() +
         skill
             ?.let { "\n\nFor this kind of work (${it.name}):\n${it.instructions}" }

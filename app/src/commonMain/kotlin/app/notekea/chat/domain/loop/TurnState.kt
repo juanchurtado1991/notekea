@@ -8,7 +8,8 @@ import app.notekea.core.memory.domain.MemoryLine
 
 /**
  * One turn of the loop as it goes, held inside [RunTurnUseCase]'s flow and nowhere else: what its calls gave back
- * ([found]), the calls [made], the ones made again ([repeated]) and what the budget [dropped].
+ * ([found]), the calls [made], the ones made again ([repeated]) and what the budget [dropped], and what the task
+ * means ([frame], `docs/agent-frame.md`): null when no frame was made, and nothing is then held back for one.
  */
 internal class TurnState(
     val task: String,
@@ -18,7 +19,7 @@ internal class TurnState(
     val turn: ToolContext,
     val budget: ContextBudget,
     val memory: List<MemoryLine> = emptyList(),
-    val apart: List<AmbiguousTask.Settled> = emptyList()
+    val frame: TaskFrame? = null
 ) {
     val found = mutableListOf<String>()
     val made = mutableSetOf<String>()
@@ -36,26 +37,6 @@ internal class TurnState(
 
     // The tool of the last call made, when it was refused: not offered until another call is made.
     val withheld = mutableListOf<String>()
-
-    /** The notes the task can mean and does not say which of: the person is asked before the turn ends. */
-    val ambiguous by lazy {
-        AmbiguousTask.notesOf(
-            task = task,
-            notes = turn.notes,
-            settled = memory.flatMap { it.names },
-            told = apart
-        )
-    }
-
-    /** The sets of notes the memory or the notes settled for the task: another of them picked is held back once. */
-    val settled by lazy {
-        TurnSetup.settledOf(
-            task = task,
-            notes = turn.notes,
-            remembered = memory,
-            told = apart
-        )
-    }
 
     val dropped: Int get() = drops.lastOrNull() ?: 0
 

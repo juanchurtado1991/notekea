@@ -61,7 +61,25 @@ class MemoryTurnTest {
                 planReader = GhostActionPlanReader()
             )
         ),
-        clock = Clock.System
+        clock = Clock.System,
+        frames = FrameSource { _, _, _, memory, _ ->
+            if (memory.isEmpty()) open else settled
+        }
+    )
+
+    private val lauras = notes.take(n = 2).map { it.file.path }
+
+    // What the frame's model says of "Laura's phone": both Lauras fit, unless its memory says which.
+    private val open = TaskFrame(
+        targets = lauras.map { FrameTarget(note = it) },
+        count = FrameCount.ONE,
+        candidates = lauras
+    )
+
+    private val settled = TaskFrame(
+        targets = listOf(FrameTarget(note = lauras.first())),
+        count = FrameCount.ONE,
+        candidates = lauras
     )
 
     private val memory = """

@@ -60,7 +60,8 @@ class RunTurnUseCase(
     private val clock: Clock,
     private val stepMemory: StepMemory? = null,
     private val wholeLast: Int? = null,
-    private val sourceSites: SourceSites? = null
+    private val sourceSites: SourceSites? = null,
+    private val frames: FrameSource? = null
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
 
@@ -78,7 +79,24 @@ class RunTurnUseCase(
         openNote: RelativePath?
     ): Flow<AgentStep> = flow {
         val remembered = vaultGuide.memoryOf(vaultPath, notes)
-        val apart = TurnSetup.apartOf(task, vaultPath, notes, vaultGuide, remembered)
+
+        val route = router.route(
+            task = task,
+            skills = vaultGuide.skillsOf(vaultPath, notes)
+        )
+
+        if (route.kind.isReply) return@flow emit(value = AgentStep.Replied(kind = route.kind))
+
+        val relevant = TurnSetup.relevantOf(task, remembered, route.kind)
+
+        // Which notes, and which entries in them, the task means: said by the model, held to by the code.
+        val frame = frames?.of(
+            task = task,
+            vaultPath = vaultPath,
+            notes = notes,
+            memory = relevant,
+            openNote = openNote
+        )
 
         // The vault's own web sources are trusted by definition (`docs/agent-web.md`): none were (bug hunt, E7).
         val turn = TurnSetup.contextOf(
@@ -88,16 +106,9 @@ class RunTurnUseCase(
             today = context.today,
             remembered = remembered,
             openNote = openNote,
-            told = apart,
+            frame = frame,
             sources = sourceSites?.sitesOf(vaultPath = vaultPath).orEmpty()
         )
-
-        val route = router.route(
-            task = task,
-            skills = vaultGuide.skillsOf(vaultPath, notes)
-        )
-
-        if (route.kind.isReply) return@flow emit(value = AgentStep.Replied(kind = route.kind))
 
         val tools = StepRecall.toolsOf(
             tools = toolsets.of(
@@ -107,7 +118,7 @@ class RunTurnUseCase(
             memory = stepMemory
         )
 
-        val memory = TurnSetup.memoryOf(task, remembered, route.kind, apart)
+        val memory = TurnSetup.memoryOf(relevant, frame)
 
         // A line the task matched is said as a step, so a wrong memory is seen the first time it matters.
         MemoryLines.matched(lines = memory).forEach {
@@ -125,7 +136,7 @@ class RunTurnUseCase(
             instructions = vaultGuide.instructionsOf(vaultPath, notes),
             skill = route.skill,
             memory = memory,
-            apart = apart
+            frame = frame
         )
 
         val state = TurnState(
@@ -135,7 +146,7 @@ class RunTurnUseCase(
             tools = tools,
             turn = turn,
             memory = memory,
-            apart = apart,
+            frame = frame,
             budget = ContextBudget(
                 llmEngine = llmEngine,
                 tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,

@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool
 
+import app.notekea.chat.domain.loop.TaskFrame
 import app.notekea.chat.domain.plan.VaultNames
 import app.notekea.chat.domain.tool.work.TurnWork
 import app.notekea.core.domain.time.CalendarDate
@@ -9,7 +10,7 @@ import app.notekea.core.web.domain.SourceTrust
 
 /**
  * What one turn's tools work on: the vault, its [notes], the open note, the [task] as written, [today], where a web
- * search is made ([country]) and whose sites it [trust]s, the notes the memory says the task means ([remembered]),
+ * search is made ([country]) and whose sites it [trust]s, which notes the task means ([frame], `docs/agent-frame.md`),
  * and what the turn read ([reads]), found on the web ([web]) and works on ([work]).
  */
 class ToolContext(
@@ -23,7 +24,7 @@ class ToolContext(
         sources = emptyList(),
         memory = emptyList()
     ),
-    val remembered: Set<RelativePath> = emptySet()
+    val frame: TaskFrame? = null
 ) {
     val reads = TurnReads()
     val work = TurnWork()

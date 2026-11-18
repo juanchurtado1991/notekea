@@ -1,11 +1,15 @@
 package app.notekea.chat.domain.tool.change
 
+import app.notekea.chat.domain.loop.FrameCount
+import app.notekea.chat.domain.loop.FrameTarget
 import app.notekea.chat.domain.loop.RouteWords
+import app.notekea.chat.domain.loop.TaskFrame
 import app.notekea.chat.domain.loop.WorkKind
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,11 +20,15 @@ import kotlin.test.assertEquals
  * told once, set a priority of "{2}", and two requests that change the notes were routed to ask.
  */
 class UnaskedChangeTest {
-    private fun contextOf(task: String) = ToolContext(
+    private fun contextOf(
+        task: String,
+        frame: TaskFrame? = null
+    ) = ToolContext(
         vaultPath = VAULT,
         notes = listOf("Home.md", "Projects/Trip to Lisbon.md").map { entry(path = it) },
         task = task,
-        openNote = null
+        openNote = null,
+        frame = frame
     )
 
     private suspend fun said(
@@ -96,7 +104,17 @@ class UnaskedChangeTest {
             expected = "add_tag: not added yet",
             actual = said(
                 tool = ChangeTools.addTag,
-                context = contextOf(task = "tag it as urgent"),
+                // "it" is one note, as the frame's model says: the open one.
+                context = contextOf(
+                    task = "tag it as urgent",
+                    frame = TaskFrame(
+                        targets = listOf(FrameTarget(note = RelativePath(value = "Home.md"))),
+                        count = FrameCount.ONE,
+                        candidates = listOf("Home.md", "Projects/Trip to Lisbon.md").map {
+                            RelativePath(value = it)
+                        }
+                    )
+                ),
                 arguments = mapOf(
                     "notes" to "Home\nProjects/Trip to Lisbon",
                     "tag" to "urgent"

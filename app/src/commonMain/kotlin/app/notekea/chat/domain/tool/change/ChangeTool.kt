@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.tool.change
 
-import app.notekea.chat.domain.loop.AmbiguousTask
+import app.notekea.chat.domain.loop.FrameCount
 import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.CheckPlanUseCase
@@ -169,8 +169,8 @@ class ChangeTool(
             context = context
         )
 
-        // A task about several ("tag both of my Goals 2027 notes") means each of them: nothing to ask.
-        val isSeveral = !AmbiguousTask.isSingular(task = context.task)
+        // A task its frame says means several ("tag both of my Goals 2027 notes") means each: nothing to ask.
+        val isSeveral = context.frame?.isSeveral == true
 
         val isShared =
             shared.isNotEmpty() &&
@@ -225,43 +225,38 @@ class ChangeTool(
         )
     }
 
-    // Several notes named where the task says one, told once. A new note's notes are what it is written from, not
-    // what it changes: "the garden" may take two (the loop's fifth run asked which garden note for "a note Garden
-    // budget").
+    // Several notes named where the task's frame says it means one, told once. A new note's notes are what it is
+    // written from, not what it changes: "the garden" may take two (the loop's fifth run asked which garden note for
+    // "a note Garden budget").
     private fun manyOf(
         step: PlannedStep,
         context: ToolContext
     ): String? {
-        val said =
-            SingularTask.oneIn(task = context.task) ?: SingularTask.pointedIn(task = context.task)
+        val frame = context.frame?.takeIf {
+            it.count == FrameCount.ONE
+        } ?: return null
 
-        val one = said.takeIf {
-            kind != ActionKind.WRITE_FROM_NOTES
-        }
-
-        val isMany = step.notes.size > 1 && one != null
+        val isMany = step.notes.size > 1 && kind != ActionKind.WRITE_FROM_NOTES
         val isWarned = isMany && context.work.warn(about = name)
         if (!isWarned) return null
 
-        // One of them is the note settled for the task (the memory, or the task's own words): no question.
-        val meant = step
-            .notes
-            .mapNotNull { context.noteNamed(name = it) }
-            .singleOrNull {
-                it in context.remembered
-            }
-            ?.value
-            ?.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        val one = frame
+            .words
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "\"$it\", one" } ?: "one note"
 
         val open =
             "If the task means one of them and does not say which, ask_user with them as the options; " +
                 "if it means them all, call $name again."
 
-        val next =
-            meant?.let { "The task means $it: call $name again with only that note." } ?: open
+        val next = frame
+            .meant
+            ?.let {
+                "The task means ${it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)}: call " +
+                    "$name again with only that note."
+            } ?: open
 
-        return "$name: not added yet. The task says \"$one\", one, and this names " +
-            "${step.notes.size} notes. $next"
+        return "$name: not added yet. The task says $one, and this names ${step.notes.size} notes. $next"
     }
 
     // A note named by a name other notes share (Home/Budget 2026, Work/Budget 2026), its folder not in the task.
@@ -269,7 +264,7 @@ class ChangeTool(
         step: PlannedStep,
         context: ToolContext
     ): List<String> {
-        val task = context.task.lowercase()
+        val frame = context.frame
 
         return (step.notes + listOfNotNull(step[ActionField.NOTE])).mapNotNull { named ->
             val name = named
@@ -286,10 +281,8 @@ class ChangeTool(
                     )
                 }
 
-            // Said by the task's folder, or by the memory, which says which of them the task's words mean.
-            val isSaid = paths.any {
-                folderOf(path = it) in task || it in context.remembered
-            }
+            // Said when the frame names one of them as meant; with no frame, nothing is held back for it.
+            val isSaid = frame == null || frame.notes.count { it in paths } == 1
 
             if (paths.size < 2 || isSaid) {
                 null
@@ -301,14 +294,6 @@ class ChangeTool(
             }
         }
     }
-
-    // The name of the folder a note is in, or none at the vault's root.
-    private fun folderOf(path: RelativePath): String = path
-        .parent
-        ?.value
-        ?.substringAfterLast(delimiter = '/')
-        ?.lowercase()
-        ?.takeIf { it.isNotEmpty() } ?: "\u0000"
 
     // A change the task does not ask, every time; a call another tool is for, once.
     private fun refusedOf(

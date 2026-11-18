@@ -4,7 +4,6 @@ import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.change.ProposeTool
-import app.notekea.chat.domain.tool.change.SingularTask
 import app.notekea.chat.domain.tool.work.AskUserTool
 
 /**
@@ -17,14 +16,6 @@ internal object TurnChecks {
         state: TurnState,
         tool: ChatTool?
     ): String? {
-        // A question about notes already settled is not asked, read or not.
-        val settled = MemoryChoice.askedOf(
-            call = call,
-            state = state
-        )
-
-        if (settled != null) return settled
-
         val only = oneOptionOf(
             call = call,
             state = state
@@ -60,7 +51,7 @@ internal object TurnChecks {
             ) ?: SameNoteQuestion.heldOf(
                 call = call,
                 state = state
-            ) ?: MemoryChoice.heldOf(
+            ) ?: FrameChoice.heldOf(
                 call = call,
                 state = state,
                 tool = tool
@@ -71,6 +62,12 @@ internal object TurnChecks {
                 call = call,
                 state = state,
                 tool = tool
+            ) ?: TopicUnread.heldOf(
+                call = call,
+                state = state
+            ) ?: AnswerFigures.heldOf(
+                call = call,
+                state = state
             ) ?: ProposalReview.heldOf(
                 call = call,
                 state = state
@@ -98,13 +95,14 @@ internal object TurnChecks {
         return isEmpty && state.told.add(NOTHING_ADDED)
     }
 
-    // A question asked when the task points at nothing it leaves open (my two budgets, the Venezuelan recipes):
-    // held back once, the model told to do it; asked again, it is asked.
+    // A question asked when the frame says the task leaves nothing open (my two budgets, the Venezuelan recipes,
+    // "Ana Torres"): held back once, the model told to do it; asked again, it is asked, as it may lack something no
+    // tool finds. With no frame, nothing says it is needless.
     private fun isNeedlessQuestion(
         call: ToolCall,
         state: TurnState
     ): Boolean {
-        val isOpen = SingularTask.pointsAtOne(task = state.task) || state.ambiguous.isNotEmpty()
+        val isOpen = state.frame?.isOpen ?: true
 
         val isNeedless =
             call.name == AskUserTool.NAME &&

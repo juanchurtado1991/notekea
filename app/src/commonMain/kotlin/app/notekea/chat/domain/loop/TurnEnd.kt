@@ -47,7 +47,7 @@ internal class TurnEnd(
             AskUserTool.NAME -> AgentStep.Asked(
                 question = call.text(name = AskUserTool.QUESTION),
                 options = AskUserTool.optionsOf(call = call),
-                remembering = SharedNames.rememberingOf(state = state)
+                remembering = state.frame?.rememberingOf(task = state.task)
             )
 
             ProposeTool.NAME -> if (isEmpty) {

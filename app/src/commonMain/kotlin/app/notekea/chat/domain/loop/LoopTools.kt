@@ -7,7 +7,9 @@ import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DateTool
+import app.notekea.chat.domain.tool.app.DaysTool
 import app.notekea.chat.domain.tool.app.ShowTools
+import app.notekea.chat.domain.tool.app.TallyTool
 import app.notekea.chat.domain.tool.change.ChangeTools
 import app.notekea.chat.domain.tool.change.MemoryTool
 import app.notekea.chat.domain.tool.change.ProposeTool
@@ -67,8 +69,6 @@ class LoopTools(
             linkFinder = linkFinder
         )
 
-        val count = CountTool(noteTextCache = noteTextCache)
-
         val looking = listOf(search, read, find, tasks, list)
 
         // "Tag every note that links to Budget 2026", "the recipes the menu uses": a change to the notes a note's
@@ -79,8 +79,7 @@ class LoopTools(
 
         return Toolsets(
             byKind = mapOf(
-                WorkKind.ASK to
-                    linking + listOf(outline, digest, CalculateTool(), count, ask, answer),
+                WorkKind.ASK to linking + listOf(outline, digest) + figures() + listOf(ask, answer),
                 WorkKind.WRITE to linking + listOf(
                     outline,
                     changes.writeNote,
@@ -115,6 +114,15 @@ class LoopTools(
             )
         )
     }
+
+    // Figures worked out by the app: from the lines the model names, checked against the notes (`tally`), an
+    // expression, days between dates, and a figure a note writes many times (`docs/agent-figures.md`).
+    private fun figures(): List<ChatTool> = listOf(
+        TallyTool(noteTextCache = noteTextCache),
+        CalculateTool(),
+        DaysTool(),
+        CountTool(noteTextCache = noteTextCache)
+    )
 
     // Organizing, with a note to write as it is often asked with the tasks or tags it is about.
     private fun organizing(

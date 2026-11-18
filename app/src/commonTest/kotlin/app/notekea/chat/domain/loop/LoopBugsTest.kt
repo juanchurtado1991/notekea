@@ -130,24 +130,6 @@ class LoopBugsTest {
         )
     }
 
-    @Test
-    fun `a figure the task writes tells no note apart`() {
-        val contacts: List<NoteEntry> = listOf("Personal/Contactos.md", "Work/Contactos.md").map {
-            entry(path = it)
-        }
-
-        val settled = ToldApart.settledOf(
-            task = "añade a Mario Solís, 8890-1122, a Contactos",
-            groups = listOf(contacts),
-            texts = mapOf(contacts[0].file.path to "Tomás Herrera, 8890-3317")
-        )
-
-        assertEquals(
-            expected = emptyList(),
-            actual = settled
-        )
-    }
-
     private companion object {
         const val CALLS = "You work on a task in the person's notes"
         const val MOST_CALLS = 12

@@ -361,3 +361,8 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   and search followed, before measuring again. Ten reviews, one per area, found about 110 defects with the input that
   triggers each; eight agents fixed them by area in one working tree with no build of their own, and the lead built,
   tested and committed. 107 were fixed, four partly.
+- **2026-11-17, the word-list checks left for foundations:** the handoff said the loop got about 88 % on its tuned
+  tasks and that "the word-list checks do not generalise". A vault written blind had scored 62 % (4B) and 74 % (9B).
+  The developer set the rule of no patches and asked for the foundations of `ROADMAP.md` post-MVP 16 instead: the
+  task's frame, figures worked out by the app, and a topic read whole. They also asked for nine more blind exams,
+  then a pool of 50, to measure against.

@@ -51,6 +51,9 @@ class RunTurnTest {
     private val office = RelativePath(value = "Work/Lease.md")
     private val notes = listOf(lease, instructions).map { entry(path = it.value) }
 
+    // The frame a test gives its turn, as the frame's model would say it; none when a test gives none.
+    private val frames = mutableListOf<TaskFrame>()
+
     private val runTurn = RunTurnUseCase(
         llmEngine = engine,
         toolsets = Toolsets(
@@ -79,7 +82,8 @@ class RunTurnTest {
                 planReader = GhostActionPlanReader()
             )
         ),
-        clock = Clock.System
+        clock = Clock.System,
+        frames = FrameSource { _, _, _, _, _ -> frames.lastOrNull() }
     )
 
     private fun script(
@@ -331,6 +335,13 @@ class RunTurnTest {
         runTest {
             val tag = """{"tool":"add_tag","notes":["Home/Lease"],"tag":"rented"}"""
 
+            // "the lease" means one, and both leases fit it.
+            frames += TaskFrame(
+                targets = listOf(FrameTarget(note = lease), FrameTarget(note = office)),
+                count = FrameCount.ONE,
+                candidates = listOf(lease, office)
+            )
+
             script(
                 tag,
                 tag,
@@ -349,7 +360,7 @@ class RunTurnTest {
                 actual = listOf(
                     "2 notes are named \"Lease\": Home/Lease, Work/Lease. If the task does not" in
                         callPrompts()[1],
-                    "(Not done: the task can mean 2 notes and does not say which: Home/Lease, Work/Lease." in
+                    "(Not done: the task means one of 2 notes and does not say which: Home/Lease; Work/Lease." in
                         callPrompts()[3],
                     steps.last() is AgentStep.Asked
                 )

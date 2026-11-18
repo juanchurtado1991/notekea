@@ -7,6 +7,8 @@ import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
 import app.notekea.chat.domain.loop.StepRecall
+import app.notekea.chat.domain.loop.TaskFramer
+import app.notekea.chat.domain.loop.TurnFrames
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
@@ -41,9 +43,12 @@ internal object LoopEval {
             textFolder = TextFolder()
         )
 
+        val answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)
+        val vaultGuide = VaultGuide(noteTextCache = cache)
+
         val tools = LoopTools(
             llmEngine = engine,
-            answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine),
+            answerFromNotes = answerFromNotes,
             noteTextCache = cache,
             actionRunner = runner,
             pageReader = pageReader,
@@ -54,7 +59,7 @@ internal object LoopEval {
         return RunTurnUseCase(
             llmEngine = engine,
             toolsets = tools.toolsets(),
-            vaultGuide = VaultGuide(noteTextCache = cache),
+            vaultGuide = vaultGuide,
             proposal = ProposalCheck(
                 checkPlan = CheckPlanUseCase(),
                 composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader(), clipper)
@@ -67,7 +72,12 @@ internal object LoopEval {
             // (docs/agent-step-memory.md).
             wholeLast = StepRecall.WHOLE_LAST.takeIf {
                 System.getProperty("notekea.stepmemory") == "fold"
-            }
+            },
+            frames = TurnFrames(
+                framer = TaskFramer(llmEngine = engine),
+                answerFromNotes = answerFromNotes,
+                vaultGuide = vaultGuide
+            )
         )
     }
 

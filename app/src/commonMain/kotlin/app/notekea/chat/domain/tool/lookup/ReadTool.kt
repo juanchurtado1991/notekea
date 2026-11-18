@@ -10,12 +10,13 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.chat.domain.tool.reading.TextOutline
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * A note's text, with the text of the documents attached to it (a pasted PDF): what the turn read, and so what a
  * note it writes is written from. A note with no text to work from is said, never written from.
  */
-class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
+class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
     private val attachedTexts = AttachedTexts(noteTextCache = noteTextCache)
 
     override val name = NAME
@@ -118,9 +119,27 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
             ?.let { ", with its attached ${it.joinToString()}" }
             .orEmpty()
 
+        // Notes on the same topic that write the task's words: an answer waits for them (`docs/agent-figures.md`).
+        val topic = TopicNotes.of(
+            note = note,
+            text = read.text,
+            context = context,
+            cache = noteTextCache
+        )
+
+        context.reads.relate(notes = topic)
+
+        val also = topic
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(
+                prefix = "\n(Also about this, by its links or tags: ",
+                postfix = ". Read them too.)"
+            ) { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            .orEmpty()
+
         return ToolResult(
             forModel = "read \"$shown\" ($words words$with):\n$properties" +
-                "${read.text.take(n = NOTE_CHARS)}$more$unread"
+                "${read.text.take(n = NOTE_CHARS)}$more$unread$also"
         )
     }
 

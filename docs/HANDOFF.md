@@ -3,7 +3,8 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
+Last updated: 2026-11-17, with the loop's foundations on #145 (the task's frame, figures worked out by the app, a
+topic read whole) and the blind evaluation pool; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
 ([notekea#142](https://github.com/juanchurtado1991/notekea/pull/142), draft), the developer's macOS smoke test under
 way, its fixes and the code review's refactors in it.
 
@@ -433,6 +434,20 @@ half merged comes after step 1. Before the design, an audit: 90,400 code lines i
     the 9B 6, one of them a medicine allergy missed), then questions the loop's word lists forced, then requests
     about one entry of a note not asked back. The word-list checks do not generalise; the next step is a structured
     step that says which notes a task means, and figures computed by the code.
+  - **The loop's foundations (2026-11-17, `ROADMAP.md` post-MVP 16):** the developer set the rule of no patches
+    (`AGENTS.md`) and targets of 85 % (4B) and 90 % (9B) on sets never tuned on. Built:
+    - **The task's frame** (`docs/agent-frame.md`): the model says, from candidates the code finds, which notes and
+      entries a task means and how many; the code holds the turn to it. `AmbiguousTask`, `SingularTask`, `ToldApart`
+      and `MemoryChoice` are gone; `RouteWords` is still a word list, open.
+    - **Figures and topics** (`docs/agent-figures.md`): `tally` and `days`, an answer's figures backed by a tool, and
+      the notes on a topic (links, tags) read before answering.
+    - **Blind exams** (`docs/eval-blind.md`): nine vaults and about 390 tasks written and checked by separate agents;
+      a pool of 50 more is being written, 10 to be sealed until the final number.
+    - **Baseline on the code before the foundations** (`54991f4d` plus the bug hunt): tuned 259 tasks 4B 228 (88 %),
+      9B 234 (90 %); Fresh Eval 4B 53/77 (68 %), 9B 58/77 (75 %); the nine blind exams 4B 261/393 (66 %), 9B 277/393
+      (70 %).
+    - **Measuring:** in a separate detached worktree, `../notekea-measure`, whose blind vaults are committed locally,
+      as the evaluation reads vaults from git HEAD; never commit on the branch while a measurement runs.
   - **Tried and dropped:** each note of a change to several checked alone by the model, a yes or a no, before the
     card. On the 40 tasks that change a group it made both models worse (4B 11 failures to 12, 9B 9 to 13): it took
     out notes the task asks for ("both of my Goals 2027 notes", a book rated 5). The code is not in the branch.

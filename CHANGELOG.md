@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Nine blind exams for the chat's loop (`docs/eval-blind.md`): vaults and tasks of nine invented people, written
+  without seeing the chat's code and checked by a second agent. With the Fresh Eval vault they are ten sets the loop
+  was never tuned on, measured before and after a change and read only by kind of failure.
+- The chat's loop works figures out instead of the model: `tally` adds, averages or counts the figures of the lines
+  the model names, each checked against the notes read, and `days` counts the days between two dates
+  (`docs/agent-figures.md`).
 - The chat remembers what you approve: tick Remember for next time when it asks which note you mean, or say
   "remember that…", and it keeps the line in `Notekea/Memory.md`. Forget a line from the step that used it.
 - Settings → Chat memory: turn the memory on or off; set your country, currency, the language of the answers and
@@ -40,6 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Agent Eval vault, which gains 25 notes: a Spanish lease, a handbook, an audit, long journals and minutes).
 
 ### Changed
+
+- The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
+  app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
+  when it says which, and works on each when it means several. It replaces the word lists that decided this
+  (`AmbiguousTask`, `SingularTask`, `ToldApart`, `MemoryChoice`), which asked on clear requests and missed "the
+  appointment" in a note of three.
+- An answer of the chat's loop waits for the notes about the same topic, by links or tags, that write the request's
+  words, and for a tool behind every figure it gives.
 
 - The chat's new loop reads a vault's instructions from `Notekea/Notekea.md`, in a folder of its own where the
   chat's memory will go too, instead of `Notekea.md` at the vault's root.
@@ -120,6 +134,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Note info mutes the counts that are zero and draws the done tasks as a bar.
 
 ### Fixed
+
+- Setting a property to the value it already has no longer rewrites how it is written: `record: off` stayed
+  `record: off`, not `record: "off"`.
 - A bug hunt over the whole app (2026-11-17, `docs/bug-hunt-2026-11-17.md`) fixed its defects, each with a test.
   In the chat's loop: a change taken out could never be added again, two refused changes looped to the last step,
   a figure the task writes settled which note it meant, questions the loop asked for were held back, a value could

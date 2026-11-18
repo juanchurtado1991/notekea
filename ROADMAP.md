@@ -428,6 +428,16 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    task does not ask, the task's words over the memory): 4B 225, 9B 224. Fixed after it and not measured whole yet:
    long notes read by the part asked about, the task's own tag used, a turn with no change says so; and the 107
    defects of the bug hunt (`docs/bug-hunt-2026-11-17.md`). Across turns it is still not turned on.
+16. **The loop's foundations** — asked for by the developer on 2026-11-17, after a vault written blind scored 62 %
+   (4B) and 74 % (9B) against about 88 % on the tuned tasks. The developer's rule is no patches
+   (`AGENTS.md`). Built in the same pull request, each step measured on the tuned tasks and on ten sets never
+   tuned on, the Fresh Eval vault and nine blind exams (`docs/eval-blind.md`):
+   1. **The task's frame** (`docs/agent-frame.md`). The model says which notes and entries a request means, from
+      candidates the app finds, and the app holds the turn to it. It replaces the word-list checks.
+   2. **Figures worked out by the app** (`docs/agent-figures.md`): `tally` over checked lines, `days` between
+      dates, and an answer's figures backed by a tool.
+   3. **A topic read whole.** The notes that a note read links or tags, and that write the task's words, are read
+      before answering.
 
 ## Out of scope for the MVP
 
