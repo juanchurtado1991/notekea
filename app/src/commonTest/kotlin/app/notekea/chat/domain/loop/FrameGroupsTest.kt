@@ -103,6 +103,27 @@ class FrameGroupsTest {
     }
 
     // The frame alone, 2026-11-18: "mark ADR-015 as accepted" was asked which ADR.
+    // The frame alone, 2026-11-18: "pon Jaén 9 como reservado" was open between the flat and its visits.
+    @Test
+    fun `the one note whose whole name the task writes settles the set, and two do not`() {
+        val flat = candidate(path = "Pisos/Jaén 9.md")
+        val visits = candidate(path = "Visitas/Visitas Jaén 9.md")
+
+        assertEquals(
+            expected = listOf(flat, null),
+            actual = listOf(
+                FrameGroups.settledOf(
+                    task = "pon Jaén 9 como reservado",
+                    group = listOf(flat, visits)
+                ),
+                FrameGroups.settledOf(
+                    task = "the budget 2026's total",
+                    group = listOf(home, work)
+                )
+            )
+        )
+    }
+
     @Test
     fun `a number of one name the task writes settles the set, and a number of none does not`() {
         val sprints = listOf(

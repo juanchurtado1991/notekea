@@ -37,7 +37,8 @@ internal object FrameGroups {
 
     /**
      * The one note of [group] whose name has a word the others' names do not and the task writes ("Laura Castro's
-     * email", "the work budget" for Work/Budget 2026); null when the names leave it to what the notes say.
+     * email", "the work budget" for Work/Budget 2026), else the one whose whole name the task writes ("Declan Moran"
+     * beside "Transcript - Declan Moran"); null when the names leave it to what the notes say.
      */
     fun settledOf(
         task: String,
@@ -64,7 +65,23 @@ internal object FrameGroups {
             }
         }
 
-        return named.singleOrNull()
+        // A note named by the task's words alone is the thing; the others are about it (the frame alone, 2026-11-18:
+        // "pon Jaén 9 como reservado" was open between Pisos/Jaén 9 and Visitas/Visitas Jaén 9).
+        val whole = group.filter { candidate ->
+            val name = candidate.path.nameWithoutExtension
+            val own = FrameWords.of(text = name) + FrameWords.numbersOf(text = name)
+
+            own.isNotEmpty() && own.all { word ->
+                words.any {
+                    FrameWords.isSame(
+                        one = it,
+                        other = word
+                    )
+                }
+            }
+        }
+
+        return named.singleOrNull() ?: whole.singleOrNull()
     }
 
     /**
