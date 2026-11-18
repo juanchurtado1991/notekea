@@ -71,6 +71,8 @@ tuned sets, and the pool below replaces them as the blind measure.
   20261117.
 - **The reference:** one commit measured on all 40 unsealed exams with both models
   (`-PchatPool=all`, `scripts/loop-eval/measure.sh reference reference <size>`).
+  - **2026-11-18, `fe69455b`:** 4B 1,210 of 1,744 (69.4 %), 9B 1,270 (72.8 %). By cause, and the budget the
+    targets leave, in `docs/loop-goal-plan.md`, "The real starting point".
 - **A round** measures ten of the 40 picked by a seed (`-PchatPool=sample -PchatPoolSeed=<n>`), at its opening and
   after each change in it. Exams differ a lot in how hard they are, so a sample is compared with the reference on
   the same exams, never with another sample.

@@ -74,6 +74,27 @@ What this says:
   85–88 % for the 9B. Reaching 85 and 90 needs cause 1 solved at about 80 %. Say so in every report: never
   promise the target.
 
+### The real starting point: the pool reference (2026-11-18, `fe69455b`)
+
+The 40 unsealed exams, 1,744 tasks, measured once on both models (step 1.4). The budget is the table above scaled
+to them: 85 % leaves at most 261 failures, 90 % at most 174.
+
+| Cause | 4B now | 4B budget | 9B now | 9B budget | Step that takes it |
+|---|---|---|---|---|---|
+| 1. Should have asked, did not | 187 | 62 | 211 | 45 | 2 |
+| 2. Asked, should not have | 81 | 35 | 59 | 22 | 2 |
+| 3. Days between dates | 13 | 13 | 9 | 9 | 3 |
+| 4. Figure worked out (sum, count, average, compare) | 85 | 58 | 59 | 31 | 3 |
+| 5. Change wrong or incomplete | 125 | 57 | 104 | 40 | 4 |
+| 6. Fact wrong or incomplete | 35 | 27 | 25 | 22 | 5 |
+| 7. Other | 8 | 9 | 7 | 5 | |
+| **Total** | **534 (69.4 %)** | **261** | **474 (72.8 %)** | **174** | |
+
+- **Asking is still the largest cause, larger on the 9B (211) than on the 4B (187):** the frame's design, not
+  the model's size. Steps 2.1 and 2.3 (pointing tasks, sets by kind) come first.
+- **Needless asks are four times the budget on the 4B:** every change to the frame is read on both causes at once.
+- **Days are within budget on both:** step 3 spends its time on figures.
+
 ### The foundations built so far (commit `9d319805`), first full measurement
 
 The frame, `tally`, `days` and the topic read whole.
@@ -463,6 +484,10 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s22-words` | `cfcc4ec9` | 2.2, namesakes told apart by their own words | dev 35 / 38; tuned 13 / 7 | | | | | yes |
 | 2026-11-18 | `s22-change` | `e1c5153b` | 2.2, entries marked for changes only | dev 36 / 15; tuned 13 / 5 | | | | | yes |
 | 2026-11-18 | `s22-dev` | `e1c5153b` | 2.2 in the loop, level 3 | | 275 of 393 (70 %, was 258): asked needlessly 40 → 17 | | | | yes |
+| 2026-11-18 | `s22-tuned` | `3165791a` | 2.2, level 4 | | | 207 of 259 (fresh 55) | | | see `s23` |
+| 2026-11-18 | `s23-quotes` | `fe69455b` | 2.2: something added is about the note; quotes tell nothing apart | dev 36 / 17; tuned 11 / 5 | | | | | yes |
+| 2026-11-18 | `s23-tuned` | `fe69455b` | the same, level 4 | | | 213 of 259 (82 %; fresh 53) | | | yes |
+| 2026-11-18 | `reference` | `fe69455b` | pool reference, 40 unsealed exams, level 5 | | | | 1210 of 1744 (69.4 %): ask missed 187, needless ask 81, days 13, figure 85, change 125, fact 35, other 8 | 1270 of 1744 (72.8 %): ask missed 211, needless ask 59, days 9, figure 59, change 104, fact 25, other 7 | yes |
 
 Notes as the plan is carried out:
 
