@@ -1,6 +1,18 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.domain.agent.AgentStep
+import app.notekea.chat.domain.loop.FrameCount
+import app.notekea.chat.domain.loop.FramePrompts
+import app.notekea.chat.domain.loop.FrameReason
+import app.notekea.chat.domain.loop.FrameTarget
+import app.notekea.chat.domain.loop.TaskFrame
+import app.notekea.core.llm.domain.ChatMessage
+import app.notekea.core.llm.domain.ChatRole
+import app.notekea.core.llm.domain.FakeLlmEngine
+import app.notekea.core.llm.domain.GenerationOptions
+import app.notekea.core.notes.domain.RelativePath
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -111,6 +123,60 @@ class EvalTraceReportTest {
         assertEquals(
             expected = "wrote a call too long to end within its tokens",
             actual = EvalTraceReport.categoryOf("no note Summary written: nothing", end, calls)
+        )
+    }
+
+    // docs/loop-goal-plan.md, step 1.1: the frame's questions write the request after the notes, and went unrecorded.
+    @Test
+    fun `a frame question is kept under its task, as a frame call`() = runTest {
+        val trace = EvalTrace(engine = FakeLlmEngine())
+
+        trace
+            .recorded
+            .generate(
+                messages = listOf(
+                    ChatMessage(
+                        role = ChatRole.SYSTEM,
+                        text = FramePrompts.SAID
+                    ),
+                    ChatMessage(
+                        role = ChatRole.USER,
+                        text = "Notes:\nN1 Home/Budget\n\nRequest: the budget's total"
+                    )
+                ),
+                options = GenerationOptions()
+            )
+            .collect()
+
+        assertEquals(
+            expected = listOf(TracedCall.Role.FRAME),
+            actual = trace.of(task = "the budget's total").map { it.role }
+        )
+    }
+
+    @Test
+    fun `the frame line says what settled it or what is open`() {
+        val home = RelativePath(value = "Home/Budget.md")
+        val work = RelativePath(value = "Work/Budget.md")
+
+        val settled = TaskFrame(
+            targets = listOf(FrameTarget(note = work)),
+            count = FrameCount.ONE,
+            candidates = listOf(home, work),
+            reason = FrameReason.MEMORY
+        )
+
+        val open = settled.copy(
+            targets = listOf(FrameTarget(note = home), FrameTarget(note = work)),
+            reason = FrameReason.SAID
+        )
+
+        assertEquals(
+            expected = listOf(
+                "one, settled by memory: Work/Budget",
+                "one, open between: Home/Budget; Work/Budget (by said)"
+            ),
+            actual = listOf(settled, open).map { EvalTraceReport.frameOf(frame = it) }
         )
     }
 }

@@ -1,5 +1,8 @@
 package app.notekea.chat.eval
 
+import app.notekea.chat.domain.loop.FramePrompts
+import app.notekea.chat.domain.loop.FrameSource
+import app.notekea.chat.domain.loop.TaskFrame
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
@@ -15,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 internal class EvalTrace(private val engine: LlmEngine) {
     private val calls = ConcurrentHashMap<String, MutableList<TracedCall>>()
+    private val frames = ConcurrentHashMap<String, TaskFrame>()
 
     /** [engine], each call it answers kept under the task its prompt names. */
     val recorded: LlmEngine = object : LlmEngine by engine {
@@ -42,6 +46,17 @@ internal class EvalTrace(private val engine: LlmEngine) {
         }
     }
 
+    /** [source], each frame it builds kept under its task, for the report's frame line. */
+    fun framed(source: FrameSource): FrameSource =
+        FrameSource { task, vaultPath, notes, memory, openNote, isChange ->
+            source.of(task, vaultPath, notes, memory, openNote, isChange)?.also {
+                frames[task] = it
+            }
+        }
+
+    /** The frame built for [task], or null when it had none. */
+    fun frameOf(task: String): TaskFrame? = frames[task]
+
     fun of(task: String): List<TracedCall> = synchronized(callsOf(task = task)) {
         callsOf(task = task).toList()
     }
@@ -60,12 +75,26 @@ internal class EvalTrace(private val engine: LlmEngine) {
     private fun roleOf(system: String): TracedCall.Role = when {
         system.startsWith(prefix = ROUTER) -> TracedCall.Role.ROUTE
         system.startsWith(prefix = LOOP) -> TracedCall.Role.STEP
+        system in FRAME_PROMPTS -> TracedCall.Role.FRAME
         else -> TracedCall.Role.OTHER
     }
 
     private companion object {
         val TASK = Regex(pattern = "Task: (.+)")
-        val REQUEST = Regex(pattern = "^Request: (.+)")
+
+        // The frame's questions write the request after the memory and the notes, so it is found on any line.
+        val REQUEST = Regex(
+            pattern = "^Request: (.+)$",
+            option = RegexOption.MULTILINE
+        )
+
+        val FRAME_PROMPTS = setOf(
+            FramePrompts.COUNT,
+            FramePrompts.SAID,
+            FramePrompts.PICK,
+            FramePrompts.ENTRY,
+            FramePrompts.SEVERAL
+        )
         const val ROUTER = "You say how a request"
         const val LOOP = "You work on a task"
     }
@@ -77,7 +106,7 @@ internal class TracedCall(
     val prompt: String,
     val written: String
 ) {
-    enum class Role { ROUTE, STEP, OTHER }
+    enum class Role { ROUTE, FRAME, STEP, OTHER }
 
     /** A call of JSON that stops before it closes: the model ran out of tokens while writing it. */
     val isCut: Boolean

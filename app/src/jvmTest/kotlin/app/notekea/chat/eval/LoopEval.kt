@@ -4,6 +4,7 @@ import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.data.SqliteStepMemory
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.loop.FrameSource
 import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
 import app.notekea.chat.domain.loop.StepRecall
@@ -36,7 +37,8 @@ internal object LoopEval {
         runner: ActionRunner,
         pageReader: PageReader = OFFLINE_PAGES,
         webSearch: WebSearchProvider = OFFLINE_SEARCH,
-        clipper: WebPageClipper? = null
+        clipper: WebPageClipper? = null,
+        trace: EvalTrace? = null
     ): RunTurnUseCase {
         val cache = NoteTextCache(
             contentStore = indexed.store,
@@ -73,12 +75,24 @@ internal object LoopEval {
             wholeLast = StepRecall.WHOLE_LAST.takeIf {
                 System.getProperty("notekea.stepmemory") == "fold"
             },
-            frames = TurnFrames(
-                framer = TaskFramer(llmEngine = engine),
-                answerFromNotes = answerFromNotes,
-                vaultGuide = vaultGuide
-            )
+            frames = framesOf(engine, answerFromNotes, vaultGuide, trace)
         )
+    }
+
+    // The app's frames, kept by the trace when there is one so a report can say each task's frame.
+    private fun framesOf(
+        engine: LlmEngine,
+        answerFromNotes: AnswerFromNotesUseCase,
+        vaultGuide: VaultGuide,
+        trace: EvalTrace?
+    ): FrameSource {
+        val frames = TurnFrames(
+            framer = TaskFramer(llmEngine = engine),
+            answerFromNotes = answerFromNotes,
+            vaultGuide = vaultGuide
+        )
+
+        return trace?.framed(source = frames) ?: frames
     }
 
     private val OFFLINE_PAGES = PageReader { Outcome.Failure(error = PageProblem.OFFLINE) }

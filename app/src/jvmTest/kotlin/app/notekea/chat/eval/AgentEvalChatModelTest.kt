@@ -16,6 +16,7 @@ import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.eval.blind.BlindExams
+import app.notekea.chat.eval.blind.BlindPool
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
@@ -267,6 +268,27 @@ class AgentEvalChatModelTest {
         }
     }
 
+    // docs/eval-blind.md: ten exams of the blind pool picked at random by a seed, all 40 unsealed, or the ten sealed.
+    @Test
+    fun `blind pool, ten exams the loop was never tuned on`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        val seed = System
+            .getProperty("notekea.chat.poolSeed")
+            .orEmpty()
+            .toLongOrNull() ?: 1
+
+        val exams = when (System.getProperty("notekea.chat.pool")) {
+            "sealed" -> BlindPool.sealed
+            "all" -> BlindPool.unsealed
+            else -> BlindPool.sampleOf(seed = seed)
+        }
+
+        exams.forEach { exam ->
+            measured(exam.vault, exam.cases.map { it.forLoop() }, "pool-${exam.id}", isLoop = true)
+        }
+    }
+
     /** The share of [cases] done right on [vault], and the report written to `build/reports/[name]-<size>.md`. */
     private suspend fun measured(
         vault: String,
@@ -306,7 +328,14 @@ class AgentEvalChatModelTest {
         val cache = NoteTextCache(indexed.store, TextFolder())
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
-        val loop = LoopEval.loopOf(recorded, embedder, indexed, runner)
+        val loop = LoopEval.loopOf(
+            engine = recorded,
+            embedder = embedder,
+            indexed = indexed,
+            runner = runner,
+            trace = trace
+        )
+
         val slots = Semaphore(permits = setup.slots)
 
         val results = coroutineScope {
@@ -337,7 +366,10 @@ class AgentEvalChatModelTest {
             it.problem == null
         }
 
-        val report = report(
+        val report = AgentEvalReport(
+            trace = trace,
+            size = size
+        ).of(
             vault = vault,
             results = results,
             right = right
@@ -379,96 +411,10 @@ class AgentEvalChatModelTest {
         )
     }
 
-    private fun report(
-        vault: String,
-        results: List<AgentResult>,
-        right: Int
-    ): String = buildString {
-        val moves = results.map {
-            it.steps.count { step ->
-                step is AgentStep.Moving
-            }
-        }
-
-        append("# Agent mode on $vault (${size.id})\n\n")
-        append("$right of ${results.size} right (${right * PERCENT / results.size} %), ")
-        append("moves ${moves.average().toInt()} on average (${moves.max()} at most), ")
-        val seconds = results.map { it.seconds }
-
-        append("${seconds.average().toInt()} s a task on average (${seconds.max()} s at most)\n")
-
-        val categories = results.mapNotNull { result ->
-            result.problem?.let {
-                EvalTraceReport.categoryOf(
-                    problem = it,
-                    end = result.steps.last(),
-                    calls = trace.of(task = result.case.task)
-                )
-            }
-        }
-
-        append(EvalTraceReport.summary(categories = categories))
-
-        results.forEach { result ->
-            val calls = trace.of(task = result.case.task)
-
-            append("\n## ${if (result.problem == null) "✓" else "✗"} ${result.case.task}\n\n")
-
-            EvalTraceReport.routeOf(calls = calls)?.let { append("Routed to $it.\n\n") }
-
-            result.steps.forEach { append("- ${shown(step = it)}\n") }
-
-            result.problem?.let {
-                append(
-                    failed(
-                        result = result,
-                        problem = it
-                    )
-                )
-            }
-
-            append("\n${result.seconds} s\n")
-        }
-    }
-
-    private fun shown(step: AgentStep): String = when (step) {
-        is AgentStep.Moving -> "${step.move} ${step.target}"
-        else -> step.toString().take(n = STEP_CHARS)
-    }
-
-    // What went wrong, with what the agent had found by its last move.
-    private fun failed(
-        result: AgentResult,
-        problem: String
-    ): String = buildString {
-        val calls = trace.of(task = result.case.task)
-        val category = EvalTraceReport.categoryOf(problem, result.steps.last(), calls)
-
-        append("\n**$problem**\n\nKind: $category.\n")
-
-        trace.lastPrompt(task = result.case.task)?.let { prompt ->
-            append("\n<details><summary>Found by the last move</summary>\n\n```\n")
-            append(prompt.substringAfter(delimiter = "so far:\n").take(n = PROMPT_CHARS))
-            append("\n```\n</details>\n")
-        }
-
-        append(EvalTraceReport.traced(calls = calls))
-    }
-
-    private class AgentResult(
-        val case: AgentEvalCase,
-        val steps: List<AgentStep>,
-        val seconds: Long,
-        val problem: String?
-    )
-
     private companion object {
         const val VAULT = "Sample Vault"
         val MEMORY = VaultGuide.MEMORY.value
         const val GPU_SLOTS = 4
-        const val PERCENT = 100
-        const val PROMPT_CHARS = 4_000
-        const val STEP_CHARS = 600
         const val NANOS_PER_SECOND = 1_000_000_000L
 
         // A size is offered agent mode when four tasks in five come out right.

@@ -1,6 +1,9 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.domain.agent.AgentStep
+import app.notekea.chat.domain.loop.FrameCount
+import app.notekea.chat.domain.loop.TaskFrame
+import app.notekea.chat.domain.loop.TaskFrame.Companion.bare
 
 /**
  * A task's [TracedCall]s written for a report: the route, each call as the model wrote it after what it was given
@@ -19,6 +22,29 @@ internal object EvalTraceReport {
                 ?.groupValues
                 ?.get(1) ?: it.trim()
         }
+
+    /** The frame in one line: how many things, settled or open, and by what (`docs/loop-goal-plan.md`, step 1.1). */
+    fun frameOf(frame: TaskFrame): String {
+        val by = frame
+            .reason
+            .name
+            .lowercase()
+
+        return when {
+            frame.isOpen -> "one, open between: ${frame.options.joinToString(separator = "; ")} (by $by)"
+
+            frame.meant != null ->
+                "one, settled by $by: ${frame.meant.bare()}" +
+                    frame
+                        .entry
+                        ?.let { ", entry \"$it\"" }
+                        .orEmpty()
+
+            frame.count == FrameCount.ONE -> "one, no note meant"
+
+            else -> "${frame.count.written}: ${frame.notes.joinToString(separator = "; ") { it.bare() }}"
+        }
+    }
 
     /** Every call of the task, each after the results it was given that the call before was not. */
     fun traced(calls: List<TracedCall>): String = buildString {

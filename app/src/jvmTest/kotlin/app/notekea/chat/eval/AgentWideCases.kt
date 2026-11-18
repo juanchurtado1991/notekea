@@ -32,17 +32,17 @@ class AgentWideCase(
             is AgentStep.Proposed -> end.summary + end.steps
             is AgentStep.Asked -> end.question + end.options
             else -> ""
-        }.replace(
-            oldValue = ",",
-            newValue = ""
-        ).lowercase()
+        }.let { FairText.plain(text = it) }
 
         val missing = (holds + computed).filterNot {
-            it.plain() in text
+            FairText.isHeld(
+                wanted = it,
+                answer = text
+            )
         }
 
         val unwanted = lacks.filter {
-            it.plain() in text
+            FairText.plain(text = it) in text
         }
 
         val isQuestion = end is AgentStep.Finished && "?" in end.summary
@@ -61,11 +61,6 @@ class AgentWideCase(
             else -> null
         }
     }
-
-    private fun String.plain(): String = replace(
-        oldValue = ",",
-        newValue = ""
-    ).lowercase()
 }
 
 /** The tasks today's 30 do not cover: documents, long notes, requests that can be read two ways, several notes. */
