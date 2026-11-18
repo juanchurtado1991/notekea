@@ -9,8 +9,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * How a turn starts (the bug hunt of 2026-11-17): the router's schema with a skill named with a quote (E12), and
- * the vault's own web sources trusted (E7).
+ * How a turn starts (the bug hunt of 2026-11-17): the router's schema with a skill named with a quote (E12), the
+ * vault's own web sources trusted (E7), and a turn that writes framed as a change (the frame alone, 2026-11-18).
  */
 class TurnStartTest {
     private val engine = FakeLlmEngine()
@@ -65,4 +65,32 @@ class TurnStartTest {
             actual = turn.trust.of(domain = "www.fao.org")
         )
     }
+
+    @Test
+    fun `a turn that writes is framed as a change, as one that organizes, and a question is not`() =
+        runTest {
+            val asked = mutableListOf<Boolean>()
+
+            val frames = FrameSource { _, _, _, _, isChange, _ ->
+                asked += isChange
+                null
+            }
+
+            listOf(WorkKind.WRITE, WorkKind.ORGANIZE, WorkKind.ASK).forEach { kind ->
+                TurnSetup.frameOf(
+                    task = "add a misc line of 200 to the budget",
+                    vaultPath = VAULT,
+                    notes = emptyList(),
+                    memory = emptyList(),
+                    kind = kind,
+                    frames = frames,
+                    openNote = null
+                )
+            }
+
+            assertEquals(
+                expected = listOf(true, true, false),
+                actual = asked
+            )
+        }
 }

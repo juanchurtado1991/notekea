@@ -10,10 +10,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The memory and the task's own words (the loop's seventh run, 2026-11-17): "the household budget" was answered
- * from the right note and held back, as the memory says "the budget" is the other Budget 2026; and "my sister's
- * phone" was read from the note the memory names, then answered with "no note says who Rosa is". Which note the
- * task means is now the frame's (`docs/agent-frame.md`).
+ * The memory and the task's own words (the loop's seventh run, 2026-11-17): "the household budget" against a memory
+ * that names the other Budget 2026, and "my sister's phone" read from the note the memory names. Which note the task
+ * means is the frame's (`docs/agent-frame.md`).
  */
 class MemoryAgainstTaskTest {
     private val engine = FakeLlmEngine()

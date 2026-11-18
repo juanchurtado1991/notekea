@@ -15,7 +15,7 @@ fun interface FrameSource {
         vaultPath: String,
         notes: Collection<NoteEntry>,
         memory: List<MemoryLine>,
-        openNote: RelativePath?,
-        isChange: Boolean
+        isChange: Boolean,
+        openNote: RelativePath?
     ): TaskFrame?
 }

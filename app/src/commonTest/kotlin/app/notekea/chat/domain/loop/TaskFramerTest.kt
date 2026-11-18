@@ -81,7 +81,12 @@ class TaskFramerTest {
             )
 
             assertEquals(
-                expected = listOf(listOf(home.path, work.path), FrameReason.WORDS, kitchen.path, FrameReason.WORDS),
+                expected = listOf(
+                    listOf(home.path, work.path),
+                    FrameReason.WORDS,
+                    kitchen.path,
+                    FrameReason.WORDS
+                ),
                 actual = listOf(open?.openNotes, open?.reason, told?.meant, told?.reason)
             )
         }

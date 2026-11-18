@@ -17,7 +17,8 @@ internal object TopicUnread {
         if (call.name != AnswerTool.NAME) return null
 
         val related = state.turn.reads.related
-        if (related.isEmpty() || !state.told.add(element = TOLD)) return null
+        val isTold = related.isEmpty() || !state.told.add(element = TOLD)
+        if (isTold) return null
 
         return "(Not done: ${related.joinToString { it.bare() }} ${if (related.size == 1) "is" else "are"} about " +
             "the same topic as what you read and write the task's words, and you have not read " +

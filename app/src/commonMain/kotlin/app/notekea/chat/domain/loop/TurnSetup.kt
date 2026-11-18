@@ -43,8 +43,9 @@ internal object TurnSetup {
     )
 
     /**
-     * Which notes, and which entries in them, the task means: said by the model, held to by the code. A note to write
-     * is no note of the vault: what it is written from are its sources, all of them, never one to ask about.
+     * Which notes, and which entries in them, the task means. Writing is framed too, as a change: "add a misc line
+     * to the budget" means one of two budgets (8 of the 4B's 36 misses had no frame, the frame alone, 2026-11-18).
+     * A note written from nothing is counted "none" and frames nothing.
      */
     suspend fun frameOf(
         task: String,
@@ -55,16 +56,13 @@ internal object TurnSetup {
         frames: FrameSource?,
         openNote: RelativePath?
     ): TaskFrame? = frames
-        ?.takeIf {
-            kind != WorkKind.WRITE
-        }
         ?.of(
             task = task,
             vaultPath = vaultPath,
             notes = notes,
             memory = memory,
             openNote = openNote,
-            isChange = kind == WorkKind.ORGANIZE
+            isChange = kind == WorkKind.ORGANIZE || kind == WorkKind.WRITE
         )
 
     /** The memory's lines that bear on [task]: those the frame's model and the loop's model are given. */

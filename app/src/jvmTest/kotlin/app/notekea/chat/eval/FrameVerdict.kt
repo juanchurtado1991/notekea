@@ -6,8 +6,8 @@ import app.notekea.chat.domain.loop.TaskFrame
 internal class FrameVerdict(
     val task: String,
     val mustAsk: Boolean,
-    val frame: TaskFrame?,
-    val calls: List<TracedCall>
+    val calls: List<TracedCall>,
+    val frame: TaskFrame?
 ) {
     enum class Kind(val written: String) {
         HIT(written = "open, and must ask"),

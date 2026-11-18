@@ -25,7 +25,10 @@ class TaskFramer(llmEngine: LlmEngine) {
         ) ?: return null
 
         val (targets, reason) = when (reply.count) {
-            FrameCount.ONE -> oneOf(task, reply.copy(isItem = reply.isItem && isChange), candidates, memory)
+            FrameCount.ONE -> {
+                val asked = reply.copy(isItem = reply.isItem && isChange)
+                oneOf(task, asked, candidates, memory)
+            }
 
             FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.let { several ->
                 targetsOf(several) to FrameReason.NONE
