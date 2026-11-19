@@ -5,6 +5,7 @@ import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DatePhrases
 import app.notekea.chat.domain.tool.app.DateTool
+import app.notekea.chat.domain.tool.app.DaysTool
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
@@ -131,6 +132,17 @@ class AppToolsTest {
                 )
             )
         }
+
+    // The loop's dev run, 2026-11-18: "120 + (2027-03-01 - 2026-11-11)" came to 95.
+    @Test
+    fun `a sum with a date in it is refused and sent to days`() = runTest {
+        val said = said(CalculateTool(), "expression" to "120 + (2027-03-01 - 2026-11-11)")
+
+        assertEquals(
+            expected = true,
+            actual = "a date is no number" in said && DaysTool.NAME in said
+        )
+    }
 
     @Test
     fun `notes, words and tasks are counted in the vault, a folder, a tag or one note`() = runTest {
