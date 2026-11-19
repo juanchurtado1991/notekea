@@ -35,8 +35,10 @@ import kotlin.time.Clock
 class BugHuntTurnTest {
     private val engine = FakeLlmEngine()
 
+    private val store = FakeNoteContentStore()
+
     private val cache = NoteTextCache(
-        contentStore = FakeNoteContentStore(),
+        contentStore = store,
         textFolder = TextFolder()
     )
 
@@ -300,11 +302,40 @@ class BugHuntTurnTest {
             )
         }
 
+    // Pool round 1, 2026-11-18: told to read the notes on the topic first, the 4B ran out of steps.
+    @Test
+    fun `an answer held for unread notes on the topic leaves only reading until they are read`() =
+        runTest {
+            store.texts[RelativePath(value = "Health/Papa.md")] = "Papa's care plan. See [[Allergies]]."
+            store.texts[RelativePath(value = "Health/Allergies.md")] = "Penicillin allergy since 2019."
+
+            run(
+                task = "what allergy does papa have?",
+                paths = listOf("Health/Papa.md", "Health/Allergies.md"),
+                calls = listOf(
+                    """{"tool":"read","note":"Health/Papa"}""",
+                    ANSWER,
+                    """{"tool":"read","note":"Health/Allergies"}"""
+                )
+            )
+
+            assertEquals(
+                expected = listOf(true, false, true),
+                actual = callSchemas()
+                    .drop(n = 1)
+                    .take(n = 3)
+                    .map {
+                        ANSWERING in it
+                    }
+            )
+        }
+
     private companion object {
         const val CALLS = "You work on a task in the person's notes"
         const val ROUTE = """{"work":"ask","skill":"none"}"""
         const val ANSWER = """{"tool":"answer","text":"Done."}"""
         const val WRITTEN = "The answer."
         const val TAGGING = "\"const\":\"add_tag\""
+        const val ANSWERING = "\"const\":\"answer\""
     }
 }

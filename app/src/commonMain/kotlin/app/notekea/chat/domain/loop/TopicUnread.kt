@@ -7,7 +7,7 @@ import app.notekea.chat.domain.tool.work.AnswerTool
 /**
  * An answer given while notes about the same topic as the ones read, that write the task's words, are still unread
  * (`docs/agent-figures.md`): "papá is not allergic to anything", with his penicillin allergy in the care plan. Held
- * back once, the model told to read them first.
+ * back once, and until they are read the calls may only read: told, the 4B ran out of steps instead.
  */
 internal object TopicUnread {
     fun heldOf(
@@ -24,6 +24,17 @@ internal object TopicUnread {
             "the same topic as what you read and write the task's words, and you have not read " +
             "${if (related.size == 1) "it" else "them"}. Read before you answer, above all before saying the notes " +
             "do not hold something.)"
+    }
+
+    /** Whether the next call may only read: the answer was held back for notes still unread. */
+    fun mustRead(state: TurnState): Boolean {
+        val isUnread = state
+            .turn
+            .reads
+            .related
+            .isNotEmpty()
+
+        return TOLD in state.told && isUnread
     }
 
     private const val TOLD = "topic unread"
