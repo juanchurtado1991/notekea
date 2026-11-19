@@ -135,6 +135,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The chat's loop reads a short note whole when asked for one of its sections, so the figures above a heading are
+  not missed.
+- `tally` counts each figure on the line of the notes closest to its words: it took the first line sharing a word
+  such as the year, and showed paid sessions as the unpaid ones it counted. A tally of other items is no longer
+  told it was made again.
+- `calculate` refuses a date and sends the model to `days`: "2027-03-01 - 2026-11-11" came to 95.
 - Setting a property to the value it already has no longer rewrites how it is written: `record: off` stayed
   `record: off`, not `record: "off"`.
 - A bug hunt over the whole app (2026-11-17, `docs/bug-hunt-2026-11-17.md`) fixed its defects, each with a test.

@@ -438,6 +438,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
       dates, and an answer's figures backed by a tool.
    3. **A topic read whole.** The notes that a note read links or tags, and that write the task's words, are read
       before answering.
+   4. **The plan to the blind targets** (`docs/loop-goal-plan.md`), under way: on 2026-11-19 the pool's first round
+      is at 73.4 % (4B) and 75.0 % (9B), against targets of 85 % and 90 %.
 
 ## Out of scope for the MVP
 
