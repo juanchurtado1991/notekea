@@ -30,9 +30,43 @@ internal object FrameGroups {
         }
 
         // One name writing them all among others writing some is that note, as its name settles a set.
-        return listOf(full).filter {
-            holding.size >= 2 && it.size in 1..MOST
+        if (named.isNotEmpty()) {
+            return listOf(full).filter {
+                holding.size >= 2 && it.size in 1..MOST
+            }
         }
+
+        return listOfNotNull(kindOf(task, candidates))
+    }
+
+    // When no name writes a word of the task, the notes of the folder its word for the thing names: "move the
+    // project to Archive" with two in Projects was settled by a pick (docs/loop-goal-plan.md, step 2.3).
+    private fun kindOf(
+        task: String,
+        candidates: List<FrameCandidates.Candidate>
+    ): List<FrameCandidates.Candidate>? {
+        val words = FrameWords.of(text = task)
+
+        return candidates
+            .groupBy { folderOf(candidate = it) }
+            .filterKeys { folder ->
+                val own = FrameWords.of(text = folder)
+
+                own.isNotEmpty() && own.all { name ->
+                    words.any {
+                        FrameWords.isSame(
+                            one = it,
+                            other = name
+                        )
+                    }
+                }
+            }
+            .values
+            .singleOrNull()
+            ?.takeIf {
+                it.size >= 2
+            }
+            ?.take(n = MOST_KIND)
     }
 
     /**
@@ -137,6 +171,16 @@ internal object FrameGroups {
         )
     }
 
+    // The innermost folder of a note's path, empty at the vault's root.
+    private fun folderOf(candidate: FrameCandidates.Candidate): String = candidate
+        .path
+        .value
+        .substringBeforeLast(
+            delimiter = '/',
+            missingDelimiterValue = ""
+        )
+        .substringAfterLast(delimiter = '/')
+
     // Every word a note writes, with those of its path.
     private fun wordsOf(candidate: FrameCandidates.Candidate): Set<String> =
         candidate.words + titleOf(candidate)
@@ -157,6 +201,7 @@ internal object FrameGroups {
     }
 
     private const val MOST = 6
+    private const val MOST_KIND = 12
 
     // A quote opens where no letter is before it, so "Laura's" opens none.
     private val QUOTED =

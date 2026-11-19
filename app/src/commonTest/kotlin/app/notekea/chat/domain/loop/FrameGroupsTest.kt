@@ -81,6 +81,28 @@ class FrameGroupsTest {
         )
     }
 
+    // The frame alone, 2026-11-18: "move the project to Archive", with two projects, was settled by a pick.
+    @Test
+    fun `when no name writes a task word, the folder its word names is the set, and a name makes none`() {
+        val greenhouse = candidate(path = "Projects/Greenhouse.md")
+        val ledger = candidate(path = "Projects/Ledger Migration.md")
+        val notes = listOf(greenhouse, ledger, contacts, dune)
+
+        assertEquals(
+            expected = listOf(listOf(listOf(greenhouse, ledger)), emptyList()),
+            actual = listOf(
+                FrameGroups.of(
+                    task = "move the project to Archive",
+                    candidates = notes
+                ),
+                FrameGroups.of(
+                    task = "move the greenhouse project to Archive",
+                    candidates = notes
+                )
+            )
+        )
+    }
+
     @Test
     fun `a word of one name or folder the task writes settles the set, and none leaves it to the notes`() {
         assertEquals(
