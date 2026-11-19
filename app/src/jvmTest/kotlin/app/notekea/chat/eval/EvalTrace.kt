@@ -92,7 +92,7 @@ internal class EvalTrace(private val engine: LlmEngine) {
             FramePrompts.COUNT,
             FramePrompts.MARK_NOTES,
             FramePrompts.PICK,
-            FramePrompts.MARK_ENTRY,
+            FramePrompts.MARK_ENTRIES,
             FramePrompts.SEVERAL
         )
         const val ROUTER = "You say how a request"

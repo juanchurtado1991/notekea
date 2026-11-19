@@ -75,28 +75,22 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         )
     )?.let { (shown, fields) -> shown.noteOf(fields = fields) }
 
-    /**
-     * The entries of [note] [task] could be about, each asked alone: shown all at once, the 4B marked one "yes"
-     * of several that fit (the frame alone, 2026-11-18). Null when a reply cannot be read.
-     */
+    /** The entries of [note] [task] could be about, each marked yes or no; null when the reply cannot be read. */
     suspend fun markedEntriesOf(
         task: String,
         note: FrameCandidates.Candidate,
         memory: List<MemoryLine>
-    ): List<String>? = note
-        .entries
-        .take(n = MOST_MARKED)
-        .filter { entry ->
-            val shown = FrameShown(
-                notes = listOf(note),
-                extra = emptyList(),
-                entries = listOf(entry)
-            )
+    ): List<String>? {
+        val shown = FrameShown(
+            notes = listOf(note),
+            extra = emptyList(),
+            entries = note.entries.take(n = MOST_MARKED)
+        )
 
-            val fields = marked(FramePrompts.MARK_ENTRY, task, memory, shown) ?: return null
+        val fields = marked(FramePrompts.MARK_ENTRIES, task, memory, shown) ?: return null
 
-            shown.markedEntriesOf(fields = fields)?.isNotEmpty() ?: return null
-        }
+        return shown.markedEntriesOf(fields = fields)
+    }
 
     /** The notes [task] names, each of them; null when the reply cannot be read. */
     suspend fun severalOf(
