@@ -25,6 +25,9 @@ class TurnReads {
         it in held
     }
 
+    /** Whether [note] was one of the topic's: its own topic is no task's (one step from what the task read). */
+    fun isRelated(note: RelativePath): Boolean = note in topic
+
     fun relate(notes: List<RelativePath>) {
         topic += notes
     }

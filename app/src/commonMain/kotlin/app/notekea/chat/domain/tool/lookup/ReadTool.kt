@@ -120,12 +120,18 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
             .orEmpty()
 
         // Notes on the same topic that write the task's words: an answer waits for them (`docs/agent-figures.md`).
-        val topic = TopicNotes.of(
-            note = note,
-            text = read.text,
-            context = context,
-            cache = noteTextCache
-        )
+        // One step only: the topic of a topic note led the 4B from Kenji to his student's friends until it ran out
+        // of steps (12 of 12 such holds on dev, 2026-11-18).
+        val topic = if (context.reads.isRelated(note = note.file.path)) {
+            emptyList()
+        } else {
+            TopicNotes.of(
+                note = note,
+                text = read.text,
+                context = context,
+                cache = noteTextCache
+            )
+        }
 
         context.reads.relate(notes = topic)
 
