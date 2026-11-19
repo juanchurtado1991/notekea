@@ -63,6 +63,8 @@ class TaskFramerTest {
     }
 
     private val one = """{"count":"one","words":"the budget","thing":"note"}"""
+    private val yes = """{"E1":"yes"}"""
+    private val no = """{"E1":"no"}"""
     private val appointment = """{"count":"one","words":"the appointment","thing":"item"}"""
 
     // The frame alone, 2026-11-18: the 4B marked one of two Lauras "yes" with nothing in the task to tell them apart.
@@ -152,22 +154,31 @@ class TaskFramerTest {
         )
     }
 
+    // The frame alone, 2026-11-18: shown every entry at once, the 4B marked one "yes" of several that fit.
     @Test
-    fun `the entries of an item are marked, one settled, two open, none the whole note`() =
+    fun `the entries of an item are marked one call each, one settled, two open, none the whole note`() =
         runTest {
-            suspend fun marked(marks: String) = frameOf(
-                task = "move the appointment to 11:00",
-                candidates = listOf(dentist),
-                replies = mapOf(
-                    FramePrompts.COUNT to appointment,
-                    FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.MARK_ENTRIES to marks
-                )
-            )
+            // Each entry is asked alone: "yes" for those that fit.
+            suspend fun framed(fitting: List<String>): TaskFrame? {
+                engine.reply = { messages ->
+                    when (messages.first().text) {
+                        FramePrompts.COUNT -> appointment
+                        FramePrompts.PICK -> """{"pick":"N1"}"""
+                        else -> if (fitting.any { it in messages.last().text }) yes else no
+                    }
+                }
 
-            val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
-            val single = marked(marks = """{"E1":"no","E2":"yes"}""")
-            val none = marked(marks = """{"E1":"no","E2":"no"}""")
+                return framer.frameOf(
+                    task = "move the appointment to 11:00",
+                    candidates = listOf(dentist),
+                    memory = emptyList(),
+                    isChange = true
+                )
+            }
+
+            val two = framed(fitting = dentist.entries)
+            val single = framed(fitting = listOf(dentist.entries[1]))
+            val none = framed(fitting = emptyList())
 
             assertEquals(
                 expected = listOf(dentist.entries, dentist.entries[1], FrameReason.ENTRY, false),

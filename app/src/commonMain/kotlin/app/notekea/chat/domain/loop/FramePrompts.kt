@@ -33,13 +33,13 @@ what their words mean. Reply with JSON: every note's id with "yes" or "no"."""
         """A request made to a notes app is about one thing in the person's notes. Reply with JSON, pick: the note
 below (N1, N2…) it is about, or "$NOT_SAID" when none of them is."""
 
-    const val MARK_ENTRIES =
-        """A request made to a notes app is about one entry of the note below: an appointment, an order, a row, a
-task. For each entry (E1, E2…), say "yes" when the request could be about it: everything the request says about its
-thing matches the entry, and what the request asks is still possible for it (an order already delivered cannot be
-marked delivered, a task done cannot be marked done). Say "no" when something the request says does not match it. A
-new value the request gives, such as a new time, date or amount to set, says nothing about which entry it is. Reply
-with JSON: every entry's id with "yes" or "no"."""
+    const val MARK_ENTRY =
+        """A request made to a notes app is about one entry of a note: an appointment, an order, a row, a task. You
+are shown one entry of the note below (E1). Say "yes" when the request could be about it: everything the request
+says about its thing matches the entry, and what the request asks is still possible for it (an order already
+delivered cannot be marked delivered, a task done cannot be marked done). Say "no" when something the request says
+does not match it. A new value the request gives, such as a new time, date or amount to set, says nothing about
+which entry it is. Reply with JSON: E1 with "yes" or "no"."""
 
     const val SEVERAL =
         """A request made to a notes app is about several things it names. You are shown the notes it may be about
