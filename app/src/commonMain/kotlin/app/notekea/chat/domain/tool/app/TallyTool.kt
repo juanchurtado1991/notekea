@@ -2,7 +2,6 @@ package app.notekea.chat.domain.tool.app
 
 import app.notekea.chat.domain.loop.FrameWords
 import app.notekea.chat.domain.tool.ChatTool
-import app.notekea.chat.domain.tool.KeyedTool
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
@@ -14,9 +13,7 @@ import app.notekea.core.notes.domain.NoteTextCache
  * Figures from lines of the notes read, worked out by the app (`docs/agent-figures.md`): the model names the lines
  * that count and those left out with why; each figure must be written on its line, or the item is refused.
  */
-class TallyTool(private val noteTextCache: NoteTextCache) :
-    ChatTool,
-    KeyedTool {
+class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
     override val name = NAME
 
     override val description =
@@ -43,13 +40,6 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
         call: ToolCall,
         context: ToolContext
     ): String = "${call.text(name = HOW)} of ${call.list(name = ITEMS).size}"
-
-    // "average of 2" is the step's line, but two averages of other items are two calls: the second, corrected one was
-    // told it was made again (the loop's dev run, 2026-11-19).
-    override fun keyOf(
-        call: ToolCall,
-        context: ToolContext
-    ): String = listOf(HOW, ITEMS, LEFT_OUT).joinToString(separator = "; ") { call.text(name = it) }
 
     override suspend fun run(
         call: ToolCall,

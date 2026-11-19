@@ -215,42 +215,6 @@ class AppToolsTest {
             )
         }
 
-    // The loop's dev run, 2026-11-19: an average corrected to other items was told it was made again.
-    @Test
-    fun `a tally of other items is another call, and the same tally again is the same one`() {
-        val registry = ToolRegistry(
-            tools = listOf(
-                TallyTool(
-                    noteTextCache = NoteTextCache(
-                        contentStore = store,
-                        textFolder = TextFolder()
-                    )
-                )
-            )
-        )
-
-        fun keyOf(items: String) = registry.keyOf(
-            ToolCall(
-                name = TallyTool.NAME,
-                arguments = mapOf(
-                    "how" to "average",
-                    "items" to items
-                )
-            ),
-            context
-        )
-
-        val first = keyOf(items = "74 | Lab report 1\n79 | Lab report 2")
-
-        assertEquals(
-            expected = listOf(false, true),
-            actual = listOf(
-                first == keyOf(items = "74 | Jordan Webb\n70 | Kevin Moss"),
-                first == keyOf(items = "74 | Lab report 1\n79 | Lab report 2")
-            )
-        )
-    }
-
     // 14 November 2026 is a Saturday.
     @Test
     fun `a phrase names its day from today, in English and in Spanish`() {
