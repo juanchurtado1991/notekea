@@ -83,24 +83,36 @@ class FrameGroupsTest {
 
     // The frame alone, 2026-11-18: "move the project to Archive", with two projects, was settled by a pick.
     @Test
-    fun `when no name writes a task word, the folder it names one of is the set, a name or all of them none`() {
+    fun `with no name for it, a change's one of a folder's kind is a set, and a name or all of them none`() {
         val greenhouse = candidate(path = "Projects/Greenhouse.md")
         val ledger = candidate(path = "Projects/Ledger Migration.md")
         val notes = listOf(greenhouse, ledger, contacts, dune)
 
         assertEquals(
-            expected = listOf(listOf(listOf(greenhouse, ledger)), emptyList(), emptyList()),
+            expected = listOf(
+                listOf(listOf(greenhouse, ledger)),
+                emptyList(),
+                emptyList(),
+                emptyList()
+            ),
             actual = listOf(
                 FrameGroups.of(
                     task = "move the project to Archive",
-                    candidates = notes
+                    candidates = notes,
+                    byKind = true
                 ),
                 FrameGroups.of(
                     task = "move the greenhouse project to Archive",
-                    candidates = notes
+                    candidates = notes,
+                    byKind = true
                 ),
                 FrameGroups.of(
                     task = "how many projects are still open?",
+                    candidates = notes,
+                    byKind = true
+                ),
+                FrameGroups.of(
+                    task = "when does the project end?",
                     candidates = notes
                 )
             )

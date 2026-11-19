@@ -7,13 +7,14 @@ package app.notekea.chat.domain.loop
  */
 internal object FrameGroups {
     /**
-     * The one set, or none. Notes sharing one word of several the names write are no set: "the food in the Azores"
-     * was open between Food bank shifts and Vocabulary - Food while it meant the Azores trip (the frame alone,
-     * 2026-11-18). One name writing them all, among others writing some, is a set of one: that note.
+     * The one set, or none. Notes sharing one word of several the names write are no set ("the food in the Azores");
+     * one name writing them all, among others writing some, is a set of one. [byKind]: a change, whose word for one
+     * of a kind may name a folder.
      */
     fun of(
         task: String,
-        candidates: List<FrameCandidates.Candidate>
+        candidates: List<FrameCandidates.Candidate>,
+        byKind: Boolean = false
     ): List<List<FrameCandidates.Candidate>> {
         val named = FrameWords
             .of(text = task)
@@ -35,6 +36,10 @@ internal object FrameGroups {
                 holding.size >= 2 && it.size in 1..MOST
             }
         }
+
+        // Only a change is about one of a kind: a question may be about all of them ("which owner pays me the most
+        // fees?", "total incident time this quarter": the frame alone, 2026-11-18), as entries are marked.
+        if (!byKind) return emptyList()
 
         return listOfNotNull(kindOf(task, candidates))
     }
