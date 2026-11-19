@@ -503,6 +503,8 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s34-kind` | `acd46813` | 2.3, a set by folder when no name writes a task word, level 2 | dev 28 / 17; tuned 6 / 4 | | | | | refined below: questions about all of a kind opened |
 | 2026-11-18 | `s35-one-kind` | `f2c6a13f` | the same, only one of a plural folder's kind, level 2 | dev 29 / 16; tuned 6 / 4 | | | | | refined below |
 | 2026-11-18 | `s36-kind-change` | `5488756c` | the same, only for changes (a question may be about all of them), level 2 | dev 27 / 13 (was 28 / 12); tuned 7 / 4 (was 8 / 4) | | | | | yes |
+| 2026-11-18 | `s37-dev`, `s37-tuned` | `fc411bde` | the kind set (s36) and, after a topic hold, only reading until those notes are read (3.3), levels 3 and 4 | | 291 of 393 (+1) | 214 of 259 (-6: the kind set held "the project that is on hold" open between six projects) | | | no, reverted in `797a2002`: the topic holds still ran out of steps, 12 of 12, as each topic note asked for its own topic |
+| 2026-11-18 | `s38-dev`, `s38-tuned` | `5a62f9ea` | a topic note asks for no topic of its own (one step), levels 3 and 4 | | 287 of 393 (-3) | 219 of 259 (-1; fresh 56) | | | no, reverted: the topic holds sit in failed tasks without failing them; those answers were given and wrong for other causes (a trap number, an unasked namesake) |
 
 Notes as the plan is carried out:
 
