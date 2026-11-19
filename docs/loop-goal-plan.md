@@ -496,6 +496,7 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s29-every` | `57af56c9` | 2.2, entries marked yes for every one that could fit (prompt), level 1 | dev 26 / 22; tuned 8 / 5 | | | | | no, reverted |
 | 2026-11-18 | `s30-dev` | `6003e12c` | 2.2 and 2.3 kept so far (s24 to s27), level 3 | | 290 of 393 (74 %, was 275): asked missed 10 won 2 lost, needless ask 9 won 4 lost | | | | yes |
 | 2026-11-18 | `s30-tuned` | `6003e12c` | the same, level 4 | | | 220 of 259 (85 %, was 213; fresh 55, was 53) | | | yes |
+| 2026-11-18 | `r1-base` | `f3d22656` | opens round 1 (seed 1): step 2 so far, level 5 | | | | 310 of 436 (71.1 %), +5 over the reference: asked missed −9, needless ask −1, change +4, figure −1, fact −1; ran out of steps 64 of 126 failures | 326 of 436 (74.8 %), +14: asked missed −14, needless ask −1, change +4, figure −1, fact −2 | kept as the round's base: below the 16 a single change needs, but each sub-step passed levels 1 to 4 and both models gain |
 
 Notes as the plan is carried out:
 
