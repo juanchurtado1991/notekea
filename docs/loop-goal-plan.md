@@ -500,6 +500,9 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s31-each` | `8e2673e4` | 2.2, each entry marked in a call of its own (the plan's fallback), level 1 | dev 40 / 12 (was 28 / 12); tuned 8 / 4 | | | | | no, reverted: shown alone, the 4B marks every entry "no" |
 | 2026-11-18 | `s32-none` | `81bef0df` | 2.2, a change's entries none of which is marked stay open, level 1 | dev 19 / 52 (was 28 / 12); tuned 5 / 6 | | | | | no, reverted: the count calls adds, tags and moves an item, so none marked mostly means no entry is meant |
 | 2026-11-18 | `s33-item` | `97cf5d0e` | 2.2, the count's item only an entry changed or asked about, with unmarked entries open, level 1 | dev 22 / 37; tuned 7 / 7 | | | | | no, reverted: the 4B still calls "add X to the list" an item, whatever the prompt says |
+| 2026-11-18 | `s34-kind` | `acd46813` | 2.3, a set by folder when no name writes a task word, level 2 | dev 28 / 17; tuned 6 / 4 | | | | | refined below: questions about all of a kind opened |
+| 2026-11-18 | `s35-one-kind` | `f2c6a13f` | the same, only one of a plural folder's kind, level 2 | dev 29 / 16; tuned 6 / 4 | | | | | refined below |
+| 2026-11-18 | `s36-kind-change` | `5488756c` | the same, only for changes (a question may be about all of them), level 2 | dev 27 / 13 (was 28 / 12); tuned 7 / 4 (was 8 / 4) | | | | | yes |
 
 Notes as the plan is carried out:
 
