@@ -39,8 +39,9 @@ internal object FrameGroups {
         return listOfNotNull(kindOf(task, candidates))
     }
 
-    // When no name writes a word of the task, the notes of the folder its word for the thing names: "move the
-    // project to Archive" with two in Projects was settled by a pick (docs/loop-goal-plan.md, step 2.3).
+    // When no name writes a word of the task, the notes of the folder its word for the thing names, one of a kind:
+    // "move the project to Archive" with two in Projects was settled by a pick (docs/loop-goal-plan.md, step 2.3).
+    // The folder's own word is all of them: "total incident time" in Incidents, "los propietarios" (2026-11-18).
     private fun kindOf(
         task: String,
         candidates: List<FrameCandidates.Candidate>
@@ -54,7 +55,9 @@ internal object FrameGroups {
 
                 own.isNotEmpty() && own.all { name ->
                     words.any {
-                        FrameWords.isSame(
+                        val isOne = it.length < name.length
+
+                        isOne && FrameWords.isSame(
                             one = it,
                             other = name
                         )
