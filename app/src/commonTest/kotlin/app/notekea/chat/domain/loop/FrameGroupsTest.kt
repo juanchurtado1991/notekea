@@ -81,6 +81,46 @@ class FrameGroupsTest {
         )
     }
 
+    // The loop's dev run, 2026-11-18: "add a follow-up task for the pending pitch" picked one editor of three.
+    @Test
+    fun `a change's item written in several notes is open between those entries, and a name settles it`() {
+        val ciara = FrameCandidates.Candidate(
+            path = RelativePath(value = "Editors/Ciara Lynch.md"),
+            gist = "",
+            entries = listOf("- Pending pitch: the night bus economy", "- Paid on time")
+        )
+
+        val tom = ciara.copy(
+            path = RelativePath(value = "Editors/Tom Hegarty.md"),
+            entries = listOf("- Pending pitch: seaweed farming")
+        )
+
+        val spread = FrameGroups.spreadOf(
+            words = "the pending pitch",
+            candidates = listOf(ciara, tom, dune)
+        )
+
+        val frame = TaskFrame(
+            targets = spread,
+            count = FrameCount.ONE,
+            candidates = emptyList()
+        )
+
+        assertEquals(
+            expected = listOf(
+                listOf("- Pending pitch: the night bus economy", "- Pending pitch: seaweed farming"),
+                emptyList()
+            ),
+            actual = listOf(
+                frame.options,
+                FrameGroups.spreadOf(
+                    words = "Ciara's pending pitch",
+                    candidates = listOf(ciara, tom)
+                )
+            )
+        )
+    }
+
     @Test
     fun `a word of one name or folder the task writes settles the set, and none leaves it to the notes`() {
         assertEquals(

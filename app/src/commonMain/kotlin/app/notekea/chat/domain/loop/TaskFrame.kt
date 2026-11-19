@@ -46,7 +46,12 @@ data class TaskFrame(
     val isSeveral: Boolean = count == FrameCount.SEVERAL || count == FrameCount.EVERY
 
     /** What the person chooses between when [isOpen]: the notes by their paths, or the entries as written. */
-    val options: List<String> = openNotes.map { it.bare() }.ifEmpty { openEntries }
+    val options: List<String> = when {
+        // Open between entries of several notes ("the pending pitch" of each editor): those entries.
+        openNotes.isNotEmpty() && targets.all { it.entries.isNotEmpty() } -> entries
+
+        else -> openNotes.map { it.bare() }.ifEmpty { openEntries }
+    }
 
     /** The other notes shown for the task, which it does not mean: a change or an answer from one is held back. */
     val others: List<RelativePath> = candidates.filter {

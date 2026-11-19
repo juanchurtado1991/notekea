@@ -36,6 +36,48 @@ internal object FrameGroups {
     }
 
     /**
+     * The entries of several notes that write every word of a change's item, when no name writes one ("the pending
+     * pitch", one in each editor's note): the one meant is among them all, not in the note a pick lands on.
+     */
+    fun spreadOf(
+        words: String,
+        candidates: List<FrameCandidates.Candidate>
+    ): List<FrameTarget> {
+        val thing = FrameWords
+            .of(text = words)
+            .filter { word ->
+                word.any { it.isLetter() }
+            }
+
+        val isNamed = candidates.any { candidate ->
+            thing.any { isNamed(candidate, it) }
+        }
+
+        if (thing.isEmpty() || isNamed) return emptyList()
+
+        val spread = candidates
+            .map { candidate ->
+                val entries = candidate.entries.filter { entry ->
+                    val written = FrameWords.of(text = entry)
+
+                    thing.all { word ->
+                        written.any { FrameWords.isSame(word, it) }
+                    }
+                }
+
+                FrameTarget(
+                    note = candidate.path,
+                    entries = entries
+                )
+            }
+            .filter { it.entries.isNotEmpty() }
+
+        val isSpread = spread.size >= 2 && spread.sumOf { it.entries.size } <= MOST
+
+        return spread.takeIf { isSpread }.orEmpty()
+    }
+
+    /**
      * The one note of [group] whose name has a word the others' names do not and the task writes ("Laura Castro's
      * email", "the work budget" for Work/Budget 2026), else the one whose whole name the task writes ("Declan Moran"
      * beside "Transcript - Declan Moran"); null when the names leave it to what the notes say.

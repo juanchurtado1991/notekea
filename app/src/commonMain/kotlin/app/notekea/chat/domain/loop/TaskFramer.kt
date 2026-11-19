@@ -58,6 +58,11 @@ class TaskFramer(llmEngine: LlmEngine) {
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
         val words = reply.words.ifBlank { task }
 
+        // A change's item written in several notes, none named: open between those entries (the loop's dev run of
+        // 2026-11-18: "add a follow-up task for the pending pitch" picked one editor of three).
+        val spread = if (reply.isItem) FrameGroups.spreadOf(words, candidates) else emptyList()
+        if (spread.isNotEmpty()) return spread to FrameReason.ENTRY
+
         val group = FrameGroups
             .of(
                 task = words,
