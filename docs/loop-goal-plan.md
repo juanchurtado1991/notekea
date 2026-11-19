@@ -498,6 +498,7 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s30-tuned` | `6003e12c` | the same, level 4 | | | 220 of 259 (85 %, was 213; fresh 55, was 53) | | | yes |
 | 2026-11-18 | `r1-base` | `f3d22656` | opens round 1 (seed 1): step 2 so far, level 5 | | | | 310 of 436 (71.1 %), +5 over the reference: asked missed −9, needless ask −1, change +4, figure −1, fact −1; ran out of steps 64 of 126 failures | 326 of 436 (74.8 %), +14: asked missed −14, needless ask −1, change +4, figure −1, fact −2 | kept as the round's base: below the 16 a single change needs, but each sub-step passed levels 1 to 4 and both models gain |
 | 2026-11-18 | `s31-each` | `8e2673e4` | 2.2, each entry marked in a call of its own (the plan's fallback), level 1 | dev 40 / 12 (was 28 / 12); tuned 8 / 4 | | | | | no, reverted: shown alone, the 4B marks every entry "no" |
+| 2026-11-18 | `s32-none` | `81bef0df` | 2.2, a change's entries none of which is marked stay open, level 1 | dev 19 / 52 (was 28 / 12); tuned 5 / 6 | | | | | no, reverted: the count calls adds, tags and moves an item, so none marked mostly means no entry is meant |
 
 Notes as the plan is carried out:
 
