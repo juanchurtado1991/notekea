@@ -111,9 +111,9 @@ class ReadingToolsTest {
     }
 
     @Test
-    fun `a note is read by a section, its subsections with it, and a section it lacks gets its headings`() =
+    fun `a long note is read by a section, its subsections with it, and a section it lacks gets its headings`() =
         runTest {
-            store.texts[lease] = LEASE
+            store.texts[lease] = LONG_LEASE
             val read = ReadTool(noteTextCache = cache)
             val rent = said(read, "note" to "Lease", "section" to "rent")
             val whole = said(read, "note" to "Lease", "section" to "## Lease")
@@ -124,7 +124,8 @@ class ReadingToolsTest {
                     true,
                     false,
                     true,
-                    "read \"Lease\": no section \"Deposit\". Its headings: Lease, Rent, Ending it, Contacts.",
+                    "read \"Lease\": no section \"Deposit\". Its headings: Lease, Rent, Ending it, Contacts, " +
+                        "Archive.",
                     listOf(lease)
                 ),
                 actual = listOf(
@@ -138,6 +139,18 @@ class ReadingToolsTest {
                 )
             )
         }
+
+    // The loop's dev run, 2026-11-19: Sprint 44 read by "Highlights" hid the points written above it.
+    @Test
+    fun `a section of a short note is the whole note`() = runTest {
+        store.texts[lease] = LEASE
+        val rent = said(ReadTool(noteTextCache = cache), "note" to "Lease", "section" to "rent")
+
+        assertEquals(
+            expected = true,
+            actual = "Intro line." in rent && "Ana" in rent
+        )
+    }
 
     @Test
     fun `a folder or a tag is listed by name with its properties, and with neither the last changed first`() =
@@ -227,5 +240,7 @@ class ReadingToolsTest {
         const val LEASE =
             "Intro line.\n\n# Lease\nSigned in May.\n\n## Rent\nThe rent is 950 euros a month.\n\n" +
                 "## Ending it\nEither side may end it with 60 days of notice.\n\n# Contacts\nAna, the landlord."
+
+        val LONG_LEASE = LEASE + "\n\n# Archive\n" + "An old line of the lease. ".repeat(n = 120)
     }
 }

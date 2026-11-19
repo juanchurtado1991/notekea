@@ -507,6 +507,7 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s38-dev`, `s38-tuned` | `5a62f9ea` | a topic note asks for no topic of its own (one step), levels 3 and 4 | | 287 of 393 (-3) | 219 of 259 (-1; fresh 56) | | | no, reverted: the topic holds sit in failed tasks without failing them; those answers were given and wrong for other causes (a trap number, an unasked namesake) |
 | 2026-11-18 | `s39-spread` | `1e3b1d88` | 2.3, a change's item written in entries of several notes, none named, open between them, level 2 | dev 29 / 12 (was 28 / 12); tuned 8 / 4 | | | | | no, reverted: the item's words carry the change's ("a follow-up task for the pending pitch"), so no entry writes them all |
 | 2026-11-19 | `s40-dev`, `s40-tuned` | `e37d8054` | `calculate` refuses a date and sends it to `days`, levels 3 and 4 | | 293 of 393 (+3) | 216 of 259 (-4; fresh 55) | | | yes, to the pool: the refusal showed on one dev task (the mortgage) and on no tuned one, so tuned's -4 is the run's noise (its losses were lost in s37 too) |
+| 2026-11-19 | `r1-date` | `e37d8054` | the date refusal on round 1, level 5 | | | | 307 of 436 (-3, the noise) | | kept as a bug fix only: a date read as three numbers gave a wrong figure; no gain on the pool |
 
 Notes as the plan is carried out:
 

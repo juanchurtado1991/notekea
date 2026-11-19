@@ -2,6 +2,7 @@ package app.notekea.chat.domain.tool.lookup
 
 import app.notekea.chat.domain.plan.AttachedTexts
 import app.notekea.chat.domain.plan.NoteProperties
+import app.notekea.chat.domain.plan.ReadNote
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
@@ -73,11 +74,7 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
 
         val shown = path.nameWithoutExtension
 
-        val unread = read
-            .unread
-            .takeIf { it.isNotEmpty() }
-            ?.let { " It attaches ${it.joinToString()}, which holds no text that can be read." }
-            .orEmpty()
+        val unread = unreadOf(read = read)
 
         if (read.text.isBlank()) {
             context.reads.addEmpty(name = shown)
@@ -88,7 +85,11 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
         context.reads.add(note = path)
         val section = call.text(name = SECTION)
 
-        if (section.isNotEmpty()) {
+        // A section of a short note is all of it: read by "Highlights", Sprint 44 hid the points above it and the
+        // 4B said no note held them (the loop's dev run, 2026-11-19).
+        val isSection = section.isNotEmpty() && read.text.length > NOTE_CHARS
+
+        if (isSection) {
             return sectionOf(
                 text = read.text,
                 section = section,
@@ -142,6 +143,12 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
                 "${read.text.take(n = NOTE_CHARS)}$more$unread$also"
         )
     }
+
+    private fun unreadOf(read: ReadNote): String = read
+        .unread
+        .takeIf { it.isNotEmpty() }
+        ?.let { " It attaches ${it.joinToString()}, which holds no text that can be read." }
+        .orEmpty()
 
     // One part of a long note, by its heading, its subheadings with it; a heading the note lacks gets its headings.
     private fun sectionOf(
