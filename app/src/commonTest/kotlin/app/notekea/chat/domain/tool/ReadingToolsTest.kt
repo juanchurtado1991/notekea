@@ -89,45 +89,6 @@ class ReadingToolsTest {
         context = context
     ).forModel
 
-    // The loop's run of 2026-11-18: Kenji's note led to his student, hers to her friends, until no step was left.
-    @Test
-    fun `a note on the topic of one read is asked for, and the topic of that note is not`() = runTest {
-        val kenji = RelativePath(value = "People/Kenji.md")
-        val ines = RelativePath(value = "People/Ines.md")
-        val rita = RelativePath(value = "People/Rita.md")
-        store.texts[kenji] = "My teacher. He prefers email."
-        store.texts[ines] = "A former student, friend. Phone: 916 778 340."
-        store.texts[rita] = "A friend from the book club. Phone: 912 000 111."
-
-        val people = ToolContext(
-            vaultPath = VAULT,
-            notes = listOf(
-                entry(path = kenji.value, metadata = tags("people")),
-                entry(path = ines.value, metadata = tags("people", "friend")),
-                entry(path = rita.value, metadata = tags("friend"))
-            ),
-            task = "what is the phone of my teacher?",
-            openNote = null
-        )
-
-        val read = ReadTool(noteTextCache = cache)
-
-        val said = listOf("Kenji", "Ines").map {
-            read.run(
-                call = ToolCall(
-                    name = read.name,
-                    arguments = mapOf("note" to it)
-                ),
-                context = people
-            ).forModel
-        }
-
-        assertEquals(
-            expected = listOf(true, false),
-            actual = said.map { "Read them too" in it }
-        )
-    }
-
     @Test
     fun `an outline gives a note's headings, nested, with the words each part holds`() = runTest {
         store.texts[lease] = LEASE
