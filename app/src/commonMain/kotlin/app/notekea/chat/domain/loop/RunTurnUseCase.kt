@@ -22,7 +22,6 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.change.ProposeTool
-import app.notekea.chat.domain.tool.lookup.ReadTool
 import app.notekea.chat.domain.tool.lookup.RecallTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
@@ -403,19 +402,11 @@ class RunTurnUseCase(
             .only(name = AskUserTool.NAME)
             .takeIf { UnsettledEnd.mustAsk(state = state) }
 
-        // Held for notes on the topic still unread: told so, the 4B ran out of steps on the pool (round 1).
-        val reading = state
-            .tools
-            .only(name = ReadTool.NAME)
-            ?.takeIf {
-                offered == looking && TopicUnread.mustRead(state = state)
-            }
-
         val withheld = (listOfNotNull(again) + state.withheld)
             .fold(initial = offered) { left, name -> left.without(name = name) }
             .takeIf { it.tools.isNotEmpty() }
 
-        val tools = asking ?: reading ?: withheld ?: offered
+        val tools = asking ?: withheld ?: offered
 
         val json = StringBuilder()
 

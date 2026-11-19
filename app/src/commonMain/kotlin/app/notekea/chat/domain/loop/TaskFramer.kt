@@ -27,7 +27,7 @@ class TaskFramer(llmEngine: LlmEngine) {
         val (targets, reason) = when (reply.count) {
             FrameCount.ONE -> {
                 val asked = reply.copy(isItem = reply.isItem && isChange)
-                oneOf(task, asked, candidates, memory, isChange)
+                oneOf(task, asked, candidates, memory)
             }
 
             FrameCount.SEVERAL -> asking.severalOf(task, candidates, memory)?.let { several ->
@@ -52,8 +52,7 @@ class TaskFramer(llmEngine: LlmEngine) {
         task: String,
         reply: FrameCountReply,
         candidates: List<FrameCandidates.Candidate>,
-        memory: List<MemoryLine>,
-        isChange: Boolean
+        memory: List<MemoryLine>
     ): Pair<List<FrameTarget>, FrameReason>? {
         // The set is made by the task's own words for its thing, not every word it writes: in "a property budget on
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
@@ -62,8 +61,7 @@ class TaskFramer(llmEngine: LlmEngine) {
         val group = FrameGroups
             .of(
                 task = words,
-                candidates = candidates,
-                byKind = isChange
+                candidates = candidates
             )
             .firstOrNull()
 

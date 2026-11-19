@@ -7,14 +7,13 @@ package app.notekea.chat.domain.loop
  */
 internal object FrameGroups {
     /**
-     * The one set, or none. Notes sharing one word of several the names write are no set ("the food in the Azores");
-     * one name writing them all, among others writing some, is a set of one. [byKind]: a change, whose word for one
-     * of a kind may name a folder.
+     * The one set, or none. Notes sharing one word of several the names write are no set: "the food in the Azores"
+     * was open between Food bank shifts and Vocabulary - Food while it meant the Azores trip (the frame alone,
+     * 2026-11-18). One name writing them all, among others writing some, is a set of one: that note.
      */
     fun of(
         task: String,
-        candidates: List<FrameCandidates.Candidate>,
-        byKind: Boolean = false
+        candidates: List<FrameCandidates.Candidate>
     ): List<List<FrameCandidates.Candidate>> {
         val named = FrameWords
             .of(text = task)
@@ -31,50 +30,9 @@ internal object FrameGroups {
         }
 
         // One name writing them all among others writing some is that note, as its name settles a set.
-        if (named.isNotEmpty()) {
-            return listOf(full).filter {
-                holding.size >= 2 && it.size in 1..MOST
-            }
+        return listOf(full).filter {
+            holding.size >= 2 && it.size in 1..MOST
         }
-
-        // Only a change is about one of a kind: a question may be about all of them ("which owner pays me the most
-        // fees?", "total incident time this quarter": the frame alone, 2026-11-18), as entries are marked.
-        if (!byKind) return emptyList()
-
-        return listOfNotNull(kindOf(task, candidates))
-    }
-
-    // When no name writes a word of the task, the notes of the folder its word for the thing names, one of a kind:
-    // "move the project to Archive" with two in Projects was settled by a pick (docs/loop-goal-plan.md, step 2.3).
-    // The folder's own word is all of them: "total incident time" in Incidents, "los propietarios" (2026-11-18).
-    private fun kindOf(
-        task: String,
-        candidates: List<FrameCandidates.Candidate>
-    ): List<FrameCandidates.Candidate>? {
-        val words = FrameWords.of(text = task)
-
-        return candidates
-            .groupBy { folderOf(candidate = it) }
-            .filterKeys { folder ->
-                val own = FrameWords.of(text = folder)
-
-                own.isNotEmpty() && own.all { name ->
-                    words.any {
-                        val isOne = it.length < name.length
-
-                        isOne && FrameWords.isSame(
-                            one = it,
-                            other = name
-                        )
-                    }
-                }
-            }
-            .values
-            .singleOrNull()
-            ?.takeIf {
-                it.size >= 2
-            }
-            ?.take(n = MOST_KIND)
     }
 
     /**
@@ -179,16 +137,6 @@ internal object FrameGroups {
         )
     }
 
-    // The innermost folder of a note's path, empty at the vault's root.
-    private fun folderOf(candidate: FrameCandidates.Candidate): String = candidate
-        .path
-        .value
-        .substringBeforeLast(
-            delimiter = '/',
-            missingDelimiterValue = ""
-        )
-        .substringAfterLast(delimiter = '/')
-
     // Every word a note writes, with those of its path.
     private fun wordsOf(candidate: FrameCandidates.Candidate): Set<String> =
         candidate.words + titleOf(candidate)
@@ -209,7 +157,6 @@ internal object FrameGroups {
     }
 
     private const val MOST = 6
-    private const val MOST_KIND = 12
 
     // A quote opens where no letter is before it, so "Laura's" opens none.
     private val QUOTED =
