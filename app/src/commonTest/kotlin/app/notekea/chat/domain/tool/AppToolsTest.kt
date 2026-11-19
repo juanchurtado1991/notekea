@@ -6,6 +6,7 @@ import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DatePhrases
 import app.notekea.chat.domain.tool.app.DateTool
 import app.notekea.chat.domain.tool.app.DaysTool
+import app.notekea.chat.domain.tool.app.TallyTool
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
@@ -179,6 +180,40 @@ class AppToolsTest {
             )
         )
     }
+
+    // The loop's dev run, 2026-11-19: the unpaid sessions were counted as the first paid one, "2026" their one word.
+    @Test
+    fun `a tally counts each figure on the line closest to its words, not the first that shares a year`() =
+        runTest {
+            store.texts[arepas] = listOf(
+                "| 1 | 2026-08-12 | Assessment | \$45 | paid |",
+                "| 7 | 2026-10-14 | Single-leg strength | \$45 | unpaid |",
+                "| 8 | 2026-10-28 | Hop tests | \$45 | unpaid |"
+            ).joinToString(separator = "\n")
+
+            val tally = TallyTool(
+                noteTextCache = NoteTextCache(
+                    contentStore = store,
+                    textFolder = TextFolder()
+                )
+            )
+
+            val said = tally.run(
+                call = ToolCall(
+                    name = tally.name,
+                    arguments = mapOf(
+                        "how" to "sum",
+                        "items" to "\$45 | 2026-10-14 Single-leg strength\n\$45 | 2026-10-28 Hop tests"
+                    )
+                ),
+                context = context
+            ).forModel
+
+            assertEquals(
+                expected = listOf(true, true, false),
+                actual = listOf("Single-leg" in said, "Hop tests" in said, "Assessment" in said)
+            )
+        }
 
     // 14 November 2026 is a Saturday.
     @Test

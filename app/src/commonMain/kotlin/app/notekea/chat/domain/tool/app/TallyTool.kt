@@ -55,10 +55,13 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
 
         val lines = linesOf(context = context)
 
+        val used = mutableSetOf<Int>()
+
         val checked = items.map {
             checkedOf(
                 item = it,
-                lines = lines
+                lines = lines,
+                used = used
             )
         }
 
@@ -127,10 +130,13 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
         val value: Double?
     )
 
-    // The item's figure, found on a line of the notes that writes it and shares a word with the item's line.
+    // The item's figure, on the line of the notes that writes it and shares the most words with the item's line; a
+    // line already counted only when no other is as close. The first line sharing "2026" was the Counted lines once,
+    // the paid sessions shown for the unpaid ones, and the 4B summed again (the loop's dev run, 2026-11-19).
     private fun checkedOf(
         item: String,
-        lines: List<String>
+        lines: List<String>,
+        used: MutableSet<Int>
     ): Checked {
         val figure = item.substringBefore(delimiter = SEPARATOR)
 
@@ -148,32 +154,65 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
 
         val words = FrameWords.of(text = said)
 
-        val line = lines.firstOrNull { line ->
-            val isWritten = FigureValues.allIn(text = line).any {
-                FigureValues.isSame(
-                    one = it,
-                    other = value
+        val index = lines
+            .indices
+            .filter {
+                isWritten(
+                    line = lines[it],
+                    value = value
                 )
             }
-
-            val lineWords = FrameWords.of(text = line)
-
-            val isSame = words.isEmpty() || words.any { word ->
-                lineWords.any { FrameWords.isSame(word, it) }
+            .map {
+                it to sharedOf(
+                    words = words,
+                    line = lines[it]
+                )
             }
+            .filter { (_, shared) ->
+                words.isEmpty() || shared > 0
+            }
+            .maxWithOrNull(
+                comparator = compareBy<Pair<Int, Int>> { (_, shared) -> shared }
+                    .thenBy { (at, _) ->
+                        if (at in used) 0 else 1
+                    }
+                    .thenByDescending { (at, _) -> at }
+            )
+            ?.first
+            ?: return Checked(
+                value = null,
+                line = item,
+                problem = "${Arithmetic.written(value = value)} is not written on such a line of the notes read."
+            )
 
-            isWritten && isSame
-        } ?: return Checked(
-            value = null,
-            line = item,
-            problem = "${Arithmetic.written(value = value)} is not written on such a line of the notes read."
-        )
+        used += index
 
         return Checked(
             value = value,
-            line = line.take(n = LINE),
+            line = lines[index].take(n = LINE),
             problem = ""
         )
+    }
+
+    private fun isWritten(
+        line: String,
+        value: Double
+    ): Boolean = FigureValues.allIn(text = line).any {
+        FigureValues.isSame(
+            one = it,
+            other = value
+        )
+    }
+
+    private fun sharedOf(
+        words: Set<String>,
+        line: String
+    ): Int {
+        val lineWords = FrameWords.of(text = line)
+
+        return words.count { word ->
+            lineWords.any { FrameWords.isSame(word, it) }
+        }
     }
 
     private enum class Tally(val written: String) {
