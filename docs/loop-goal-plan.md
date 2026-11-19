@@ -46,17 +46,14 @@ different design: write what you found in the log at the end of this file, and t
 | Fresh vault, 77 tasks | 53 (68 %) | 58 (75 %) |
 | Nine exams, 393 tasks | 261 (66 %) | 277 (70 %) |
 
-### Now (2026-11-19, commit `5c9fd1a7`)
+### Now (2026-11-19, commit `677fe638`)
 
 | | 4B | 9B |
 |---|---|---|
-| Nine exams (dev), 393 tasks | 298 (75.8 %) | not run since the baseline |
-| Tuned, 259 tasks | 221 (85.3 %) at `677fe638` | not run since the baseline |
-| Fresh vault, 77 tasks | 60 (77.9 %) at `677fe638` | not run since the baseline |
-| Pool round 1, 436 tasks | 320 (73.4 %) at `677fe638` | 327 (75.0 %) at `677fe638` |
-
-The last fix (`5c9fd1a7`, a tally of other items is a new call) is measured on dev only: the GPU was lost during
-tuned and needs a reset before the next run. Measure it on tuned and the pool first.
+| Nine exams (dev), 393 tasks | 295 (75.1 %) | not run since the baseline |
+| Tuned, 259 tasks | 221 (85.3 %) | not run since the baseline |
+| Fresh vault, 77 tasks | 60 (77.9 %) | not run since the baseline |
+| Pool round 1, 436 tasks | 320 (73.4 %) | 327 (75.0 %) |
 
 ### Where the failures are
 
@@ -525,7 +522,7 @@ One row for each measurement. Keep it short.
 | 2026-11-19 | `s42-dev`, `s42-tuned` | `677fe638` | `tally` counts each figure on the line closest to its words (it took the first line sharing "2026"), levels 3 and 4 | | 295 of 393 (+4) | 221 of 259 (+5, none lost; fresh 60, +1) | | | yes, to the pool |
 | 2026-11-19 | `r1-tally` | `677fe638` | the tally line match on round 1, level 5 | | | | 320 of 436 (+5 on r1-section, +10 on r1-base; 73.4 %) | | yes: kept |
 | 2026-11-19 | `r1-tally` (9B) | `677fe638` | the round so far on the 9B, level 5 | | | | | 327 of 436 (+1 on r1-base; 75.0 %) | the 9B holds; its gains are figures (4) |
-| 2026-11-19 | `s43-dev`, `s43-tuned` | `5c9fd1a7` | a tally of other items is not told it was made again (`KeyedTool`), levels 3 and 4 | | 298 of 393 (+3) | not measured: the GPU was lost 12 minutes in (Vulkan "device lost", the driver asks for a reset) | | | to measure on tuned and the pool once the GPU is reset |
+| 2026-11-19 | `s43-dev`, `s43-tuned` | `5c9fd1a7` | a tally of other items is not told it was made again (`KeyedTool`), levels 3 and 4 | | 298 of 393 (+3) | 217 of 259 (-4; fresh 58, -2), measured after the GPU reset | | | no, reverted: the losses call tally 6 to 8 times; the "made again" stopped those loops, so a figure task now runs out of steps instead. A tally loop needs its own repair (3.3), not a looser key |
 
 Notes as the plan is carried out:
 
