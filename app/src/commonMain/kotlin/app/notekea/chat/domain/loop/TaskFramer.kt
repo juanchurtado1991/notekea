@@ -105,7 +105,7 @@ class TaskFramer(llmEngine: LlmEngine) {
 
     // The entries of the note meant a change could be about, when its thing is an item and the note has several
     // (a question about "the budget" sums its rows: marking them asked on 26 of 319 tasks, the frame alone):
-    // one fits, that entry; several or none, open between them, as for notes.
+    // one fits, that entry; several, open between them; none, the whole note.
     private suspend fun entriesOf(
         task: String,
         reply: FrameCountReply,
@@ -113,11 +113,10 @@ class TaskFramer(llmEngine: LlmEngine) {
         memory: List<MemoryLine>,
         reason: FrameReason
     ): Pair<List<FrameTarget>, FrameReason>? {
-        // None marked is no answer: the 4B marks every entry "no" when it cannot tell them apart (the frame alone,
-        // 2026-11-18), as for notes. Only changes mark entries, so a question about the note asks nothing.
+        // None marked is the whole note: leaving them open made the 4B ask on 99 of 319 tasks that need no
+        // question (the frame alone, 2026-11-18), as it marks every entry "no" for a question about the note.
         val entries = if (reply.isItem && meant.entries.size > 1) {
-            val marked = asking.markedEntriesOf(task, meant, memory) ?: return null
-            marked.ifEmpty { meant.entries.take(n = FrameQuestions.MOST_MARKED) }
+            asking.markedEntriesOf(task, meant, memory) ?: return null
         } else {
             emptyList()
         }
