@@ -182,12 +182,14 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         ) { "- ${it.text}" }
         .orEmpty()
 
-    private companion object {
-        const val COUNT = "count"
-        const val WORDS = "words"
-        const val THING = "thing"
-        const val TOKENS = 100
-        const val MARK_TOKENS = 10
+    companion object {
+        /** The most notes or entries one marking shows. */
         const val MOST_MARKED = 12
+
+        private const val COUNT = "count"
+        private const val WORDS = "words"
+        private const val THING = "thing"
+        private const val TOKENS = 100
+        private const val MARK_TOKENS = 10
     }
 }

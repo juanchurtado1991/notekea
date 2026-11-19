@@ -18,9 +18,11 @@ are not shown the notes: judge by the request's words. Reply with JSON:
   recipes", "the notes tagged travel", "every open task"). "none" when it is about no particular note (write a
   new note from nothing, a question about the app or the world).
 - words: the request's own words for what it is about, copied as written ("Laura", "the budget").
-- thing: "item" when the one thing is an item already inside a note that the request changes or asks about (an
-  appointment, an order, a row, a task, a payment); "note" when it is a whole note, a person or a document, and when
-  the request adds something new to a note ("add a task to my recipe", "add Ana to Contactos")."""
+- thing: "item" only when the request changes, cancels, reschedules or marks one entry already written inside a
+  note (an appointment, an order, a row, a task, a payment), or asks about one ("move the appointment to 11:00",
+  "mark the invoice paid", "cancel my booking"). "note" for everything else: a whole note, a person or a document;
+  adding something new to a note ("add a task to my recipe", "log today's run", "add Ana to Contactos"); tagging,
+  moving, renaming or linking a note, or setting one of its properties."""
 
     const val MARK_NOTES =
         """A request made to a notes app is about one thing in the person's notes, and each note below (N1, N2…)

@@ -152,28 +152,33 @@ class TaskFramerTest {
         )
     }
 
+    // The frame alone, 2026-11-18: the 4B marks every entry "no" when it cannot tell them apart, as for notes.
     @Test
-    fun `the entries of an item are marked, one settled, two open, none the whole note`() =
-        runTest {
-            suspend fun marked(marks: String) = frameOf(
-                task = "move the appointment to 11:00",
-                candidates = listOf(dentist),
-                replies = mapOf(
-                    FramePrompts.COUNT to appointment,
-                    FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.MARK_ENTRIES to marks
-                )
+    fun `the entries of a changed item are marked, one settled, two or none open`() = runTest {
+        suspend fun marked(marks: String) = frameOf(
+            task = "move the appointment to 11:00",
+            candidates = listOf(dentist),
+            replies = mapOf(
+                FramePrompts.COUNT to appointment,
+                FramePrompts.PICK to """{"pick":"N1"}""",
+                FramePrompts.MARK_ENTRIES to marks
             )
+        )
 
-            val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
-            val single = marked(marks = """{"E1":"no","E2":"yes"}""")
-            val none = marked(marks = """{"E1":"no","E2":"no"}""")
+        val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
+        val single = marked(marks = """{"E1":"no","E2":"yes"}""")
+        val none = marked(marks = """{"E1":"no","E2":"no"}""")
 
-            assertEquals(
-                expected = listOf(dentist.entries, dentist.entries[1], FrameReason.ENTRY, false),
-                actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.isOpen)
-            )
-        }
+        assertEquals(
+            expected = listOf(
+                dentist.entries,
+                dentist.entries[1],
+                FrameReason.ENTRY,
+                dentist.entries
+            ),
+            actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.openEntries)
+        )
+    }
 
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
