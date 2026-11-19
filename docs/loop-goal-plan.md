@@ -511,6 +511,7 @@ One row for each measurement. Keep it short.
 | 2026-11-19 | `s41-dev`, `s41-tuned` | `28f84e5d` | a section of a short note (≤2 500 characters) is read whole, levels 3 and 4 | | 291 of 393 (-2) | 216 of 259 (+0; fresh 59, +4) | | | yes, to the pool: dev and tuned hold, fresh gains 4 |
 | 2026-11-19 | `r1-section` | `28f84e5d` | the short-note section on round 1, level 5 | | | | 315 of 436 (+8 on r1-date, +5 on r1-base; 72.2 %) | | yes: kept; most wins are figures (11), the data above a heading now read |
 | 2026-11-19 | `s42-dev`, `s42-tuned` | `677fe638` | `tally` counts each figure on the line closest to its words (it took the first line sharing "2026"), levels 3 and 4 | | 295 of 393 (+4) | 221 of 259 (+5, none lost; fresh 60, +1) | | | yes, to the pool |
+| 2026-11-19 | `r1-tally` | `677fe638` | the tally line match on round 1, level 5 | | | | 320 of 436 (+5 on r1-section, +10 on r1-base; 73.4 %) | | yes: kept |
 
 Notes as the plan is carried out:
 
