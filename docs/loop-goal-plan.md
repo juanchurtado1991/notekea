@@ -508,6 +508,7 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s39-spread` | `1e3b1d88` | 2.3, a change's item written in entries of several notes, none named, open between them, level 2 | dev 29 / 12 (was 28 / 12); tuned 8 / 4 | | | | | no, reverted: the item's words carry the change's ("a follow-up task for the pending pitch"), so no entry writes them all |
 | 2026-11-19 | `s40-dev`, `s40-tuned` | `e37d8054` | `calculate` refuses a date and sends it to `days`, levels 3 and 4 | | 293 of 393 (+3) | 216 of 259 (-4; fresh 55) | | | yes, to the pool: the refusal showed on one dev task (the mortgage) and on no tuned one, so tuned's -4 is the run's noise (its losses were lost in s37 too) |
 | 2026-11-19 | `r1-date` | `e37d8054` | the date refusal on round 1, level 5 | | | | 307 of 436 (-3, the noise) | | kept as a bug fix only: a date read as three numbers gave a wrong figure; no gain on the pool |
+| 2026-11-19 | `s41-dev`, `s41-tuned` | `28f84e5d` | a section of a short note (≤2 500 characters) is read whole, levels 3 and 4 | | 291 of 393 (-2) | 216 of 259 (+0; fresh 59, +4) | | | yes, to the pool: dev and tuned hold, fresh gains 4 |
 
 Notes as the plan is carried out:
 
