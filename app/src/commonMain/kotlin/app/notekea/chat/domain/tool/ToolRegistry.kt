@@ -14,7 +14,12 @@ class ToolRegistry(val tools: List<ChatTool>) {
     fun keyOf(
         call: ToolCall,
         context: ToolContext
-    ): String = "${call.name}:${byName[call.name]?.targetOf(call, context).orEmpty()}".lowercase()
+    ): String {
+        val tool = byName[call.name]
+        val key = (tool as? KeyedTool)?.keyOf(call, context) ?: tool?.targetOf(call, context)
+
+        return "${call.name}:${key.orEmpty()}".lowercase()
+    }
 
     /** The tools that end the turn and no other. */
     fun ends(): ToolRegistry = ToolRegistry(

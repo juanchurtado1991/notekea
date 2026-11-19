@@ -512,6 +512,7 @@ One row for each measurement. Keep it short.
 | 2026-11-19 | `r1-section` | `28f84e5d` | the short-note section on round 1, level 5 | | | | 315 of 436 (+8 on r1-date, +5 on r1-base; 72.2 %) | | yes: kept; most wins are figures (11), the data above a heading now read |
 | 2026-11-19 | `s42-dev`, `s42-tuned` | `677fe638` | `tally` counts each figure on the line closest to its words (it took the first line sharing "2026"), levels 3 and 4 | | 295 of 393 (+4) | 221 of 259 (+5, none lost; fresh 60, +1) | | | yes, to the pool |
 | 2026-11-19 | `r1-tally` | `677fe638` | the tally line match on round 1, level 5 | | | | 320 of 436 (+5 on r1-section, +10 on r1-base; 73.4 %) | | yes: kept |
+| 2026-11-19 | `r1-tally` (9B) | `677fe638` | the round so far on the 9B, level 5 | | | | | 327 of 436 (+1 on r1-base; 75.0 %) | the 9B holds; its gains are figures (4) |
 
 Notes as the plan is carried out:
 
