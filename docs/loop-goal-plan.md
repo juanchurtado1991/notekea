@@ -505,6 +505,8 @@ One row for each measurement. Keep it short.
 | 2026-11-18 | `s36-kind-change` | `5488756c` | the same, only for changes (a question may be about all of them), level 2 | dev 27 / 13 (was 28 / 12); tuned 7 / 4 (was 8 / 4) | | | | | yes |
 | 2026-11-18 | `s37-dev`, `s37-tuned` | `fc411bde` | the kind set (s36) and, after a topic hold, only reading until those notes are read (3.3), levels 3 and 4 | | 291 of 393 (+1) | 214 of 259 (-6: the kind set held "the project that is on hold" open between six projects) | | | no, reverted in `797a2002`: the topic holds still ran out of steps, 12 of 12, as each topic note asked for its own topic |
 | 2026-11-18 | `s38-dev`, `s38-tuned` | `5a62f9ea` | a topic note asks for no topic of its own (one step), levels 3 and 4 | | 287 of 393 (-3) | 219 of 259 (-1; fresh 56) | | | no, reverted: the topic holds sit in failed tasks without failing them; those answers were given and wrong for other causes (a trap number, an unasked namesake) |
+| 2026-11-18 | `s39-spread` | `1e3b1d88` | 2.3, a change's item written in entries of several notes, none named, open between them, level 2 | dev 29 / 12 (was 28 / 12); tuned 8 / 4 | | | | | no, reverted: the item's words carry the change's ("a follow-up task for the pending pitch"), so no entry writes them all |
+| 2026-11-19 | `s40-dev`, `s40-tuned` | `e37d8054` | `calculate` refuses a date and sends it to `days`, levels 3 and 4 | | 293 of 393 (+3) | 216 of 259 (-4; fresh 55) | | | yes, to the pool: the refusal showed on one dev task (the mortgage) and on no tuned one, so tuned's -4 is the run's noise (its losses were lost in s37 too) |
 
 Notes as the plan is carried out:
 
