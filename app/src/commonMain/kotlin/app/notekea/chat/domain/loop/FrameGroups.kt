@@ -159,6 +159,6 @@ internal object FrameGroups {
     private const val MOST = 6
 
     // A quote opens where no letter is before it, so "Laura's" opens none.
-    internal val QUOTED =
+    private val QUOTED =
         Regex(pattern = "(?<!\\p{L})'[^']*'(?!\\p{L})|\"[^\"]*\"|‘[^’]*’|“[^”]*”|«[^»]*»")
 }

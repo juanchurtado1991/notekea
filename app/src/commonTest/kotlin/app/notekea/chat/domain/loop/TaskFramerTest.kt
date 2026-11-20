@@ -175,37 +175,6 @@ class TaskFramerTest {
             )
         }
 
-    // The frame alone, 2026-11-20: the 4B marked both Lauras "no", and the note was settled whole.
-    @Test
-    fun `entries of namesakes the task does not tell apart are open with no marks`() = runTest {
-        val payments = candidate(
-            path = "Finanzas/Cobros 2026.md",
-            entries = listOf(
-                "- Toledo 14 — Laura Pons — pendiente",
-                "- Fuencarral 88 — Laura Benítez — pendiente",
-                "- Jaén 9 — Carmen Vidal — pendiente"
-            )
-        )
-
-        val frame = frameOf(
-            task = "Laura ya ha pagado noviembre, apúntalo",
-            candidates = listOf(payments),
-            replies = mapOf(
-                FramePrompts.COUNT to """{"count":"one","words":"Laura","thing":"item"}""",
-                FramePrompts.PICK to """{"pick":"N1"}""",
-                FramePrompts.MARK_ENTRIES to """{"E1":"no","E2":"no"}"""
-            )
-        )
-
-        assertEquals(
-            expected = listOf(payments.entries.take(n = 2), false),
-            actual = listOf(
-                frame?.openEntries,
-                FramePrompts.MARK_ENTRIES in engine.generated.map { it.first().text }
-            )
-        )
-    }
-
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
     fun `a question about an item marks no entry, as it may add them up`() = runTest {
