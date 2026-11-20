@@ -32,7 +32,7 @@ class TaskFramerTest {
         words = setOf("servers")
     )
     private val worded = "the budget for the kitchen servers"
-    private val wordedOne = """{"count":"one","words":"$worded","thing":"note"}"""
+    private val wordedOne = """{"count":"one","words":"$worded","does":"note"}"""
 
     private fun candidate(
         path: String,
@@ -62,8 +62,8 @@ class TaskFramerTest {
         )
     }
 
-    private val one = """{"count":"one","words":"the budget","thing":"note"}"""
-    private val appointment = """{"count":"one","words":"the appointment","thing":"item"}"""
+    private val one = """{"count":"one","words":"the budget","does":"note"}"""
+    private val appointment = """{"count":"one","words":"the appointment","does":"changes"}"""
 
     // The frame alone, 2026-11-18: the 4B marked one of two Lauras "yes" with nothing in the task to tell them apart.
     @Test
@@ -79,7 +79,7 @@ class TaskFramerTest {
                 task = "what is the total of the kitchen budget?",
                 candidates = listOf(kitchen, work),
                 replies = mapOf(
-                    FramePrompts.COUNT to """{"count":"one","words":"the kitchen budget","thing":"note"}"""
+                    FramePrompts.COUNT to """{"count":"one","words":"the kitchen budget","does":"note"}"""
                 )
             )
 
@@ -175,6 +175,34 @@ class TaskFramerTest {
             )
         }
 
+    // The frame alone, 2026-11-20: "log an expense for today" was called an item and its entries were asked about.
+    @Test
+    fun `only a request that changes what a note already writes marks its entries`() = runTest {
+        suspend fun marks(does: String): Boolean {
+            engine.generated.clear()
+
+            frameOf(
+                task = "add a cleaning at 10:00",
+                candidates = listOf(dentist),
+                replies = mapOf(
+                    FramePrompts.COUNT to """{"count":"one","words":"the dentist","does":"$does"}""",
+                    FramePrompts.PICK to """{"pick":"N1"}""",
+                    FramePrompts.MARK_ENTRIES to """{"E1":"no","E2":"no"}"""
+                )
+            )
+
+            return FramePrompts.MARK_ENTRIES in engine.generated.map { it.first().text }
+        }
+
+        val answers =
+            listOf(FramePrompts.CHANGES, FramePrompts.ADDS, FramePrompts.WHOLE, FramePrompts.ASKS)
+
+        assertEquals(
+            expected = listOf(true, false, false, false),
+            actual = answers.map { marks(does = it) }
+        )
+    }
+
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
     fun `a question about an item marks no entry, as it may add them up`() = runTest {
@@ -220,7 +248,7 @@ class TaskFramerTest {
             val every = frameOf(
                 task = "tag my recipes",
                 candidates = listOf(home),
-                replies = mapOf(FramePrompts.COUNT to """{"count":"every","words":"my recipes","thing":"note"}""")
+                replies = mapOf(FramePrompts.COUNT to """{"count":"every","words":"my recipes","does":"note"}""")
             )
 
             val calls = engine.generated.size
