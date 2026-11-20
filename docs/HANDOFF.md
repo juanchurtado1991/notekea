@@ -6,7 +6,8 @@ milestone, a release candidate or the open work changes, so it never needs a con
 Last updated: 2026-11-19, with the plan to the blind targets under way on #145: the pool's first round at 73.4 %
 (4B) and 75.0 % (9B), the targets 85 % and 90 %; where it stands and what to measure next is in
 `docs/loop-goal-plan.md`, sections 2 ("Now") and 7 (the log). Step 4.2, `change_line` (card design B, the
-developer's choice), is built and measured at 316 of 436 on the pool (-4): whether it stays is the developer's call.
+developer's choice), is built and measured at 316 of 436 on the pool (-4, within the noise), and kept by the developer; next is
+step 2 (asking).
 Before that, 2026-11-17, with the loop's foundations on #145 (the task's frame, figures worked out by the app, a
 topic read whole), the blind evaluation pool, and **the plan to reach the blind targets, `docs/loop-goal-plan.md`,
 which is the next work: follow it step by step**; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
