@@ -7,9 +7,6 @@ internal object FramePrompts {
     const val NO = "no"
     const val ITEM = "item"
     const val NOTE = "note"
-    const val CHANGES = "changes"
-    const val ADDS = "adds"
-    const val ASKS = "asks"
 
     const val COUNT =
         """You read a request made to a notes app and say how many things in the person's notes it is about. You
@@ -20,16 +17,10 @@ are not shown the notes: judge by the request's words. Reply with JSON:
   "every" when it is about every note or entry a condition picks out ("all clients with an unpaid invoice", "my
   recipes", "the notes tagged travel", "every open task"). "none" when it is about no particular note (write a
   new note from nothing, a question about the app or the world).
-- words: the request's own words for what it is about, copied as written ("Laura", "the budget"). For a request
-  that adds, the words for where it goes or whom it is about ("my recipe", "Contactos", "Laura" in "add a task to
-  call Laura"), never what it adds.
+- words: the request's own words for what it is about, copied as written ("Laura", "the budget").
 - thing: "item" when the one thing is an item already inside a note that the request changes or asks about (an
   appointment, an order, a row, a task, a payment); "note" when it is a whole note, a person or a document, and when
-  the request adds something new to a note ("add a task to my recipe", "add Ana to Contactos").
-- does: what the request does. "changes" when it changes, moves, cancels, marks or removes something already
-  written inside a note (an appointment, an order, a row, a task, a payment). "adds" when it adds something new to a
-  note, a list or a log, or writes a new note. "note" when it renames, moves, tags or deletes a whole note. "asks"
-  when it asks about something."""
+  the request adds something new to a note ("add a task to my recipe", "add Ana to Contactos")."""
 
     const val MARK_NOTES =
         """A request made to a notes app is about one thing in the person's notes, and each note below (N1, N2…)

@@ -63,8 +63,7 @@ class TaskFramerTest {
     }
 
     private val one = """{"count":"one","words":"the budget","thing":"note"}"""
-    private val appointment =
-        """{"count":"one","words":"the appointment","thing":"item","does":"changes"}"""
+    private val appointment = """{"count":"one","words":"the appointment","thing":"item"}"""
 
     // The frame alone, 2026-11-18: the 4B marked one of two Lauras "yes" with nothing in the task to tell them apart.
     @Test
@@ -175,65 +174,6 @@ class TaskFramerTest {
                 actual = listOf(two?.openEntries, single?.entry, single?.reason, none?.isOpen)
             )
         }
-
-    // The frame alone, 2026-11-20: "log an expense for today" was called an item and its entries were asked about.
-    @Test
-    fun `only an item the request changes marks the note's entries`() = runTest {
-        suspend fun marks(does: String): Boolean {
-            engine.generated.clear()
-
-            frameOf(
-                task = "add a cleaning at 10:00",
-                candidates = listOf(dentist),
-                replies = mapOf(
-                    FramePrompts.COUNT to """{"count":"one","words":"the dentist","thing":"item","does":"$does"}""",
-                    FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.MARK_ENTRIES to """{"E1":"no","E2":"no"}"""
-                )
-            )
-
-            return FramePrompts.MARK_ENTRIES in engine.generated.map { it.first().text }
-        }
-
-        val answers =
-            listOf(FramePrompts.CHANGES, FramePrompts.ADDS, FramePrompts.NOTE, FramePrompts.ASKS)
-
-        assertEquals(
-            expected = listOf(true, false, false, false),
-            actual = answers.map { marks(does = it) }
-        )
-    }
-
-    // The frame alone, 2026-11-20: the 4B marked both Lauras "no", and the note was settled whole.
-    @Test
-    fun `entries of namesakes the task does not tell apart are open with no marks`() = runTest {
-        val payments = candidate(
-            path = "Finanzas/Cobros 2026.md",
-            entries = listOf(
-                "- Toledo 14 — Laura Pons — pendiente",
-                "- Fuencarral 88 — Laura Benítez — pendiente",
-                "- Jaén 9 — Carmen Vidal — pendiente"
-            )
-        )
-
-        val frame = frameOf(
-            task = "Laura ya ha pagado noviembre, apúntalo",
-            candidates = listOf(payments),
-            replies = mapOf(
-                FramePrompts.COUNT to """{"count":"one","words":"Laura","thing":"item","does":"changes"}""",
-                FramePrompts.PICK to """{"pick":"N1"}""",
-                FramePrompts.MARK_ENTRIES to """{"E1":"no","E2":"no"}"""
-            )
-        )
-
-        assertEquals(
-            expected = listOf(payments.entries.take(n = 2), false),
-            actual = listOf(
-                frame?.openEntries,
-                FramePrompts.MARK_ENTRIES in engine.generated.map { it.first().text }
-            )
-        )
-    }
 
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
