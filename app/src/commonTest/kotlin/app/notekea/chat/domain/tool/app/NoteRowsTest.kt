@@ -67,4 +67,34 @@ class NoteRowsTest {
             )
         )
     }
+
+    // The dev run of 2026-11-20: "Distance (mi)" was asked of a column named Distance, "hours of sleep" of Hours.
+    @Test
+    fun `the column asked is the one whose name shares the most words with it`() {
+        val row = NoteRows.of(
+            body = listOf(
+                "| Date | Distance | Hours | Pace |",
+                "|---|---|---|---|",
+                "| Oct 3 | 4.5 | 7.5 | 10 |"
+            ).joinToString(separator = "\n")
+        ).single()
+
+        assertEquals(
+            expected = listOf(4.5, 7.5, null),
+            actual = listOf(
+                NoteRows.figureOf(
+                    row = row,
+                    column = "Distance (mi)"
+                ).value,
+                NoteRows.figureOf(
+                    row = row,
+                    column = "hours of sleep"
+                ).value,
+                NoteRows.figureOf(
+                    row = row,
+                    column = "calories"
+                ).value
+            )
+        )
+    }
 }

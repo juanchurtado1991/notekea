@@ -561,6 +561,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `r1-line` 9B | `8b6fbd58` | round 1 closed on the 9B, the code as r1-line (`change_line` kept), level 5 | | | | 337 of 436 (77.3 %, +10 on r1-tally's 327): change wrong 14 won, 5 lost; figures 2 won, 2 lost; left: 41 should have asked, 25 change wrong, 15 needless asks | | measured only (design work stopped); the 9B's figure for round 1 |
 | 2026-11-20 | `r1-line` 9B dev | `bc2e6972` | the nine exams on the 9B, first since the baseline (277), level 3 | | 291 of 393 (74.0 %, +14 on the baseline): left 36 should have asked, 17 needless asks, 17 figures, 23 changes | | | | measured only |
 | 2026-11-20 | `r1-line` 9B tuned | `e839309b` | the tuned tasks and the fresh vault on the 9B, first since the baseline (234, 58), level 4 | | | 226 of 259 (87.3 %); fresh 59 of 77 (76.6 %): left 9 should have asked, 5 needless asks, 5 figures, 13 changes | | | measured only |
+| 2026-11-20 | `s57-rows` | `b1c496bb` | 3.2, `rows` numbers a note's rows and `tally` counts them by id; after a figure hold the next call may only be a figure tool, level 3 | | 288 of 393 (-11 on `s54-dev`; figures 22, 5 won, 10 lost; days 4) | | | | no, mended: the column was found only when every word asked was in its name ("Distance (mi)" for Distance, "hours of sleep" for Hours), so tables refused their rows as writing several figures; now the column sharing the most words |
 
 Notes as the plan is carried out:
 
