@@ -71,7 +71,8 @@ rule built on it moves errors around. The plan does not say what to do then. The
 2. **Lift the gate on 2.4**, and let the loop ask with the frame as it is.
 3. **Redesign the count**: a call the 4B can answer, or the code finding the sets without the model's words.
 
-Until the developer picks one, only measurements that change nothing are run.
+Taken meanwhile (the goal says to take another step): **1, step 3**, as it leaves step 2's code as it was and
+the developer can still pick 2 or 3. Step 3.2 first, as cause 4 is the larger (17 on dev, the gate 15).
 
 ### Where the failures are
 

@@ -8,6 +8,7 @@ import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DateTool
 import app.notekea.chat.domain.tool.app.DaysTool
+import app.notekea.chat.domain.tool.app.RowsTool
 import app.notekea.chat.domain.tool.app.ShowTools
 import app.notekea.chat.domain.tool.app.TallyTool
 import app.notekea.chat.domain.tool.change.ChangeLineTool
@@ -116,9 +117,10 @@ class LoopTools(
         )
     }
 
-    // Figures worked out by the app: from the lines the model names, checked against the notes (`tally`), an
-    // expression, days between dates, and a figure a note writes many times (`docs/agent-figures.md`).
+    // Figures worked out by the app: from the rows of a note the code numbers and the model names (`rows`, `tally`),
+    // an expression, days between dates, and a figure a note writes many times (`docs/agent-figures.md`).
     private fun figures(): List<ChatTool> = listOf(
+        RowsTool(noteTextCache = noteTextCache),
         TallyTool(noteTextCache = noteTextCache),
         CalculateTool(),
         DaysTool(),

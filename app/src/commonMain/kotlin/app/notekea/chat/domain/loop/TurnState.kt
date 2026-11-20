@@ -38,6 +38,9 @@ internal class TurnState(
     // The tool of the last call made, when it was refused: not offered until another call is made.
     val withheld = mutableListOf<String>()
 
+    // The tools the next call may only be, after a hold only they repair: figures an answer gave and no tool did.
+    val narrowed = mutableListOf<String>()
+
     val dropped: Int get() = drops.lastOrNull() ?: 0
 
     // What the turn was told once, so it is not told again: that it proposed with nothing added.

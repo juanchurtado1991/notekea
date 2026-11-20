@@ -15,15 +15,14 @@ confidence: the 9B made 6 such mistakes and the 4B about 16. Some examples:
 
 ## Figures: the model picks the lines, the app works them out
 
-- **`tally`** (`TallyTool`) takes `how`, `items` and `left_out`:
-  - `how` is one of sum, average, count, product, min, max or difference;
-  - `items` are the lines that count, each written as "figure | the line it is on";
-  - `left_out` are the lines left out, each written as "line | why".
-
-  The app checks each item against the notes the turn read. The figure must be written on a line that shares a word
-  with the item's line. If it is not, the item is refused, and the model is told to read the note it is in. The app
-  then works the result out and shows each counted line next to its figure. The left-out lines make the model say
-  what it excluded and why, where that can be seen and checked.
+- **`rows`** (`RowsTool`, `NoteRows`, 2026-11-20, the plan's step 3.2) numbers a note's rows R1, R2…: a table's
+  rows with their cells under the header's names, list items, and `Key: value` lines that write a figure, each under
+  its heading. A word keeps the rows about it (a column, a heading, a label).
+- **`tally`** (`TallyTool`) takes `how` (sum, average, count, product, min, max or difference), the note, the rows by
+  id (or all) and, when a row writes several figures, the column or the word the figure is under. The code reads each
+  row's figure (dates and times are none), works the result out, and lists the rows counted and those of the note it
+  did not count, so a row left out is seen. It replaced the items the model copied as "figure | line", which dropped
+  rows and copied figures wrong (the loop's dev runs, 2026-11-19 and 2026-11-20).
 - **`FigureValues`** reads figures as notes write them in English or Spanish style: 1,234.50, 1.234,50, 38,5 and
   2.500 €.
 - **`days`** (`DaysTool`) counts the days between two days. Each day can be a date as the notes write it or a phrase
