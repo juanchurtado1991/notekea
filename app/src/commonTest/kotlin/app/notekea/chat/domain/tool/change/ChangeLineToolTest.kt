@@ -9,9 +9,12 @@ import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -190,6 +193,63 @@ class ChangeLineToolTest {
         assertEquals(
             expected = emptyList(),
             actual = context.work.changes
+        )
+    }
+
+    // The loop's tuned run, 2026-11-19: "baja a 3 el rating" called change_line on "rating: 4" until the steps ran
+    // out, and "set date 2026-10-28" wrote the title with a date line under it.
+    @Test
+    fun `a property and a line with lines added are sent to the tool for them`() = runTest {
+        val book = RelativePath(value = "Books/Sapiens.md")
+        store.texts[book] = "---\nrating: 4\n---\n# Sapiens\n"
+
+        val context = ToolContext(
+            vaultPath = VAULT,
+            notes = listOf(
+                entry(
+                    path = book.value,
+                    metadata = NoteMetadata.NONE.copy(
+                        properties = listOf(
+                            NoteProperty(
+                                key = "rating",
+                                value = PropertyValue.Number(text = "4")
+                            )
+                        )
+                    )
+                )
+            ),
+            task = "set the rating of Sapiens to 3",
+            openNote = null
+        )
+
+        val saids = listOf(
+            "rating: 4" to "rating: 3",
+            "# Sapiens" to "# Sapiens\nDate: 2026-10-28"
+        ).map { (line, text) ->
+            tool
+                .run(
+                    call = ToolCall(
+                        name = tool.name,
+                        arguments = mapOf(
+                            "note" to "Sapiens",
+                            "line" to line,
+                            "text" to text
+                        )
+                    ),
+                    context = context
+                )
+                .forModel
+                .substringAfter(delimiter = "not added. ")
+                .substringBefore(delimiter = ":")
+        }
+
+        assertEquals(
+            expected = listOf(
+                "\"rating\" is a property of the note, not a line of it",
+                "text is the one line that takes the line's place. To add lines, call append or add_task; to " +
+                    "set a property, set_property."
+            ),
+            actual = saids
         )
     }
 }

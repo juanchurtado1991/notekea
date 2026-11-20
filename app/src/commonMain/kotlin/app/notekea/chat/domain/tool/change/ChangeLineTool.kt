@@ -8,6 +8,7 @@ import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolResult
+import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 
@@ -46,6 +47,14 @@ class ChangeLineTool(
             )
         }
 
+        // One line takes one line's place: lines added under it are append's or add_task's, a date set_property's.
+        if ('\n' in call.text(name = ActionField.TEXT.written)) {
+            return ToolResult(
+                forModel = "$name: not added. text is the one line that takes the line's place. To add lines, " +
+                    "call append or add_task; to set a property, set_property."
+            )
+        }
+
         val lines = noteTextCache
             .textsOf(
                 vaultPath = context.vaultPath,
@@ -68,7 +77,10 @@ class ChangeLineTool(
                 lines = lines,
                 wanted = it
             ) as? LineMatch.One
-        } ?: return unfound(
+        } ?: return propertyOf(
+            entry = entry,
+            said = said
+        ) ?: unfound(
             path = path,
             lines = lines,
             wanted = said.last()
@@ -94,6 +106,32 @@ class ChangeLineTool(
             old = found.line,
             new = new,
             context = context
+        )
+    }
+
+    // A line written as a property of the note ("rating: 4"): the frontmatter is set_property's, never a line's.
+    private fun propertyOf(
+        entry: NoteEntry,
+        said: List<String>
+    ): ToolResult? {
+        val property = entry
+            .metadata
+            .properties
+            .map { it.key }
+            .firstOrNull { key ->
+                said.any {
+                    it
+                        .trim()
+                        .startsWith(
+                            prefix = "$key:",
+                            ignoreCase = true
+                        )
+                }
+            } ?: return null
+
+        return ToolResult(
+            forModel = "$name: not added. \"$property\" is a property of the note, not a line of it: call " +
+                "set_property with the note, \"$property\" and its value."
         )
     }
 
