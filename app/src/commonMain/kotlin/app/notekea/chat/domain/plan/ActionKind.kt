@@ -109,6 +109,11 @@ enum class ActionKind(
         needs = setOf(ActionField.NOTE, ActionField.TEXT),
         isWriting = true
     ),
+    CHANGE_LINE(
+        written = "change_line",
+        needs = setOf(ActionField.NOTE, ActionField.TEXT, ActionField.LINE),
+        isWriting = true
+    ),
     LINK_NOTES(
         written = "link_notes",
         needs = setOf(ActionField.NOTE, ActionField.TARGET),

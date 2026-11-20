@@ -53,7 +53,7 @@ class Toolsets(private val byKind: Map<WorkKind, List<ChatTool>>) {
     }
 
     companion object {
-        const val MOST_TOOLS = 24
+        const val MOST_TOOLS = 25
 
         private val WEB_TOOLS = setOf(WebSearchTool.NAME, FetchTool.NAME, ChangeTools.clip.name)
     }

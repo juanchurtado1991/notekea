@@ -31,7 +31,7 @@ object ChangeTools {
     val append = ChangeTool(
         name = "append",
         description = "text added at the end of a note: the note and the text, as it will be written. Never a " +
-            "task (add_task), a tag (add_tag) or a property (set_property).",
+            "task (add_task), a tag (add_tag), a property (set_property) or a line changed (change_line).",
         kind = ActionKind.APPEND_TEXT,
         fields = listOf(ActionField.NOTE, ActionField.TEXT),
         misuse = ChangeMisuse::taskAppended
@@ -77,6 +77,15 @@ object ChangeTools {
         kind = ActionKind.COMPLETE_TASK,
         fields = listOf(ActionField.NOTE, ActionField.TEXT),
         misuse = ChangeMisuse::doneUnasked
+    )
+
+    val changeLine = ChangeTool(
+        name = "change_line",
+        description = "one line of a note changed in place (a time, a date, a figure, a name): the note, text as " +
+            "the note writes the line now, and line as it must be. Never text added (append), a task marked done " +
+            "(complete_task) or a property (set_property).",
+        kind = ActionKind.CHANGE_LINE,
+        fields = listOf(ActionField.NOTE, ActionField.TEXT, ActionField.LINE)
     )
 
     val link = ChangeTool(

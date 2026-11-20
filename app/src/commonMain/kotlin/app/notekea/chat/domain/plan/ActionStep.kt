@@ -3,9 +3,9 @@ package app.notekea.chat.domain.plan
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * A planned step checked against the vault (3.9): the [notes] it acts on, found by their names (up to 50, a folder or a
- * tag expanded), the [folder] and [target] it names, the [template] note, and the fields as written. [content] is the
- * text it will write, prepared before the card so the person confirms what will be written, not a promise of it.
+ * A planned step checked against the vault (3.9): the [notes] it acts on, found by their names (up to 50), the fields
+ * as written (a changed line: [text] as the note writes it, [line] as it will be), and [content], the text it will
+ * write, prepared before the card so the person confirms what will be written, not a promise of it.
  */
 data class ActionStep(
     val kind: ActionKind,
@@ -15,6 +15,7 @@ data class ActionStep(
     val template: RelativePath? = null,
     val title: String? = null,
     val text: String? = null,
+    val line: String? = null,
     val property: String? = null,
     val value: String? = null,
     val tag: String? = null,

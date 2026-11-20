@@ -3,6 +3,7 @@ package app.notekea.shell.data.chat
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.LineEdit
 import app.notekea.chat.domain.plan.NoteFileName
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
@@ -259,6 +260,35 @@ internal class NoteWriter(
 
             is Outcome.Failure -> Outcome.Failure(error = done.error)
         }
+    }
+
+    // The line found again in the note as it is now, by its words: one the person changed since the card is still
+    // found, and none or several alike fail the plan, not a guess (4.2). Undo writes the line back.
+    suspend fun changeLine(step: ActionStep): Outcome<Unit, ActionProblem> {
+        val unknown = Outcome.Failure(error = ActionProblem.UnknownLine(text = step.text.orEmpty()))
+        val path = step.notes.firstOrNull() ?: return unknown
+
+        val before = noteContentStore.read(
+            vaultPath = vaultPath,
+            path = path
+        ) ?: return unknown
+
+        val after = LineEdit.changed(
+            text = before,
+            old = step.text.orEmpty(),
+            new = step.line.orEmpty()
+        ) ?: return unknown
+
+        rewrite(
+            rewrite = NoteRewrite(
+                path = path,
+                original = before,
+                updated = after,
+                linkCount = 0
+            )
+        )
+
+        return Outcome.Success(value = Unit)
     }
 
     // A note that cannot be read fails the plan: a tag on a note moved away was written nowhere, and said done (A6).

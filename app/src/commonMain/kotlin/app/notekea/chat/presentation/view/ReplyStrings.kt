@@ -24,6 +24,8 @@ import app.notekea.resources.chat_action_cancelled
 import app.notekea.resources.chat_action_cancelled_es
 import app.notekea.resources.chat_action_cards_count
 import app.notekea.resources.chat_action_cards_count_es
+import app.notekea.resources.chat_action_change_line
+import app.notekea.resources.chat_action_change_line_es
 import app.notekea.resources.chat_action_clip_url
 import app.notekea.resources.chat_action_clip_url_es
 import app.notekea.resources.chat_action_close_tabs
@@ -136,6 +138,8 @@ import app.notekea.resources.chat_problem_failed
 import app.notekea.resources.chat_problem_failed_es
 import app.notekea.resources.chat_problem_folder
 import app.notekea.resources.chat_problem_folder_es
+import app.notekea.resources.chat_problem_line
+import app.notekea.resources.chat_problem_line_es
 import app.notekea.resources.chat_problem_long
 import app.notekea.resources.chat_problem_long_es
 import app.notekea.resources.chat_problem_many
@@ -301,6 +305,7 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_action_add_tag to Res.string.chat_action_add_tag_es,
     Res.string.chat_action_add_task to Res.string.chat_action_add_task_es,
     Res.string.chat_action_complete_task to Res.string.chat_action_complete_task_es,
+    Res.string.chat_action_change_line to Res.string.chat_action_change_line_es,
     Res.string.chat_action_link_notes to Res.string.chat_action_link_notes_es,
     Res.string.chat_action_bookmark to Res.string.chat_action_bookmark_es,
     Res.string.chat_action_create_folder to Res.string.chat_action_create_folder_es,
@@ -335,6 +340,7 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_problem_many to Res.string.chat_problem_many_es,
     Res.string.chat_problem_exists to Res.string.chat_problem_exists_es,
     Res.string.chat_problem_task to Res.string.chat_problem_task_es,
+    Res.string.chat_problem_line to Res.string.chat_problem_line_es,
     Res.string.chat_problem_query to Res.string.chat_problem_query_es,
     Res.string.chat_problem_query_failed to Res.string.chat_problem_query_failed_es,
     Res.string.chat_problem_long to Res.string.chat_problem_long_es,

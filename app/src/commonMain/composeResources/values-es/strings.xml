@@ -837,6 +837,7 @@
     <string name="chat_action_add_tag">Add tag</string>
     <string name="chat_action_add_task">Add task</string>
     <string name="chat_action_complete_task">Complete task</string>
+    <string name="chat_action_change_line">Change a line</string>
     <string name="chat_action_link_notes">Link</string>
     <string name="chat_action_bookmark">Bookmark</string>
     <string name="chat_action_create_folder">Create folder</string>
@@ -865,6 +866,7 @@
     <string name="chat_problem_many">That covers %1$d notes; I do at most 50 at a time. Ask for a folder or a tag at a time.</string>
     <string name="chat_problem_exists">A note called “%1$s” is already there, so I left it as it is.</string>
     <string name="chat_problem_task">I found no open task like “%1$s” in that note.</string>
+    <string name="chat_problem_line">I found no one line like “%1$s” in that note.</string>
     <string name="chat_problem_query">Your notes have no property “%1$s”. Try with one of the vault's properties.</string>
     <string name="chat_problem_query_failed">I could not turn that into a search of your notes' properties.</string>
     <string name="chat_problem_long">The text has %1$d words, more than I can turn into notes at once. Paste it in parts.</string>
@@ -925,6 +927,7 @@
     <string name="chat_action_add_tag_es">Añadir etiqueta</string>
     <string name="chat_action_add_task_es">Añadir tarea</string>
     <string name="chat_action_complete_task_es">Completar tarea</string>
+    <string name="chat_action_change_line_es">Cambiar una línea</string>
     <string name="chat_action_link_notes_es">Enlazar</string>
     <string name="chat_action_bookmark_es">Añadir a marcadores</string>
     <string name="chat_action_create_folder_es">Crear carpeta</string>
@@ -961,6 +964,7 @@
     <string name="chat_problem_many_es">Eso abarca %1$d notas; hago como mucho 50 a la vez. Pídelo por carpeta o por etiqueta.</string>
     <string name="chat_problem_exists_es">Ya existe una nota llamada “%1$s”, así que la dejé como está.</string>
     <string name="chat_problem_task_es">No encontré ninguna tarea pendiente como “%1$s” en esa nota.</string>
+    <string name="chat_problem_line_es">No encontré una sola línea como “%1$s” en esa nota.</string>
     <string name="chat_problem_query_es">Tus notas no tienen la propiedad “%1$s”. Prueba con una de las propiedades del vault.</string>
     <string name="chat_problem_query_failed_es">No pude convertir eso en una búsqueda por las propiedades de tus notas.</string>
     <string name="chat_problem_long_es">El texto tiene %1$d palabras, más de las que puedo convertir en notas de una vez. Pégalo por partes.</string>

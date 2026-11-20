@@ -242,6 +242,8 @@ class VaultActionRunner(
 
         ActionKind.COMPLETE_TASK -> writer.completeTask(step = step)
 
+        ActionKind.CHANGE_LINE -> writer.changeLine(step = step)
+
         ActionKind.SET_PROPERTY, ActionKind.ADD_TAG -> writer.setProperty(step = step)
 
         ActionKind.LINK_NOTES -> linkNotes(

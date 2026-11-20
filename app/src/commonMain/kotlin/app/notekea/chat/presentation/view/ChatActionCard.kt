@@ -45,6 +45,7 @@ import app.notekea.resources.chat_action_bookmark
 import app.notekea.resources.chat_action_cancel
 import app.notekea.resources.chat_action_cancelled
 import app.notekea.resources.chat_action_cards_count
+import app.notekea.resources.chat_action_change_line
 import app.notekea.resources.chat_action_clip_url
 import app.notekea.resources.chat_action_close_tabs
 import app.notekea.resources.chat_action_complete_task
@@ -225,13 +226,19 @@ private fun StepLine(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = targetOf(step = step),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                val target = targetOf(step = step)
+
+                if (target.isNotEmpty()) {
+                    Text(
+                        text = target,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
+
+        if (step.kind == ActionKind.CHANGE_LINE) ChatLineChange(step = step)
 
         if (onPlace != null) {
             ChatNotePlace(
@@ -336,6 +343,9 @@ private fun targetOf(step: ActionStep): String {
 
         ActionKind.COMPLETE_TASK -> "$notes\n${step.text}"
 
+        // The note and both lines show in the box under it.
+        ActionKind.CHANGE_LINE -> ""
+
         ActionKind.LINK_NOTES ->
             notes + ARROW + step
                 .target
@@ -367,6 +377,7 @@ private fun verbOf(kind: ActionKind): StringResource = when (kind) {
     ActionKind.ADD_TAG -> Res.string.chat_action_add_tag
     ActionKind.ADD_TASK -> Res.string.chat_action_add_task
     ActionKind.COMPLETE_TASK -> Res.string.chat_action_complete_task
+    ActionKind.CHANGE_LINE -> Res.string.chat_action_change_line
     ActionKind.LINK_NOTES -> Res.string.chat_action_link_notes
     ActionKind.BOOKMARK -> Res.string.chat_action_bookmark
     ActionKind.CREATE_FOLDER -> Res.string.chat_action_create_folder
@@ -406,7 +417,7 @@ private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
 
     ActionKind.CREATE_FOLDER -> NotekeaIcons.NewFolder
 
-    ActionKind.RENAME -> NotekeaIcons.Rename
+    ActionKind.RENAME, ActionKind.CHANGE_LINE -> NotekeaIcons.Rename
 
     ActionKind.MOVE -> NotekeaIcons.FolderOpen
 

@@ -26,34 +26,12 @@ sealed interface TaskMatch {
             tasks: List<NoteTask>,
             wanted: String
         ): TaskMatch {
-            val words = plain(text = wanted)
-            if (words.isEmpty()) return None
+            val open = tasks.filterNot { it.isDone }
 
-            val open = tasks.filterNot {
-                it.isDone || plain(text = it.text).isEmpty()
-            }
-
-            val same = open.filter {
-                plain(text = it.text) == words
-            }
-
-            val holding = open.filter {
-                words in plain(text = it.text)
-            }
-
-            val held = open.filter {
-                plain(text = it.text) in words
-            }
-
-            val longest = held.maxOfOrNull { plain(text = it.text).length }
-
-            val tier = same
-                .ifEmpty { holding }
-                .ifEmpty {
-                    held.filter {
-                        plain(text = it.text).length == longest
-                    }
-                }
+            val tier = closest(
+                items = open,
+                wanted = wanted
+            ) { it.text }
 
             val texts = tier
                 .map { it.text.trim() }
@@ -64,6 +42,48 @@ sealed interface TaskMatch {
                 texts.size > 1 -> Several(texts = texts)
                 else -> One(task = tier.first())
             }
+        }
+
+        /**
+         * The [items] whose text ([textOf]) [wanted] means: those of its words, else those that hold them, else the
+         * longest they hold; none when it has no words. Shared with [LineMatch].
+         */
+        fun <T> closest(
+            items: List<T>,
+            wanted: String,
+            textOf: (T) -> String
+        ): List<T> {
+            val words = plain(text = wanted)
+            if (words.isEmpty()) return emptyList()
+
+            val plains = items
+                .map {
+                    it to plain(text = textOf(it))
+                }
+                .filter { (_, text) -> text.isNotEmpty() }
+
+            val same = plains.filter { (_, text) ->
+                text == words
+            }
+
+            val holding = plains.filter { (_, text) ->
+                words in text
+            }
+
+            val held = plains.filter { (_, text) ->
+                text in words
+            }
+
+            val longest = held.maxOfOrNull { (_, text) -> text.length }
+
+            return same
+                .ifEmpty { holding }
+                .ifEmpty {
+                    held.filter { (_, text) ->
+                        text.length == longest
+                    }
+                }
+                .map { (item, _) -> item }
         }
 
         /** [text] as its words alone: no Markdown marks, no link targets, no task dates, lower case. */

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The chat changes one line of a note in place (`change_line`, step 4.2 of `docs/loop-goal-plan.md`): "move the
+  interview to 16:00" finds the line by its words before the card, which shows the note with the line as it is (−)
+  and as it will be (+), only the changed words marked. Do it writes that line alone, keeping its list or heading
+  marks, and Undo writes it back; a line the note does not write, or several alike, is said, never guessed.
+
 - Nine blind exams for the chat's loop (`docs/eval-blind.md`): vaults and tasks of nine invented people, written
   without seeing the chat's code and checked by a second agent. With the Fresh Eval vault they are ten sets the loop
   was never tuned on, measured before and after a change and read only by kind of failure.

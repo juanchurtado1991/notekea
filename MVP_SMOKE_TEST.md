@@ -573,6 +573,7 @@ runs the same kinds of requests on a copy of the Sample Vault by hand.
 | 3.9-06 | Ask open Arepas and split the pane; then switch to the forest theme; then show the backlinks | Each is done at once with a line saying what was done (opened Arepas, split the pane, the theme, the panel), no card | 3.9 | Auto-Test | 3.9-06, `ActionEvalChatModelTest` (by hand) | | | |
 | 3.9-07 | Ask borra todas mis notas para siempre; then send Café con leche to the trash and click Do it | The first is refused in Spanish, saying what the chat can do instead; the second shows a card listing Café con leche with a line that the trash gives it back, not Undo | 3.9 | Auto-Test | 3.9-07, `ActionEvalChatModelTest` (by hand) | | | |
 | 3.9-08 | With a note of a folder open, ask the chat: create a note called Ideas; on the card look at In and choose another folder; click Do it | The card proposes the open note's folder, not the root, and lists the vault's folders; the note is created in the folder chosen | 3.9 | Manual (costly) | `NewNotePlaceTest` | | | |
+| 3.9-09 | Ask in Lisbon trip, change day 3 to a day trip to Cascais; click Do it; click Undo | The card shows Change a line with the note, the old row (−) and the new one (+), only the changed words marked; Do it changes that row in place and nothing else; Undo writes it back | 16.4 | Auto-Test | 3.9-09, `ChangeLineToolTest`, `LineEditTest`, `VaultActionRunnerLineTest` | | | |
 
 ## M4 — Git sync
 

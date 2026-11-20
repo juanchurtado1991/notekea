@@ -25,6 +25,7 @@ internal fun SuiteBuilder.actionChangeCases() {
     moveKeepsLinks()
     shownAtOnce()
     refusedAndTrash()
+    changeLine()
 }
 
 private fun SuiteBuilder.tagFolder() {
@@ -158,6 +159,43 @@ private fun SuiteBuilder.refusedAndTrash() {
         click(text = "Do it")
         expectNoFile(path = CAFE_NOTE)
         expectFile(path = "$PLAYGROUND/.trash/Café con leche.md")
+    }
+}
+
+private fun SuiteBuilder.changeLine() {
+    automated(
+        id = "3.9-09",
+        title = "A line is changed in place, shown before and after on the card, and Undo writes it back",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.any
+    ) {
+        openChat(withArepas = false)
+        ask(question = "in Lisbon trip, change day 3 to a day trip to Cascais")
+        expectText(text = "Change a line")
+
+        expectText(
+            text = "Day trip to Sintra",
+            substring = true
+        )
+
+        click(text = "Do it")
+
+        expectFile(
+            path = LISBON_NOTE,
+            containing = "Cascais"
+        )
+
+        expectFileWithout(
+            path = LISBON_NOTE,
+            text = "Sintra |"
+        )
+
+        click(text = "Undo")
+
+        expectFile(
+            path = LISBON_NOTE,
+            containing = "| 3 | Day trip to Sintra |"
+        )
     }
 }
 

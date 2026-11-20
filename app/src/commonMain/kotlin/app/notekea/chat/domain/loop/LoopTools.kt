@@ -10,6 +10,7 @@ import app.notekea.chat.domain.tool.app.DateTool
 import app.notekea.chat.domain.tool.app.DaysTool
 import app.notekea.chat.domain.tool.app.ShowTools
 import app.notekea.chat.domain.tool.app.TallyTool
+import app.notekea.chat.domain.tool.change.ChangeLineTool
 import app.notekea.chat.domain.tool.change.ChangeTools
 import app.notekea.chat.domain.tool.change.MemoryTool
 import app.notekea.chat.domain.tool.change.ProposeTool
@@ -137,6 +138,7 @@ class LoopTools(
         ChangeTools.setProperty,
         ChangeTools.addTask,
         ChangeTools.completeTask,
+        ChangeLineTool(noteTextCache = noteTextCache),
         ChangeTools.link,
         ChangeTools.move,
         ChangeTools.rename,

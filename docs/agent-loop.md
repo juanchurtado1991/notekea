@@ -518,7 +518,8 @@ and written by `ProposalCheck`, shared with today's agent). `TurnState` holds a 
 **What the measures taught, and what the loop does for it.** Each was found in a report of the evaluation and
 fixed in general, not for its task:
 - A set that lacked the tool a task needed failed far more than a larger set chose wrong: sets hold what their
-  work needs, up to 24 tools (the developer lifted step 0's limit of ten: "if more tools work better, so be it").
+  work needs, up to 25 tools since `change_line` (4.2), 24 before (the developer lifted step 0's limit of ten: "if
+  more tools work better, so be it").
   Looking (search, read, find, tasks, list) is in every set, and write_note in organize too.
 - The model made the same call again and again: a call made again is told, and its tool is withdrawn for the next
   call; three repeats and only changing or ending tools are left. A change asked again is told it is already in

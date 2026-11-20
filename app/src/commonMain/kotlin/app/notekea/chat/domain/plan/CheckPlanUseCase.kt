@@ -67,6 +67,7 @@ class CheckPlanUseCase {
                 template = found.template,
                 title = step[ActionField.TITLE],
                 text = step[ActionField.TEXT],
+                line = step[ActionField.LINE],
                 property = step[ActionField.PROPERTY],
                 value = step[ActionField.VALUE],
                 tag = step[ActionField.TAG]?.let { tagOf(written = it) },
