@@ -26,7 +26,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
             system = FramePrompts.COUNT,
             user = "${remembered(memory = memory)}Request: $task",
             schema = "{\"type\":\"object\",\"properties\":{\"$COUNT\":{\"enum\":[$counts]}," +
-                "\"$WORDS\":{\"type\":\"string\"},\"$THING\":{\"enum\":[$things]}}," +
+                "\"$WORDS\":{\"type\":\"string\",\"maxLength\":$MOST_WORDS},\"$THING\":{\"enum\":[$things]}}," +
                 "\"required\":[\"$COUNT\",\"$WORDS\",\"$THING\"]}"
         ) ?: return null
 
@@ -186,6 +186,10 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         const val COUNT = "count"
         const val WORDS = "words"
         const val THING = "thing"
+
+        // The task's words for its thing, never the request: the 4B copied "cuánto le pago a Luis por turno" whole,
+        // and no set of the two Luis was made (the frame alone, 2026-11-20). The grammar holds it short.
+        const val MOST_WORDS = 32
         const val TOKENS = 100
         const val MARK_TOKENS = 10
         const val MOST_MARKED = 12

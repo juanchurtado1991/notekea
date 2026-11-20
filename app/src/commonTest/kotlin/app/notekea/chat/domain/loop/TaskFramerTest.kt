@@ -175,6 +175,27 @@ class TaskFramerTest {
             )
         }
 
+    // The frame alone, 2026-11-20: the 4B copied "cuánto le pago a Luis por turno" whole as its words.
+    @Test
+    fun `the count's words are held short by the grammar`() = runTest {
+        frameOf(
+            task = "cuánto le pago a Luis por turno?",
+            candidates = listOf(dentist),
+            replies = mapOf(FramePrompts.COUNT to one)
+        )
+
+        val schema = engine
+            .options
+            .first()
+            .jsonSchema
+            .orEmpty()
+
+        assertEquals(
+            expected = true,
+            actual = "\"words\":{\"type\":\"string\",\"maxLength\":32}" in schema
+        )
+    }
+
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
     fun `a question about an item marks no entry, as it may add them up`() = runTest {
