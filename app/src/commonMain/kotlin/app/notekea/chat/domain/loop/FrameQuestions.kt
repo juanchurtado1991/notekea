@@ -20,17 +20,14 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         memory: List<MemoryLine>
     ): FrameCountReply? {
         val counts = FrameCount.entries.joinToString(separator = ",") { "\"${it.written}\"" }
-
-        val does =
-            listOf(FramePrompts.CHANGES, FramePrompts.ADDS, FramePrompts.WHOLE, FramePrompts.ASKS)
-                .joinToString(separator = ",") { "\"$it\"" }
+        val things = "\"${FramePrompts.NOTE}\",\"${FramePrompts.ITEM}\""
 
         val fields = asked(
             system = FramePrompts.COUNT,
             user = "${remembered(memory = memory)}Request: $task",
             schema = "{\"type\":\"object\",\"properties\":{\"$COUNT\":{\"enum\":[$counts]}," +
-                "\"$WORDS\":{\"type\":\"string\"},\"$DOES\":{\"enum\":[$does]}}," +
-                "\"required\":[\"$COUNT\",\"$WORDS\",\"$DOES\"]}"
+                "\"$WORDS\":{\"type\":\"string\"},\"$THING\":{\"enum\":[$things]}}," +
+                "\"required\":[\"$COUNT\",\"$WORDS\",\"$THING\"]}"
         ) ?: return null
 
         val count = FrameCount.entries.firstOrNull {
@@ -40,7 +37,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         return FrameCountReply(
             count = count,
             words = fields[WORDS].orEmpty(),
-            isItem = fields[DOES] == FramePrompts.CHANGES
+            isItem = fields[THING] == FramePrompts.ITEM
         )
     }
 
@@ -188,7 +185,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
     private companion object {
         const val COUNT = "count"
         const val WORDS = "words"
-        const val DOES = "does"
+        const val THING = "thing"
         const val TOKENS = 100
         const val MARK_TOKENS = 10
         const val MOST_MARKED = 12
