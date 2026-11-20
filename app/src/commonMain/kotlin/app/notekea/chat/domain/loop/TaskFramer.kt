@@ -115,10 +115,23 @@ class TaskFramer(llmEngine: LlmEngine) {
     ): Pair<List<FrameTarget>, FrameReason>? {
         // None marked is the whole note: leaving them open made the 4B ask on 99 of 319 tasks that need no
         // question (the frame alone, 2026-11-18), as it marks every entry "no" for a question about the note.
-        val entries = if (reply.isItem && meant.entries.size > 1) {
-            asking.markedEntriesOf(task, meant, memory) ?: return null
-        } else {
-            emptyList()
+        val isMarked = reply.isItem && meant.entries.size > 1
+
+        // Entries the task's words fit alike and nothing tells apart are open by the code, as namesake notes are:
+        // the model marked them all "no", or one of them "yes".
+        val alike = FrameAlike
+            .of(
+                task = task,
+                thing = reply.words.ifBlank { task },
+                entries = meant.entries
+            )
+            .takeIf { isMarked }
+            .orEmpty()
+
+        val entries = when {
+            alike.isNotEmpty() -> alike
+            isMarked -> asking.markedEntriesOf(task, meant, memory) ?: return null
+            else -> emptyList()
         }
 
         val target = FrameTarget(
