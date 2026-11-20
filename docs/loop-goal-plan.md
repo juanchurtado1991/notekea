@@ -531,6 +531,11 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s48-namesakes` | `a4946f40` | 2.3, the names beginning with a word the task writes are a set when no name writes every word ("Luis" with Turnos semana 46 shown), level 2 | dev 28 / 14; tuned 8 / 5 | | | | | no, reverted before it was pushed: 1 won, 4 false alarms |
 | 2026-11-20 | `s49-alike` | `1bafe36c` | 2.2, the entries writing every word of the task's thing are open by the code when no other task word tells them apart (as `toldOf` does for notes), level 2 | dev 24 / 20; tuned 8 / 5 | | | | | refined below: numbers did not tell entries apart, and the words of a list were read as one entry's |
 | 2026-11-20 | `s50-alike` | `32f87b8f` | the same, numbers telling entries apart, and words every entry shown writes naming the list, level 2 | dev 26 / 14; tuned 8 / 5 | | | | | no, reverted in `883e9235`: 2 won, 3 false alarms; those three are counts the model got wrong (an add, "las dos facturas", a rename called one item) |
+| 2026-11-20 | `s51-does` | `00ec82da` | the count's `thing` replaced by what the request does (changes, adds, note, asks), so only a change marks entries, level 2 | dev 34 / 9; tuned 8 / 5 | | | | | refined below: for an add, the model wrote what it adds as the words, so no set was made |
+| 2026-11-20 | `s52-does` | `2e4fa372` | the same, an add's words where it goes, level 2 | dev 32 / 10; tuned 10 / 6 | | | | | no, reverted in `202bb2a9`: the new prompt changed the words of other tasks too |
+| 2026-11-20 | `s53-does` | `2eeb04be` | `thing` kept and `does` added after it, an entry marked only for an item changed, level 2 | dev 33 / 8; tuned 10 / 4 | | | | | refined below: an add's words still what it adds |
+| 2026-11-20 | `s54-does`, `s54-dev` | `d32b26ea` | the same, an add's words where it goes or whom it is about, levels 2 and 3 | dev 32 / 9; tuned 8 / 4 | 299 of 393 (+2 on `s45`; asking 3 lost, 3 won) | | | | yes: the misses it adds on level 2 were opened by chance among one note's entries, and the loop does not lose them |
+| 2026-11-20 | `s55-alike` | `e77761b7` | `s49`'s alike entries again on the count of `s54`, level 2 | dev 30 / 9 (was 32 / 9); tuned 8 / 4 | | | | | yes, to level 3 |
 
 Notes as the plan is carried out:
 
