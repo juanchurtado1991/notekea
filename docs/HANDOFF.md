@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-19, with the plan to the blind targets under way on #145: the pool's first round at 73.4 %
+Last updated: 2026-11-20 (the 9B at 337 on the pool, design work stopped; see the weekend goal); before that 2026-11-19, with the plan to the blind targets under way on #145: the pool's first round at 73.4 %
 (4B) and 75.0 % (9B), the targets 85 % and 90 %; where it stands and what to measure next is in
 `docs/loop-goal-plan.md`, sections 2 ("Now") and 7 (the log). Step 4.2, `change_line` (card design B, the
 developer's choice), is built and measured at 316 of 436 on the pool (-4, within the noise), and kept by the developer; next is
@@ -14,6 +14,9 @@ step 2 (asking).
 change measured up the ladder and reverted when the rule says so, one measurement at a time, the log kept. Two
 steps reverted in a row stop the design work (measure only); a decision the plan does not make is written down for
 the developer and another step is taken. A short report on Sunday.
+On 2026-11-20 the pool stands at 316 (72.5 %) on the 4B and 337 (77.3 %) on the 9B. Two steps on the count were
+reverted in a row, so design work has stopped; the decision this leaves for the developer (go on to step 3, lift
+the gate on 2.4, or redesign the count) is in `docs/loop-goal-plan.md`, section 2.
 Before that, 2026-11-17, with the loop's foundations on #145 (the task's frame, figures worked out by the app, a
 topic read whole), the blind evaluation pool, and **the plan to reach the blind targets, `docs/loop-goal-plan.md`,
 which is the next work: follow it step by step**; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request

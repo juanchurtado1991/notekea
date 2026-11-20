@@ -55,6 +55,24 @@ different design: write what you found in the log at the end of this file, and t
 | Fresh vault, 77 tasks | 60 (77.9 %) | not run since the baseline |
 | Pool round 1, 436 tasks | 320 (73.4 %) | 327 (75.0 %) |
 
+On 2026-11-20, the code as r1-line (`ad27622b`, `change_line` kept): the pool at 316 (72.5 %) on the 4B and 337
+(77.3 %, +10, mostly changes) on the 9B.
+
+### A decision for the developer (2026-11-20)
+
+Step 2 is stuck at level 2: with the frame alone, dev still misses 37 % of the tasks that must ask (the target is at
+most 20 %), and 2.4 waits on that target. Nine attempts on the count (namesakes, alike entries, a `does` field,
+words held short) each traded misses for false alarms or gained no more than the noise on the pool, and the last two
+were reverted in a row, which stops design work for the weekend. The cause under them is one: the 4B's count is not
+reliable (it copies the whole request as `words`, marks entries wrongly, and calls adds and renames items), so any
+rule built on it moves errors around. The plan does not say what to do then. The ways on:
+
+1. **Go on to step 3 (figures)**, which does not depend on the count, and come back to asking later.
+2. **Lift the gate on 2.4**, and let the loop ask with the frame as it is.
+3. **Redesign the count**: a call the 4B can answer, or the code finding the sets without the model's words.
+
+Until the developer picks one, only measurements that change nothing are run.
+
 ### Where the failures are
 
 The failures of the nine exams at the baseline, counted by cause with `scripts/loop-eval/buckets.py`. The budget is
@@ -539,6 +557,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s55-dev`, `s55-tuned` | `e77761b7` | the count's `does` and alike entries (s54, s55), levels 3 and 4 | | 297 of 393 (-2 on `s54-dev`: the two target tasks won; six long tasks lost, which no entry rule reaches) | 218 of 259 (-2 on `s46`; fresh 59) | | | yes, to the pool |
 | 2026-11-20 | `r1-alike` | `e77761b7` | the same on round 1, level 5 | | | | 317 of 436 (+1 on r1-line): should have asked 1 won, 2 lost; needless ask 4 won, 1 lost | | no, reverted in `d3b7a6be`: below +4, and the cause it aims at did not go down |
 | 2026-11-20 | `s56-short` | `f6e38695` | 2.2, the count's words held to 32 characters by the grammar (the 4B copied the whole request), level 2 | dev 29 / 17; tuned 8 / 4 | | | | | no, reverted in `4f27e2a3`: fewer words fit more notes alike, so sets grew. Second step reverted in a row: design work stops for the weekend (the goal's rule), only measuring |
+| 2026-11-20 | `r1-line` 9B | `8b6fbd58` | round 1 closed on the 9B, the code as r1-line (`change_line` kept), level 5 | | | | 337 of 436 (77.3 %, +10 on r1-tally's 327): change wrong 14 won, 5 lost; figures 2 won, 2 lost; left: 41 should have asked, 25 change wrong, 15 needless asks | | measured only (design work stopped); the 9B's figure for round 1 |
 
 Notes as the plan is carried out:
 
