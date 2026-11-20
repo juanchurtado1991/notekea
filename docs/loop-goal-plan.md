@@ -50,7 +50,7 @@ different design: write what you found in the log at the end of this file, and t
 
 | | 4B | 9B |
 |---|---|---|
-| Nine exams (dev), 393 tasks | 295 (75.1 %) | not run since the baseline |
+| Nine exams (dev), 393 tasks | 295 (75.1 %) | 291 (74.0 %), 2026-11-20 |
 | Tuned, 259 tasks | 221 (85.3 %) | not run since the baseline |
 | Fresh vault, 77 tasks | 60 (77.9 %) | not run since the baseline |
 | Pool round 1, 436 tasks | 320 (73.4 %) | 327 (75.0 %) |
@@ -558,6 +558,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `r1-alike` | `e77761b7` | the same on round 1, level 5 | | | | 317 of 436 (+1 on r1-line): should have asked 1 won, 2 lost; needless ask 4 won, 1 lost | | no, reverted in `d3b7a6be`: below +4, and the cause it aims at did not go down |
 | 2026-11-20 | `s56-short` | `f6e38695` | 2.2, the count's words held to 32 characters by the grammar (the 4B copied the whole request), level 2 | dev 29 / 17; tuned 8 / 4 | | | | | no, reverted in `4f27e2a3`: fewer words fit more notes alike, so sets grew. Second step reverted in a row: design work stops for the weekend (the goal's rule), only measuring |
 | 2026-11-20 | `r1-line` 9B | `8b6fbd58` | round 1 closed on the 9B, the code as r1-line (`change_line` kept), level 5 | | | | 337 of 436 (77.3 %, +10 on r1-tally's 327): change wrong 14 won, 5 lost; figures 2 won, 2 lost; left: 41 should have asked, 25 change wrong, 15 needless asks | | measured only (design work stopped); the 9B's figure for round 1 |
+| 2026-11-20 | `r1-line` 9B dev | `bc2e6972` | the nine exams on the 9B, first since the baseline (277), level 3 | | 291 of 393 (74.0 %, +14 on the baseline): left 36 should have asked, 17 needless asks, 17 figures, 23 changes | | | | measured only |
 
 Notes as the plan is carried out:
 
