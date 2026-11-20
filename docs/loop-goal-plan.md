@@ -538,6 +538,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s55-alike` | `e77761b7` | `s49`'s alike entries again on the count of `s54`, level 2 | dev 30 / 9 (was 32 / 9); tuned 8 / 4 | | | | | yes, to level 3 |
 | 2026-11-20 | `s55-dev`, `s55-tuned` | `e77761b7` | the count's `does` and alike entries (s54, s55), levels 3 and 4 | | 297 of 393 (-2 on `s54-dev`: the two target tasks won; six long tasks lost, which no entry rule reaches) | 218 of 259 (-2 on `s46`; fresh 59) | | | yes, to the pool |
 | 2026-11-20 | `r1-alike` | `e77761b7` | the same on round 1, level 5 | | | | 317 of 436 (+1 on r1-line): should have asked 1 won, 2 lost; needless ask 4 won, 1 lost | | no, reverted in `d3b7a6be`: below +4, and the cause it aims at did not go down |
+| 2026-11-20 | `s56-short` | `f6e38695` | 2.2, the count's words held to 32 characters by the grammar (the 4B copied the whole request), level 2 | dev 29 / 17; tuned 8 / 4 | | | | | no, reverted in `4f27e2a3`: fewer words fit more notes alike, so sets grew. Second step reverted in a row: design work stops for the weekend (the goal's rule), only measuring |
 
 Notes as the plan is carried out:
 
