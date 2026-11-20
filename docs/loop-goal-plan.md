@@ -536,6 +536,8 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s53-does` | `2eeb04be` | `thing` kept and `does` added after it, an entry marked only for an item changed, level 2 | dev 33 / 8; tuned 10 / 4 | | | | | refined below: an add's words still what it adds |
 | 2026-11-20 | `s54-does`, `s54-dev` | `d32b26ea` | the same, an add's words where it goes or whom it is about, levels 2 and 3 | dev 32 / 9; tuned 8 / 4 | 299 of 393 (+2 on `s45`; asking 3 lost, 3 won) | | | | yes: the misses it adds on level 2 were opened by chance among one note's entries, and the loop does not lose them |
 | 2026-11-20 | `s55-alike` | `e77761b7` | `s49`'s alike entries again on the count of `s54`, level 2 | dev 30 / 9 (was 32 / 9); tuned 8 / 4 | | | | | yes, to level 3 |
+| 2026-11-20 | `s55-dev`, `s55-tuned` | `e77761b7` | the count's `does` and alike entries (s54, s55), levels 3 and 4 | | 297 of 393 (-2 on `s54-dev`: the two target tasks won; six long tasks lost, which no entry rule reaches) | 218 of 259 (-2 on `s46`; fresh 59) | | | yes, to the pool |
+| 2026-11-20 | `r1-alike` | `e77761b7` | the same on round 1, level 5 | | | | 317 of 436 (+1 on r1-line): should have asked 1 won, 2 lost; needless ask 4 won, 1 lost | | no, reverted in `d3b7a6be`: below +4, and the cause it aims at did not go down |
 
 Notes as the plan is carried out:
 
