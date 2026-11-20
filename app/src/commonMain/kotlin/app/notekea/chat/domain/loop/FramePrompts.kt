@@ -19,7 +19,8 @@ are not shown the notes: judge by the request's words. Reply with JSON:
   "every" when it is about every note or entry a condition picks out ("all clients with an unpaid invoice", "my
   recipes", "the notes tagged travel", "every open task"). "none" when it is about no particular note (write a
   new note from nothing, a question about the app or the world).
-- words: the request's own words for what it is about, copied as written ("Laura", "the budget").
+- words: the request's own words for what it is about, copied as written ("Laura", "the budget"). For a request
+  that adds, the words for where it goes ("my recipe", "Contactos"), never what it adds.
 - does: what the request does. "changes" when it changes, moves, cancels, marks or removes something already
   written inside a note (an appointment, an order, a row, a task, a payment). "adds" when it adds something new to a
   note, a list or a log ("add a task to my recipe", "log today's run", "add Ana to Contactos"). "note" when it
