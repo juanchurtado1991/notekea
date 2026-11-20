@@ -34,8 +34,8 @@ private const val ADDED = "+"
 @Composable
 internal fun ChatLineChange(step: ActionStep) {
     val note = step.notes.firstOrNull() ?: return
-    val before = LineEdit.textOf(line = step.text.orEmpty())
-    val after = LineEdit.textOf(line = step.line.orEmpty())
+    val before = LineEdit.textOf(line = step.line.orEmpty())
+    val after = LineEdit.textOf(line = step.text.orEmpty())
 
     val change = LineDiff.of(
         old = before,
@@ -144,8 +144,8 @@ private fun ChatLineChangePreview() {
             step = ActionStep(
                 kind = ActionKind.CHANGE_LINE,
                 notes = listOf(RelativePath(value = "Journal/2026-11-20.md")),
-                text = "- 10:00 Interview with Ana",
-                line = "- 16:00 Interview with Ana"
+                line = "- 10:00 Interview with Ana",
+                text = "- 16:00 Interview with Ana"
             )
         )
     }

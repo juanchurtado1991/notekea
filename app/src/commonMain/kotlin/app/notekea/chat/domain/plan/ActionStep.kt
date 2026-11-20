@@ -4,7 +4,7 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * A planned step checked against the vault (3.9): the [notes] it acts on, found by their names (up to 50), the fields
- * as written (a changed line: [text] as the note writes it, [line] as it will be), and [content], the text it will
+ * as written (a changed line: [line] as the note writes it, [text] as it will be), and [content], the text it will
  * write, prepared before the card so the person confirms what will be written, not a promise of it.
  */
 data class ActionStep(

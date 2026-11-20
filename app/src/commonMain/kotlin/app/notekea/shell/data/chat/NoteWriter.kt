@@ -265,7 +265,7 @@ internal class NoteWriter(
     // The line found again in the note as it is now, by its words: one the person changed since the card is still
     // found, and none or several alike fail the plan, not a guess (4.2). Undo writes the line back.
     suspend fun changeLine(step: ActionStep): Outcome<Unit, ActionProblem> {
-        val unknown = Outcome.Failure(error = ActionProblem.UnknownLine(text = step.text.orEmpty()))
+        val unknown = Outcome.Failure(error = ActionProblem.UnknownLine(text = step.line.orEmpty()))
         val path = step.notes.firstOrNull() ?: return unknown
 
         val before = noteContentStore.read(
@@ -275,8 +275,8 @@ internal class NoteWriter(
 
         val after = LineEdit.changed(
             text = before,
-            old = step.text.orEmpty(),
-            new = step.line.orEmpty()
+            old = step.line.orEmpty(),
+            new = step.text.orEmpty()
         ) ?: return unknown
 
         rewrite(

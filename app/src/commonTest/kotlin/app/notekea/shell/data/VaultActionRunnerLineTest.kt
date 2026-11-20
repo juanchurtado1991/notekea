@@ -22,8 +22,8 @@ class VaultActionRunnerLineTest {
     ) = ActionStep(
         kind = ActionKind.CHANGE_LINE,
         notes = listOf(DAY),
-        text = text,
-        line = line
+        line = line,
+        text = text
     )
 
     @Test
@@ -34,8 +34,8 @@ class VaultActionRunnerLineTest {
         val done = fixture.run(
             notes,
             changed(
-                text = "- 10:00 Interview with Ana",
-                line = "- 16:00 Interview with Ana"
+                line = "- 10:00 Interview with Ana",
+                text = "- 16:00 Interview with Ana"
             )
         )
 
@@ -56,8 +56,8 @@ class VaultActionRunnerLineTest {
         val done = fixture.run(
             notes,
             changed(
-                text = "- 10:00 Interview with Ana",
-                line = "- 16:00 Interview with Ana"
+                line = "- 10:00 Interview with Ana",
+                text = "- 16:00 Interview with Ana"
             )
         )
 

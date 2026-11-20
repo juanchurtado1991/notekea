@@ -81,11 +81,11 @@ object ChangeTools {
 
     val changeLine = ChangeTool(
         name = "change_line",
-        description = "one line of a note changed in place (a time, a date, a figure, a name): the note, text as " +
-            "the note writes the line now, and line as it must be. Never text added (append), a task marked done " +
-            "(complete_task) or a property (set_property).",
+        description = "one line of a note changed in place (a time, a date, a figure, a name): the note, line as " +
+            "the note writes it now, and text as the whole line must read. Never text added (append), a task " +
+            "marked done (complete_task) or a property (set_property).",
         kind = ActionKind.CHANGE_LINE,
-        fields = listOf(ActionField.NOTE, ActionField.TEXT, ActionField.LINE)
+        fields = listOf(ActionField.NOTE, ActionField.LINE, ActionField.TEXT)
     )
 
     val link = ChangeTool(
