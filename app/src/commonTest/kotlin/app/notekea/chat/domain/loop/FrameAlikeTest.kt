@@ -24,6 +24,32 @@ class FrameAlikeTest {
         )
     }
 
+    // The frame alone, 2026-11-20: "the 2026-11-18 confocal booking" was asked which booking, and "add vitamin D to
+    // grandpa's medicines" which medicine.
+    @Test
+    fun `a number one of them writes tells them apart, and words every entry writes name the list`() {
+        val bookings = listOf(
+            "- 2026-11-13 confocal booking 09:00–12:00",
+            "- 2026-11-18 confocal booking 14:00–17:00"
+        )
+
+        assertEquals(
+            expected = listOf(emptyList(), emptyList()),
+            actual = listOf(
+                FrameAlike.of(
+                    task = "change the 2026-11-18 confocal booking to 15:00–18:00",
+                    thing = "the 2026-11-18 confocal booking",
+                    entries = bookings + paid
+                ),
+                FrameAlike.of(
+                    task = "add the confocal booking for Friday",
+                    thing = "the confocal booking",
+                    entries = bookings
+                )
+            )
+        )
+    }
+
     @Test
     fun `a word one of them writes alone, one entry, or no word of the thing leaves them to the marks`() {
         assertEquals(

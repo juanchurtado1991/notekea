@@ -12,8 +12,9 @@ internal object FrameAlike {
         thing: String,
         entries: List<String>
     ): List<String> {
+        // A number is a word of an entry too: "the 2026-11-18 booking", "chapter 1".
         val written = entries.map {
-            it to FrameWords.of(text = it)
+            it to FrameWords.of(text = it) + FrameWords.numbersOf(text = it)
         }
 
         // The thing's words that any entry writes: "the overdue invoice" is the invoice when no entry says overdue.
@@ -29,15 +30,16 @@ internal object FrameAlike {
             words.all { holds(own, it) }
         }
 
-        if (alike.size < 2) return emptyList()
+        // Words every entry shown writes name the list, not one of it: "add vitamin D to grandpa's medicines".
+        if (alike.size !in 2..<written.size) return emptyList()
 
         // What the task quotes is what it writes, not which entry it means.
-        val said = FrameWords.of(
-            text = task.replace(
-                regex = FrameGroups.QUOTED,
-                replacement = " "
-            )
+        val unquoted = task.replace(
+            regex = FrameGroups.QUOTED,
+            replacement = " "
         )
+
+        val said = FrameWords.of(text = unquoted) + FrameWords.numbersOf(text = unquoted)
 
         val isTold = alike.any { (entry, own) ->
             val others = alike.filter {
