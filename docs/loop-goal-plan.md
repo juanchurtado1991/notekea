@@ -568,6 +568,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s58-rows` | `0cc9bed7` | the same, the column mended, level 3 | | 287 of 393 (-12; figures 26, 4 won, 13 lost) | | | | no, reverted in `a5cf687e` and `4f143673`: the 4B names the wrong rows, takes a difference of three, and repeats a refused tally; copying lines did better. Third step reverted in a row |
 | 2026-11-20 | `s59-first` | `48d76f77` | 2.4, first half: a frame open before the first step asks at once, with the frame's options, level 3 | | 299 of 393 (+0 on `s54-dev`, +2 on `s45-dev`: 9 won, 9 lost; should have asked 29) | | | | yes, to tuned |
 | 2026-11-20 | `s59-first` tuned | `48d76f77` | the same, level 4 | | | 217 of 259 (-3 on `s46`: 3 lost, facts and a change, none won); fresh 59 | | | yes, to the pool (at the edge of the rule's 3) |
+| 2026-11-20 | `s59-first` pool | `48d76f77` | the same, level 5 | | | | 318 of 436 (+2 on r1-line): should have asked 0 won, 0 lost; changes 4 won, 4 lost | | no, reverted: below +4 and the cause it aims at did not go down (the open frames it asks at once were already asked at the end). Fourth step reverted in a row |
 
 Notes as the plan is carried out:
 
