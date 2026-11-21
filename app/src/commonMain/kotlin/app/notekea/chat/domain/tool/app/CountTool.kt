@@ -9,6 +9,7 @@ import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.chat.domain.tool.reading.TextOutline
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /**
  * Notes, words or tasks counted by the app, in the vault, a folder, a tag or one note: asked how many, the model
@@ -18,8 +19,9 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
     override val name = NAME
 
     override val description =
-        "what to count (notes, words, tasks, open tasks or done tasks) and where (a folder, a #tag or a " +
-            "note's name; the whole vault when left out); you get the number."
+        "what to count (notes, words, tasks, open tasks or done tasks), or a property to sum (servings), or a " +
+            "word a note writes with a figure many times (Spent, points), and where (a folder, a #tag or a " +
+            "note's name; the whole vault when left out); you get the number, or every such line and their sum."
 
     override val arguments = listOf(
         ToolArgument(name = WHAT),
@@ -66,7 +68,25 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
 
             "note" in what -> notes.size
 
-            else -> return ToolResult(forModel = "count: I count notes, words, tasks, open tasks or done tasks.")
+            else -> return ToolResult(
+                forModel = summed(
+                    property = what,
+                    notes = notes
+                ) ?: WrittenFigures.of(
+                    word = what,
+                    place = where.ifEmpty { "the vault" },
+                    texts = noteTextCache
+                        .textsOf(
+                            vaultPath = context.vaultPath,
+                            notes = notes
+                        )
+                        .map {
+                            it.key.nameWithoutExtension to it.value.body
+                        },
+                    task = context.task
+                ) ?: "count: I count notes, words, tasks, open tasks or done tasks, sum a property, or add up " +
+                    "the figures a word is written with; nothing there writes \"$what\"."
+            )
         }
 
         val place = where.ifEmpty { "the vault" }
@@ -103,6 +123,45 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
             else -> null
         }
     }
+
+    // "How many servings do all the recipes add up to": the property's numbers summed, each note's shown, so the
+    // model neither reads every recipe nor adds them up itself (the loop's fifth run answered 10 and 4 for 16).
+    private fun summed(
+        property: String,
+        notes: List<NoteEntry>
+    ): String? {
+        val values = notes.mapNotNull { note ->
+            note
+                .metadata
+                .properties
+                .firstOrNull {
+                    it.key.equals(
+                        other = property.trim(),
+                        ignoreCase = true
+                    )
+                }
+                ?.let { numberOf(value = it.value) }
+                ?.let {
+                    note.file.path.nameWithoutExtension to it
+                }
+        }
+
+        if (values.isEmpty()) return null
+
+        val total = values.sumOf { it.second }
+        val each = values.joinToString { "${it.first} ${written(number = it.second)}" }
+
+        return "count: $property sums ${written(number = total)} over ${values.size} notes ($each)."
+    }
+
+    private fun numberOf(value: PropertyValue): Double? = when (value) {
+        is PropertyValue.Number -> value.text
+        is PropertyValue.Text -> value.text
+        else -> null
+    }?.trim()?.toDoubleOrNull()
+
+    private fun written(number: Double): String =
+        if (number % 1.0 == 0.0) number.toLong().toString() else number.toString()
 
     private suspend fun wordsIn(
         notes: List<NoteEntry>,

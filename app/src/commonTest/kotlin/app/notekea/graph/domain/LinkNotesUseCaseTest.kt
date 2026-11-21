@@ -57,6 +57,20 @@ class LinkNotesUseCaseTest {
         )
     }
 
+    // Bug hunt 2026-11-17 (G4): `[[C# notes]]` was written, which leads to the heading "notes" of a note "C".
+    @Test
+    fun `a note whose name a wiki link cannot hold gets a Markdown link`() = runTest {
+        val target = RelativePath(value = "Code/C# notes.md")
+        store.texts[SOURCE] = "Text"
+
+        linkNotes(VAULT, SOURCE, target, listOf(SOURCE, target))
+
+        assertEquals(
+            expected = "Text\n\n[C# notes](../Code/C%23%20notes.md)\n",
+            actual = store.texts[SOURCE]
+        )
+    }
+
     @Test
     fun `a note that cannot be read changes nothing`() = runTest {
         assertEquals(

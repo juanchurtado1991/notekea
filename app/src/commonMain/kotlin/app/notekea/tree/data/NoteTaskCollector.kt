@@ -88,12 +88,7 @@ internal class NoteTaskCollector {
             .find(input = line)
             ?.groupValues
             ?.get(index = 1)
-            ?: PLAIN_DATE.find(
-                input = tagFinder.textOf(line = line).replace(
-                    regex = ADDRESS,
-                    replacement = ""
-                )
-            )?.value
+            ?: PLAIN_DATE.find(input = plainTextOf(line = line))?.value
 
         return written?.let {
             momentFormat.parseDate(
@@ -103,11 +98,27 @@ internal class NoteTaskCollector {
         }
     }
 
+    /**
+     * The text of [line] where a written date may be its due date: without links, addresses and the Tasks plugin's
+     * other dates (created, start, scheduled, done, cancelled), which were read as due dates.
+     */
+    private fun plainTextOf(line: String): String = tagFinder
+        .textOf(line = line)
+        .replace(
+            regex = ADDRESS,
+            replacement = StringPatterns.EMPTY
+        )
+        .replace(
+            regex = OTHER_PLUGIN_DATE,
+            replacement = StringPatterns.EMPTY
+        )
+
     private companion object {
         const val HEADING_MARK = "#"
         const val TASK_MARK = '['
         val ADDRESS = Regex(pattern = "\\S+://\\S+")
         val BLOCK_ID = Regex(pattern = "\\s+\\^[\\w-]+\\s*$")
+        val OTHER_PLUGIN_DATE = Regex(pattern = "(?:➕|🛫|⏳|✅|❌)\\uFE0F?\\s*\\d{4}-\\d{2}-\\d{2}")
         val PLAIN_DATE = Regex(pattern = "(?<![\\d-])\\d{4}-\\d{2}-\\d{2}(?![\\d-])")
         val PLUGIN_DATE = Regex(pattern = "\\s*📅\\s*(\\d{4}-\\d{2}-\\d{2})")
     }

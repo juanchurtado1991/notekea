@@ -14,6 +14,7 @@ import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.graph.presentation.model.GraphIntent
 import app.notekea.resources.Res
 import app.notekea.resources.tree_untitled_note
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
@@ -196,6 +197,14 @@ private fun followTreeEffect(
                 )
             )
 
+            // The graph follows its note to its new name rather than losing its center (the bug hunt, G6).
+            viewModels.graph.onIntent(
+                intent = GraphIntent.OnRenamed(
+                    from = effect.from,
+                    to = effect.to
+                )
+            )
+
             viewModels.editors.forEach { editor ->
                 val open = editor.state.value.notePath ?: return@forEach
 
@@ -214,7 +223,15 @@ private fun followTreeEffect(
 
         is VaultTreeEffect.LinksRewritten -> viewModels.editors.forEach { editor ->
             val open = editor.state.value.notePath ?: return@forEach
-            if (open in effect.notes) editor.onIntent(EditorIntent.OnNoteRewritten(path = open))
+
+            if (open in effect.notes) {
+                editor.onIntent(
+                    EditorIntent.OnNoteRewritten(
+                        path = open,
+                        original = effect.originals[open]
+                    )
+                )
+            }
         }
 
         is VaultTreeEffect.ChooseTemplate -> viewModels.onTemplatePicker(
@@ -284,9 +301,13 @@ internal fun followSwitcherEffect(
         is QuickSwitcherEffect.LinkNote -> {
             val target = LinkResolver(notePaths = notes).wikiTarget(path = effect.path)
 
-            editors.active.onIntent(
-                EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target))
+            val link = FormatAction.NoteLink(
+                target = target,
+                path = effect.path,
+                source = editors.active.state.value.notePath
             )
+
+            editors.active.onIntent(EditorIntent.OnFormat(action = link))
         }
 
         QuickSwitcherEffect.Dismissed -> editors.active.onIntent(

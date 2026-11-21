@@ -233,6 +233,10 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
 
 ## The chat's memory between conversations (2026-11-15): designed
 
+- **The handoff said, once built:** "Next: step 1 (the memory read), measured, then step 2."
+- **What happened:** steps 2 to 6 were written while step 1 was measured, as the measurement holds Gradle for an
+  hour or more. The 9B's run then compiled their unfinished code and stopped.
+
 - The loop's design had said "memory between chats is left for later: what it may keep, and how the person sees and
   deletes it, needs its own decision". On 2026-11-15 the developer asked why the agent does not learn the person;
   the decision was written as `docs/agent-memory.md`, a note of the vault written only with approval, before any
@@ -323,3 +327,42 @@ and Duplicate, a new note's properties) is the current work and is in `docs/HAND
   the 4B 19 → 21 and the 9B 16 → 19, and the small model keeps today's agent with the loop on.
 - **2026-11-15, the branch's code review:** the handoff said Next was a code review; it found ten things, six fixed
   with a test each (the sync repair, the sums, accented names, the last step's question).
+- **2026-11-16, the memory measured with steps 1 to 6:** the handoff said the 9B made 166 of 201 on step 1 (the
+  same as before), and with every step the 4B 159 and the 9B 164; the changes read task by task were the runs'
+  noise, and one question offering one note twice was fixed.
+- **2026-11-16, the web's 50 tasks:** the handoff said the web's recorded evaluation was not done; the developer
+  asked instead for 50 tasks on the real web on the three models, graded by hand, and a shortened address was fixed.
+- **2026-11-16, the web graded and its failures fixed:** graded by hand the 9B and the 4B made 25 of 50 and the 2B
+  9; research and deep notes had no web in the writing work, approved pages went unread and a person's phone was
+  searched online, and each was fixed with a test (`docs/agent-web.md`); a role-play on the 9B found a correction
+  to a proposal not yet made cannot be followed, as the history keeps only its summary.
+- **2026-11-16, the web measured again after its fixes:** graded side by side by one standard, the 9B went from
+  24½ to 29½ of 50 and the 4B stayed at 25; the 201 tasks did not change (164, 159).
+- **2026-11-16, a memory of the turn's steps planned:** the developer asked for what each step finds to be kept
+  outside the model's context and handed back in parts; written as Post-MVP 15 in `ROADMAP.md`, to be measured
+  after the web's third measurement. Cloudflare's Code Mode was looked at for the same problem and left.
+- **2026-11-16, the memory of the turn's steps built:** the developer asked it in this pull request, used by every
+  kind of work and not only the web, and for the model to ask back what it needs rather than remember it; built
+  with SQLite's full-text search in memory and a `recall` tool (`docs/agent-step-memory.md`).
+- **2026-11-17, the loop's fifth and seventh runs:** the handoff said the step memory was "being measured against
+  the third run". Folding old results to a line measured worse on both models (9B 203 of 259, was 212; 4B 201, was
+  204) and was turned off by default. The fifth run's failures were read one by one with the developer asleep, at
+  their word that the 4B "errs where it matters": invented links in nearly every answer, the memory not settling
+  "my goals", questions with one option, sources of a new note dropped. Fixed and measured in the seventh run: 4B
+  219, 9B 221, no invented link. The seventh's failures were read the same way (wrong sums said with confidence,
+  tasks nobody asked for added to a tagging, a question asked for a plural request, the memory winning over the
+  task's own words) and fixed for the eighth: 4B 225, 9B 224. Between the two runs 11 tasks of the 4B and 7 of
+  the 9B went from right to wrong with no change that touches them, so a few tasks of difference is noise, and
+  the measure of reliability is the kind of each failure, not the total. Asked by the developer whether the
+  failures could be bugs in the feature and not the model, two were: the tag check of the commit before refused a
+  translated tag every time without saying which to use, so the turn looped until it ran out, and an empty proposal
+  ended as the model's own summary of a change never made. Both fixed. A per-note check of group changes by the
+  model was built, measured worse on both models, and dropped. A bug hunt over the chat, tasks, query views, graph
+  and search followed, before measuring again. Ten reviews, one per area, found about 110 defects with the input that
+  triggers each; eight agents fixed them by area in one working tree with no build of their own, and the lead built,
+  tested and committed. 107 were fixed, four partly.
+- **2026-11-17, the word-list checks left for foundations:** the handoff said the loop got about 88 % on its tuned
+  tasks and that "the word-list checks do not generalise". A vault written blind had scored 62 % (4B) and 74 % (9B).
+  The developer set the rule of no patches and asked for the foundations of `ROADMAP.md` post-MVP 16 instead: the
+  task's frame, figures worked out by the app, and a topic read whole. They also asked for nine more blind exams,
+  then a pool of 50, to measure against.

@@ -18,11 +18,13 @@ enum class WorkKind(
     ORGANIZE(
         written = "organize",
         description = "notes are tagged, given a property or a task (add a task to…), linked, moved, renamed, " +
-            "bookmarked or trashed, or a folder is created; a task is marked done."
+            "bookmarked or trashed, or a folder is created; a task is marked done; the chat is asked to remember " +
+            "or forget something from now on (remember…, recuerda…, forget…, olvida…)."
     ),
     WEB(
         written = "web",
-        description = "a web page whose address the request writes is read or saved."
+        description = "the web: searched for something the notes do not hold (search the web, look it up online, " +
+            "busca en internet, where can I buy…), or a page whose address the request writes read or saved."
     ),
     ASK(
         written = "ask",

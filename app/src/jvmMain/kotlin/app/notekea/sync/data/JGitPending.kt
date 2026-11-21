@@ -13,8 +13,11 @@ internal object JGitPending {
 
     fun of(git: Git): Int = namesOf(git = git).size
 
-    /** Their paths in the vault. */
-    fun namesOf(git: Git): Set<String> {
+    /** Their paths in the vault; [branch] is the one whose commits count, which a rebase cut short leaves. */
+    fun namesOf(
+        git: Git,
+        branch: String = git.repository.branch
+    ): Set<String> {
         val status = git.status().call()
 
         val uncommitted = listOf(
@@ -26,13 +29,25 @@ internal object JGitPending {
             status.untracked
         ).flatten().toSet()
 
-        return uncommitted + unpushed(git = git)
+        return uncommitted + unpushed(
+            git = git,
+            branch = branch
+        )
     }
 
-    private fun unpushed(git: Git): Set<String> {
+    private fun unpushed(
+        git: Git,
+        branch: String
+    ): Set<String> {
         val repository = git.repository
-        val head = repository.resolve(Constants.HEAD) ?: return emptySet()
-        val remote = repository.resolve("$REMOTE_PREFIX${repository.branch}")
+
+        // The branch's own commit, not HEAD: in the middle of a rebase HEAD is the remote's commit plus those
+        // replayed so far, and the branch still holds every commit made here.
+        val head = repository.resolve("${Constants.R_HEADS}$branch")
+            ?: repository.resolve(Constants.HEAD)
+            ?: return emptySet()
+
+        val remote = repository.resolve("$REMOTE_PREFIX$branch")
 
         val base = remote?.let {
             RevWalk(repository).use { walk ->

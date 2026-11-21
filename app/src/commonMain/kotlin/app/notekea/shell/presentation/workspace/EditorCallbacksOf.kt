@@ -4,6 +4,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.viewmodel.EditorCallbacks
 import app.notekea.editor.presentation.viewmodel.saveInOtherEditors
+import app.notekea.graph.presentation.model.GraphIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
@@ -33,6 +34,13 @@ internal fun editorCallbacksOf(
 
         workspace.onIntent(
             intent = WorkspaceIntent.OnRenamed(
+                from = effect.from,
+                to = effect.to
+            )
+        )
+
+        viewModels.graph.onIntent(
+            intent = GraphIntent.OnRenamed(
                 from = effect.from,
                 to = effect.to
             )

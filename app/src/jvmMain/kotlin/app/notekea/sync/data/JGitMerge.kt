@@ -91,12 +91,23 @@ internal class JGitMerge(
             ?.keys
             .orEmpty()
 
-        if (result.mergeStatus != MergeResult.MergeStatus.CONFLICTING) {
+        val isConflicting = result.mergeStatus == MergeResult.MergeStatus.CONFLICTING
+
+        if (!isConflicting) {
+            // A merge that did not happen (a note changed meanwhile, a file Git could not write) is no pull: said
+            // with the files it stopped at, rather than the push being refused next with no cause shown.
+            check(result.mergeStatus.isSuccessful) { notMerged(result = result) }
+
             return PullResult(
                 changed = changedBetween(before),
                 conflicts = emptyList()
             )
         }
+
+        refuseFileAgainstFolder(
+            clashing = clashing,
+            before = before
+        )
 
         // A step that fails here would leave the vault half merged, its notes full of conflict marks, and the
         // next sync would commit them: everything goes back to what was committed before the merge instead.
@@ -178,12 +189,48 @@ internal class JGitMerge(
         // An older conflict of this note not settled yet: its copy is the person's too, set aside and not lost.
         if (copy.exists()) {
             val mine = File(repository.workTree, ConflictCopies.mineOf(path = note).value)
-            copy.renameTo(FreeFile.beside(file = mine))
+
+            FreeFile.moveBeside(
+                file = copy,
+                wanted = mine
+            )
         }
 
         copy.writeBytes(ours)
 
         return note
+    }
+
+    // A note on one side where the other has a folder of that name (or a link) is left unmerged with no content
+    // conflict, and a commit would keep one side only: the vault goes back to its last commit and the person renames
+    // one of them.
+    private fun refuseFileAgainstFolder(
+        clashing: Set<String>,
+        before: ObjectId
+    ) {
+        val unmerged = git
+            .status()
+            .call()
+            .conflicting - clashing
+
+        if (unmerged.isEmpty()) return
+
+        git
+            .reset()
+            .setMode(ResetCommand.ResetType.HARD)
+            .setRef(before.name)
+            .call()
+
+        error("$FILE_AND_FOLDER ${unmerged.sorted().joinToString()}")
+    }
+
+    private fun notMerged(result: MergeResult): String {
+        val paths = result
+            .failingPaths
+            ?.keys
+            .orEmpty() + result.checkoutConflicts.orEmpty()
+
+        return "$NOT_MERGED (${result.mergeStatus}): ${paths.sorted().joinToString()}"
     }
 
     private fun blobOf(
@@ -232,5 +279,8 @@ internal class JGitMerge(
         const val HEAD = "HEAD"
         const val ALL = "."
         const val MERGE_MESSAGE = "Notekea: sync"
+        const val NOT_MERGED = "The remote's changes could not be brought in"
+        const val FILE_AND_FOLDER =
+            "A note and a folder (or another kind of file) share a name here and on the remote, rename one:"
     }
 }

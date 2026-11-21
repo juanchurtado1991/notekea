@@ -10,6 +10,7 @@ import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.NewNoteDefaults
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
@@ -18,6 +19,7 @@ import app.notekea.core.notes.domain.NoteScanner
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.notes.domain.links.NoteRewrite
 import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
 import app.notekea.tree.domain.ApplyTemplateUseCase
@@ -39,9 +41,9 @@ import kotlinx.coroutines.withContext
 class VaultActionRunner(
     private val noteContentStore: NoteContentStore,
     private val noteFileOperations: NoteFileOperations,
-    private val noteScanner: NoteScanner,
-    private val renameEntry: RenameEntryUseCase,
-    private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
+    noteScanner: NoteScanner,
+    renameEntry: RenameEntryUseCase,
+    updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val applyLinkUpdates: ApplyLinkUpdatesUseCase,
     private val applyTemplate: ApplyTemplateUseCase,
     private val openDailyNote: OpenDailyNoteUseCase,
@@ -52,6 +54,15 @@ class VaultActionRunner(
     private val newNoteDefaults: NewNoteDefaults? = null
 ) : ActionRunner {
     private val lock = Mutex()
+
+    private val moves = EntryMoves(
+        noteFileOperations = noteFileOperations,
+        noteScanner = noteScanner,
+        renameEntry = renameEntry,
+        updateLinksAfterRename = updateLinksAfterRename,
+        trash = trash
+    )
+
     private val journals = mutableMapOf<Long, ActionJournal>()
     private var nextId = 0L
 
@@ -86,13 +97,17 @@ class VaultActionRunner(
         )
 
         // A plan is done whole or not at all: what it did before the step that failed, threw or was cancelled is
-        // taken back (the code review of 2026-11-13: only a step that said it failed was).
+        // taken back (the code review of 2026-11-13: only a step that said it failed was). The trash cannot give
+        // back what it took, so it goes last, after every other step succeeded (A11).
+        val links = LinkResolver(notePaths = notes.map { it.file.path })
+
         try {
-            steps.forEach { step ->
+            TrashLast.ordered(steps = steps).forEach { step ->
                 val done = runStep(
                     vaultPath = vaultPath,
                     step = step,
-                    writer = writer
+                    writer = writer,
+                    links = links
                 )
 
                 if (done is Outcome.Failure) {
@@ -202,7 +217,8 @@ class VaultActionRunner(
     private suspend fun runStep(
         vaultPath: String,
         step: ActionStep,
-        writer: NoteWriter
+        writer: NoteWriter,
+        links: LinkResolver
     ): Outcome<Unit, ActionProblem> = when (step.kind) {
         ActionKind.CREATE_NOTE -> writer.createNote(step = step)
 
@@ -226,11 +242,14 @@ class VaultActionRunner(
 
         ActionKind.COMPLETE_TASK -> writer.completeTask(step = step)
 
+        ActionKind.CHANGE_LINE -> writer.changeLine(step = step)
+
         ActionKind.SET_PROPERTY, ActionKind.ADD_TAG -> writer.setProperty(step = step)
 
         ActionKind.LINK_NOTES -> linkNotes(
             step = step,
-            writer = writer
+            writer = writer,
+            links = links
         )
 
         ActionKind.BOOKMARK -> bookmark(
@@ -241,19 +260,19 @@ class VaultActionRunner(
 
         ActionKind.CREATE_FOLDER -> writer.createFolder(folder = step.folder ?: RelativePath.ROOT)
 
-        ActionKind.RENAME -> rename(
+        ActionKind.RENAME -> moves.rename(
             vaultPath = vaultPath,
             step = step,
             journal = writer.journal
         )
 
-        ActionKind.MOVE -> move(
+        ActionKind.MOVE -> moves.move(
             vaultPath = vaultPath,
             step = step,
             journal = writer.journal
         )
 
-        ActionKind.TRASH -> trashed(
+        ActionKind.TRASH -> moves.trashed(
             vaultPath = vaultPath,
             step = step,
             journal = writer.journal
@@ -264,7 +283,7 @@ class VaultActionRunner(
             Outcome.Success(value = Unit)
         }
 
-        else -> Outcome.Success(value = Unit)
+        else -> writer.otherwise(step = step)
     }
 
     /** The step's notes, or today's daily note (made if it is not there yet) when it names none. */
@@ -278,40 +297,84 @@ class VaultActionRunner(
         val today =
             (openDailyNote(vaultPath = vaultPath) as? Outcome.Success)?.value ?: return emptyList()
 
-        // A daily note the step had to make goes with Undo too.
+        // A daily note the step had to make goes with Undo too, only while it holds what it was made with: the
+        // person may have written in it since (A3).
         if (today.isNew) {
+            val made = noteContentStore
+                .read(
+                    vaultPath = vaultPath,
+                    path = today.path
+                )
+                .orEmpty()
+
             journal.created += today.path
 
             journal.undoSteps += { vault ->
-                trash.moveToTrash(
-                    vaultPath = vault,
-                    path = today.path
-                )
+                val now = noteContentStore
+                    .read(
+                        vaultPath = vault,
+                        path = today.path
+                    )
+                    .orEmpty()
+
+                if (now == made) {
+                    val trashed = trash.moveToTrash(
+                        vaultPath = vault,
+                        path = today.path
+                    )
+
+                    if (trashed is Outcome.Failure) throw UndoFailed()
+                }
             }
         }
 
         return listOf(today.path)
     }
 
+    // One task line whatever the model wrote: its own marker ("[ ] x", "- [x] x") left out, its lines joined, and
+    // the due day only when it is a real one (T13).
     private fun taskLine(step: ActionStep): String {
         val due = step
             .due
-            ?.takeIf { DATE.matches(input = it) }
-            ?.let { " 📅 $it" }
+            ?.let { DATE.find(input = it)?.destructured }
+            ?.let { (year, month, day) ->
+                CalendarDate(
+                    year = year.toInt(),
+                    month = month.toInt(),
+                    day = day.toInt()
+                )
+                    .takeIf { it.isValid }
+                    ?.let { " 📅 $year-$month-$day" }
+            }
             .orEmpty()
 
-        return "- [ ] ${step.text.orEmpty().removePrefix(prefix = "- [ ] ")}$due"
+        val text = step
+            .text
+            .orEmpty()
+            .replace(
+                regex = LINE_BREAKS,
+                replacement = " "
+            )
+            .replace(
+                regex = TASK_MARKER,
+                replacement = ""
+            )
+            .trim()
+
+        return "- [ ] $text$due"
     }
 
+    // The link as the vault resolves it: a bare name two notes share led to either of them (A10).
     private suspend fun linkNotes(
         step: ActionStep,
-        writer: NoteWriter
+        writer: NoteWriter,
+        links: LinkResolver
     ): Outcome<Unit, ActionProblem> {
         val target = step.target ?: return Outcome.Success(value = Unit)
 
         return writer.append(
             notes = step.notes,
-            text = "[[${target.nameWithoutExtension}]]"
+            text = "[[${links.wikiTarget(path = target)}]]"
         )
     }
 
@@ -348,149 +411,11 @@ class VaultActionRunner(
         return Outcome.Success(value = Unit)
     }
 
-    private suspend fun rename(
-        vaultPath: String,
-        step: ActionStep,
-        journal: ActionJournal
-    ): Outcome<Unit, ActionProblem> {
-        val from = step.folder ?: step.notes.singleOrNull() ?: return Outcome.Success(value = Unit)
-        val newName = step.title.orEmpty()
-        val notesBefore = notesOf(vaultPath = vaultPath)
-
-        val renamed =
-            when (val result = renameEntry(vaultPath = vaultPath, path = from, newName = newName)) {
-                is Outcome.Success -> result.value
-                is Outcome.Failure -> return Outcome.Failure(ActionProblem.UnknownNote(from.value))
-            }
-
-        updateLinksAfterRename(
-            vaultPath = vaultPath,
-            notesBefore = notesBefore,
-            from = from,
-            to = renamed
-        )
-
-        journal.moved += from to renamed
-
-        journal.undoSteps += { path ->
-            movedBack(
-                vaultPath = path,
-                from = renamed,
-                to = from
-            )
-        }
-
-        return Outcome.Success(value = Unit)
-    }
-
-    private suspend fun move(
-        vaultPath: String,
-        step: ActionStep,
-        journal: ActionJournal
-    ): Outcome<Unit, ActionProblem> {
-        val folder = step.target ?: return Outcome.Success(value = Unit)
-
-        noteFileOperations.createFolder(
-            vaultPath = vaultPath,
-            path = folder
-        )
-
-        val entries = listOfNotNull(step.folder).ifEmpty { step.notes }
-
-        // "Move it to .." would take the note out of the vault.
-        if (!folder.isInside) return Outcome.Failure(ActionProblem.UnknownFolder(folder.value))
-
-        entries.forEach { from ->
-            val to = folder.child(name = from.name)
-            val isPlaced = from == to || noteFileOperations.exists(vaultPath = vaultPath, path = to)
-            if (isPlaced) return@forEach
-
-            val notesBefore = notesOf(vaultPath = vaultPath)
-
-            val moved = noteFileOperations.move(
-                vaultPath = vaultPath,
-                from = from,
-                to = to
-            )
-
-            val unmovable = ActionProblem.UnknownNote(from.value)
-            if (moved is Outcome.Failure) return Outcome.Failure(unmovable)
-
-            updateLinksAfterRename(
-                vaultPath = vaultPath,
-                notesBefore = notesBefore,
-                from = from,
-                to = to
-            )
-
-            journal.moved += from to to
-
-            journal.undoSteps += { path ->
-                movedBack(
-                    vaultPath = path,
-                    from = to,
-                    to = from
-                )
-            }
-        }
-
-        return Outcome.Success(value = Unit)
-    }
-
-    private suspend fun movedBack(
-        vaultPath: String,
-        from: RelativePath,
-        to: RelativePath
-    ) {
-        val notesBefore = notesOf(vaultPath = vaultPath)
-
-        val moved = noteFileOperations.move(
-            vaultPath = vaultPath,
-            from = from,
-            to = to
-        )
-
-        if (moved is Outcome.Success) {
-            updateLinksAfterRename(
-                vaultPath = vaultPath,
-                notesBefore = notesBefore,
-                from = from,
-                to = to
-            )
-        }
-    }
-
-    private suspend fun trashed(
-        vaultPath: String,
-        step: ActionStep,
-        journal: ActionJournal
-    ): Outcome<Unit, ActionProblem> {
-        listOfNotNull(step.folder).ifEmpty { step.notes }.forEach { path ->
-            val moved = trash.moveToTrash(
-                vaultPath = vaultPath,
-                path = path
-            )
-
-            if (moved is Outcome.Success) journal.trashed += path
-        }
-
-        return Outcome.Success(value = Unit)
-    }
-
-    private suspend fun notesOf(vaultPath: String): Set<RelativePath> =
-        when (val listing = noteScanner.scan(vaultPath = vaultPath)) {
-            is Outcome.Success ->
-                listing
-                    .value
-                    .files
-                    .mapTo(destination = HashSet()) { it.path }
-
-            is Outcome.Failure -> emptySet()
-        }
-
     private companion object {
         const val MAX_UNDOABLE = 20
-        val DATE = Regex(pattern = "\\d{4}-\\d{2}-\\d{2}")
+        val DATE = Regex(pattern = "(\\d{4})-(\\d{2})-(\\d{2})")
+        val LINE_BREAKS = Regex(pattern = "\\s*\\r?\\n\\s*")
+        val TASK_MARKER = Regex(pattern = "^\\s*(?:(?:[-*+]|\\d+[.)])\\s+)?(?:\\[[ xX]?]\\s*)?")
 
         val MODES = mapOf(
             ThemeMode.DARK to listOf("dark", "oscuro", "oscura", "noche", "night", "negro"),

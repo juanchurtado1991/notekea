@@ -52,6 +52,12 @@ data class FrontmatterBlocks(
         private const val BYTE_ORDER_MARK = "\uFEFF"
         private val TOP_LEVEL_KEY = Regex(pattern = "^([^\\s#-][^:]*):(\\s|$)")
 
+        /**
+         * Whether [line] opens or closes a frontmatter block: `---` with nothing after it but spaces, as Obsidian
+         * reads it. `NoteDocument` and the metadata reader share it, so task offsets and the body agree.
+         */
+        fun isDelimiter(line: String): Boolean = line.trimEnd() == DELIMITER
+
         /** The blocks of [header], or null when the note has no frontmatter. */
         fun of(header: String): FrontmatterBlocks? {
             val prefix = if (header.startsWith(prefix = BYTE_ORDER_MARK)) {

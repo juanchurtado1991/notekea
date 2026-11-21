@@ -33,14 +33,23 @@ class FetchTool(private val pageReader: PageReader) : ChatTool {
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val url = call.text(name = URL)
+        val asked = call.text(name = URL)
 
-        // Only an address the task writes whole: not a piece of one, such as its site's root.
-        val isWritten = url in UrlsNamed.writtenIn(text = context.task)
+        // Only an address the task writes whole (not a piece of one, such as its site's root), or a page a web search
+        // found on a trusted site (docs/agent-web.md, #144); one the model cut at its query is read whole.
+        val url = allowedOf(
+            asked = asked,
+            context = context
+        ) ?: return ToolResult(
+            forModel = "fetch \"$asked\": refused, the task does not write this address and it is not a trusted " +
+                "page the search found."
+        )
 
-        if (!isWritten) {
-            return ToolResult(forModel = "fetch \"$url\": refused, the task does not write this address.")
+        if (!context.web.canRead) {
+            return ToolResult(forModel = "fetch \"$url\": eight pages are the most a request may read; answer now.")
         }
+
+        context.web.read(url = url)
 
         return when (val page = pageReader.read(url = url)) {
             is Outcome.Success -> ToolResult(
@@ -54,9 +63,28 @@ class FetchTool(private val pageReader: PageReader) : ChatTool {
         }
     }
 
+    // The address allowed that [asked] is: itself, or the one allowed address it is cut from at a "?", "&" or "#".
+    private fun allowedOf(
+        asked: String,
+        context: ToolContext
+    ): String? {
+        val allowed = UrlsNamed.writtenIn(text = context.task) + context.web.readable
+        if (asked in allowed) return asked
+
+        return allowed
+            .distinct()
+            .filter {
+                it.length > asked.length &&
+                    it.startsWith(prefix = asked) &&
+                    it[asked.length] in QUERY_MARKS
+            }
+            .singleOrNull()
+    }
+
     companion object {
         const val NAME = "fetch"
         const val URL = "url"
         private const val PAGE_CHARS = 3_000
+        private const val QUERY_MARKS = "?&#"
     }
 }

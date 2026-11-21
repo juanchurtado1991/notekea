@@ -3,6 +3,7 @@ package app.notekea.tasks.presentation
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.domain.FakeNoteContentStore
@@ -24,8 +25,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
@@ -119,6 +122,45 @@ class TasksViewModelTest {
         )
     }
 
+    // Bug hunt K7: "today" was only worked out on a change, so it went stale while the tab stayed open overnight.
+    @Test
+    fun `the tasks are listed again at local midnight while the tab shows`() = test {
+        val start = TODAY.plusDays(-1).epochDay * SECONDS_IN_DAY + LATE_EVENING
+
+        val tickingClock = object : Clock {
+            override fun now(): Instant = Instant.fromEpochSeconds(
+                epochSeconds = start + dispatcher.scheduler.currentTime / 1_000
+            )
+        }
+
+        val overnight = TasksViewModel(
+            vaultPath = VAULT,
+            listTasks = ListTasksUseCase(),
+            setTaskDone = SetTaskDoneUseCase(
+                store,
+                ApplyLinkUpdatesUseCase(noteContentStore = store)
+            ),
+            clock = tickingClock,
+            localCalendar = FakeLocalCalendar(),
+            dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+        )
+
+        overnight.onIntent(intent = TasksIntent.OnNotesChange(notes = listOf(NOTE)))
+        overnight.onIntent(intent = TasksIntent.OnShownChange(isShown = true))
+        overnight.onIntent(intent = TasksIntent.OnGroupingChange(grouping = TaskGrouping.DATE))
+        runCurrent()
+        val evening = firstGroupOf(model = overnight)
+        advanceTimeBy(delayTimeMillis = 2 * 60 * 60 * 1_000L)
+        runCurrent()
+
+        assertEquals(
+            expected = TaskWhen.TODAY to TaskWhen.OVERDUE,
+            actual = evening to firstGroupOf(model = overnight)
+        )
+
+        overnight.viewModelScope.cancel()
+    }
+
     @Test
     fun `checking a task writes that one character, tells the editors and leaves the list at once`() =
         test {
@@ -134,7 +176,10 @@ class TasksViewModelTest {
             )
 
             assertEquals(
-                expected = TasksEffect.NoteRewritten(path = PATH),
+                expected = TasksEffect.NoteRewritten(
+                    path = PATH,
+                    original = TEXT
+                ),
                 actual = effect
             )
 
@@ -208,6 +253,17 @@ class TasksViewModelTest {
         )
     }
 
+    private fun firstGroupOf(model: TasksViewModel): TaskWhen {
+        val first = model
+            .state
+            .value
+            .list
+            .groups
+            .first()
+
+        return (first as TaskGroup.OfDate).date
+    }
+
     private object FixedClock : Clock {
         override fun now(): Instant = Instant.fromEpochMilliseconds(epochMilliseconds = 0)
     }
@@ -219,6 +275,8 @@ class TasksViewModelTest {
     private companion object {
         const val TEXT = "- [ ] Write\n- [ ] Ship\n"
         const val VAULT = "/vault"
+        const val SECONDS_IN_DAY = 86_400L
+        const val LATE_EVENING = 23 * 60 * 60L
         val PATH = RelativePath(value = "Plan.md")
         val TODAY = CalendarDate(
             year = 2026,

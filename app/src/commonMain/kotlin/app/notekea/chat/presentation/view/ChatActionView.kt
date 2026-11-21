@@ -43,6 +43,7 @@ import app.notekea.resources.chat_problem_cannot_undo
 import app.notekea.resources.chat_problem_exists
 import app.notekea.resources.chat_problem_failed
 import app.notekea.resources.chat_problem_folder
+import app.notekea.resources.chat_problem_line
 import app.notekea.resources.chat_problem_long
 import app.notekea.resources.chat_problem_many
 import app.notekea.resources.chat_problem_missing
@@ -240,6 +241,8 @@ private fun problemText(problem: ActionProblem): String = when (problem) {
         replyString(Res.string.chat_problem_exists, problem.path.nameWithoutExtension)
 
     is ActionProblem.UnknownTask -> replyString(Res.string.chat_problem_task, problem.text)
+
+    is ActionProblem.UnknownLine -> replyString(Res.string.chat_problem_line, problem.text)
 
     is ActionProblem.UnknownQuery -> problem.property?.let {
         replyString(Res.string.chat_problem_query, it)

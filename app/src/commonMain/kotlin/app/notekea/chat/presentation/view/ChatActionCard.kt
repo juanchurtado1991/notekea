@@ -45,6 +45,7 @@ import app.notekea.resources.chat_action_bookmark
 import app.notekea.resources.chat_action_cancel
 import app.notekea.resources.chat_action_cancelled
 import app.notekea.resources.chat_action_cards_count
+import app.notekea.resources.chat_action_change_line
 import app.notekea.resources.chat_action_clip_url
 import app.notekea.resources.chat_action_close_tabs
 import app.notekea.resources.chat_action_complete_task
@@ -52,12 +53,14 @@ import app.notekea.resources.chat_action_confirm
 import app.notekea.resources.chat_action_create_folder
 import app.notekea.resources.chat_action_create_note
 import app.notekea.resources.chat_action_done_title
+import app.notekea.resources.chat_action_forget
 import app.notekea.resources.chat_action_link_notes
 import app.notekea.resources.chat_action_make_cards
 import app.notekea.resources.chat_action_move
 import app.notekea.resources.chat_action_notes_from_text
 import app.notekea.resources.chat_action_open
 import app.notekea.resources.chat_action_panel
+import app.notekea.resources.chat_action_remember
 import app.notekea.resources.chat_action_rename
 import app.notekea.resources.chat_action_running
 import app.notekea.resources.chat_action_search
@@ -223,13 +226,19 @@ private fun StepLine(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = targetOf(step = step),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                val target = targetOf(step = step)
+
+                if (target.isNotEmpty()) {
+                    Text(
+                        text = target,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
+
+        if (step.kind == ActionKind.CHANGE_LINE) ChatLineChange(step = step)
 
         if (onPlace != null) {
             ChatNotePlace(
@@ -334,6 +343,9 @@ private fun targetOf(step: ActionStep): String {
 
         ActionKind.COMPLETE_TASK -> "$notes\n${step.text}"
 
+        // The note and both lines show in the box under it.
+        ActionKind.CHANGE_LINE -> ""
+
         ActionKind.LINK_NOTES ->
             notes + ARROW + step
                 .target
@@ -365,12 +377,15 @@ private fun verbOf(kind: ActionKind): StringResource = when (kind) {
     ActionKind.ADD_TAG -> Res.string.chat_action_add_tag
     ActionKind.ADD_TASK -> Res.string.chat_action_add_task
     ActionKind.COMPLETE_TASK -> Res.string.chat_action_complete_task
+    ActionKind.CHANGE_LINE -> Res.string.chat_action_change_line
     ActionKind.LINK_NOTES -> Res.string.chat_action_link_notes
     ActionKind.BOOKMARK -> Res.string.chat_action_bookmark
     ActionKind.CREATE_FOLDER -> Res.string.chat_action_create_folder
     ActionKind.RENAME -> Res.string.chat_action_rename
     ActionKind.MOVE -> Res.string.chat_action_move
     ActionKind.TRASH -> Res.string.chat_action_trash
+    ActionKind.REMEMBER -> Res.string.chat_action_remember
+    ActionKind.FORGET -> Res.string.chat_action_forget
     ActionKind.OPEN_NOTE, ActionKind.OPEN_TODAY -> Res.string.chat_action_open
     ActionKind.SEARCH -> Res.string.chat_action_search
     ActionKind.SPLIT_PANE -> Res.string.chat_action_split
@@ -402,11 +417,15 @@ private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
 
     ActionKind.CREATE_FOLDER -> NotekeaIcons.NewFolder
 
-    ActionKind.RENAME -> NotekeaIcons.Rename
+    ActionKind.RENAME, ActionKind.CHANGE_LINE -> NotekeaIcons.Rename
 
     ActionKind.MOVE -> NotekeaIcons.FolderOpen
 
     ActionKind.TRASH -> NotekeaIcons.Delete
+
+    ActionKind.REMEMBER -> NotekeaIcons.Bookmark
+
+    ActionKind.FORGET -> NotekeaIcons.Delete
 
     ActionKind.OPEN_NOTE, ActionKind.OPEN_TODAY -> NotekeaIcons.Note
 

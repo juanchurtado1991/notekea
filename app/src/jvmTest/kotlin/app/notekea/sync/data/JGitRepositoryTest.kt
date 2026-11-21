@@ -19,6 +19,7 @@ import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
 
 /**
  * Sync on real repositories: two vaults of one remote, a bare repository on disk (`file://`, no network), through
@@ -29,7 +30,10 @@ class JGitRepositoryTest {
     private val remote = File(root, "remote.git")
     private val laptop = File(root, "Laptop")
     private val desktop = File(root, "Desktop")
-    private val git = JGitRepository(dispatchers = JvmAppDispatchers())
+    private val git = JGitRepository(
+        dispatchers = JvmAppDispatchers(),
+        clock = Clock.System
+    )
     private val url = remote.toURI().toString()
 
     init {

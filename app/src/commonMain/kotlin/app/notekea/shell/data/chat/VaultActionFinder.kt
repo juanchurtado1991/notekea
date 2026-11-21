@@ -5,6 +5,7 @@ import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.chat.domain.plan.FoundRow
+import app.notekea.chat.domain.plan.TaskMatch
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
@@ -16,6 +17,7 @@ import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.domain.links.LinkFinder
 import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.notes.domain.links.NoteRewrite
+import app.notekea.core.notes.domain.tasks.NoteTask
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryTranslation
 import app.notekea.query.domain.QueryYaml
@@ -99,6 +101,12 @@ class VaultActionFinder(
                 return Outcome.Failure(error = ActionProblem.UnknownQuery(property = null))
         }
 
+        // No filter and no order chooses nothing: every note came back as if it matched ("projects with open
+        // tasks", which no property says).
+        if (query.filters.isEmpty() && query.sort == null) {
+            return Outcome.Failure(error = ActionProblem.UnknownQuery(property = null))
+        }
+
         val result = runQuery(
             query = query,
             notes = notes
@@ -122,7 +130,15 @@ class VaultActionFinder(
         step: ActionStep,
         notes: Collection<NoteEntry>
     ): FoundNotes {
-        val period = PERIODS[step.period?.lowercase()]
+        // A period of no name here is no period: its tasks were every open task, shown under that name (T14).
+        val named = step
+            .period
+            ?.lowercase()
+            ?.takeIf {
+                it in PERIODS
+            }
+
+        val period = PERIODS[named]
 
         val view = TaskView(
             grouping = TaskGrouping.DATE,
@@ -146,7 +162,7 @@ class VaultActionFinder(
 
         return FoundNotes(
             isTasks = true,
-            period = step.period?.lowercase(),
+            period = named,
             rows = rows.map {
                 FoundRow(
                     note = it.path,
@@ -221,28 +237,18 @@ class VaultActionFinder(
         path: RelativePath,
         notes: Collection<NoteEntry>
     ): NoteRewrite? {
-        val property = if (step.kind == ActionKind.ADD_TAG) {
-            val tags = notes
-                .firstOrNull {
-                    it.file.path == path
-                }
-                ?.metadata
-                ?.tags
-                .orEmpty()
-
-            val tag = step.tag.orEmpty()
-            if (tag in tags) return null
-
-            NoteProperty(
-                key = TAGS,
-                value = PropertyValue.Items(items = tags + tag)
-            )
-        } else {
-            NoteProperty(
-                key = step.property.orEmpty(),
-                value = valueOf(text = step.value.orEmpty())
+        if (step.kind == ActionKind.ADD_TAG) {
+            return setPropertyUseCase.withTag(
+                vaultPath = vaultPath,
+                path = path,
+                tag = step.tag.orEmpty()
             )
         }
+
+        val property = NoteProperty(
+            key = step.property.orEmpty(),
+            value = valueOf(text = step.value.orEmpty())
+        )
 
         return setPropertyUseCase(
             vaultPath = vaultPath,
@@ -251,38 +257,35 @@ class VaultActionFinder(
         )
     }
 
-    /** Checks the open task of the step's note whose text reads most like the step's, and returns what was written. */
+    /**
+     * Checks the open task of [tasks], the note's as it is now, that the step's words mean ([TaskMatch]), and returns
+     * what was written. Several that read alike are no choice of the app's: the first of them was ticked (A7).
+     */
     suspend fun completeTask(
         vaultPath: String,
         step: ActionStep,
-        notes: Collection<NoteEntry>
-    ): NoteRewrite? {
-        val note = notes.firstOrNull {
-            it.file.path == step.notes.firstOrNull()
-        } ?: return null
+        tasks: List<NoteTask>
+    ): Outcome<NoteRewrite, ActionProblem> {
+        val path = step.notes.firstOrNull()
+        val unknown = Outcome.Failure(error = ActionProblem.UnknownTask(text = step.text.orEmpty()))
 
-        val wanted = step
-            .text
-            .orEmpty()
-            .lowercase()
+        val match = TaskMatch.of(
+            tasks = tasks,
+            wanted = step.text.orEmpty()
+        )
 
-        val task = note
-            .metadata
-            .tasks
-            .filterNot { it.isDone }
-            .firstOrNull {
-                wanted in it.text.lowercase() || it.text.lowercase() in wanted
-            }
-            ?: return null
+        if (path == null || match !is TaskMatch.One) return unknown
 
-        return setTaskDone(
+        val done = setTaskDone(
             vaultPath = vaultPath,
             row = TaskRow(
-                path = note.file.path,
-                task = task,
+                path = path,
+                task = match.task,
                 due = TaskWhen.NO_DATE
             )
         )
+
+        return done?.let { Outcome.Success(value = it) } ?: unknown
     }
 
     private fun valueOf(text: String): PropertyValue {
@@ -302,7 +305,7 @@ class VaultActionFinder(
         return when {
             trimmed.equals("true", ignoreCase = true) -> PropertyValue.Checkbox(isChecked = true)
             trimmed.equals("false", ignoreCase = true) -> PropertyValue.Checkbox(isChecked = false)
-            trimmed.toDoubleOrNull() != null -> PropertyValue.Number(text = trimmed)
+            PLAIN_NUMBER.matches(input = trimmed) -> PropertyValue.Number(text = trimmed)
             date != null -> PropertyValue.Date(date = date)
             else -> PropertyValue.Text(text = trimmed)
         }
@@ -331,7 +334,9 @@ class VaultActionFinder(
                 )
 
     private companion object {
-        const val TAGS = "tags"
+        // Written bare only as a plain decimal: "08001", "+34600111222", "1e5" or "NaN" stay text, as a YAML reader
+        // drops the zero or the plus, or reads another number (A8).
+        val PLAIN_NUMBER = Regex(pattern = "-?(0|[1-9]\\d*)(\\.\\d+)?")
         val ISO_DATE = Regex(pattern = "(\\d{4})-(\\d{2})-(\\d{2})")
         val PERIODS = mapOf(
             "overdue" to TaskWhen.OVERDUE,

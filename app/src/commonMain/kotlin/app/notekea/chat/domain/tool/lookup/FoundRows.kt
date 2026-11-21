@@ -1,5 +1,7 @@
 package app.notekea.chat.domain.tool.lookup
 
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.FoundRow
@@ -22,7 +24,7 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
             val result = actionRunner.find(context.vaultPath, step, context.notes)
         ) {
             is Outcome.Success -> result.value
-            is Outcome.Failure -> return ToolResult(forModel = "${step.kind.written}: nothing found.")
+            is Outcome.Failure -> return ToolResult(forModel = failedOf(step, result.error))
         }
 
         val rows = found.rows.filter(predicate = keep)
@@ -46,7 +48,38 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
                     whenOf(row = it)
             }
 
-        return ToolResult(forModel = "${step.kind.written} ${step.request.orEmpty()}:\n$lines")
+        // Said, so 30 rows are not taken for all of them.
+        val more = (rows.size - ROWS)
+            .takeIf {
+                it > 0
+            }
+            ?.let { "\n($it more, ${rows.size} in all: narrow the request to see them.)" }
+            .orEmpty()
+
+        return ToolResult(forModel = "${step.kind.written} ${step.request.orEmpty()}:\n$lines$more")
+    }
+
+    // Why it found nothing, and where else to look: "nothing found" alone had the 9B ask for "notes tagged idea"
+    // three times (the loop's fifth run). A query only chooses by properties.
+    private fun failedOf(
+        step: ActionStep,
+        problem: ActionProblem
+    ): String {
+        val asked = "${step.kind.written} ${step.request.orEmpty()}".trim()
+
+        val why = when (problem) {
+            is ActionProblem.UnknownQuery ->
+                problem
+                    .property
+                    ?.let { "no property \"$it\" in the vault" }
+                    ?: "it is not a choice by properties"
+
+            else -> "it could not be run"
+        }
+
+        val elsewhere = if (step.kind == ActionKind.FIND_NOTES) " $ELSEWHERE" else ""
+
+        return "$asked: nothing found, as $why.$elsewhere"
     }
 
     // "(later, due 2027-01-15 (Friday))": the Tasks tab's group and the day the task writes.
@@ -63,8 +96,11 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
         .filter { it.isNotBlank() }
         .joinToString(separator = " · ")
 
-    private companion object {
-        const val MARKDOWN = ".md"
-        const val ROWS = 30
+    companion object {
+        private const val MARKDOWN = ".md"
+        private const val ROWS = 30
+        const val ELSEWHERE =
+            "A tag is listed with list and its tag; words in the text with search; links with links; open tasks " +
+                "with list, which shows each note's."
     }
 }

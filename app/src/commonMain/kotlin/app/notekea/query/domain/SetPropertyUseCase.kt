@@ -6,7 +6,9 @@ import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
 import app.notekea.core.notes.domain.frontmatter.FrontmatterPatch
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.links.NoteRewrite
 
@@ -20,6 +22,50 @@ class SetPropertyUseCase(
     private val applyLinkUpdates: ApplyLinkUpdatesUseCase
 ) {
     private val patch = FrontmatterPatch()
+
+    /**
+     * [tag] added to the tags the note writes now, read from its text and not from an index that may be behind it:
+     * two tags added to one note in a plan lost the first (the bug hunt of 2026-11-17). Null when it has the tag.
+     */
+    suspend fun withTag(
+        vaultPath: String,
+        path: RelativePath,
+        tag: String
+    ): NoteRewrite? {
+        val original = noteContentStore.read(
+            vaultPath = vaultPath,
+            path = path
+        ) ?: return null
+
+        val block = FrontmatterBlocks
+            .of(header = NoteDocument.fromText(text = original).header)
+            ?.blockOf(key = TAGS)
+
+        val held = when (val value = block?.let { FrontmatterReader().valueOf(block = it) }) {
+            is PropertyValue.Items -> value.items
+            is PropertyValue.Text -> listOf(value.text)
+            else -> emptyList()
+        }.filter { it.isNotBlank() }
+
+        if (held.any {
+                it.equals(
+                    other = tag,
+                    ignoreCase = true
+                )
+            }
+        ) {
+            return null
+        }
+
+        return invoke(
+            vaultPath = vaultPath,
+            path = path,
+            property = NoteProperty(
+                key = block?.key ?: TAGS,
+                value = PropertyValue.Items(items = held + tag)
+            )
+        )
+    }
 
     suspend operator fun invoke(
         vaultPath: String,
@@ -63,4 +109,8 @@ class SetPropertyUseCase(
 
     private fun lineBreakOf(document: NoteDocument): String =
         if (document.usesCrLf) StringPatterns.WINDOWS_NEW_LINE else StringPatterns.NEW_LINE
+
+    private companion object {
+        const val TAGS = "tags"
+    }
 }

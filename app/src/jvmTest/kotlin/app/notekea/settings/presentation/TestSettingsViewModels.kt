@@ -6,6 +6,8 @@ import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeAttachmentStore
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FakeVaultSettingsWriter
 import app.notekea.core.platform.domain.FakeSystemEnvironment
@@ -15,6 +17,7 @@ import app.notekea.settings.presentation.about.AboutViewModel
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
 import app.notekea.settings.presentation.files.FilesSettingsViewModel
 import app.notekea.settings.presentation.help.SettingsHelpViewModel
+import app.notekea.settings.presentation.memory.MemorySettingsViewModel
 import app.notekea.settings.presentation.preferences.PreferencesViewModel
 import kotlinx.coroutines.flow.emptyFlow
 import kotlin.time.Clock
@@ -29,6 +32,15 @@ fun testSettingsViewModels(
         reader = FakeVaultSettingsReader(),
         writer = FakeVaultSettingsWriter(),
         attachmentStore = FakeAttachmentStore(),
+        localCalendar = FakeLocalCalendar(),
+        clock = Clock.System,
+        vaultPath = null
+    ),
+    memory = MemorySettingsViewModel(
+        noteContentStore = FakeNoteContentStore(),
+        noteFileOperations = FakeNoteFileOperations(),
+        attachmentStore = FakeAttachmentStore(),
+        preferencesStore = FakeAppPreferencesStore(),
         localCalendar = FakeLocalCalendar(),
         clock = Clock.System,
         vaultPath = null

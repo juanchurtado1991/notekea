@@ -1,5 +1,7 @@
 package app.notekea.chat.domain.skill
 
+import app.notekea.core.memory.domain.MemoryLine
+import app.notekea.core.memory.domain.MemoryNote
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
@@ -33,6 +35,30 @@ class VaultGuide(private val noteTextCache: NoteTextCache) {
         )[entry.file.path]
             ?.take(n = INSTRUCTIONS_CHARS)
             ?.takeIf { it.isNotBlank() }
+    }
+
+    /** The lines of the chat's memory (`docs/agent-memory.md`); empty when the vault has none. */
+    suspend fun memoryOf(
+        vaultPath: String,
+        notes: Collection<NoteEntry>
+    ): List<MemoryLine> {
+        val entry = notes.firstOrNull {
+            it
+                .file
+                .path
+                .value
+                .equals(
+                    other = MEMORY.value,
+                    ignoreCase = true
+                )
+        } ?: return emptyList()
+
+        val text = textsOf(
+            vaultPath = vaultPath,
+            notes = listOf(entry)
+        )[entry.file.path].orEmpty()
+
+        return MemoryNote.linesOf(text = text)
     }
 
     /**
@@ -95,7 +121,8 @@ class VaultGuide(private val noteTextCache: NoteTextCache) {
         )
     }
 
-    private suspend fun textsOf(
+    /** The text of each of [notes] that can be read, without its frontmatter's edges of blank space. */
+    suspend fun textsOf(
         vaultPath: String,
         notes: List<NoteEntry>
     ): Map<RelativePath, String> = noteTextCache
@@ -116,7 +143,8 @@ class VaultGuide(private val noteTextCache: NoteTextCache) {
          * instructions live in a folder of Notekea's own, where the chat's memory is meant to go too.
          */
         val INSTRUCTIONS = RelativePath(value = "Notekea/Notekea.md")
-        const val SKILLS_FOLDER = "Skills"
+        val MEMORY = MemoryNote.PATH
+        const val SKILLS_FOLDER = "Notekea/Skills"
 
         // Always in the prompt, so short: about 500 tokens of instructions, 300 of a skill.
         private const val INSTRUCTIONS_CHARS = 2_000

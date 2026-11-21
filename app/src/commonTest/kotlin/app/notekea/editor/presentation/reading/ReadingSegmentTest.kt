@@ -6,6 +6,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.EmbedKind
 import app.notekea.editor.presentation.attachments.AttachmentView
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -28,10 +29,19 @@ class ReadingSegmentTest {
 
         assertEquals(
             expected = listOf(
-                ReadingSegment.Markdown(text = "Intro\n"),
-                ReadingSegment.Markdown(text = "# One\nBody\n"),
+                ReadingSegment.Markdown(
+                    text = "Intro\n",
+                    start = 0
+                ),
+                ReadingSegment.Markdown(
+                    text = "# One\nBody\n",
+                    start = 6
+                ),
                 ReadingSegment.Attachment(view = view),
-                ReadingSegment.Markdown(text = "## Two\nEnd\n")
+                ReadingSegment.Markdown(
+                    text = "## Two\nEnd\n",
+                    start = 28
+                )
             ),
             actual = ReadingSegment.of(
                 text = text,
@@ -47,12 +57,18 @@ class ReadingSegmentTest {
 
         assertEquals(
             expected = listOf(
-                ReadingSegment.Markdown(text = "Books\n\n"),
+                ReadingSegment.Markdown(
+                    text = "Books\n\n",
+                    start = 0
+                ),
                 ReadingSegment.Query(
                     text = "columns: [rating]\n",
                     source = block
                 ),
-                ReadingSegment.Markdown(text = "\nThe end\n")
+                ReadingSegment.Markdown(
+                    text = "\nThe end\n",
+                    start = 38
+                )
             ),
             actual = ReadingSegment.of(
                 text = "Books\n\n$block\n\nThe end\n",
@@ -82,7 +98,12 @@ class ReadingSegmentTest {
         val text = "     ```query\nmiddle\n```kotlin\nval a = 1\n```\n"
 
         assertEquals(
-            expected = listOf(ReadingSegment.Markdown(text = text)),
+            expected = listOf(
+                ReadingSegment.Markdown(
+                    text = text,
+                    start = 0
+                )
+            ),
             actual = ReadingSegment.of(
                 text = text,
                 attachments = emptyList()
@@ -98,7 +119,12 @@ class ReadingSegmentTest {
 
         assertEquals(
             expected = listOf(quoted, open, other).map {
-                listOf(ReadingSegment.Markdown(text = it))
+                listOf(
+                    ReadingSegment.Markdown(
+                        text = it,
+                        start = 0
+                    )
+                )
             },
             actual = listOf(quoted, open, other).map {
                 ReadingSegment.of(
@@ -107,5 +133,37 @@ class ReadingSegmentTest {
                 )
             }
         )
+    }
+
+    @Test
+    fun `a drawn task's checkbox toggles its own line, not an earlier one with the same text`() {
+        val text = "# A\n- [ ] x\n# A\n- [ ] x\n"
+        val toggles = mutableListOf<Int>()
+
+        val last = ReadingSegment
+            .of(
+                text = text,
+                attachments = emptyList(),
+                headings = OutlineFinder().headings(text = text)
+            )
+            .filterIsInstance<ReadingSegment.Markdown>()
+            .last()
+
+        taskClicks(
+            segment = last,
+            textStart = BLOCK_START,
+            onIntent = {
+                if (it is EditorIntent.OnTaskToggle) toggles += it.stateIndex
+            }
+        ).invoke(0, 1)
+
+        assertEquals(
+            expected = listOf(BLOCK_START + text.lastIndexOf(string = "[ ]") + 1),
+            actual = toggles
+        )
+    }
+
+    private companion object {
+        const val BLOCK_START = 5
     }
 }

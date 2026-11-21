@@ -45,6 +45,17 @@ class NoteBlocksTest {
     }
 
     @Test
+    fun `a fence of another character or a shorter one inside a code block does not close it`() {
+        val tildes = "~~~\n```\n\n# not a heading\n~~~\n\n"
+        val long = "````\n```\n\ntext\n````\n\n"
+
+        assertEquals(
+            expected = listOf("Before\n\n", tildes, long, "After"),
+            actual = blocksOf(text = "Before\n\n$tildes${long}After")
+        )
+    }
+
+    @Test
     fun `two cuts are equal when their blocks are the same`() {
         assertEquals(
             expected = listOf(true, false, false),

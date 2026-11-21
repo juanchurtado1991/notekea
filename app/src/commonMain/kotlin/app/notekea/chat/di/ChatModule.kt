@@ -13,8 +13,11 @@ import app.notekea.chat.domain.answer.DescribeVaultUseCase
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.help.HelpGuideSource
 import app.notekea.chat.domain.loop.ChatLoop
+import app.notekea.chat.domain.loop.FrameSource
 import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
+import app.notekea.chat.domain.loop.TaskFramer
+import app.notekea.chat.domain.loop.TurnFrames
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionPlanReader
 import app.notekea.chat.domain.plan.CheckPlanUseCase
@@ -53,7 +56,25 @@ val chatModule = module {
     factoryOf(::ProposalCheck)
     factoryOf(::LoopTools)
     factory { get<LoopTools>().toolsets() }
-    factoryOf(::RunTurnUseCase)
+    factoryOf(::TaskFramer)
+    factory<FrameSource> { TurnFrames(get(), get(), get()) }
+
+    factory {
+        RunTurnUseCase(
+            llmEngine = get(),
+            toolsets = get(),
+            vaultGuide = get(),
+            proposal = get(),
+            clock = get(),
+            // Bound on the desktop (`SqliteStepMemory`); elsewhere the loop drops what does not fit, as before.
+            stepMemory = getOrNull(),
+            // The vault's own web sources, trusted by definition (`docs/agent-web.md`).
+            sourceSites = getOrNull(),
+            // Which notes the task means, said before the turn (`docs/agent-frame.md`).
+            frames = get()
+        )
+    }
+
     factoryOf(::ChatLoop)
     factoryOf(::AnswerHelpUseCase)
     factoryOf(::DescribeVaultUseCase)

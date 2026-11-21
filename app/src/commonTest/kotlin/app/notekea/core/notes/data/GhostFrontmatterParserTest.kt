@@ -46,6 +46,27 @@ class GhostFrontmatterParserTest {
         )
     }
 
+    // Bug hunt S5: a key written with a capital was ignored.
+    @Test
+    fun `keys are read whatever their case`() {
+        val yaml =
+            """
+            Title: Pricing ideas
+            TAGS: [product]
+            Aliases:
+              - Prices
+            """.trimIndent()
+
+        assertEquals(
+            expected = NoteMetadata(
+                tags = listOf("product"),
+                aliases = listOf("Prices"),
+                title = "Pricing ideas"
+            ),
+            actual = parser.parse(yaml = yaml)
+        )
+    }
+
     @Test
     fun `other keys of any shape do not get in the way, nor nested keys with the same name`() {
         val yaml =

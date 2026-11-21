@@ -15,6 +15,7 @@ class ApplyLinkUpdatesUseCase(private val noteContentStore: NoteContentStore) {
     ): LinkUpdateResult {
         val updated = mutableListOf<RelativePath>()
         val skipped = mutableListOf<RelativePath>()
+        val originals = mutableMapOf<RelativePath, String>()
 
         rewrites.forEach { rewrite ->
             val isUnchanged = noteContentStore.read(
@@ -29,12 +30,18 @@ class ApplyLinkUpdatesUseCase(private val noteContentStore: NoteContentStore) {
                     content = rewrite.updated
                 ) is Outcome.Success
 
-            if (written) updated += rewrite.path else skipped += rewrite.path
+            if (written) {
+                updated += rewrite.path
+                originals.getOrPut(key = rewrite.path) { rewrite.original }
+            } else {
+                skipped += rewrite.path
+            }
         }
 
         return LinkUpdateResult(
             updated = updated,
-            skipped = skipped
+            skipped = skipped,
+            originals = originals
         )
     }
 }

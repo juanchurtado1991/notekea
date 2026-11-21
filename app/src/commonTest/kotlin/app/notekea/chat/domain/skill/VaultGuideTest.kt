@@ -25,10 +25,30 @@ class VaultGuideTest {
 
     private val instructions = RelativePath(value = "Notekea/Notekea.md")
     private val atRoot = RelativePath(value = "Notekea.md")
-    private val recipe = RelativePath(value = "Skills/Recipe card.md")
-    private val summary = RelativePath(value = "Skills/Document summary.md")
-    private val empty = RelativePath(value = "Skills/Empty.md")
+    private val recipe = RelativePath(value = "Notekea/Skills/Recipe card.md")
+    private val summary = RelativePath(value = "Notekea/Skills/Document summary.md")
+    private val empty = RelativePath(value = "Notekea/Skills/Empty.md")
     private val notes = listOf(instructions, recipe, summary, empty).map { entry(path = it.value) }
+
+    @Test
+    fun `the chat's memory is read from the Notekea folder, and is empty when the vault has none`() =
+        runTest {
+            val memory = RelativePath(value = "Notekea/Memory.md")
+            store.texts[memory] = "## Areas\n- \"work\" is `Trabajo/`"
+
+            val read = guide.memoryOf(
+                vaultPath = VAULT,
+                notes = notes + entry(path = memory.value)
+            )
+
+            assertEquals(
+                expected = listOf(listOf("\"work\" is `Trabajo/`"), emptyList()),
+                actual = listOf(
+                    read.map { it.text },
+                    guide.memoryOf(VAULT, notes)
+                )
+            )
+        }
 
     @Test
     fun `the vault's instructions are its note's text, and none when it has no such note or it is empty`() =

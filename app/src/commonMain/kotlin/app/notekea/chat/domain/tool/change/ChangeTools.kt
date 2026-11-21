@@ -31,7 +31,7 @@ object ChangeTools {
     val append = ChangeTool(
         name = "append",
         description = "text added at the end of a note: the note and the text, as it will be written. Never a " +
-            "task (add_task), a tag (add_tag) or a property (set_property).",
+            "task (add_task), a tag (add_tag), a property (set_property) or a line changed (change_line).",
         kind = ActionKind.APPEND_TEXT,
         fields = listOf(ActionField.NOTE, ActionField.TEXT),
         misuse = ChangeMisuse::taskAppended
@@ -56,7 +56,8 @@ object ChangeTools {
         description = "a property set on notes: the notes, the property as the vault names it, and its value " +
             "(a status, a priority, a date: never complete_task for them).",
         kind = ActionKind.SET_PROPERTY,
-        fields = listOf(ActionField.NOTES, ActionField.PROPERTY, ActionField.VALUE)
+        fields = listOf(ActionField.NOTES, ActionField.PROPERTY, ActionField.VALUE),
+        misuse = ChangeMisuse::tagAsProperty
     )
 
     val addTask = ChangeTool(
@@ -65,7 +66,8 @@ object ChangeTools {
             "tool when the task has a day. Call it once for each task. Never a task marked done (complete_task).",
         kind = ActionKind.ADD_TASK,
         fields = listOf(ActionField.NOTE, ActionField.TEXT, ActionField.DUE),
-        optional = setOf(ActionField.DUE)
+        optional = setOf(ActionField.DUE),
+        unasked = ChangeMisuse::taskUnasked
     )
 
     val completeTask = ChangeTool(
@@ -75,6 +77,15 @@ object ChangeTools {
         kind = ActionKind.COMPLETE_TASK,
         fields = listOf(ActionField.NOTE, ActionField.TEXT),
         misuse = ChangeMisuse::doneUnasked
+    )
+
+    val changeLine = ChangeTool(
+        name = "change_line",
+        description = "one line of a note changed in place (a time, a date, a figure, a name): the note, line as " +
+            "the note writes it now, and text as the whole line must read. Never text added (append), a task " +
+            "marked done (complete_task) or a property (set_property).",
+        kind = ActionKind.CHANGE_LINE,
+        fields = listOf(ActionField.NOTE, ActionField.LINE, ActionField.TEXT)
     )
 
     val link = ChangeTool(

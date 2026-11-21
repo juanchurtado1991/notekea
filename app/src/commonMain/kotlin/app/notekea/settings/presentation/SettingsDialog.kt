@@ -32,6 +32,7 @@ import app.notekea.settings.presentation.appearance.AppearanceSettings
 import app.notekea.settings.presentation.files.FilesSettings
 import app.notekea.settings.presentation.help.SettingsHelpBar
 import app.notekea.settings.presentation.help.SettingsHelpIntent
+import app.notekea.settings.presentation.memory.MemorySettings
 import app.notekea.settings.presentation.preferences.EditorSettings
 import app.notekea.settings.presentation.preferences.GeneralSettings
 import app.notekea.settings.presentation.shortcuts.ShortcutsSettings
@@ -174,6 +175,16 @@ private fun SectionContent(
         }
 
         SettingsSection.AI_MODEL -> aiModelSection(fill, spotlight)
+
+        SettingsSection.CHAT_MEMORY -> {
+            val memory by viewModels
+                .memory
+                .state
+                .collectAsState()
+
+            val order = platformConventions.dialogButtonOrder
+            MemorySettings(memory, viewModels.memory::onIntent, order, spotlight, fill)
+        }
 
         SettingsSection.SYNC -> syncSection(fill, spotlight)
 

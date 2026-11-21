@@ -41,7 +41,7 @@ class ContextBudgetTest {
         runTest {
             val fitted = budget(tokens = 710).fit(entries = entries).entries
 
-            val alone = budget(tokens = 150).fit(entries = entries).entries
+            val alone = budget(tokens = 310).fit(entries = entries).entries
 
             assertEquals(
                 expected = listOf(
@@ -51,6 +51,23 @@ class ContextBudgetTest {
                 actual = listOf(fitted, alone)
             )
         }
+
+    // The bug hunt of 2026-11-17 (E4): the newest alone over the room was sent whole, and the call overflowed.
+    @Test
+    fun `the newest alone over the room is cut to it, its start kept`() = runTest {
+        val fitted = budget(tokens = 250).fit(entries = entries).entries
+        val newest = fitted.last()
+        val room = 250 - engine.countTokens(text = "The task.") - 100
+
+        assertEquals(
+            expected = listOf(true, true, true),
+            actual = listOf(
+                newest.endsWith(suffix = ContextBudget.CUT),
+                entries.last().startsWith(prefix = newest.removeSuffix(suffix = ContextBudget.CUT)),
+                fitted.sumOf { engine.countTokens(text = it) } <= room
+            )
+        )
+    }
 
     @Test
     fun `what was dropped stays dropped, so the prompt's start does not change at every move`() =

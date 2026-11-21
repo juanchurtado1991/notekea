@@ -29,6 +29,14 @@ class ReadModeLinksTest {
     }
 
     @Test
+    fun `a wiki link with its pipe escaped in a table leads to its note, shown with its alias`() {
+        assertEquals(
+            expected = "| [the arepas](notekea:Arepas) | 2 |",
+            actual = links.prepare(body = "| [[Arepas\\|the arepas]] | 2 |")
+        )
+    }
+
+    @Test
     fun `tags become links that search them, nested and accented tags too`() {
         assertEquals(
             expected = "Dinner [#recipe](notekea-tag:recipe) and [#café/morning](notekea-tag:caf%C3%A9/morning).",

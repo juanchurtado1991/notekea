@@ -25,6 +25,7 @@ enum class AgentUse {
             problem is ActionProblem.UnknownNote ||
                 problem is ActionProblem.UnknownFolder ||
                 problem is ActionProblem.UnknownTask ||
+                problem is ActionProblem.UnknownLine ||
                 problem is ActionProblem.UnknownQuery
 
         return this == WHEN_STUCK && (isUnknown || isUnnamed)

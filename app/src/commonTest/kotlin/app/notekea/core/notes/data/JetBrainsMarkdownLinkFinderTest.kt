@@ -91,6 +91,52 @@ class JetBrainsMarkdownLinkFinderTest {
         )
     }
 
+    // Bug hunt 2026-11-17 (G5): `[text](Note)` opened the note on a click and was missing from the graph.
+    @Test
+    fun `a markdown link with no extension or with a title is a note link, a page or a heading is not`() {
+        val markdown = "[a](Arepas), [b](Recipes/Menu.md \"The menu\"), [c](<Garden plan>), " +
+            "[d](www.example.com), [e](mailto:me), [f](#Steps)"
+
+        assertEquals(
+            expected = listOf("Arepas", "Recipes/Menu.md", "Garden plan"),
+            actual = finder.find(markdown = markdown).map { it.target }
+        )
+    }
+
+    // Bug hunt 2026-11-17 (G8): only the third kind of link was checked for a URL scheme.
+    @Test
+    fun `a web page in angle brackets is no note link, even when it ends in md`() {
+        assertEquals(
+            expected = emptyList(),
+            actual = finder.find(markdown = "[site](<https://example.com/README.md>)")
+        )
+    }
+
+    // Bug hunt 2026-11-17 (A5): links and embeds to attachments were never found, so a rename broke them.
+    @Test
+    fun `with attachments, links and embeds to any file of the vault are found, web pages still are not`() {
+        val markdown = "![pic](assets/pic.png), [doc](<Files/Plan v2.pdf>), ![[assets/pic.png]], " +
+            "[site](https://example.com/pic.png)"
+
+        assertEquals(
+            expected = listOf("assets/pic.png", "Files/Plan v2.pdf", "assets/pic.png"),
+            actual = finder.findWithAttachments(markdown = markdown).map { it.target }
+        )
+
+        assertEquals(
+            expected = listOf("assets/pic.png"),
+            actual = finder.find(markdown = markdown).map { it.target }
+        )
+    }
+
+    @Test
+    fun `a label with escaped brackets still makes a link`() {
+        assertEquals(
+            expected = listOf("C%5B1%5D.md"),
+            actual = finder.find(markdown = "[C\\[1\\]](C%5B1%5D.md)").map { it.target }
+        )
+    }
+
     @Test
     fun `links inside code are left alone`() {
         val markdown =

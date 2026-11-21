@@ -38,6 +38,10 @@ Everything written into this repository (code, comments, commits, pull requests,
   afterwards) and show the images in the conversation; never commit screenshots or attach them to pull requests.
   For a new screen or a visual change, first show 2–3 design options to choose from.
 - **No dead code:** when changing or reverting, remove the parameters, strings, helpers and imports nothing uses.
+- **No patches (the developer, 2026-11-17):** fix the cause in the design, never a special case for the failure seen
+  (a word list, a regex for one phrasing, a check written against one task). A patch is allowed only when it is
+  exceptional, and then it says so in its comment and in the handoff, with why the foundation could not take it yet.
+  Patches piled on a weak base are what made the chat fail on tasks it was not tuned on.
 
 ## Step-by-step review (`GUIDELINES.md` §8)
 

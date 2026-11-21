@@ -62,7 +62,8 @@ class RenameAndUpdateLinksUseCaseTest {
                     path = RelativePath(value = "Recipes/Arepas reina.md"),
                     links = LinkUpdateResult(
                         updated = listOf(RelativePath(value = WELCOME)),
-                        skipped = emptyList()
+                        skipped = emptyList(),
+                        originals = mapOf(RelativePath(value = WELCOME) to "Cook [[Arepas]].")
                     )
                 )
             ),

@@ -162,15 +162,21 @@ class SmokeFormattingToolbarTest {
             }
             .toList() + RelativePath(value = "Editor/Formatting practice.md")
 
+        val path = RelativePath(value = "Recipes/Café con leche.md")
+
         val target = LinkResolver(
             notePaths = notePaths
-        ).wikiTarget(path = RelativePath(value = "Recipes/Café con leche.md"))
+        ).wikiTarget(path = path)
 
         val steps = FormattingSteps(text = practice)
 
         steps.select(
             part = "coffee",
-            action = FormatAction.NoteLink(target = target)
+            action = FormatAction.NoteLink(
+                target = target,
+                path = path,
+                source = RelativePath(value = "Editor/Formatting practice.md")
+            )
         )
 
         assertEquals(

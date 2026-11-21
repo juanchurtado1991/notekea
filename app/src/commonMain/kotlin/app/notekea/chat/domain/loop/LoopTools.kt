@@ -7,8 +7,12 @@ import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DateTool
+import app.notekea.chat.domain.tool.app.DaysTool
 import app.notekea.chat.domain.tool.app.ShowTools
+import app.notekea.chat.domain.tool.app.TallyTool
+import app.notekea.chat.domain.tool.change.ChangeLineTool
 import app.notekea.chat.domain.tool.change.ChangeTools
+import app.notekea.chat.domain.tool.change.MemoryTool
 import app.notekea.chat.domain.tool.change.ProposeTool
 import app.notekea.chat.domain.tool.lookup.FetchTool
 import app.notekea.chat.domain.tool.lookup.FindTool
@@ -19,12 +23,14 @@ import app.notekea.chat.domain.tool.reading.DigestTool
 import app.notekea.chat.domain.tool.reading.LinksTool
 import app.notekea.chat.domain.tool.reading.ListTool
 import app.notekea.chat.domain.tool.reading.OutlineTool
+import app.notekea.chat.domain.tool.web.WebSearchTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.chat.domain.tool.work.HandTool
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.web.domain.WebSearchProvider
 
 /**
  * The loop's toolsets as the app builds them (`docs/agent-loop.md`, "Toolsets"): what each kind of work is given,
@@ -36,10 +42,15 @@ class LoopTools(
     private val noteTextCache: NoteTextCache,
     private val actionRunner: ActionRunner,
     private val pageReader: PageReader,
-    private val linkFinder: LinkFinder
+    private val linkFinder: LinkFinder,
+    private val webSearch: WebSearchProvider
 ) {
     fun toolsets(): Toolsets {
-        val search = SearchTool(answerFromNotes = answerFromNotes)
+        val search = SearchTool(
+            answerFromNotes = answerFromNotes,
+            noteTextCache = noteTextCache
+        )
+
         val read = ReadTool(noteTextCache = noteTextCache)
         val outline = OutlineTool(noteTextCache = noteTextCache)
         val list = ListTool()
@@ -59,17 +70,18 @@ class LoopTools(
             linkFinder = linkFinder
         )
 
-        val count = CountTool(noteTextCache = noteTextCache)
-
         val looking = listOf(search, read, find, tasks, list)
+
+        // "Tag every note that links to Budget 2026", "the recipes the menu uses": a change to the notes a note's
+        // links name (the loop's fifth run had no links when it organized or wrote).
+        val linking = looking + links
         val shows = ShowTools.of(setTheme = { actionRunner.setTheme(theme = it) })
         val changes = ChangeTools
 
         return Toolsets(
             byKind = mapOf(
-                WorkKind.ASK to
-                    looking + listOf(outline, digest, links, CalculateTool(), count, ask, answer),
-                WorkKind.WRITE to looking + listOf(
+                WorkKind.ASK to linking + listOf(outline, digest) + figures() + listOf(ask, answer),
+                WorkKind.WRITE to linking + listOf(
                     outline,
                     changes.writeNote,
                     changes.createNote,
@@ -78,20 +90,24 @@ class LoopTools(
                     changes.addTask,
                     DateTool(),
                     changes.makeCards,
+                    MemoryTool.remember,
                     ask,
                     propose
                 ),
-                WorkKind.ORGANIZE to looking + organizing(
+                WorkKind.ORGANIZE to linking + organizing(
                     ask = ask,
                     ends = listOf(propose)
                 ),
                 // Shown at once, after looking up the note or the heading the request means.
                 WorkKind.APP to looking + shows + listOf(HandTool.help, ask, answer),
                 WorkKind.WEB to listOf(
+                    WebSearchTool(provider = webSearch),
                     FetchTool(pageReader = pageReader),
                     search,
                     read,
                     changes.clip,
+                    // "Look up … and add it to my trip note": what the pages say, appended with their links.
+                    changes.append,
                     ask,
                     propose,
                     answer
@@ -99,6 +115,15 @@ class LoopTools(
             )
         )
     }
+
+    // Figures worked out by the app: from the lines the model names, checked against the notes (`tally`), an
+    // expression, days between dates, and a figure a note writes many times (`docs/agent-figures.md`).
+    private fun figures(): List<ChatTool> = listOf(
+        TallyTool(noteTextCache = noteTextCache),
+        CalculateTool(),
+        DaysTool(),
+        CountTool(noteTextCache = noteTextCache)
+    )
 
     // Organizing, with a note to write as it is often asked with the tasks or tags it is about.
     private fun organizing(
@@ -113,12 +138,15 @@ class LoopTools(
         ChangeTools.setProperty,
         ChangeTools.addTask,
         ChangeTools.completeTask,
+        ChangeLineTool(noteTextCache = noteTextCache),
         ChangeTools.link,
         ChangeTools.move,
         ChangeTools.rename,
         ChangeTools.createFolder,
         ChangeTools.trash,
         ChangeTools.bookmark,
+        MemoryTool.remember,
+        MemoryTool.forget,
         ask
     ) + ends
 }

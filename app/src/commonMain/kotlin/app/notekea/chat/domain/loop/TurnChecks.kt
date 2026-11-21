@@ -4,7 +4,6 @@ import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.change.ProposeTool
-import app.notekea.chat.domain.tool.change.SingularTask
 import app.notekea.chat.domain.tool.work.AskUserTool
 
 /**
@@ -17,6 +16,13 @@ internal object TurnChecks {
         state: TurnState,
         tool: ChatTool?
     ): String? {
+        val only = oneOptionOf(
+            call = call,
+            state = state
+        )
+
+        if (only != null) return only
+
         val unread = UnreadChoice.of(
             call = call,
             state = state
@@ -38,10 +44,30 @@ internal object TurnChecks {
 
             isNeedlessQuestion(call = call, state = state) -> NOT_ASKED
 
-            else -> UnsettledEnd.heldOf(
+            else -> WebChecks.heldOf(
                 call = call,
                 state = state,
                 tool = tool
+            ) ?: SameNoteQuestion.heldOf(
+                call = call,
+                state = state
+            ) ?: FrameChoice.heldOf(
+                call = call,
+                state = state,
+                tool = tool
+            ) ?: SeveralUnread.heldOf(
+                call = call,
+                state = state
+            ) ?: UnsettledEnd.heldOf(
+                call = call,
+                state = state,
+                tool = tool
+            ) ?: TopicUnread.heldOf(
+                call = call,
+                state = state
+            ) ?: AnswerFigures.heldOf(
+                call = call,
+                state = state
             ) ?: ProposalReview.heldOf(
                 call = call,
                 state = state
@@ -69,17 +95,64 @@ internal object TurnChecks {
         return isEmpty && state.told.add(NOTHING_ADDED)
     }
 
-    // A question asked when the task points at nothing it leaves open (my two budgets, the Venezuelan recipes):
-    // held back once, the model told to do it; asked again, it is asked.
+    // A question asked when the frame says the task leaves nothing open (my two budgets, the Venezuelan recipes,
+    // "Ana Torres"): held back once, the model told to do it; asked again, it is asked, as it may lack something no
+    // tool finds. With no frame, nothing says it is needless.
     private fun isNeedlessQuestion(
         call: ToolCall,
         state: TurnState
     ): Boolean {
-        val isOpen = SingularTask.pointsAtOne(task = state.task) || state.ambiguous.isNotEmpty()
-        val isNeedless = call.name == AskUserTool.NAME && !isOpen
+        val isOpen = state.frame?.isOpen ?: true
+
+        val isNeedless =
+            call.name == AskUserTool.NAME &&
+                !isOpen &&
+                !isAskedFor(state = state)
 
         return isNeedless && state.told.add(NOT_ASKED)
     }
+
+    // A question with one note as its only answer: the 4B found the one recipe of two servings, then asked "which
+    // recipe? Options: Pancakes" (the loop's fifth run). Held back twice, as it asks again right away.
+    private fun oneOptionOf(
+        call: ToolCall,
+        state: TurnState
+    ): String? {
+        val isAsking = call.name == AskUserTool.NAME && !isAskedFor(state = state)
+        if (!isAsking) return null
+
+        val only = AskUserTool
+            .optionsOf(call = call)
+            .singleOrNull()
+            ?.let { state.turn.pathOf(name = it) } ?: return null
+
+        val isHeld = state.told.add(ONE_OPTION) || state.told.add(ONE_OPTION_AGAIN)
+
+        val held = "(Not asked: one note is nothing to choose between. Do the task with $only now.)"
+
+        return held.takeIf { isHeld }
+    }
+
+    // A question the loop itself told the model to ask: where the person lives, which of the notes the task left
+    // open, or a change tool's "ask_user when the task does not say". Holding it back left the model nothing to do
+    // (the bug hunt of 2026-11-17, L12).
+    private fun isAskedFor(state: TurnState): Boolean {
+        val isTold = state.told.any {
+            it in ASKED_FOR
+        }
+
+        val isLastAsking = state
+            .found
+            .lastOrNull()
+            ?.contains(other = AskUserTool.NAME) == true
+
+        return isTold || isLastAsking
+    }
+
+    private val ASKED_FOR = setOf(WebChecks.COUNTRY_UNKNOWN, UnsettledEnd.MUST_ASK)
+
+    private const val ONE_OPTION = "one option"
+    private const val ONE_OPTION_AGAIN = "one option again"
 
     private const val NOT_ASKED =
         "(Not asked: the task names what it means, all of them, so there is nothing to choose. Do it with " +

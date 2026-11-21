@@ -10,6 +10,7 @@ import app.notekea.resources.settings_section_appearance
 import app.notekea.resources.settings_section_editor
 import app.notekea.resources.settings_section_files
 import app.notekea.resources.settings_section_general
+import app.notekea.resources.settings_section_memory
 import app.notekea.resources.settings_section_shortcuts
 import app.notekea.resources.settings_section_sync
 import org.jetbrains.compose.resources.StringResource
@@ -44,6 +45,11 @@ enum class SettingsSection(
         label = Res.string.settings_section_ai,
         icon = NotekeaIcons.ChatAnswer,
         topic = SettingsTopic.AI_MODEL
+    ),
+    CHAT_MEMORY(
+        label = Res.string.settings_section_memory,
+        icon = NotekeaIcons.Bookmark,
+        topic = SettingsTopic.CHAT_MEMORY
     ),
     SYNC(
         label = Res.string.settings_section_sync,

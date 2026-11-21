@@ -3,14 +3,20 @@ package app.notekea.core.notes.domain.links
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link with a folder must match a
- * path or the end of one ([wikiPath]); a bare name must match one note's name, the linking note's folder winning, and
- * any other ambiguity resolves to nothing. A Markdown link is read from the linking note's folder, then the vault root.
+ * Resolves links the way Obsidian does, among [notePaths] and [attachmentPaths], ignoring letter case. A wiki link with
+ * a folder must match a path or the end of one ([wikiPath]); a bare name must match one note's name, the linking note's
+ * folder winning. A Markdown link is read from the linking note's folder (not when it starts with `/`), then the root.
  */
-class LinkResolver(notePaths: Collection<RelativePath>) {
+class LinkResolver(
+    notePaths: Collection<RelativePath>,
+    attachmentPaths: Collection<RelativePath> = emptyList()
+) {
     private val notes = notePaths.toSet()
-    private val byLowerPath = notePaths.associateBy { it.value.lowercase() }
+    private val attachments = attachmentPaths.toSet()
+    private val files = notes + attachments
+    private val byLowerPath = files.associateBy { it.value.lowercase() }
     private val byLowerName = notePaths.groupBy { it.nameWithoutExtension.lowercase() }
+    private val attachmentsByLowerName = attachmentPaths.groupBy { it.name.lowercase() }
 
     fun resolve(
         link: NoteLink,
@@ -105,17 +111,28 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
             withoutMarkdownExtension(target = path.value)
         }
 
-    /** Whether a bare `[[name]]` would point to exactly one note. */
-    fun isUniqueName(name: String): Boolean = byLowerName[name.lowercase()].orEmpty().size == 1
+    /** Whether a bare `[[name]]` would point to exactly one note or attachment. */
+    fun isUniqueName(name: String): Boolean {
+        val key = name.lowercase()
+
+        return byLowerName[key].orEmpty().size + attachmentsByLowerName[key].orEmpty().size == 1
+    }
 
     private fun resolveMarkdown(
         target: String,
         source: RelativePath
     ): ResolvedLink? {
-        val fromSource = noteAt(
-            folder = source.parent ?: RelativePath.ROOT,
-            target = target
-        )
+        // A leading "/" starts at the vault's root, never at the linking note's folder.
+        val isFromRoot = target.startsWith(prefix = RelativePath.SEPARATOR)
+
+        val fromSource = if (isFromRoot) {
+            null
+        } else {
+            fileAt(
+                folder = source.parent ?: RelativePath.ROOT,
+                target = target
+            )
+        }
 
         if (fromSource != null) {
             return ResolvedLink(
@@ -124,7 +141,7 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
             )
         }
 
-        val fromRoot = noteAt(
+        val fromRoot = fileAt(
             folder = RelativePath.ROOT,
             target = target.removePrefix(prefix = RelativePath.SEPARATOR)
         )
@@ -142,8 +159,11 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         }
     }
 
-    /** The note [target] names read from [folder]: exactly as written, else ignoring letter case. */
-    private fun noteAt(
+    /**
+     * The note or attachment [target] names read from [folder]: exactly as written, else ignoring letter case, and
+     * for a target with no extension, the note it names (`[text](Note)` opens `Note.md`, as Obsidian does).
+     */
+    private fun fileAt(
         folder: RelativePath,
         target: String
     ): RelativePath? {
@@ -152,9 +172,15 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
             target = target
         ) ?: return null
 
-        return path.takeIf {
-            it in notes
-        } ?: byLowerPath[path.value.lowercase()]
+        val note = RelativePath(value = path.value + RelativePath.MARKDOWN_EXTENSION)
+        val hasExtension = EXTENSION_MARK in path.name
+
+        return listOfNotNull(path, note.takeUnless { hasExtension })
+            .firstNotNullOfOrNull { candidate ->
+                candidate.takeIf {
+                    it in files
+                } ?: byLowerPath[candidate.value.lowercase()]
+            }
     }
 
     private fun resolveWiki(
@@ -166,6 +192,16 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
             source = source
         )?.value?.lowercase() ?: return null
 
+        return resolveWikiNote(
+            name = name,
+            source = source
+        ) ?: resolveWikiAttachment(name = name)
+    }
+
+    private fun resolveWikiNote(
+        name: String,
+        source: RelativePath
+    ): RelativePath? {
         if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
 
@@ -186,7 +222,27 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         }
     }
 
+    /** The attachment a wiki link or embed names, its extension written: `![[pic.png]]`, `![[assets/pic.png]]`. */
+    private fun resolveWikiAttachment(name: String): RelativePath? {
+        if (RelativePath.SEPARATOR !in name) return attachmentsByLowerName[name]?.singleOrNull()
+
+        val suffix = RelativePath.SEPARATOR + name
+
+        val exact = attachments.firstOrNull {
+            it.value.lowercase() == name
+        }
+
+        return exact ?: attachments.singleOrNull {
+            it
+                .value
+                .lowercase()
+                .endsWith(suffix = suffix)
+        }
+    }
+
     companion object {
+        private const val EXTENSION_MARK = '.'
+
         fun withoutMarkdownExtension(target: String): String {
             val isMarkdown = target.endsWith(
                 suffix = RelativePath.MARKDOWN_EXTENSION,

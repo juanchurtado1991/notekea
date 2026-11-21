@@ -3,6 +3,7 @@ package app.notekea.chat.domain.agent
 import app.notekea.chat.domain.loop.WorkKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.core.web.domain.FoundSource
 
 /** Where agent mode stands while it works, as the chat shows it. */
 sealed interface AgentStep {
@@ -25,7 +26,17 @@ sealed interface AgentStep {
     /** A question to the person in place of a guess, with the [options] to choose from as buttons. */
     data class Asked(
         val question: String,
-        val options: List<String>
+        val options: List<String>,
+        val remembering: Remembering? = null
+    ) : AgentStep
+
+    /**
+     * A web search found sources the person has not trusted yet (`docs/agent-web.md`): the turn stops so they approve
+     * the ones to read, the trusted ones ticked already.
+     */
+    data class SourcesFound(
+        val sources: List<FoundSource>,
+        val omitted: Int
     ) : AgentStep
 
     /** Steps the app shows now (a note opened, a panel, the theme): nothing in the notes changes. */

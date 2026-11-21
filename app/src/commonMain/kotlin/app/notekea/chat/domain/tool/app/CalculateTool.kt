@@ -32,6 +32,14 @@ class CalculateTool : ChatTool {
     ): ToolResult {
         val expression = call.text(name = EXPRESSION)
 
+        // A date is no number: "2027-03-01 - 2026-11-11" came to 95 as three subtractions (the loop's dev run).
+        if (DATE.containsMatchIn(input = expression)) {
+            return ToolResult(
+                forModel = "calculate \"$expression\": a date is no number. Count the days between two dates " +
+                    "with ${DaysTool.NAME}, then calculate with the days it gives."
+            )
+        }
+
         val value = Arithmetic.valueOf(expression = expression)
             ?: return ToolResult(
                 forModel = "calculate \"$expression\": not arithmetic I can do. Write only numbers and " +
@@ -44,5 +52,7 @@ class CalculateTool : ChatTool {
     companion object {
         const val NAME = "calculate"
         const val EXPRESSION = "expression"
+
+        private val DATE = Regex(pattern = "\\d{4}-\\d{1,2}-\\d{1,2}")
     }
 }

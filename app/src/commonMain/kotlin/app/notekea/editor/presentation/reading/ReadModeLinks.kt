@@ -75,7 +75,8 @@ class ReadModeLinks {
                         prefix = EMBED_MARK
                     ) && isFile(inner = inner) -> fileEmbed(inner = inner)
 
-                    else -> markdownLink(inner = match.groupValues[1]) ?: match.value
+                    // Unescaped, or a table's `[[A\|b]]` would lead to a note named `A\`.
+                    else -> markdownLink(inner = inner) ?: match.value
                 }
             }
     }

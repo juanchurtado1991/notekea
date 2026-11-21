@@ -29,6 +29,15 @@ object AnswerPrompt {
         option = RegexOption.IGNORE_CASE
     )
 
+    // "The notes do not contain the cost of a single ride…": the notes are its subject, saying what they lack, with
+    // none of the words above after it (the web's evaluation, 2026-11-16, where the web was then never offered).
+    private val NOTES_LACK = Regex(
+        pattern = "^\\W*(the |your )?(excerpts?|passages?|notes?) (do|does) not (contain|hold|include|have|say|" +
+            "mention|give|state|tell|list)\\b|^\\W*(las |tus )?(notas|extractos?) no (contienen|incluyen|dicen|" +
+            "mencionan|tienen|indican|dan)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
+
     private val CITED = Regex(pattern = "\\[\\d+]")
 
     private const val SHORT_REPLY = 320
@@ -46,7 +55,8 @@ object AnswerPrompt {
         val isUncited = !CITED.containsMatchIn(input = text)
 
         return SAYS_NOT_FOUND.containsMatchIn(input = text) ||
-            (isUncited && SAYS_NONE.containsMatchIn(input = text))
+            (isUncited && SAYS_NONE.containsMatchIn(input = text)) ||
+            (isUncited && NOTES_LACK.containsMatchIn(input = text))
     }
 
     private const val INSTRUCTIONS =

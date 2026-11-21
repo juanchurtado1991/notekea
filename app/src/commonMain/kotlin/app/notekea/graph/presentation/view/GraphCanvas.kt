@@ -301,12 +301,13 @@ private fun fitOf(
     )
 }
 
-private fun noteAt(
+/** The note under [point]: the dot drawn on top of the others there, as [drawOrderOf] paints them. */
+internal fun noteAt(
     point: Offset,
     dots: List<GraphDot>,
     places: Map<RelativePath, Offset>,
     scale: Float
-): RelativePath? = dots.lastOrNull { dot ->
+): RelativePath? = drawOrderOf(dots = dots).lastOrNull { dot ->
     val place = places[dot.path]
     place != null && (place - point).getDistance() <= dot.radius * scale + HIT_MARGIN
 }?.path
@@ -372,15 +373,16 @@ private fun Map(
         )
 
         drawDots(
-            dots = state.dots.sortedBy {
-                -it.depth
-            },
+            dots = drawOrderOf(dots = state.dots),
             paint = paint,
             measurer = measurer,
             fade = 1f
         )
     }
 }
+
+/** The dots from the farthest to the center, the order they are drawn in, so the center ends on top. */
+private fun drawOrderOf(dots: List<GraphDot>): List<GraphDot> = dots.sortedByDescending { it.depth }
 
 /** The color of [folder] in the graph and its legend. */
 internal fun folderColor(

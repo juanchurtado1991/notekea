@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -96,6 +97,34 @@ class EditorUnsavedTest : EditorViewModelTestBase() {
                     .buffer
                     .text
                     .toString()
+            )
+        }
+
+    @Test
+    fun `text kept in memory asks before replacing a file changed outside meanwhile`() =
+        runEditorTest {
+            open(path = AREPAS)
+            store.refused += AREPAS
+            operations.failure = NotesError.OperationFailed(path = AREPAS.value)
+            type(text = "Typed here")
+            open(path = WELCOME)
+            store.refused -= AREPAS
+            store.texts[AREPAS] = "From another app\n"
+
+            open(path = AREPAS)
+            advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
+            runCurrent()
+
+            assertEquals(
+                expected = Triple(true, "Typed here", "From another app\n"),
+                actual = Triple(
+                    viewModel.state.value.hasConflict,
+                    viewModel
+                        .buffer
+                        .text
+                        .toString(),
+                    store.texts[AREPAS]
+                )
             )
         }
 

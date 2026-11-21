@@ -34,4 +34,19 @@ class TextTagFinderTest {
             actual = TextTagFinder().tags(lines = lines)
         )
     }
+
+    // Bug hunt S4: parentheses in a link's target, or an address's anchor, ended the target and made a tag.
+    @Test
+    fun `an anchor after parentheses in a link, in an address or after a quote is no tag`() {
+        val lines = sequenceOf(
+            "Read [Dune](https://en.wikipedia.org/wiki/Dune_(novel)#Plot) #book",
+            "Or https://a.b/c_(d)#top and <a href=\"x\"#anchor> nor key=#value",
+            "A (note)#plain stays text"
+        )
+
+        assertEquals(
+            expected = listOf("book"),
+            actual = TextTagFinder().tags(lines = lines)
+        )
+    }
 }

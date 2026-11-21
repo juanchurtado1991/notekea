@@ -24,6 +24,27 @@ internal object DatePhrases {
         listOf("sunday", "domingo")
     )
 
+    private val MONTHS = listOf(
+        listOf("january", "enero"),
+        listOf("february", "febrero"),
+        listOf("march", "marzo"),
+        listOf("april", "abril"),
+        listOf("may", "mayo"),
+        listOf("june", "junio"),
+        listOf("july", "julio"),
+        listOf("august", "agosto"),
+        listOf("september", "septiembre", "setiembre"),
+        listOf("october", "octubre"),
+        listOf("november", "noviembre"),
+        listOf("december", "diciembre")
+    )
+
+    // "15 de noviembre", "15 November 2027", "November 15th".
+    private val DAY_MONTH =
+        Regex(pattern = "\\b(\\d{1,2}) (?:de )?([a-z]+)(?:,? (?:de |del )?(\\d{4}))?")
+    private val MONTH_DAY =
+        Regex(pattern = "\\b([a-z]+) (\\d{1,2})(?:st|nd|rd|th)?\\b(?:,? (\\d{4}))?")
+
     private val NAMES =
         listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
@@ -59,12 +80,22 @@ internal object DatePhrases {
             }
         }
 
-        return written(said = said)
-            ?: moved(
+        return offset(said = said)
+            ?: written(said = said)
+            ?: named(
                 said = said,
                 today = today
             )
+            ?: inWeek(
+                said = said,
+                weekday = weekday + 1,
+                today = today
+            )
             ?: ended(
+                said = said,
+                today = today
+            )
+            ?: moved(
                 said = said,
                 today = today
             )
@@ -100,12 +131,58 @@ internal object DatePhrases {
         return "${date.year}-$month-$day (${NAMES[date.dayOfWeek - 1]})"
     }
 
+    // A span before or after a written day: "una semana antes de 2026-04-03" was answered 2026-04-03 itself (the
+    // loop's eighth run), as a written day was taken alone.
+    private fun offset(said: String): CalendarDate? {
+        val from = written(said = said) ?: return null
+        val span = OFFSET.find(input = said)?.groupValues ?: return null
+        val count = span[1].toLongOrNull() ?: COUNTS[span[1]] ?: 1L
+        val isBefore = span[3].startsWith(prefix = "before") || span[3].startsWith(prefix = "antes")
+
+        return shifted(
+            today = from,
+            count = if (isBefore) -count else count,
+            unit = span[2]
+        )
+    }
+
     private fun written(said: String): CalendarDate? = ISO.find(input = said)?.let { match ->
         CalendarDate(
             year = match.groupValues[1].toInt(),
             month = match.groupValues[2].toInt(),
             day = match.groupValues[3].toInt()
         ).takeIf { it.isValid }
+    }
+
+    // A day and a month's name, in this year when none is written: the date tool could not say "el 15 de noviembre"
+    // (the loop's fifth run, both models).
+    private fun named(
+        said: String,
+        today: CalendarDate
+    ): CalendarDate? {
+        val dayFirst = DAY_MONTH
+            .findAll(input = said)
+            .map { it.groupValues }
+            .map { Triple(it[1], it[2], it[3]) }
+
+        val monthFirst = MONTH_DAY
+            .findAll(input = said)
+            .map { it.groupValues }
+            .map { Triple(it[2], it[1], it[3]) }
+
+        return (dayFirst + monthFirst).firstNotNullOfOrNull { (day, month, year) ->
+            val index = MONTHS.indexOfFirst {
+                month in it
+            }
+
+            if (index < 0) return@firstNotNullOfOrNull null
+
+            CalendarDate(
+                year = year.toIntOrNull() ?: today.year,
+                month = index + 1,
+                day = day.toInt()
+            ).takeIf { it.isValid }
+        }
     }
 
     // "in 3 weeks", "hace 2 meses", "next month".
@@ -183,6 +260,39 @@ internal object DatePhrases {
         else -> null
     }
 
+    // A weekday of next week, or the last one gone: "friday next week" was the day a week on, and "last friday"
+    // the coming one (T11). [weekday] is 1 for Monday, 0 for none.
+    private fun inWeek(
+        said: String,
+        weekday: Int,
+        today: CalendarDate
+    ): CalendarDate? {
+        if (weekday < 1) return null
+
+        val isNextWeek = NEXT_WEEK.any {
+            it in said
+        }
+
+        val isLast = LAST.containsMatchIn(input = said)
+
+        return when {
+            isNextWeek -> {
+                val monday = today.plusDays(days = 1L - today.dayOfWeek + WEEK)
+
+                monday.plusDays(days = weekday - 1L)
+            }
+
+            isLast -> {
+                val back = (today.dayOfWeek - weekday).mod(other = CalendarDate.DAYS_IN_WEEK)
+
+                today.plusDays(days = -(if (back == 0) WEEK else back.toLong()))
+            }
+
+            else -> null
+        }
+    }
+
+    // "end of next month" is the last day of next month, not this day of it (T11).
     private fun ended(
         said: String,
         today: CalendarDate
@@ -194,19 +304,31 @@ internal object DatePhrases {
 
         val isYear = "year" in said || " ano" in said
         val isMonth = "month" in said || "mes" in said
+        val isNext = NEXT.containsMatchIn(input = said)
+
+        val ahead = when {
+            !isNext -> 0L
+            isYear -> CalendarDate.MONTHS.toLong()
+            else -> 1L
+        }
+
+        val base = plusMonths(
+            date = today,
+            months = ahead
+        )
 
         return when {
             !isEnd -> null
 
-            isYear -> today.copy(
+            isYear -> base.copy(
                 month = CalendarDate.MONTHS,
                 day = LAST_DAY_OF_YEAR
             )
 
-            isMonth -> today.copy(
+            isMonth -> base.copy(
                 day = CalendarDate.lengthOfMonth(
-                    year = today.year,
-                    month = today.month
+                    year = base.year,
+                    month = base.month
                 )
             )
 
@@ -248,4 +370,20 @@ internal object DatePhrases {
     }
 
     private const val LAST_DAY_OF_YEAR = 31
+
+    private val NEXT_WEEK = listOf("next week", "proxima semana", "semana que viene")
+    private val LAST = Regex(pattern = "\\b(last|past|previous|pasado|anterior)\\b")
+    private val NEXT = Regex(pattern = "\\b(next|proximo|que viene)\\b")
+
+    private val OFFSET = Regex(
+        pattern = "(\\d+|an?|one|two|three|un|una|dos|tres)\\s+(days?|weeks?|months?|dias?|semanas?|mes|meses)" +
+            "\\s+(before|after|antes|despues)"
+    )
+
+    private val COUNTS = mapOf(
+        "two" to 2L,
+        "dos" to 2L,
+        "three" to 3L,
+        "tres" to 3L
+    )
 }

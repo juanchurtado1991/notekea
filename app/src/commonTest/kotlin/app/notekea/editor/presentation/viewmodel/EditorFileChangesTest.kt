@@ -332,7 +332,8 @@ class EditorFileChangesTest : EditorViewModelTestBase() {
                             to = renamed,
                             links = LinkUpdateResult(
                                 updated = listOf(WELCOME),
-                                skipped = emptyList()
+                                skipped = emptyList(),
+                                originals = mapOf(WELCOME to "Cook [[Arepas]].")
                             )
                         )
                     )

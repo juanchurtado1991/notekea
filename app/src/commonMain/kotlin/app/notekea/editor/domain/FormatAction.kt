@@ -1,5 +1,7 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * What a formatting toolbar button asks for. Each carries the placeholder text inserted when
  * nothing is selected, already in the person's language, so [MarkdownFormatter] stays free of words.
@@ -51,8 +53,15 @@ sealed interface FormatAction {
      */
     data class Embed(val markdown: String) : FormatAction
 
-    /** A wiki link to [target], the note's name (or path when its name is not unique). */
-    data class NoteLink(val target: String) : FormatAction
+    /**
+     * A link to the note at [path] from the note at [source]: `[[target]]`, [target] being its name (or path when the
+     * name is not unique), or a Markdown link when that name holds what ends a wiki link early (`C# notes`).
+     */
+    data class NoteLink(
+        val target: String,
+        val path: RelativePath,
+        val source: RelativePath?
+    ) : FormatAction
 
     data class WebLink(val placeholder: String) : FormatAction
 

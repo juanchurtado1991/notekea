@@ -22,6 +22,9 @@ sealed interface ActionProblem {
     /** No open task of the note reads like [text]. */
     data class UnknownTask(val text: String) : ActionProblem
 
+    /** No line of the note, or several alike, reads like [text] (4.2). */
+    data class UnknownLine(val text: String) : ActionProblem
+
     /** The request in plain words could not be turned into a query of the vault's properties (3.8). */
     data class UnknownQuery(val property: String?) : ActionProblem
 

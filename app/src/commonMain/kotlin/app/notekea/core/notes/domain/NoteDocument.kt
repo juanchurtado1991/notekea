@@ -1,6 +1,7 @@
 package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
 
 /**
  * A note split for editing: the [header] (byte order mark and frontmatter, exactly as stored), which the editor never
@@ -46,12 +47,12 @@ data class NoteDocument(
         private const val BYTE_ORDER_MARK = "\uFEFF"
         private const val CR = '\r'
         private const val CRLF = "\r\n"
-        private const val DELIMITER = "---"
         private const val LF = "\n"
 
         /**
-         * Splits a note's [text]. Frontmatter is recognized as Obsidian does: the first line is exactly `---` and a
-         * later line is exactly `---`; anything else (no closing line, `----`, a `---` further down) is body.
+         * Splits a note's [text]. Frontmatter is recognized as Obsidian does: the first line is `---` and a later line
+         * is `---` (trailing spaces allowed); anything else (no closing line, `...`, `----`, a `---` further down) is
+         * body.
          */
         fun fromText(text: String): NoteDocument {
             val start = if (text.startsWith(prefix = BYTE_ORDER_MARK)) BYTE_ORDER_MARK.length else 0
@@ -124,9 +125,9 @@ data class NoteDocument(
                 val line = text.substring(
                     startIndex = lineStart,
                     endIndex = lineEnd
-                ).trimEnd(CR)
+                )
 
-                val isDelimiter = line == DELIMITER
+                val isDelimiter = FrontmatterBlocks.isDelimiter(line = line)
                 if (lineIndex == 0 && !isDelimiter) return null
 
                 if (lineIndex > 0 && isDelimiter) {

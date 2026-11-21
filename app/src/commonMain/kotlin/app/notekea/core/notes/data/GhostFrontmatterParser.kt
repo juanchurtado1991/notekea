@@ -58,19 +58,38 @@ class GhostFrontmatterParser {
         keys: List<String>
     ): String? {
         val start = lines.indexOfFirst { line ->
-            keys.any { line.startsWith(prefix = it + KEY_SEPARATOR) }
+            keys.any {
+                isKeyLine(
+                    line = line,
+                    key = it
+                )
+            }
         }
 
         if (start < 0) return null
 
-        val key = keys.first { lines[start].startsWith(prefix = it + KEY_SEPARATOR) }
+        val key = keys.first {
+            isKeyLine(
+                line = lines[start],
+                key = it
+            )
+        }
 
         val continuation = lines.drop(n = start + 1).takeWhile { isContinuation(line = it) }
 
-        val firstLine = VALUE_KEY + lines[start].removePrefix(prefix = key)
+        val firstLine = VALUE_KEY + lines[start].substring(startIndex = key.length)
 
         return (listOf(firstLine) + continuation).joinToString(separator = LINE_SEPARATOR)
     }
+
+    // Keys are read whatever their case, as Obsidian reads them: `Tags:` and `Title:` were ignored.
+    private fun isKeyLine(
+        line: String,
+        key: String
+    ): Boolean = line.startsWith(
+        prefix = key + KEY_SEPARATOR,
+        ignoreCase = true
+    )
 
     private fun isContinuation(line: String): Boolean =
         line.isBlank() ||

@@ -86,4 +86,35 @@ class PassageSnippetTest {
             actual = snippet.keywords.size
         )
     }
+
+    // Bug hunt S3: a dot inside a number or a version ended the sentence, so a snippet started at "500 euros".
+    @Test
+    fun `a sentence ends at its mark before a space or the end, not at a dot inside a number`() {
+        val snippet = PassageSnippet.of(
+            passage = "Intro here. It costs 3.500 euros for v2.1 now. Then more.",
+            words = setOf("euros")
+        )
+
+        assertEquals(
+            expected = "It costs 3.500 euros for v2.1 now.",
+            actual = snippet
+                .text
+                .substring(range = snippet.highlight)
+                .trim()
+        )
+    }
+
+    // Bug hunt S8: a comment line in a code block was left out as a heading.
+    @Test
+    fun `a hash line inside a code block is no heading and stays in the text`() {
+        val snippet = PassageSnippet.of(
+            passage = "## Setup\n```bash\n# install first\n```\nThen run it.",
+            words = setOf("install")
+        )
+
+        assertEquals(
+            expected = "```bash # install first ``` Then run it.",
+            actual = snippet.text
+        )
+    }
 }

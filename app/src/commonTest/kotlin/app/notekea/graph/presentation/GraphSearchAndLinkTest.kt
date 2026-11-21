@@ -20,14 +20,23 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         }
 
         send(GraphIntent.OnOpen(note = AREPAS))
+        val text = store.texts.getValue(key = AREPAS)
 
         send(GraphIntent.OnLink(path = TASKS))
         send(GraphIntent.OnLinkUndo)
 
-        val rewritten = GraphEffect.NoteRewritten(path = AREPAS)
-
+        // Each starts from the text the one before left, so an editor with unsaved edits can make it too.
         assertEquals(
-            expected = listOf<GraphEffect>(rewritten, rewritten),
+            expected = listOf<GraphEffect>(
+                GraphEffect.NoteRewritten(
+                    path = AREPAS,
+                    original = text
+                ),
+                GraphEffect.NoteRewritten(
+                    path = AREPAS,
+                    original = "$text\n\n[[Tasks]]\n"
+                )
+            ),
             actual = effects
         )
     }

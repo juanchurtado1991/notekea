@@ -11,6 +11,7 @@ internal object YamlValues {
     private const val APOSTROPHE = '\''
     private const val ESCAPE = '\\'
     private const val ITEM_SEPARATOR = ','
+    private const val ITEM_STARTS = "[,"
     private const val KEY_END = ':'
     private const val QUOTE = '"'
     private const val QUOTES = "'\""
@@ -33,14 +34,24 @@ internal object YamlValues {
      */
     fun withoutComment(text: String): String {
         var quote: Char? = null
+        var index = 0
 
-        text.forEachIndexed { index, char ->
+        while (index < text.length) {
+            val char = text[index]
             val isEscaped = index > 0 && text[index - 1] == ESCAPE
 
+            // `''` inside single quotes is one apostrophe, not the end of the quote.
+            val isDoubledApostrophe =
+                quote == APOSTROPHE &&
+                    char == APOSTROPHE &&
+                    text.getOrNull(index = index + 1) == APOSTROPHE
+
             when {
+                isDoubledApostrophe -> index++
+
                 quote != null -> if (char == quote && !isEscaped) quote = null
 
-                char in QUOTES -> quote = char
+                opensQuote(text = text, index = index) -> quote = char
 
                 char == COMMENT_MARK.first() &&
                     index > 0 &&
@@ -50,9 +61,31 @@ internal object YamlValues {
                         endIndex = index
                     ).trim()
             }
+
+            index++
         }
 
         return text
+    }
+
+    /**
+     * Whether [index] of [text] is a quote that opens a quoted value: at the value's start, or an inline list item's.
+     * The apostrophe in "Don't" is text, and opening a quote there kept the comment after it (bug hunt S7).
+     */
+    private fun opensQuote(
+        text: String,
+        index: Int
+    ): Boolean {
+        if (text[index] !in QUOTES) return false
+
+        val before = text
+            .substring(
+                startIndex = 0,
+                endIndex = index
+            )
+            .trimEnd()
+
+        return before.isEmpty() || before.last() in ITEM_STARTS
     }
 
     fun isQuoted(text: String): Boolean =
@@ -180,10 +213,18 @@ internal object YamlValues {
         text != text.trim() ||
             text.lowercase() in TYPED_WORDS ||
             NUMBER.matches(input = text) ||
+            NUMBER_LIKE.matches(input = text) ||
             DATE_LIKE.matches(input = text) ||
             text.first() in SPECIAL_STARTS ||
             SPECIAL_PARTS.any { it in text } ||
             text.last() == KEY_END ||
             YamlEscapes.needsEscapes(text = text)
         )
+
+    // What a YAML reader takes for a number though NUMBER does not: "+34600111222", "1e5", ".5", ".inf", "0x1F".
+    private val NUMBER_LIKE = Regex(
+        pattern = "[+-]?(\\d[\\d_]*(\\.\\d*)?([eE][+-]?\\d+)?|\\.\\d+([eE][+-]?\\d+)?|\\.(inf|nan)|" +
+            "0x[0-9a-f]+|0o[0-7]+)",
+        option = RegexOption.IGNORE_CASE
+    )
 }

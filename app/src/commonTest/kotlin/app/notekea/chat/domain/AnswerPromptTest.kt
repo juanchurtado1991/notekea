@@ -28,6 +28,20 @@ class AnswerPromptTest {
         )
     }
 
+    // The web's evaluation, 2026-11-16: the notes said to lack a thing, with no word of the list after it, were not
+    // read as not found, so the web was never offered; one that lacks it and still answers, citing, is an answer.
+    @Test
+    fun `a reply that says the notes lack what was asked is not found`() {
+        assertEquals(
+            expected = listOf(true, true, false),
+            actual = listOf(
+                AnswerPrompt.isNotFound(text = "The notes do not contain the cost of a metro ride in Lisbon."),
+                AnswerPrompt.isNotFound(text = "Las notas no mencionan el precio del metro de Lisboa."),
+                AnswerPrompt.isNotFound(text = "The notes do not give a fare, but the trip budget is 940 USD [1].")
+            )
+        )
+    }
+
     @Test
     fun `tables that do not answer the question give the not found reply, not the model's words`() =
         runTest {

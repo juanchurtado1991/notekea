@@ -104,9 +104,13 @@ internal fun connectionActions(
     fun insertLink(path: RelativePath) {
         val target = LinkResolver(notePaths = notes()).wikiTarget(path = path)
 
-        editors.active.onIntent(
-            intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target))
+        val link = FormatAction.NoteLink(
+            target = target,
+            path = path,
+            source = editors.active.state.value.notePath
         )
+
+        editors.active.onIntent(intent = EditorIntent.OnFormat(action = link))
     }
 
     return ConnectionActions(

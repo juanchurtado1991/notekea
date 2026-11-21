@@ -2,8 +2,10 @@ package app.notekea.query.domain
 
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
+// Property names ignore case too: `Status` and `status` are one property, as the catalog shows them.
 /**
  * Runs a query over the vault's [NoteEntry]s, exactly, from what the note cache holds: no model is
  * involved. A note without a property passes only "is empty". Rows are in the order of the sort, notes without its
@@ -32,15 +34,13 @@ class RunQueryUseCase {
             notes = found,
             sort = query.sort
         ).map { note ->
-            val properties = note
-                .metadata
-                .properties
-                .associateBy { it.key }
-
             QueryRow(
                 path = note.file.path,
                 cells = columns.map {
-                    properties[it]
+                    propertyOf(
+                        note = note,
+                        name = it
+                    )
                 }
             )
         }
@@ -50,14 +50,14 @@ class RunQueryUseCase {
                 note
                     .metadata
                     .properties
-                    .map { it.key }
+                    .map { it.key.lowercase() }
             }
 
         return QueryResult(
             rows,
             columns,
             unknown = query.properties.filter {
-                it !in known
+                it.lowercase() !in known
             },
             total = notes.size
         )
@@ -67,13 +67,10 @@ class RunQueryUseCase {
         note: NoteEntry,
         filter: QueryFilter
     ): Boolean {
-        val value = note
-            .metadata
-            .properties
-            .firstOrNull {
-                it.key == filter.property
-            }
-            ?.value
+        val value = propertyOf(
+            note = note,
+            name = filter.property
+        )?.value
 
         return when (filter.condition) {
             QueryCondition.IN_FOLDER -> isInFolder(
@@ -85,7 +82,12 @@ class RunQueryUseCase {
 
             QueryCondition.IS_EMPTY -> values.isEmpty(value = value)
 
-            QueryCondition.IS -> value != null && isEqual(value = value, other = filter.value)
+            // "books with rating" reaches here as "rating is" and no value: the property is there, whatever it holds.
+            QueryCondition.IS -> if (filter.value.isBlank()) {
+                !values.isEmpty(value = value)
+            } else {
+                value != null && isEqual(value = value, other = filter.value)
+            }
 
             QueryCondition.CONTAINS ->
                 value != null &&
@@ -101,6 +103,21 @@ class RunQueryUseCase {
         }
     }
 
+    /** The note's property named [name], whatever its case: a person writes `Status` for `status`. */
+    private fun propertyOf(
+        note: NoteEntry,
+        name: String
+    ): NoteProperty? = note
+        .metadata
+        .properties
+        .firstOrNull {
+            it.key.equals(
+                other = name,
+                ignoreCase = true
+            )
+        }
+
+    // A hand-written "books" means the folder Books, but only at a folder's end: "Book" is not "Books/".
     private fun isInFolder(
         note: NoteEntry,
         folder: String
@@ -108,7 +125,10 @@ class RunQueryUseCase {
         .file
         .path
         .value
-        .startsWith(prefix = folder.trim().trim(FOLDER_MARK) + FOLDER_MARK)
+        .startsWith(
+            prefix = folder.trim().trim(FOLDER_MARK) + FOLDER_MARK,
+            ignoreCase = true
+        )
 
     private fun isEqual(
         value: PropertyValue,
@@ -150,13 +170,10 @@ class RunQueryUseCase {
         if (sort == null) return notes.sortedWith(comparator = byName)
 
         val keyed = notes.map { note ->
-            note to note
-                .metadata
-                .properties
-                .firstOrNull {
-                    it.key == sort.property
-                }
-                ?.value
+            note to propertyOf(
+                note = note,
+                name = sort.property
+            )?.value
         }
 
         val (shown, missing) = keyed.partition {
@@ -193,7 +210,10 @@ class RunQueryUseCase {
 
     private fun rankOf(value: PropertyValue): Int = when {
         value is PropertyValue.Number && value.text.toDoubleOrNull() != null -> 0
-        value is PropertyValue.Date -> 1
+
+        // A date with a time is text, yet it sorts among the dates by its day.
+        values.isDate(value = value) -> 1
+
         else -> 2
     }
 

@@ -31,7 +31,11 @@ class UpdateLinksAfterRenameUseCaseTest {
         assertEquals(
             expected = LinkUpdateResult(
                 updated = listOf(RelativePath(value = WELCOME), RelativePath(value = JOURNAL)),
-                skipped = emptyList()
+                skipped = emptyList(),
+                originals = mapOf(
+                    RelativePath(value = WELCOME) to "Cook [[Arepas]].",
+                    RelativePath(value = JOURNAL) to "Ate [[Arepas]] again."
+                )
             ),
             actual = result
         )
@@ -58,6 +62,7 @@ class UpdateLinksAfterRenameUseCaseTest {
     private suspend fun rename(): LinkUpdateResult? = updateLinksAfterRename(
         vaultPath = VAULT,
         notesBefore = setOf(AREPAS, WELCOME, JOURNAL).map { RelativePath(value = it) }.toSet(),
+        attachmentsBefore = emptySet(),
         from = RelativePath(value = AREPAS),
         to = RelativePath(value = RENAMED)
     )

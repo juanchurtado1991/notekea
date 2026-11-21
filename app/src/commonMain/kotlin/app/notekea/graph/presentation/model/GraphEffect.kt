@@ -10,6 +10,9 @@ sealed interface GraphEffect {
     /** `Space`: the side panel, where the inspector lives, shows or hides. */
     data object ToggleInspector : GraphEffect
 
-    /** The note at [path] was written from the graph: an editor that has it open takes the new text. */
-    data class NoteRewritten(val path: RelativePath) : GraphEffect
+    /** The note at [path] was written from the graph over [original]: an editor that has it open takes the new text. */
+    data class NoteRewritten(
+        val path: RelativePath,
+        val original: String
+    ) : GraphEffect
 }

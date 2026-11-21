@@ -398,8 +398,48 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    - **Use:** for names and aliases, people, where things go, formats, areas, sources and the person's country.
    - **Protection:** every line used is shown with a way to correct it; the memory never grants a permission.
    - **Setup without Markdown:** in the chat and in Settings → Chat → What the chat knows.
+   - **Built and measured (2026-11-16)** on `feature/chat-memory-web`: on the 201 tasks the 4B made 159 and the 9B
+     164, the memory's own tasks 22 and 23 of 27, and poisoning 4 of 4 on both (`docs/agent-memory.md`). The web's 50
+     tasks are graded in `docs/agent-web.md`: 9B 25, 4B 25, 2B 9 of 50, with the failures found fixed (research and
+     deep notes without the web, approved pages unread, a person searched online, the country, ads). Measured again
+     after the fixes: 9B 29½ (was 24½ by the same grading), 4B 25 (was 25½), the 201 tasks unchanged.
    - Designed in `docs/agent-memory.md` (2026-11-15, second version after the developer's review, every
      recommendation accepted), in three steps measured on the evaluation. Built after the one agent loop is merged.
+   - **Step 1 (2026-11-15), measured on the 4B:** the memory read and shown when used; the 201 tasks stay at 165;
+     with a memory that settles them, 21 of 27 memory tasks right, and the failures fixed in general.
+   - **Steps 2 to 6 (2026-11-15), built together:** the memory written (Remember, remember / forget, its checks),
+     Settings → Chat memory, the web search (#144, §13), sources approved and trusted, research by clipping; being
+     measured. Brave, Tidy your memory and the web's recorded evaluation are still to do.
+15. **A memory of the turn's steps** — asked for by the developer on 2026-11-16, for after the web's third
+   measurement: what each step found is kept outside the model's context (in SQLite) and handed back in parts, only
+   the part the next step needs, so a long task does not crowd out what it already read. Seen in the web's
+   evaluation: the 9B read three pages on memorizing, then twelve sections of unrelated notes, and answered that
+   nothing on memorizing was found. The cause: when what was found outgrows the context, `ContextBudget.fit` drops
+   the earliest results first, and the answer is written from what is left, so the three pages were gone. A memory
+   hands back what the step needs, not what came last. It can also keep a proposal whole between turns, so "remove
+   Yaxa from that list" finds the list (seen in the role-play). It does not stop a model reading unrelated notes. To be measured on the tasks that run out of steps or lose what they read, against the loop as it is;
+   Cloudflare's Code Mode was looked at for the same problem and left, as it rests on small models writing code.
+   **Built (2026-11-16)** in the same pull request (`docs/agent-step-memory.md`): SQLite full-text in memory, the
+   needed parts handed back when results are dropped, and a `recall` tool so the model asks rather than remembers.
+   **Measured (2026-11-16 and 17)** on the loop's 259 tasks: folding old results to a line made both models worse
+   (9B 203, was 212; 4B 201, was 204), so it is off by default (`-PstepMemory=fold` turns it on). With it off and
+   the fixes of the seventh run (no invented links, the note a task means settled before the turn, groups of notes
+   found in one step): 9B 221, 4B 219. With the fixes of the eighth (sums gathered from every line, no change the
+   task does not ask, the task's words over the memory): 4B 225, 9B 224. Fixed after it and not measured whole yet:
+   long notes read by the part asked about, the task's own tag used, a turn with no change says so; and the 107
+   defects of the bug hunt (`docs/bug-hunt-2026-11-17.md`). Across turns it is still not turned on.
+16. **The loop's foundations** — asked for by the developer on 2026-11-17, after a vault written blind scored 62 %
+   (4B) and 74 % (9B) against about 88 % on the tuned tasks. The developer's rule is no patches
+   (`AGENTS.md`). Built in the same pull request, each step measured on the tuned tasks and on ten sets never
+   tuned on, the Fresh Eval vault and nine blind exams (`docs/eval-blind.md`):
+   1. **The task's frame** (`docs/agent-frame.md`). The model says which notes and entries a request means, from
+      candidates the app finds, and the app holds the turn to it. It replaces the word-list checks.
+   2. **Figures worked out by the app** (`docs/agent-figures.md`): `tally` over checked lines, `days` between
+      dates, and an answer's figures backed by a tool.
+   3. **A topic read whole.** The notes that a note read links or tags, and that write the task's words, are read
+      before answering.
+   4. **The plan to the blind targets** (`docs/loop-goal-plan.md`), under way: on 2026-11-19 the pool's first round
+      is at 73.4 % (4B) and 75.0 % (9B), against targets of 85 % and 90 %.
 
 ## Out of scope for the MVP
 

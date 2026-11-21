@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The chat changes one line of a note in place (`change_line`, step 4.2 of `docs/loop-goal-plan.md`): "move the
+  interview to 16:00" finds the line by its words before the card, which shows the note with the line as it is (−)
+  and as it will be (+), only the changed words marked. Do it writes that line alone, keeping its list or heading
+  marks, and Undo writes it back; a line the note does not write, or several alike, is said, never guessed.
+
+- Nine blind exams for the chat's loop (`docs/eval-blind.md`): vaults and tasks of nine invented people, written
+  without seeing the chat's code and checked by a second agent. With the Fresh Eval vault they are ten sets the loop
+  was never tuned on, measured before and after a change and read only by kind of failure.
+- The chat's loop works figures out instead of the model: `tally` adds, averages or counts the figures of the lines
+  the model names, each checked against the notes read, and `days` counts the days between two dates
+  (`docs/agent-figures.md`).
+- The chat remembers what you approve: tick Remember for next time when it asks which note you mean, or say
+  "remember that…", and it keeps the line in `Notekea/Memory.md`. Forget a line from the step that used it.
+- Settings → Chat memory: turn the memory on or off; set your country, currency, the language of the answers and
+  where new notes go; see what the chat learnt and forget a line, or everything.
+- With the chat's new loop on, the chat can search the web when you ask or when your notes don't hold an answer
+  (#144). Every search shows what it searched. New sources wait for you to tick them, sites you trust are read
+  without asking, and it can remember which sites you trust or not.
+- The chat's new loop keeps what a request's steps found aside, so a page read early is not lost when later
+  reads fill what the model can see: the parts the request needs come back, and the model can ask for one back
+  (`recall`). Kept only while the request runs, never written to a file.
+- The web's evaluation: 50 tasks the chat works on the real web, graded by hand. They are where to buy in your
+  country, facts and prices with their sources, pages clipped, deep notes, research, and what must stay safe.
+- The chat's new loop reads its memory, `Notekea/Memory.md`: what you approved it to remember, such as which
+  note "Laura" means, so it no longer asks which. The lines a request uses show as a step ("From your memory: …").
+  Only the lines a request matches are read, plus how you like answers. A line that asks for leave to act
+  ("without asking") is never read. Your own skills now live in `Notekea/Skills/`.
 - Settings → General → Agent mode with the new loop: a preview that has Agent mode work with the one loop. When a
   request can be read two ways the chat asks back with a button for each answer.
 - The design of the chat's memory between conversations (`docs/agent-memory.md`). The memory is a note of the vault,
@@ -24,6 +51,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Agent Eval vault, which gains 25 notes: a Spanish lease, a handbook, an audit, long journals and minutes).
 
 ### Changed
+
+- The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
+  app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
+  when it says which, and works on each when it means several. It replaces the word lists that decided this
+  (`AmbiguousTask`, `SingularTask`, `ToldApart`, `MemoryChoice`), which asked on clear requests and missed "the
+  appointment" in a note of three.
+- An answer of the chat's loop waits for the notes about the same topic, by links or tags, that write the request's
+  words, and for a tool behind every figure it gives.
 
 - The chat's new loop reads a vault's instructions from `Notekea/Notekea.md`, in a folder of its own where the
   chat's memory will go too, instead of `Notekea.md` at the vault's root.
@@ -105,6 +140,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The chat's loop reads a short note whole when asked for one of its sections, so the figures above a heading are
+  not missed.
+- `tally` counts each figure on the line of the notes closest to its words: it took the first line sharing a word
+  such as the year, and showed paid sessions as the unpaid ones it counted.
+- `calculate` refuses a date and sends the model to `days`: "2027-03-01 - 2026-11-11" came to 95.
+- Setting a property to the value it already has no longer rewrites how it is written: `record: off` stayed
+  `record: off`, not `record: "off"`.
+- A bug hunt over the whole app (2026-11-17, `docs/bug-hunt-2026-11-17.md`) fixed its defects, each with a test.
+  In the chat's loop: a change taken out could never be added again, two refused changes looped to the last step,
+  a figure the task writes settled which note it meant, questions the loop asked for were held back, a value could
+  not be written as a number (the `"}"` the models wrote for 3), and a refused call was repeated as it was. In its
+  tools: two tags on one note lost the first, "Pay rent" ticked "Pay", impossible changes were "added" and failed
+  at Do it, dates "a week before", "last friday" and "end of next month" were wrong. Queries, tasks, search, the
+  memory, the editor (frontmatter typed in the body saved twice, a checkbox ticking an earlier line), links and the
+  graph, the web (spoofed trusted sites, a page's size cap) and sync (conflict marks committed when connecting a
+  vault cut short in a merge, a stale Git lock blocking sync for good) were fixed too.
+
+- The chat's new loop no longer ends an answer from your notes with a link it made up: an answer links only to
+  pages the request searched or read.
+- The chat's new loop knows which note you mean without asking, when your request or its memory says so: "Tomás
+  from the chess club" is the Tomás tagged club, "my Sunday weekly review" the one held on Sundays, and "my
+  goals" the note the memory names. It no longer asks "which one?" with a single note to choose.
+- The chat's new loop writes a note from several notes ("a note with what I learnt from each book") instead of
+  asking which of them you meant or dropping them.
+- The chat's new loop finds a group of notes in one step: a search names every note that writes its words, a
+  folder's list shows each note's tags and open tasks, and links are followed when organizing and writing.
+- The chat's new loop uses the tag a request names ("etiquetar con viaje", "tag them with latin") in place of
+  another the model wrote for it: refused each time, as it was since the fix before, the models wrote "travel" and
+  "latina" again until the turn ran out of steps.
+- A turn of the chat's new loop that tried to change the notes and added no change says so, and never ends on
+  "Lowered the rating to 3…" with nothing proposed.
+- The chat's new loop reads a long note with the headings of what its first part leaves out and the paragraphs that
+  write the request's words, so it no longer answers "the agreement does not say" from the first 2,500 characters.
+- A question about notes the chat's memory already settles is not asked when its options add words to their names
+  ("Goals 2027 (work)").
+- The chat's new loop adds up a figure a note writes many times ("what do the daily Spent figures add up to?")
+  from every line that writes it, instead of from the few it happened to read.
+- The chat's new loop adds only what you ask: no task of its own on a note you asked it to tag, the tag as you
+  wrote it ("viaje", not "travel"), and no "which one?" when you named several notes.
+- The chat's new loop goes by your request over its memory when both name a note ("the household budget" is not
+  "the budget" it remembered), and answers knowing what the memory says ("my sister's phone").
+- The chat's new loop takes "etiquétalas con…" and "compare … in a note" as changes, not as questions, and
+  finds notes "with a rating" whatever the rating is.
+- The chat's new loop adds up a property across notes, understands "15 de noviembre" and "November 3rd" as
+  dates, tags instead of setting a property when asked to tag, and says why a choice by properties found nothing.
+- The chat no longer asks which of two notes you mean when both answers are the same note, once by its name and
+  once by its folder.
+- The chat reads a page you ticked even when the model shortens its address at its `?` or `&`, as it did with a
+  shop's product page.
+- Asked to research something and write a note, or to make a note of a page's address, the chat searches and
+  reads the web instead of writing from unrelated notes or leaving an empty note.
+- The chat reads the pages you ticked before it answers, and searches the web when you ask it to research.
+- The chat reads a note of your vault instead of searching the web for it, and never searches for a person's
+  phone, address or email.
+- Asked to make a note of a page, the chat clips the page instead of writing an empty note or one from your other
+  notes; asked to add what pages say to a note, it appends it with each page's link instead of only answering.
+- A search for where to buy something names your country, so it finds shops where you live.
+- With no country in your request or memory, a search for where to buy asks where you live first, instead of
+  showing shops in the United States.
+- "Search the web for my weekly review" reads your note instead of searching the web, even after reading it.
+- The chat no longer adds the same line to a note over and over when two notes share its name.
+- Answers from web pages link each page by its address, not "page 1", and no longer call pages "notes".
+- DuckDuckGo's ads no longer show as sources.
+- The chat's answers no longer carry an example figure from its instructions, or notes about its own reasoning.
+- "The notes do not contain…" is read as not found, so the chat offers to search the web.
 - Repairing a vault left in the middle of a sync with Keep mine copies the notes that clashed, as you left them, to
   the vault's trash before they go back to the last commit; a repair that fails says why.
 - The chat's sums are written out in full ("12345678.25", not "1.234567825E7"), and a minus before a power is taken

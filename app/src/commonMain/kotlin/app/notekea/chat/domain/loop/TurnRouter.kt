@@ -19,6 +19,14 @@ class TurnRouter(private val llmEngine: LlmEngine) {
     ): TurnRoute {
         val json = StringBuilder()
 
+        // Room for the longest skill name as well: one longer than the reply's room was cut, and the reply unread.
+        val longest = skills
+            .map { escaped(text = it.name) }
+            .maxByOrNull { it.length }
+            .orEmpty()
+
+        val tokens = ROUTE_TOKENS + llmEngine.countTokens(text = longest)
+
         try {
             llmEngine
                 .generate(
@@ -27,7 +35,7 @@ class TurnRouter(private val llmEngine: LlmEngine) {
                         skills = skills
                     ),
                     options = GenerationOptions(
-                        maxTokens = ROUTE_TOKENS,
+                        maxTokens = tokens,
                         temperature = 0f,
                         jsonSchema = schemaOf(skills = skills)
                     )
@@ -40,9 +48,12 @@ class TurnRouter(private val llmEngine: LlmEngine) {
         val fields = ToolCallJson.fields(json = json.toString()) ?: return NONE
 
         return TurnRoute(
-            kind = WorkKind.entries.firstOrNull {
-                it.written == fields[WORK]
-            } ?: WorkKind.ASK,
+            kind = RouteWords.kindOf(
+                task = task,
+                routed = WorkKind.entries.firstOrNull {
+                    it.written == fields[WORK]
+                } ?: WorkKind.ASK
+            ),
             skill = skills.firstOrNull {
                 it.name == fields[SKILL]
             }
@@ -79,11 +90,25 @@ class TurnRouter(private val llmEngine: LlmEngine) {
 
     private fun schemaOf(skills: List<Skill>): String {
         val kinds = WorkKind.entries.joinToString(separator = ",") { "\"${it.written}\"" }
-        val names = (skills.map { it.name } + NO_SKILL).joinToString(separator = ",") { "\"$it\"" }
+
+        val names = (skills.map { it.name } + NO_SKILL)
+            .joinToString(separator = ",") { "\"${escaped(text = it)}\"" }
 
         return "{\"type\":\"object\",\"properties\":{\"$WORK\":{\"enum\":[$kinds]}," +
             "\"$SKILL\":{\"enum\":[$names]}},\"required\":[\"$WORK\",\"$SKILL\"]}"
     }
+
+    // A name holding a quote or a backslash broke the schema, and every turn was routed to ask (the bug hunt of
+    // 2026-11-17, E12).
+    private fun escaped(text: String): String = text
+        .replace(
+            oldValue = "\\",
+            newValue = "\\\\"
+        )
+        .replace(
+            oldValue = "\"",
+            newValue = "\\\""
+        )
 
     private companion object {
         const val WORK = "work"

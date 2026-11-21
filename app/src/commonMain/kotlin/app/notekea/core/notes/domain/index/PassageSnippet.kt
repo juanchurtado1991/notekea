@@ -1,5 +1,7 @@
 package app.notekea.core.notes.domain.index
 
+import app.notekea.core.domain.markdown.FenceTracker
+
 /**
  * What a result quotes of a note: the passage found ([text]) with the sentence that shares the
  * most words with what was looked for as [highlight], and in it the [keywords] that say why it was found: the few
@@ -12,18 +14,22 @@ data class PassageSnippet(
 ) {
     companion object {
         /**
-         * [passage] without its heading lines, each other line made [plain], and its sentence sharing most of [words],
-         * which are [normalized], lower case unless told otherwise, as the highlight; the first when none shares any.
+         * [passage] without its heading lines, each other line made [plain], and its sentence that [scores] best (by
+         * default, how many of [words] it holds once [normalized]) as the highlight; the first when none scores.
          */
         fun of(
             passage: String,
             words: Set<String>,
             normalized: (String) -> String = String::lowercase,
-            plain: (String) -> String = { it }
+            plain: (String) -> String = { it },
+            scores: (String) -> Int = {
+                sharedWords(
+                    sentence = normalized(it),
+                    words = words
+                )
+            }
         ): PassageSnippet {
-            val text = passage
-                .lines()
-                .filterNot { HEADING.matches(input = it) }
+            val text = withoutHeadings(lines = passage.lines())
                 .map(transform = plain)
                 .filter { it.isNotBlank() }
                 .joinToString(separator = " ")
@@ -35,18 +41,35 @@ data class PassageSnippet(
                 .toList()
                 .ifEmpty { listOf(text.indices) }
 
-            val best = sentences.maxBy { range ->
-                sharedWords(
-                    sentence = normalized(text.substring(range = range)),
-                    words = words
-                )
-            }
+            val best = sentences.maxBy { range -> scores(text.substring(range = range)) }
 
             return PassageSnippet(
                 text = text,
                 highlight = best,
                 keywords = keywordsIn(text, best, words, normalized)
             )
+        }
+
+        /** [lines] without the headings among them; a `# comment` in a code block is no heading (bug hunt S8). */
+        private fun withoutHeadings(lines: List<String>): List<String> {
+            val fences = FenceTracker()
+
+            return lines.filterNot {
+                isHeading(
+                    line = it,
+                    fences = fences
+                )
+            }
+        }
+
+        // Every line goes through the fences, in order, so they know where code starts and ends.
+        private fun isHeading(
+            line: String,
+            fences: FenceTracker
+        ): Boolean {
+            val isCode = fences.read(text = line)
+
+            return !isCode && HEADING.matches(input = line)
         }
 
         private fun keywordsIn(
@@ -86,7 +109,9 @@ data class PassageSnippet(
 
         private const val MAX_KEYWORDS = 3
         private val HEADING = Regex(pattern = "^#{1,6}\\s.*$")
-        private val SENTENCE = Regex(pattern = "[^.!?]+[.!?]?")
+
+        // A sentence ends at its marks followed by a space or the end: a dot inside "3.500" or "v2.1" cut it.
+        private val SENTENCE = Regex(pattern = ".+?(?:[.!?]+(?=\\s|$)|$)")
         private val WORD = Regex(pattern = "\\p{L}{3,}")
     }
 }

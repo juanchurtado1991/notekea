@@ -11,7 +11,13 @@ import org.koin.dsl.module
 
 /** Git sync on the desktop: JGit for the repository, the system's keychain for the token, the vault's size on disk. */
 val jvmSyncModule = module {
-    single<GitRepository> { JGitRepository(dispatchers = get()) }
+    single<GitRepository> {
+        JGitRepository(
+            dispatchers = get(),
+            clock = get()
+        )
+    }
+
     single<TokenStore> { KeyringTokenStore(dispatchers = get()) }
 
     single<VaultSizes> {

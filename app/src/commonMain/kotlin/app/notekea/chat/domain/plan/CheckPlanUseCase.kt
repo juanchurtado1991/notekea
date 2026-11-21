@@ -67,9 +67,10 @@ class CheckPlanUseCase {
                 template = found.template,
                 title = step[ActionField.TITLE],
                 text = step[ActionField.TEXT],
+                line = step[ActionField.LINE],
                 property = step[ActionField.PROPERTY],
                 value = step[ActionField.VALUE],
-                tag = step[ActionField.TAG]?.removePrefix(prefix = "#"),
+                tag = step[ActionField.TAG]?.let { tagOf(written = it) },
                 due = step[ActionField.DUE],
                 period = step[ActionField.PERIOD],
                 panel = step[ActionField.PANEL],
@@ -83,5 +84,20 @@ class CheckPlanUseCase {
     companion object {
         /** The most notes one step may cover ("tag every note in Recipes"), all listed on the card. */
         const val MAX_NOTES = 50
+
+        private val SPACES = Regex(pattern = "\\s+")
+
+        /**
+         * A tag as a tag list holds it: "# road trip" is `road-trip`, as a space in it broke a scalar tag list
+         * (the bug hunt of 2026-11-17, A12). Compared with the notes' own tags ignoring case.
+         */
+        fun tagOf(written: String): String = written
+            .trim()
+            .trimStart('#')
+            .trim()
+            .replace(
+                regex = SPACES,
+                replacement = "-"
+            )
     }
 }

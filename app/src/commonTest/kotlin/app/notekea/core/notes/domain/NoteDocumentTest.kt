@@ -63,6 +63,22 @@ class NoteDocumentTest {
         )
     }
 
+    // Bug hunt K2: a fence with trailing spaces was frontmatter for the metadata reader and body here.
+    @Test
+    fun `fences with trailing spaces hold frontmatter, and a dots line does not close it`() {
+        assertEquals(
+            expected = listOf(
+                "---  \na: 1\n--- \t\n" to "Body",
+                "" to "---\na: 1\n...\nBody"
+            ),
+            actual = listOf("---  \na: 1\n--- \t\nBody", "---\na: 1\n...\nBody").map {
+                NoteDocument.fromText(text = it).let { document ->
+                    document.header to document.body
+                }
+            }
+        )
+    }
+
     @Test
     fun `frontmatter without a body or a final line break is all header`() {
         assertEquals(

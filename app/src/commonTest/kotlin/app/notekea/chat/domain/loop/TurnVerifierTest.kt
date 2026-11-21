@@ -2,6 +2,7 @@ package app.notekea.chat.domain.loop
 import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.ProposalCheck
+import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.CheckPlanUseCase
@@ -78,7 +79,23 @@ class TurnVerifierTest {
                 planReader = GhostActionPlanReader()
             )
         ),
-        clock = Clock.System
+        clock = Clock.System,
+        frames = FrameSource { _, _, _, _, _, _ -> frames.lastOrNull() }
+    )
+
+    // The frame a test gives its turn, as the frame's model would say it; none when a test gives none.
+    private val frames = mutableListOf<TaskFrame>()
+
+    private val lauras = listOf("People/Laura Castro.md", "People/Laura Méndez.md").map {
+        RelativePath(value = it)
+    }
+
+    // "the phone of Laura": both Lauras fit, and the task means one.
+    private val bothLauras = TaskFrame(
+        targets = lauras.map { FrameTarget(note = it) },
+        count = FrameCount.ONE,
+        candidates = lauras,
+        words = "Laura"
     )
 
     private fun script(
@@ -190,6 +207,8 @@ class TurnVerifierTest {
                 entry(path = it)
             }
 
+            frames += bothLauras
+
             script(
                 """{"tool":"answer","text":"Laura's phone is 8701-9032."}""",
                 """{"tool":"ask_user","question":"Which Laura?","options":["Laura Castro","Laura Méndez"]}"""
@@ -208,7 +227,7 @@ class TurnVerifierTest {
             assertEquals(
                 expected = listOf(true, false, true),
                 actual = listOf(
-                    "the task can mean 2 notes and does not say which: People/Laura Castro, People/Laura Méndez" in
+                    "the task means one of 2 notes and does not say which: People/Laura Castro; People/Laura Méndez" in
                         callPrompts()[1],
                     "\"answer\"" in schema,
                     steps.last() is AgentStep.Asked
@@ -222,6 +241,8 @@ class TurnVerifierTest {
         val people = listOf("People/Laura Castro.md", "People/Laura Méndez.md").map {
             entry(path = it)
         }
+
+        frames += bothLauras
 
         val sums = (1 until RunTurnUseCase.MAX_STEPS).map {
             """{"tool":"calculate","expression":"$it + 1"}"""
@@ -241,7 +262,14 @@ class TurnVerifierTest {
         assertEquals(
             expected = AgentStep.Asked(
                 question = "Which Laura?",
-                options = listOf("Laura Castro", "Laura Méndez")
+                options = listOf("Laura Castro", "Laura Méndez"),
+                // docs/agent-memory.md: a question about notes the task left open can be remembered once answered.
+                remembering = Remembering(
+                    said = "Laura",
+                    notes = listOf("People/Laura Castro.md", "People/Laura Méndez.md").map {
+                        RelativePath(value = it)
+                    }
+                )
             ),
             actual = steps.last()
         )

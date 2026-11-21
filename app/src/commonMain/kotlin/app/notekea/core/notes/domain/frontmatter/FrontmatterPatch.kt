@@ -11,6 +11,7 @@ import app.notekea.core.domain.time.MomentFormat
  */
 class FrontmatterPatch {
     private val momentFormat = MomentFormat()
+    private val reader = FrontmatterReader()
 
     /** [header] with [key]'s value set to [value]; as it is when the note has no such property. */
     fun set(
@@ -21,17 +22,38 @@ class FrontmatterPatch {
         val frontmatter = FrontmatterBlocks.of(header = header) ?: return header
         val old = frontmatter.blockOf(key = key) ?: return header
 
+        // The value it already has is kept as written: `record: off` was rewritten as `record: "off"`, a note's
+        // frontmatter changed though nothing in it did (seen on a blind evaluation vault, 2026-11-17).
+        val isSame = valueOf(
+            header = header,
+            key = key
+        ) == value
+
+        if (isSame) return header
+
         val keyText = old
             .lines
             .first()
             .substringBefore(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
 
-        val block = FrontmatterBlocks.Block(
-            lines = linesOf(
-                keyText = keyText,
-                value = value,
+        val lines = linesOf(
+            keyText = keyText,
+            value = value,
+            old = old
+        )
+
+        // Another value is its source as written, its comments included.
+        val written = if (value is PropertyValue.Other) {
+            lines
+        } else {
+            withComment(
+                lines = lines,
                 old = old
-            ),
+            )
+        }
+
+        val block = FrontmatterBlocks.Block(
+            lines = written,
             key = key
         )
 
@@ -40,6 +62,39 @@ class FrontmatterPatch {
                 if (it === old) block else it
             }
         ).toHeader()
+    }
+
+    private fun valueOf(
+        header: String,
+        key: String
+    ): PropertyValue? = (reader.read(header = header) as? FrontmatterContent.Properties)
+        ?.properties
+        ?.firstOrNull {
+            it.key == key
+        }
+        ?.value
+
+    /**
+     * [lines] with the comment that ended [old]'s key line (`status: draft # for now`), while the value still fits on
+     * one line. Editing the value dropped it (bug hunt D10).
+     */
+    private fun withComment(
+        lines: List<String>,
+        old: FrontmatterBlocks.Block
+    ): List<String> {
+        val written = old
+            .lines
+            .first()
+            .substringAfter(
+                delimiter = FrontmatterBlocks.KEY_SEPARATOR,
+                missingDelimiterValue = StringPatterns.EMPTY
+            )
+            .trim()
+
+        val comment = written.removePrefix(prefix = YamlValues.withoutComment(text = written))
+        val keepsComment = comment.isNotEmpty() && lines.size == 1
+
+        return if (keepsComment) listOf(lines.single() + comment) else lines
     }
 
     /** [header] with a new property [key] at the end, a frontmatter made with [lineBreak] when the note has none. */
@@ -190,6 +245,14 @@ class FrontmatterPatch {
 
         val joined = written.joinToString(separator = ITEM_SEPARATOR)
 
+        val isInlineList = inline.startsWith(prefix = YamlValues.INLINE_OPEN) ||
+            becomesInlineList(
+                inline = inline,
+                itemCount = items.size,
+                quote = quote,
+                key = old?.key
+            )
+
         return when {
             items.isEmpty() -> listOf(
                 keyLine(
@@ -198,7 +261,7 @@ class FrontmatterPatch {
                 )
             )
 
-            inline.startsWith(prefix = YamlValues.INLINE_OPEN) -> {
+            isInlineList -> {
                 listOf(
                     keyLine(
                         keyText = keyText,
@@ -226,6 +289,23 @@ class FrontmatterPatch {
         }
     }
 
+    /**
+     * Whether a value written on the key's line without brackets becomes an inline list: with two or more items, unless
+     * it is a list key's plain comma-separated text. `tags: "work", "x"` was no YAML and `author: Ana, Bob` one text.
+     */
+    private fun becomesInlineList(
+        inline: String,
+        itemCount: Int,
+        quote: Char?,
+        key: String?
+    ): Boolean {
+        val isCommaList = key?.lowercase() in YamlValues.LIST_KEYS && quote == null
+
+        return inline.isNotEmpty() &&
+            itemCount >= MIN_LIST_ITEMS &&
+            !isCommaList
+    }
+
     /** How the property's list items were indented (`  ` by default, as Obsidian writes them). */
     private fun indentOf(old: FrontmatterBlocks.Block?): String = old
         ?.continuation
@@ -245,6 +325,7 @@ class FrontmatterPatch {
     private companion object {
         const val DEFAULT_INDENT = "  "
         const val ITEM_SEPARATOR = ", "
+        const val MIN_LIST_ITEMS = 2
         const val KEY_VALUE_SEPARATOR = ": "
         const val ISO_DATE = MomentFormat.ISO_DATE
     }

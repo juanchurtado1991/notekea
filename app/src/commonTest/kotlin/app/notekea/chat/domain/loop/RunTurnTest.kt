@@ -51,6 +51,9 @@ class RunTurnTest {
     private val office = RelativePath(value = "Work/Lease.md")
     private val notes = listOf(lease, instructions).map { entry(path = it.value) }
 
+    // The frame a test gives its turn, as the frame's model would say it; none when a test gives none.
+    private val frames = mutableListOf<TaskFrame>()
+
     private val runTurn = RunTurnUseCase(
         llmEngine = engine,
         toolsets = Toolsets(
@@ -79,7 +82,8 @@ class RunTurnTest {
                 planReader = GhostActionPlanReader()
             )
         ),
-        clock = Clock.System
+        clock = Clock.System,
+        frames = FrameSource { _, _, _, _, _, _ -> frames.lastOrNull() }
     )
 
     private fun script(
@@ -255,7 +259,7 @@ class RunTurnTest {
                     "- add_tag (notes, tag):" in system,
                     "- calculate" in system,
                     "For this kind of work (meeting notes):" in system,
-                    "add_tag: not added, UnknownNote(name=Tacos)" in callPrompts()[1],
+                    "add_tag: not added, no note is named \"Tacos\"" in callPrompts()[1],
                     proposed.steps.map { it.kind },
                     proposed
                         .steps
@@ -267,11 +271,10 @@ class RunTurnTest {
         }
 
     @Test
-    fun `a tag the task does not write is held once, and each change added shows the proposal so far`() =
+    fun `a tag the task names is used in place of the model's, and the change added shows the proposal so far`() =
         runTest {
             script(
                 """{"tool":"add_tag","notes":["Lease"],"tag":"home"}""",
-                """{"tool":"add_tag","notes":["Lease"],"tag":"hogar"}""",
                 """{"tool":"propose","summary":"$SUMMARY"}""",
                 work = "organize"
             )
@@ -279,10 +282,10 @@ class RunTurnTest {
             val steps = run(task = "etiqueta el contrato Lease como hogar")
 
             assertEquals(
-                expected = listOf(true, true, "hogar"),
+                expected = listOf(true, "hogar"),
                 actual = listOf(
-                    "add_tag: not added yet. The task does not write \"home\"." in callPrompts()[1],
-                    "The proposal now holds:\n- add_tag, Lease, hogar\n" in callPrompts()[2],
+                    "add_tag: added. The tag is \"hogar\", as the task writes it. The proposal now holds:\n" +
+                        "- add_tag, Lease, hogar\n" in callPrompts()[1],
                     (steps.last() as AgentStep.Proposed)
                         .steps
                         .single()
@@ -332,6 +335,13 @@ class RunTurnTest {
         runTest {
             val tag = """{"tool":"add_tag","notes":["Home/Lease"],"tag":"rented"}"""
 
+            // "the lease" means one, and both leases fit it.
+            frames += TaskFrame(
+                targets = listOf(FrameTarget(note = lease), FrameTarget(note = office)),
+                count = FrameCount.ONE,
+                candidates = listOf(lease, office)
+            )
+
             script(
                 tag,
                 tag,
@@ -350,7 +360,7 @@ class RunTurnTest {
                 actual = listOf(
                     "2 notes are named \"Lease\": Home/Lease, Work/Lease. If the task does not" in
                         callPrompts()[1],
-                    "(Not done: the task can mean 2 notes and does not say which: Home/Lease, Work/Lease." in
+                    "(Not done: the task means one of 2 notes and does not say which: Home/Lease; Work/Lease." in
                         callPrompts()[3],
                     steps.last() is AgentStep.Asked
                 )
@@ -378,6 +388,41 @@ class RunTurnTest {
                 actual = listOf(
                     "(2 notes are named \"Lease\": Home/Lease, Work/Lease." in callPrompts()[1],
                     steps.last() is AgentStep.Asked
+                )
+            )
+        }
+
+    // The web's third run: the 4B appended to "Ideas", which two notes share, 29 times and never ended.
+    @Test
+    fun `a bare name two notes share asked again counts as made again, and the turn can end`() =
+        runTest {
+            val read = """{"tool":"read","note":"Lease"}"""
+
+            val ask =
+                """{"tool":"ask_user","question":"Which lease?","options":["Home/Lease","Work/Lease"]}"""
+
+            script(read, read, read, read, ask)
+
+            val steps = run(
+                task = "summarize the lease",
+                notes = notes + entry(path = office.value)
+            )
+
+            val last = engine
+                .options
+                .filter {
+                    it.jsonSchema != null
+                }
+                .last()
+                .jsonSchema
+                .orEmpty()
+
+            assertEquals(
+                expected = listOf(true, true, false),
+                actual = listOf(
+                    steps.last() is AgentStep.Asked,
+                    "again: its result is above. (2 notes are named" in callPrompts()[2],
+                    "\"read\"" in last
                 )
             )
         }

@@ -4,25 +4,22 @@ import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
-/** The [QueryCatalog] of the vault's notes: a property's kind is the one most of its notes give it. */
+/**
+ * The [QueryCatalog] of the vault's notes: a property's kind is the one most of its notes give it. Names that differ
+ * only in case (`Status`, `status`) are one property, under the spelling most notes use, as queries match them.
+ */
 class BuildQueryCatalogUseCase {
     private val names = NaturalNameComparator()
 
     operator fun invoke(notes: Collection<NoteEntry>): QueryCatalog {
-        val kinds = notes.flatMap { it.metadata.properties }.groupBy({ it.key }, {
-            kindOf(value = it.value)
-        })
+        val spellings = notes
+            .flatMap { it.metadata.properties }
+            .groupBy { it.key.lowercase() }
 
-        val keys = kinds.map { (name, found) ->
-            val kind = found
-                .groupingBy { it }
-                .eachCount()
-                .maxBy { it.value }
-                .key
-
+        val keys = spellings.values.map { found ->
             QueryKey(
-                name = name,
-                kind = kind
+                name = mostOf(found.map { it.key }),
+                kind = mostOf(found.map { kindOf(value = it.value) })
             )
         }
 
@@ -36,6 +33,12 @@ class BuildQueryCatalogUseCase {
                 .sortedWith(names)
         )
     }
+
+    private fun <T> mostOf(found: List<T>): T = found
+        .groupingBy { it }
+        .eachCount()
+        .maxBy { it.value }
+        .key
 
     private fun kindOf(value: PropertyValue): QueryValueKind = when (value) {
         is PropertyValue.Number -> QueryValueKind.NUMBER

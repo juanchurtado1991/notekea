@@ -5,9 +5,9 @@ import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 
 /**
- * The `#tags` written in a note's text, as Obsidian reads them, each once in the order they first appear: a `#` not
- * after a letter, digit, `#`, `/` or `&`, followed by letters, digits, `_`, `-` and `/`, not only digits. Code (fenced
- * blocks and inline code), wiki links and link targets are not text, so `[[#Heading]]` and `(#anchor)` are not tags.
+ * The `#tags` written in a note's text, as Obsidian reads them, each once in the order they first appear (the rule is
+ * `MarkdownSyntax.TAG`). Code (fenced blocks and inline code), wiki links, link targets and addresses are not text,
+ * so `[[#Heading]]`, `(#anchor)` and `https://a.b/#top` are not tags.
  */
 class TextTagFinder {
     fun tags(lines: Sequence<String>): List<String> {
@@ -39,6 +39,11 @@ class TextTagFinder {
 
     companion object {
         private const val TAG_MARK = '#'
-        private val NOT_TEXT = Regex(pattern = "(`+).*?\\1|\\[\\[[^\\]\\n]*]]|]\\([^)\\n]*\\)")
+
+        // A link's target may hold one level of parentheses (`wiki/Dune_(novel)#Plot`) and a bare address its
+        // `#anchor`: either ended the target early, and the anchor after it made a tag.
+        private val NOT_TEXT = Regex(
+            pattern = "(`+).*?\\1|\\[\\[[^\\]\\n]*]]|]\\((?:[^()\\n]|\\([^()\\n]*\\))*\\)|https?://\\S+"
+        )
     }
 }

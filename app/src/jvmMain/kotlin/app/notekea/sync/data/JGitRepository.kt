@@ -21,12 +21,16 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import kotlin.time.Clock
 
 /**
  * [GitRepository] with JGit on the vault's folder: one remote, `origin`, one branch; what Notekea writes for itself
  * stays out through `.git/info/exclude`, which is never committed nor touches the vault's own `.gitignore`.
  */
-class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
+class JGitRepository(
+    private val dispatchers: AppDispatchers,
+    private val clock: Clock
+) : GitRepository {
     override suspend fun connect(
         vaultPath: String,
         remoteUrl: String,
@@ -35,6 +39,8 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         vaultPath = vaultPath,
         isCreated = true
     ) { git ->
+        refuseUnfinished(git = git)
+
         git
             .repository
             .config
@@ -132,6 +138,7 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         note: RelativePath,
         choice: ConflictChoice
     ): Outcome<Unit, SyncError> = git(vaultPath = vaultPath) { git ->
+        refuseUnfinished(git = git)
         val copy = File(vaultPath, ConflictCopies.copyOf(path = note).value).toPath()
         val original = File(vaultPath, note.value).toPath()
 
@@ -143,7 +150,11 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
             ConflictChoice.BOTH -> {
                 // "Note (mine).md" may be there from an earlier conflict: a free name, never a failure.
                 val wanted = File(vaultPath, ConflictCopies.mineOf(path = note).value)
-                Files.move(copy, FreeFile.beside(file = wanted).toPath())
+
+                FreeFile.moveBeside(
+                    file = copy.toFile(),
+                    wanted = wanted
+                )
             }
         }
 
@@ -160,6 +171,12 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
     ): Outcome<T, SyncError> = withContext(context = dispatchers.io) {
         try {
             val folder = File(vaultPath)
+
+            StaleIndexLock.clear(
+                vault = folder,
+                now = clock.now()
+            )
+
             val isRepository = File(folder, Constants.DOT_GIT).isDirectory
 
             val git = when {
@@ -189,39 +206,15 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
     private fun commitIn(
         git: Git,
         message: String
-    ): Boolean {
-        if (git.status().call().isClean) return false
-        LargeFiles.leaveOut(git = git)
+    ): Boolean = JGitCommit.all(
+        git = git,
+        message = message
+    )
 
-        git
-            .add()
-            .addFilepattern(ALL)
-            .call()
-
-        git
-            .add()
-            .setUpdate(true)
-            .addFilepattern(ALL)
-            .call()
-
-        val name = git
-            .repository
-            .config
-            .getString(USER, null, NAME) ?: AUTHOR
-
-        val email = git
-            .repository
-            .config
-            .getString(USER, null, EMAIL) ?: AUTHOR_EMAIL
-
-        git
-            .commit()
-            .setMessage(message)
-            .setAuthor(name, email)
-            .setCommitter(name, email)
-            .call()
-
-        return true
+    // In the middle of a merge or a rebase the notes may hold Git's conflict marks, which a commit would send to
+    // every device: the person repairs the vault first (Settings → Sync's repair, `JGitRepair`).
+    private fun refuseUnfinished(git: Git) {
+        check(!JGitRepair(git = git).isUnfinished) { INTERRUPTED }
     }
 
     private fun pullIn(
@@ -356,18 +349,14 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         const val MERGE = "merge"
         const val URL = "url"
         const val FETCH = "fetch"
-        const val USER = "user"
-        const val NAME = "name"
-        const val EMAIL = "email"
-        const val ALL = "."
         const val GIT_FOLDER = ".git"
         const val REMOTE_REFS = "refs/remotes/origin/"
-        const val AUTHOR = "Notekea"
-        const val AUTHOR_EMAIL = "notekea@localhost"
         const val TOKEN_USER = "x-access-token"
         const val FIRST_MESSAGE = "Notekea: the vault before its first sync"
         const val RESOLVED_MESSAGE = "Notekea: settled the conflict of"
         const val PUSH_REFUSED = "The remote refused the push"
+        const val INTERRUPTED =
+            "This vault was left in the middle of a sync: repair it before syncing again"
         val NOT_A_REPOSITORY = SyncError.Failed(message = "This vault is not a Git repository yet")
         val EXCLUDED =
             listOf("*.notekea-tmp", ".trash/", ".obsidian/workspace.json", ".obsidian/workspace-mobile.json", ".DS_Store")

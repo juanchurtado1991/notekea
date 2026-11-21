@@ -9,7 +9,8 @@ enum class ActionKind(
     val written: String,
     val needs: Set<ActionField> = emptySet(),
     val isWriting: Boolean = false,
-    val isOrganizing: Boolean = false
+    val isOrganizing: Boolean = false,
+    val isLoopOnly: Boolean = false
 ) {
     // Asked of the notes: 3.2's answer, a list of notes by their properties or the tasks (3.8).
     ANSWER(written = "answer"),
@@ -108,6 +109,11 @@ enum class ActionKind(
         needs = setOf(ActionField.NOTE, ActionField.TEXT),
         isWriting = true
     ),
+    CHANGE_LINE(
+        written = "change_line",
+        needs = setOf(ActionField.NOTE, ActionField.TEXT, ActionField.LINE),
+        isWriting = true
+    ),
     LINK_NOTES(
         written = "link_notes",
         needs = setOf(ActionField.NOTE, ActionField.TARGET),
@@ -140,7 +146,21 @@ enum class ActionKind(
     ),
 
     // Asked for something the chat never does (deleting for good, Settings, outside the vault, code).
-    REFUSE(written = "refuse");
+    REFUSE(written = "refuse"),
+
+    // A line of the chat's memory written or taken out (docs/agent-memory.md); the one loop's only, never planned.
+    REMEMBER(
+        written = "remember",
+        needs = setOf(ActionField.TEXT),
+        isWriting = true,
+        isLoopOnly = true
+    ),
+    FORGET(
+        written = "forget",
+        needs = setOf(ActionField.TEXT),
+        isWriting = true,
+        isLoopOnly = true
+    );
 
     /** Whether a step of this kind changes the vault, so the plan waits for the card's Do it. */
     val isConfirmed: Boolean get() = isWriting || isOrganizing

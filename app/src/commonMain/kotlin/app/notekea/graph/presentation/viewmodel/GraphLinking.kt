@@ -23,16 +23,22 @@ internal class GraphLinking(
         if (linkJob?.isActive == true) return
 
         linkJob = host.launch {
-            lastLink = linkNotes(vaultPath, source, target, host.notes.keys)
-            val isLinked = lastLink != null
+            val link = linkNotes(vaultPath, source, target, host.notes.keys)
+            lastLink = link
+            val isLinked = link != null
 
-            if (isLinked) {
+            if (link != null) {
                 host.graph = host.graph?.withLink(
                     one = source,
                     other = target
                 )
 
-                host.emit(effect = GraphEffect.NoteRewritten(path = source))
+                host.emit(
+                    effect = GraphEffect.NoteRewritten(
+                        path = source,
+                        original = link.original
+                    )
+                )
             }
 
             host.change {
@@ -61,7 +67,13 @@ internal class GraphLinking(
                     other = target
                 )
 
-                host.emit(effect = GraphEffect.NoteRewritten(path = rewrite.path))
+                // The undo starts from the text the link wrote.
+                host.emit(
+                    effect = GraphEffect.NoteRewritten(
+                        path = rewrite.path,
+                        original = rewrite.updated
+                    )
+                )
             }
 
             lastLink = null

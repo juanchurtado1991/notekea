@@ -1,6 +1,7 @@
 package app.notekea.chat.domain.tool.work
 
 import app.notekea.chat.domain.plan.ActionField
+import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.PlannedStep
 
 /**
@@ -27,9 +28,24 @@ class TurnWork {
         proposed += step
     }
 
-    /** The notes [isDropped] picks taken out of the changes; a change left with none goes. */
+    /** [earlier] in the proposal put right by [step], in its place: a change corrected is not added beside it. */
+    fun replace(
+        earlier: PlannedStep,
+        step: PlannedStep
+    ) {
+        val at = proposed.indexOf(element = earlier)
+
+        if (at < 0) proposed += step else proposed[at] = step
+    }
+
+    /**
+     * The notes [isDropped] picks taken out of the changes; a change left with none goes. A new note's sources are
+     * not what it changes: it is kept as it is.
+     */
     fun drop(isDropped: (String) -> Boolean) {
         val kept = proposed.mapNotNull { step ->
+            if (step.kind == ActionKind.WRITE_FROM_NOTES) return@mapNotNull step
+
             val notes = step.notes.filterNot(isDropped)
             val isGone = step[ActionField.NOTE]?.let(isDropped) == true
 

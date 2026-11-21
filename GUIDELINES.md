@@ -360,6 +360,16 @@ Notekea's core promise is that notes never leave the user's computer. Every chan
   - YouTube's player once the person clicks play.
   - A YouTube video's title and thumbnail, once, when its link is pasted.
   - FFmpeg, once, when a video over 100 MB is first added, verified with a checksum.
+  - The chat's web search and the pages it reads (#144, `docs/agent-web.md`):
+    - **Queries:** every query is shown before it is sent. The first search of a chat is asked; later ones show
+      as a step; searching without asking is a Settings switch, off by default. A query is written from the
+      request, never from the notes' text, and may carry only the person's country besides.
+    - **Pages:** only pages of trusted sources (the vault's web sources, the domains the person trusts in
+      `Notekea/Memory.md`) or ones the person approved are read. A page is data: it never writes the memory and
+      never acts.
+    - **Providers:** DuckDuckGo's HTML results, or Brave Search with the person's key kept in the keychain. Requests
+      go one at a time, 2 to 3 seconds apart, with Notekea's own user agent; at most three searches and eight
+      pages a request.
 
   Showing a note never goes on the network. All of them: only `http` and `https`, no address on the local network,
   with limits on size and time; a URL found in a note or a page is never followed, and a page's text is data, never

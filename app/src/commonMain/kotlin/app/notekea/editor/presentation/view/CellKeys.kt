@@ -44,16 +44,11 @@ internal class CellKeys(
 
         val selection = page.buffer.selection
         val isPlain = !event.isShiftPressed
-
-        val isAtStart =
-            isPlain &&
-                selection.collapsed &&
-                selection.start == cell.start
-
-        val isAtEnd =
-            isPlain &&
-                selection.collapsed &&
-                selection.start == cell.end
+        // Shift changes what an arrow does, but Backspace and Delete still delete with it.
+        val isAtCellStart = selection.collapsed && selection.start == cell.start
+        val isAtCellEnd = selection.collapsed && selection.start == cell.end
+        val isAtStart = isPlain && isAtCellStart
+        val isAtEnd = isPlain && isAtCellEnd
 
         val above = table.cell(
             row = cell.row - 1,
@@ -99,9 +94,9 @@ internal class CellKeys(
             Key.DirectionRight -> isAtEnd && (go(offset = next?.start) || leaveDown(table = table))
 
             // At the cell's edges they would delete its pipe.
-            Key.Backspace -> isAtStart
+            Key.Backspace -> isAtCellStart
 
-            Key.Delete -> isAtEnd
+            Key.Delete -> isAtCellEnd
 
             else -> false
         }

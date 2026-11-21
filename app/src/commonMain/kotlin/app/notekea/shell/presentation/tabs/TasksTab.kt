@@ -67,7 +67,12 @@ internal fun FollowTasks(
                 }
 
                 is TasksEffect.NoteRewritten -> viewModels.editors.forEach { editor ->
-                    editor.onIntent(intent = EditorIntent.OnNoteRewritten(path = effect.path))
+                    editor.onIntent(
+                        intent = EditorIntent.OnNoteRewritten(
+                            path = effect.path,
+                            original = effect.original
+                        )
+                    )
                 }
             }
         }

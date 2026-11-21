@@ -13,7 +13,7 @@ internal object AskedWords {
     private val ABOUT = Regex(
         pattern = "^\\W*(what|which|who|whom|whose|when|where|why|how (much|many|long|often)|" +
             "qu[eé]|cu[aá]l|cu[aá]les|qui[eé]n|qui[eé]nes|cu[aá]ndo|d[oó]nde|por qu[eé]|cu[aá]nt[oa]s?|" +
-            "tell me|dime|decime|quiero (saber|que me digas)|is|are|does|do|did|est[aá]|hay)\\b",
+            "tell me|dime|decime|quiero (saber|que me digas)|is|are|does|do|did|est[aá]|hay)(?![\\p{L}\\p{N}])",
         option = RegexOption.IGNORE_CASE
     )
 

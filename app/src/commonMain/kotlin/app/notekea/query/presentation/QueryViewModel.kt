@@ -293,7 +293,12 @@ class QueryViewModel(
             return false
         }
 
-        emit(effect = QueryEffect.NoteRewritten(path = rewrite.path))
+        emit(
+            effect = QueryEffect.NoteRewritten(
+                path = rewrite.path,
+                original = rewrite.original
+            )
+        )
 
         return true
     }

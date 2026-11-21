@@ -57,6 +57,113 @@ internal object ChangeMisuse {
         }
     }
 
+    /**
+     * set_property with the value a task tags with: "tag the notes that have a status property with tracked" had
+     * both models set status to tracked on every project (the loop's fifth run).
+     */
+    fun tagAsProperty(
+        task: String,
+        step: PlannedStep
+    ): String? {
+        val words = task.lowercase()
+        val value = step[ActionField.VALUE]?.lowercase()?.removePrefix(prefix = "#") ?: return null
+
+        val isTagged = TAGS.containsMatchIn(input = words) && Regex.escape(value).let {
+            Regex(pattern = "\\b(with|con) #?$it\\b").containsMatchIn(input = words)
+        }
+
+        return if (isTagged) {
+            "set_property sets a property, and the task tags with \"$value\": call add_tag with the notes and " +
+                "that tag."
+        } else {
+            null
+        }
+    }
+
+    /**
+     * add_task where the task names another change and no task: "tag the notes about my home renovation" got "Task to
+     * tag home renovation notes" added to one of them, and four more like it (the loop's seventh run). Every time.
+     */
+    fun taskUnasked(
+        task: String,
+        step: PlannedStep
+    ): String? {
+        // The task's own words: "add 'set up the router' to Home" names no change in what it quotes (T12).
+        val words = QUOTED
+            .replace(
+                input = task.lowercase(),
+                replacement = " "
+            )
+
+        val isAdded =
+            ADDS_TO.containsMatchIn(input = words) && !ADDS_OTHER.containsMatchIn(input = words)
+
+        val isAsked = ASKS_TASK.containsMatchIn(input = words) || isAdded
+        val isUnasked = OTHER_CHANGE.containsMatchIn(input = words) && !isAsked
+
+        return if (isUnasked && step[ActionField.TEXT] != null) {
+            "The task asks for no task, and nothing it does not ask for is added. When the proposal holds " +
+                "what the task asks, call propose now."
+        } else {
+            null
+        }
+    }
+
+    /**
+     * The tag the task itself writes (tag … with X, etiqueta con X, tag it as X), as written; null when it leaves
+     * the word to the model. The loop's eighth run refused "travel" for "con viaje" ten times in a row: the tag is
+     * the task's, so it is used, not argued over.
+     */
+    fun tagNamed(task: String): String? {
+        if (!TAGS.containsMatchIn(input = task.lowercase())) return null
+
+        val named = TAG_AS.find(input = task) ?: TAG_NAMED.findAll(input = task).lastOrNull()
+
+        return named
+            ?.groupValues
+            ?.get(index = 1)
+            ?.takeIf {
+                it.lowercase() !in NO_TAG
+            }
+    }
+
+    private val TAG_NAMED = Regex(
+        pattern = "\\b(?:with|con)\\s+#?([\\p{L}\\p{N}_/-]+)",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    private val TAG_AS = Regex(
+        pattern = "\\b(?:as|como)\\s+#?([\\p{L}\\p{N}_/-]+)",
+        option = RegexOption.IGNORE_CASE
+    )
+
+    // A word after "with" that is no tag: "with my sister", "with the open tasks", "as I asked".
+    private val NO_TAG = setOf(
+        "the", "a", "an", "my", "its", "their", "that", "this", "those", "open", "i", "you", "it", "tasks",
+        "el", "la", "los", "las", "un", "una", "mi", "mis", "su", "sus", "ese", "esa", "tareas"
+    )
+
+    private val ASKS_TASK = Regex(
+        pattern = "\\b(task|tasks|to-?do|to-?dos|remind|reminder|tarea|tareas|pendiente|pendientes|recuérdame|" +
+            "recuerdame|recordatorio)\\b"
+    )
+
+    // A span the task quotes: "…", “…”, «…», or '…' opened after a space (not the one in "don't").
+    private val QUOTED = Regex(pattern = "\"[^\"]*\"|“[^”]*”|«[^»]*»|(?:^|(?<=\\s))'[^']*'")
+
+    // "add X to Home", "pon X en mi lista": something put into a note, a task unless it is a tag or a property.
+    private val ADDS_TO = Regex(pattern = "\\b(add|put|añade|agrega|pon)\\b.*\\b(to|a|al|en)\\b")
+    private val ADDS_OTHER =
+        Regex(pattern = "\\b(tag|tags|etiqueta|etiquetas|property|propiedad|link|enlace|text|texto)\\b")
+
+    private val OTHER_CHANGE = Regex(
+        pattern = "\\b(tag|tags|etiqueta|etiquetas|etiquetar|etiquétalas|etiquetalas|etiquétalos|move|mueve|mover|" +
+            "rename|renombra|renombrar|set|property|propiedad|link|enlaza|enlazar)\\b"
+    )
+
+    private val TAGS =
+        Regex(pattern = "\\b(tag|tags|etiqueta|etiquetas|etiquétalas|etiquetalas|etiquetar)\\b")
+
     // "a note X with…", "listing…", "Lisbon plan: the places…", "con las recetas…".
     private val HOLDS = Regex(pattern = "\\b(with|listing|holding|con|listando|que tenga)\\b|\\w: ")
     private val ADDS_TASK =

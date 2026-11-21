@@ -132,6 +132,32 @@ class NoteGraphTest {
     }
 
     @Test
+    fun `a crowded inner ring stays inside a sparse outer one`() {
+        val hub = RelativePath(value = "Hub.md")
+        val far = RelativePath(value = "Far.md")
+        val near = (0 until 30).map { RelativePath(value = "Near $it.md") }
+
+        val depths = mapOf(hub to 0, far to 2) + near.associateWith { 1 }
+
+        val points = GraphLayout().rings(
+            graph = NoteGraph(
+                nodes = (listOf(hub, far) + near).map {
+                    GraphNode(
+                        path = it,
+                        links = 1
+                    )
+                },
+                edges = emptyList()
+            ),
+            depths = depths
+        )
+
+        val isOutside = distance(points.getValue(far)) > distance(points.getValue(near.first()))
+
+        assertTrue(actual = isOutside)
+    }
+
+    @Test
     fun `a spread keeps linked notes closer than the rest, and a large vault stays fast`() =
         runTest {
             val points = GraphLayout().spread(graph = graph)

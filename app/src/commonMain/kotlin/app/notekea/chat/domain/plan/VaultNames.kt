@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.plan
 
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
@@ -50,12 +51,9 @@ internal class VaultNames(
 
             ActionKind.CREATE_FOLDER -> StepTargets(folder = newFolder(name = folderName.orEmpty()))
 
-            ActionKind.WRITE_FROM_NOTES -> StepTargets(
-                notes = selected(
-                    step = step,
-                    isOpenByDefault = true
-                ),
-                folder = folderName?.let { folderOf(name = it) }
+            ActionKind.WRITE_FROM_NOTES -> writtenFrom(
+                step = step,
+                folderName = folderName
             )
 
             ActionKind.APPEND_TEXT, ActionKind.ADD_TASK -> StepTargets(
@@ -74,7 +72,7 @@ internal class VaultNames(
                 ),
                 folder = folderName?.let { folderOf(name = it) },
                 target = movedTo(name = step[ActionField.TARGET].orEmpty())
-            )
+            ).also { moved(targets = it) }
 
             ActionKind.RENAME, ActionKind.BOOKMARK, ActionKind.TRASH -> StepTargets(
                 notes = notesUnlessFolder(
@@ -82,9 +80,17 @@ internal class VaultNames(
                     folderName = folderName
                 ),
                 folder = folderName?.let { folderOf(name = it) }
-            )
+            ).also {
+                renamed(
+                    step = step,
+                    targets = it
+                )
+            }
 
             ActionKind.SHOW_TASKS -> StepTargets(folder = folderName?.let { folderOf(name = it) })
+
+            // The chat's memory is one note, whatever note is open.
+            ActionKind.REMEMBER, ActionKind.FORGET -> StepTargets(notes = listOf(VaultGuide.MEMORY))
 
             else -> StepTargets(
                 notes = selected(
@@ -93,6 +99,31 @@ internal class VaultNames(
                 )
             )
         }
+    }
+
+    /** A note written from notes, registered where the writer puts it: the folder asked for, else beside them. */
+    private fun writtenFrom(
+        step: PlannedStep,
+        folderName: String?
+    ): StepTargets {
+        val targets = StepTargets(
+            notes = selected(
+                step = step,
+                isOpenByDefault = true
+            ),
+            folder = folderName?.let { folderOf(name = it) }
+        )
+
+        written(
+            step = step,
+            folder = targets.folder ?: targets
+                .notes
+                .map { it.parent }
+                .distinct()
+                .singleOrNull()
+        )
+
+        return targets
     }
 
     /** The step's notes, unless it names a folder, which it then acts on whole. */
@@ -122,8 +153,18 @@ internal class VaultNames(
                 step.kind != ActionKind.ADD_TAG
             }
             ?.let { tag ->
-                notes.filter {
-                    tag.removePrefix(prefix = "#") in it.metadata.tags
+                val wanted = CheckPlanUseCase.tagOf(written = tag)
+
+                notes.filter { note ->
+                    note
+                        .metadata
+                        .tags
+                        .any {
+                            it.equals(
+                                other = wanted,
+                                ignoreCase = true
+                            )
+                        }
                 }.map { it.file.path }
             }
             .orEmpty()
@@ -207,11 +248,82 @@ internal class VaultNames(
         step: PlannedStep,
         folder: RelativePath?
     ) {
-        val title = step[ActionField.TITLE]
-        val isNote = step.kind == ActionKind.CREATE_NOTE && title != null
-        if (!isNote) return
+        if (step.kind == ActionKind.CREATE_NOTE) {
+            written(
+                step = step,
+                folder = folder
+            )
+        }
+    }
 
-        paths += (folder ?: RelativePath.ROOT).child(name = "$title$MARKDOWN")
+    // Registered under the file's name the writer gives it, not the raw title: "Ideas?" is written `Ideas.md`.
+    private fun written(
+        step: PlannedStep,
+        folder: RelativePath?
+    ) {
+        val title = step[ActionField.TITLE] ?: return
+
+        val name = NoteFileName.of(title = title) + MARKDOWN
+
+        paths += (folder ?: RelativePath.ROOT).child(name = name)
+    }
+
+    // A note moved or renamed is at its new path for the later steps: a tag after a move was written nowhere.
+    private fun moved(targets: StepTargets) {
+        val into = targets.target ?: return
+        val from = targets.folder
+
+        if (from != null) {
+            rebased(
+                from = from,
+                to = into.child(name = from.name)
+            )
+
+            return
+        }
+
+        targets.notes.forEach {
+            rebased(
+                from = it,
+                to = into.child(name = it.name)
+            )
+        }
+    }
+
+    private fun renamed(
+        step: PlannedStep,
+        targets: StepTargets
+    ) {
+        val title = step[ActionField.TITLE]?.trim()
+        val isRenamed = step.kind == ActionKind.RENAME && !title.isNullOrEmpty()
+        if (!isRenamed) return
+
+        val from = targets.folder ?: targets.notes.singleOrNull() ?: return
+        val name = if (from.isMarkdown) "$title$MARKDOWN" else title.orEmpty()
+
+        rebased(
+            from = from,
+            to = (from.parent ?: RelativePath.ROOT).child(name = name)
+        )
+    }
+
+    // [from], a note or a folder, and everything in it, now under [to].
+    private fun rebased(
+        from: RelativePath,
+        to: RelativePath
+    ) {
+        if (from.isRoot) return
+
+        val moved = paths.map {
+            it.rebased(
+                from = from,
+                to = to
+            )
+        }
+
+        paths.clear()
+        paths += moved
+        folders += moved.flatMap { ancestorsOf(path = it) }
     }
 
     private fun ancestorsOf(path: RelativePath): List<RelativePath> =

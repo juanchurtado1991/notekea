@@ -268,9 +268,7 @@ class AgentTaskUseCase(
         task: String,
         found: List<String>
     ): AgentStep {
-        val hasLooked = found.any {
-            !it.startsWith(prefix = AgentFinalAnswer.AGAIN)
-        }
+        val hasLooked = found.any { AgentFinalAnswer.isResult(entry = it) }
 
         if (!hasLooked) return AgentStep.Stopped(problem = null)
 

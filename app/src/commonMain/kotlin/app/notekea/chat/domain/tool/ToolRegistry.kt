@@ -16,6 +16,13 @@ class ToolRegistry(val tools: List<ChatTool>) {
         context: ToolContext
     ): String = "${call.name}:${byName[call.name]?.targetOf(call, context).orEmpty()}".lowercase()
 
+    /** The tools that end the turn and no other. */
+    fun ends(): ToolRegistry = ToolRegistry(
+        tools = tools.filter {
+            it.effect == ToolEffect.ENDS
+        }
+    )
+
     /** The tools that change or end, none that looks: what a call may be once the turn has looked enough. */
     fun ending(): ToolRegistry = ToolRegistry(
         tools = tools.filter {
@@ -52,7 +59,13 @@ class ToolRegistry(val tools: List<ChatTool>) {
         val named = "\"$NAMED\":{\"const\":\"${tool.name}\"}"
 
         val properties = tool.arguments.map {
-            if (it.isList) "\"${it.name}\":$LIST" else "\"${it.name}\":$TEXT"
+            val type = when {
+                it.isList -> LIST
+                it.isValue -> VALUE
+                else -> TEXT
+            }
+
+            "\"${it.name}\":$type"
         }
 
         val required = listOf(NAMED) + tool
@@ -71,6 +84,8 @@ class ToolRegistry(val tools: List<ChatTool>) {
         /** The field of a call that names its tool, written first. */
         const val NAMED = "tool"
         private const val TEXT = "{\"type\":\"string\"}"
+        private const val VALUE =
+            "{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"},{\"type\":\"boolean\"}]}"
         private const val LIST =
             "{\"type\":\"array\",\"maxItems\":12,\"items\":{\"type\":\"string\"}}"
     }

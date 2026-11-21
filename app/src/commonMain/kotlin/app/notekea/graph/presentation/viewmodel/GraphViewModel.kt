@@ -86,6 +86,9 @@ class GraphViewModel(
         host = host
     )
     private var openedFrom: RelativePath? = null
+
+    // The center the notes no longer hold, until a rename tells where it went or another note is chosen.
+    private var lostCenter: RelativePath? = null
     private val relatedNotes = GraphRelatedNotes(vaultPath, findRelatedNotes, noteTextCache)
     private val previews = GraphPreviews(vaultPath, noteTextCache, markdownLineStripper)
     private var isShown = false
@@ -105,6 +108,11 @@ class GraphViewModel(
     override fun handleIntent(intent: GraphIntent) {
         when (intent) {
             is GraphIntent.OnNotesChange -> changeNotes(notes = intent.notes)
+
+            is GraphIntent.OnRenamed -> rename(
+                from = intent.from,
+                to = intent.to
+            )
 
             is GraphIntent.OnIndexChange -> changeIndex(isReady = intent.isReady)
 
@@ -159,6 +167,22 @@ class GraphViewModel(
         refresh()
     }
 
+    private fun rename(
+        from: RelativePath,
+        to: RelativePath
+    ) {
+        val lost = lostCenter
+        lostCenter = null
+        openedFrom = openedFrom?.rebased(from, to)
+
+        change {
+            it.copy(
+                center = (it.center ?: lost)?.rebased(from, to),
+                selected = it.selected?.rebased(from, to)
+            )
+        }
+    }
+
     private fun changeIndex(isReady: Boolean) {
         if (isReady == state.value.isIndexReady) return
         relatedNotes.forget()
@@ -173,6 +197,7 @@ class GraphViewModel(
 
     private fun open(note: RelativePath?) {
         openedFrom = note
+        lostCenter = null
 
         change {
             it.copy(
@@ -267,9 +292,19 @@ class GraphViewModel(
 
             val shown = whole.withoutFolders(folders = current.excludedFolders)
 
-            val center = current.center?.takeIf {
+            // A center missing from the notes is kept aside: they may still be loading, or a rename that moved
+            // it may come after them. Before any note comes it stays the center, so the graph opens on it then.
+            val wanted = current.center ?: lostCenter
+
+            val center = wanted?.takeIf {
                 it in notes
             }
+
+            lostCenter = wanted.takeIf {
+                center == null
+            }
+
+            val keptCenter = if (notes.isEmpty()) wanted else center
 
             val (dots, lines) = when {
                 current.scope == GraphScope.WHOLE_VAULT -> vaultOf(shown)
@@ -281,7 +316,7 @@ class GraphViewModel(
                 search.withMatches(
                     state = it.copy(
                         isLoading = false,
-                        center = center,
+                        center = keptCenter,
                         dots = dots,
                         lines = lines,
                         folders = folders,

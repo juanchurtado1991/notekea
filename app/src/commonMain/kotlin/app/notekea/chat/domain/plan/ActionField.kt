@@ -8,6 +8,7 @@ enum class ActionField(val written: String) {
     TAG(written = "tag"),
     TITLE(written = "title"),
     TEXT(written = "text"),
+    LINE(written = "line"),
     TEMPLATE(written = "template"),
     PROPERTY(written = "property"),
     VALUE(written = "value"),

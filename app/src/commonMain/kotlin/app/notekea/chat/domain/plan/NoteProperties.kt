@@ -8,7 +8,11 @@ internal object NoteProperties {
     fun of(note: NoteEntry): List<String> = note
         .metadata
         .properties
-        .map { "${it.key}: ${writtenOf(value = it.value)}" }
+        .map { property ->
+            // An unread value's source already starts with its key: the model was shown "status: status: draft".
+            val value = property.value
+            if (value is PropertyValue.Other) value.source else "${property.key}: ${writtenOf(value = value)}"
+        }
 
     private fun writtenOf(value: PropertyValue): String = when (value) {
         is PropertyValue.Text -> value.text

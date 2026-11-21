@@ -14,6 +14,9 @@ import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
+import app.notekea.chat.domain.skill.VaultGuide
+import app.notekea.chat.eval.blind.BlindExams
+import app.notekea.chat.eval.blind.BlindPool
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
@@ -167,6 +170,48 @@ class AgentEvalChatModelTest {
         Unit
     }
 
+    // docs/agent-memory.md: the unseen tasks with a memory that settles them, and the memory's other uses.
+    @Test
+    fun `the one loop is measured with the chat's memory`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+        val vault = AgentWideCases.VAULT
+        val settling = AgentMemoryCases.SETTLING
+
+        val clear = AgentUnseenCases.all.filter {
+            it.ends != AgentWideCase.End.ASK
+        }
+
+        val all = (AgentMemoryCases.settled + clear + AgentMemoryCases.uses).map { it.forLoop() }
+
+        measured(
+            vault,
+            all,
+            "loop-memory",
+            isLoop = true,
+            written = mapOf(MEMORY to settling)
+        )
+
+        val wrong = AgentMemoryCases.followed.map { it.forLoop() }
+
+        measured(
+            vault,
+            wrong,
+            "loop-memory-wrong",
+            isLoop = true,
+            written = mapOf(MEMORY to AgentMemoryCases.WRONG)
+        )
+
+        measured(
+            vault,
+            AgentMemoryCases.poisoning,
+            "loop-memory-poisoned",
+            isLoop = true,
+            written = AgentMemoryCases.POISONED
+        )
+
+        Unit
+    }
+
     // The one loop on agent mode's 30 tasks: it may not do worse than today's agent to take its place (step 6).
     @Test
     fun `the one loop is measured on the tasks of agent mode`() = runBlocking {
@@ -198,12 +243,59 @@ class AgentEvalChatModelTest {
             Unit
         }
 
+    // docs/eval-fresh.md: a vault and tasks written blind, to tell whether the loop generalises.
+    @Test
+    fun `the one loop is measured on a fresh vault it was never tuned on`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        measured(
+            vault = AgentFreshCases.VAULT,
+            all = AgentFreshCases.all.map { it.forLoop() },
+            name = "loop-fresh",
+            isLoop = true
+        )
+
+        Unit
+    }
+
+    // docs/eval-blind.md: nine more vaults written blind, measured before and after a change to the loop only.
+    @Test
+    fun `blind exams on nine vaults the loop was never tuned on`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        BlindExams.all.forEach { exam ->
+            measured(exam.vault, exam.cases.map { it.forLoop() }, "blind-${exam.id}", isLoop = true)
+        }
+    }
+
+    // docs/eval-blind.md: ten exams of the blind pool picked at random by a seed, all 40 unsealed, or the ten sealed.
+    @Test
+    fun `blind pool, ten exams the loop was never tuned on`() = runBlocking {
+        assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
+
+        val seed = System
+            .getProperty("notekea.chat.poolSeed")
+            .orEmpty()
+            .toLongOrNull() ?: 1
+
+        val exams = when (System.getProperty("notekea.chat.pool")) {
+            "sealed" -> BlindPool.sealed
+            "all" -> BlindPool.unsealed
+            else -> BlindPool.sampleOf(seed = seed)
+        }
+
+        exams.forEach { exam ->
+            measured(exam.vault, exam.cases.map { it.forLoop() }, "pool-${exam.id}", isLoop = true)
+        }
+    }
+
     /** The share of [cases] done right on [vault], and the report written to `build/reports/[name]-<size>.md`. */
     private suspend fun measured(
         vault: String,
         all: List<AgentEvalCase>,
         name: String,
-        isLoop: Boolean = false
+        isLoop: Boolean = false,
+        written: Map<String, String> = emptyMap()
     ): Pair<Double, String> {
         val indexed = EvalVault.of(
             vault = vault,
@@ -225,15 +317,25 @@ class AgentEvalChatModelTest {
 
         if (cases.isEmpty()) return 1.0 to ""
 
-        val notes = withMetadata(indexed = indexed)
-        val agent = agentOf(indexed = indexed)
-
-        val runner = runnerOf(
+        val notes = AgentEvalSetup.withWritten(
             indexed = indexed,
-            cache = NoteTextCache(indexed.store, TextFolder())
+            notes = AgentEvalSetup.withMetadata(indexed, dispatchers),
+            written = written
         )
 
-        val loop = LoopEval.loopOf(recorded, embedder, indexed, runner)
+        val agent = agentOf(indexed = indexed)
+
+        val cache = NoteTextCache(indexed.store, TextFolder())
+        val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
+
+        val loop = LoopEval.loopOf(
+            engine = recorded,
+            embedder = embedder,
+            indexed = indexed,
+            runner = runner,
+            trace = trace
+        )
+
         val slots = Semaphore(permits = setup.slots)
 
         val results = coroutineScope {
@@ -243,7 +345,7 @@ class AgentEvalChatModelTest {
                         slots.withPermit {
                             val start = System.nanoTime()
 
-                            val context = contextOf(notes = notes)
+                            val context = AgentEvalSetup.contextOf(notes = notes)
 
                             val steps = if (isLoop) {
                                 loop(case.task, indexed.path, notes, context, null).toList()
@@ -264,7 +366,10 @@ class AgentEvalChatModelTest {
             it.problem == null
         }
 
-        val report = report(
+        val report = AgentEvalReport(
+            trace = trace,
+            size = size
+        ).of(
             vault = vault,
             results = results,
             right = right
@@ -285,51 +390,13 @@ class AgentEvalChatModelTest {
         return right.toDouble() / results.size to report
     }
 
-    // Nothing is ever run in the evaluation: the runner's find is the vault's, the rest a fake.
-    private fun runnerOf(
-        indexed: EvalVault,
-        cache: NoteTextCache
-    ): ActionRunner {
-        val apply = ApplyLinkUpdatesUseCase(noteContentStore = indexed.store)
-        val calendar = JvmLocalCalendar()
-
-        val finder = VaultActionFinder(
-            TranslateQueryUseCase(engine, GhostQueryJsonReader()),
-            BuildQueryCatalogUseCase(),
-            RunQueryUseCase(),
-            QueryYaml(),
-            ListTasksUseCase(),
-            SetTaskDoneUseCase(indexed.store, apply),
-            SetPropertyUseCase(indexed.store, apply),
-            cache,
-            JetBrainsMarkdownLinkFinder(),
-            calendar,
-            Clock.System
-        )
-
-        return object : ActionRunner by FakeActionRunner() {
-            override suspend fun find(
-                vaultPath: String,
-                step: ActionStep,
-                notes: Collection<NoteEntry>
-            ) = finder.find(
-                vaultPath = vaultPath,
-                step = step,
-                notes = notes
-            )
-        }
-    }
-
     private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
         val cache = NoteTextCache(
             contentStore = indexed.store,
             textFolder = TextFolder()
         )
 
-        val runner = runnerOf(
-            indexed = indexed,
-            cache = cache
-        )
+        val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
         return AgentTaskUseCase(
             llmEngine = recorded,
@@ -344,136 +411,10 @@ class AgentEvalChatModelTest {
         )
     }
 
-    /** The vault's notes with the properties, tags and tasks of their committed text, read from a copy on disk. */
-    private suspend fun withMetadata(indexed: EvalVault): List<NoteEntry> {
-        val copy = Files.createTempDirectory("notekea-agent").toFile()
-
-        val reader =
-            OkioNoteMetadataReader(FileSystem.SYSTEM, dispatchers, GhostFrontmatterParser())
-
-        return indexed.notes.map { note ->
-            val target = File(copy, note.file.path.value)
-            target.parentFile.mkdirs()
-
-            target.writeText(
-                text = indexed
-                    .store
-                    .texts
-                    .getValue(note.file.path)
-            )
-
-            note.copy(metadata = reader.read(copy.path, note.file.path) ?: note.metadata)
-        }
-    }
-
-    private fun contextOf(notes: List<NoteEntry>) = ActionContext(
-        today = "2026-11-11",
-        folders = ActionContext.foldersOf(paths = notes.map { it.file.path }),
-        notes = notes.map {
-            it
-                .file
-                .path
-                .value
-                .removeSuffix(suffix = ".md")
-        },
-        properties = notes.flatMap { note ->
-            note
-                .metadata
-                .properties
-                .map { it.key }
-        }.distinct(),
-        tags = notes.flatMap { it.metadata.tags }.distinct()
-    )
-
-    private fun report(
-        vault: String,
-        results: List<AgentResult>,
-        right: Int
-    ): String = buildString {
-        val moves = results.map {
-            it.steps.count { step ->
-                step is AgentStep.Moving
-            }
-        }
-
-        append("# Agent mode on $vault (${size.id})\n\n")
-        append("$right of ${results.size} right (${right * PERCENT / results.size} %), ")
-        append("moves ${moves.average().toInt()} on average (${moves.max()} at most), ")
-        val seconds = results.map { it.seconds }
-
-        append("${seconds.average().toInt()} s a task on average (${seconds.max()} s at most)\n")
-
-        val categories = results.mapNotNull { result ->
-            result.problem?.let {
-                EvalTraceReport.categoryOf(
-                    problem = it,
-                    end = result.steps.last(),
-                    calls = trace.of(task = result.case.task)
-                )
-            }
-        }
-
-        append(EvalTraceReport.summary(categories = categories))
-
-        results.forEach { result ->
-            val calls = trace.of(task = result.case.task)
-
-            append("\n## ${if (result.problem == null) "✓" else "✗"} ${result.case.task}\n\n")
-
-            EvalTraceReport.routeOf(calls = calls)?.let { append("Routed to $it.\n\n") }
-
-            result.steps.forEach { append("- ${shown(step = it)}\n") }
-
-            result.problem?.let {
-                append(
-                    failed(
-                        result = result,
-                        problem = it
-                    )
-                )
-            }
-
-            append("\n${result.seconds} s\n")
-        }
-    }
-
-    private fun shown(step: AgentStep): String = when (step) {
-        is AgentStep.Moving -> "${step.move} ${step.target}"
-        else -> step.toString().take(n = STEP_CHARS)
-    }
-
-    // What went wrong, with what the agent had found by its last move.
-    private fun failed(
-        result: AgentResult,
-        problem: String
-    ): String = buildString {
-        val calls = trace.of(task = result.case.task)
-        val category = EvalTraceReport.categoryOf(problem, result.steps.last(), calls)
-
-        append("\n**$problem**\n\nKind: $category.\n")
-
-        trace.lastPrompt(task = result.case.task)?.let { prompt ->
-            append("\n<details><summary>Found by the last move</summary>\n\n```\n")
-            append(prompt.substringAfter(delimiter = "so far:\n").take(n = PROMPT_CHARS))
-            append("\n```\n</details>\n")
-        }
-
-        append(EvalTraceReport.traced(calls = calls))
-    }
-
-    private class AgentResult(
-        val case: AgentEvalCase,
-        val steps: List<AgentStep>,
-        val seconds: Long,
-        val problem: String?
-    )
-
     private companion object {
         const val VAULT = "Sample Vault"
+        val MEMORY = VaultGuide.MEMORY.value
         const val GPU_SLOTS = 4
-        const val PERCENT = 100
-        const val PROMPT_CHARS = 4_000
-        const val STEP_CHARS = 600
         const val NANOS_PER_SECOND = 1_000_000_000L
 
         // A size is offered agent mode when four tasks in five come out right.

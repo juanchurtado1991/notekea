@@ -29,9 +29,27 @@ enum class QueryCondition(
     );
 
     companion object {
-        /** The condition written as [text], or null. */
-        fun of(text: String): QueryCondition? = entries.firstOrNull {
-            it.written == text
+        private val SPACES = Regex(pattern = "\\s+")
+
+        /**
+         * The condition written as [text], or null. A person writes `Is empty` or `more  than` as well, so case and
+         * the spaces between words do not count.
+         */
+        fun of(text: String): QueryCondition? {
+            val words = wordsOf(text = text)
+
+            return entries.firstOrNull {
+                it.written == words
+            }
         }
+
+        /** [text] lowercase, with one space between its words: how a keyword is matched. */
+        fun wordsOf(text: String): String = text
+            .trim()
+            .lowercase()
+            .replace(
+                regex = SPACES,
+                replacement = " "
+            )
     }
 }

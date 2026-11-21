@@ -18,6 +18,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.tasks.NoteTask
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,7 +44,17 @@ class ReadingToolsTest {
         notes = listOf(
             entry(
                 path = lease.value,
-                modifiedOffsetMillis = 3_000
+                modifiedOffsetMillis = 3_000,
+                metadata = NoteMetadata.NONE.copy(
+                    tasks = listOf(true, false, false).map {
+                        NoteTask(
+                            stateIndex = 0,
+                            endIndex = 0,
+                            text = "Call Ana",
+                            isDone = it
+                        )
+                    }
+                )
             ),
             entry(
                 path = arepas.value,
@@ -100,9 +111,9 @@ class ReadingToolsTest {
     }
 
     @Test
-    fun `a note is read by a section, its subsections with it, and a section it lacks gets its headings`() =
+    fun `a long note is read by a section, its subsections with it, and a section it lacks gets its headings`() =
         runTest {
-            store.texts[lease] = LEASE
+            store.texts[lease] = LONG_LEASE
             val read = ReadTool(noteTextCache = cache)
             val rent = said(read, "note" to "Lease", "section" to "rent")
             val whole = said(read, "note" to "Lease", "section" to "## Lease")
@@ -113,7 +124,8 @@ class ReadingToolsTest {
                     true,
                     false,
                     true,
-                    "read \"Lease\": no section \"Deposit\". Its headings: Lease, Rent, Ending it, Contacts.",
+                    "read \"Lease\": no section \"Deposit\". Its headings: Lease, Rent, Ending it, Contacts, " +
+                        "Archive.",
                     listOf(lease)
                 ),
                 actual = listOf(
@@ -128,6 +140,18 @@ class ReadingToolsTest {
             )
         }
 
+    // The loop's dev run, 2026-11-19: Sprint 44 read by "Highlights" hid the points written above it.
+    @Test
+    fun `a section of a short note is the whole note`() = runTest {
+        store.texts[lease] = LEASE
+        val rent = said(ReadTool(noteTextCache = cache), "note" to "Lease", "section" to "rent")
+
+        assertEquals(
+            expected = true,
+            actual = "Intro line." in rent && "Ana" in rent
+        )
+    }
+
     @Test
     fun `a folder or a tag is listed by name with its properties, and with neither the last changed first`() =
         runTest {
@@ -135,16 +159,20 @@ class ReadingToolsTest {
 
             assertEquals(
                 expected = listOf(
-                    "list, 2 notes in \"recipes\":\nRecipes/Arepas\nRecipes/Soup (serves)",
-                    "list, 1 notes tagged latin:\nRecipes/Arepas",
-                    "list, 3 notes changed last:\nHome/Lease\nRecipes/Arepas\nRecipes/Soup (serves)",
-                    "list: no note in \"Trips\"."
+                    "list, 2 notes in \"recipes\":\nRecipes/Arepas (#latin)\nRecipes/Soup (serves)",
+                    "list, 1 notes tagged latin:\nRecipes/Arepas (#latin)",
+                    "list, 3 notes changed last:\nHome/Lease (2 open tasks)\nRecipes/Arepas (#latin)\n" +
+                        "Recipes/Soup (serves)",
+                    "list: no note in \"Trips\".",
+                    // A tag asked as a folder, as the 9B listed "Tags/idea" three times (the loop's fifth run).
+                    "list, 1 notes tagged latin:\nRecipes/Arepas (#latin)"
                 ),
                 actual = listOf(
                     said(list, "folder" to "recipes"),
                     said(list, "tag" to "latin"),
                     said(list),
-                    said(list, "folder" to "Trips")
+                    said(list, "folder" to "Trips"),
+                    said(list, "folder" to "Tags/latin")
                 )
             )
         }
@@ -212,5 +240,7 @@ class ReadingToolsTest {
         const val LEASE =
             "Intro line.\n\n# Lease\nSigned in May.\n\n## Rent\nThe rent is 950 euros a month.\n\n" +
                 "## Ending it\nEither side may end it with 60 days of notice.\n\n# Contacts\nAna, the landlord."
+
+        val LONG_LEASE = LEASE + "\n\n# Archive\n" + "An old line of the lease. ".repeat(n = 120)
     }
 }

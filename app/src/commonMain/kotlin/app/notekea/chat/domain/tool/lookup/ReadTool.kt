@@ -2,6 +2,7 @@ package app.notekea.chat.domain.tool.lookup
 
 import app.notekea.chat.domain.plan.AttachedTexts
 import app.notekea.chat.domain.plan.NoteProperties
+import app.notekea.chat.domain.plan.ReadNote
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
@@ -10,12 +11,13 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.chat.domain.tool.reading.TextOutline
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * A note's text, with the text of the documents attached to it (a pasted PDF): what the turn read, and so what a
  * note it writes is written from. A note with no text to work from is said, never written from.
  */
-class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
+class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
     private val attachedTexts = AttachedTexts(noteTextCache = noteTextCache)
 
     override val name = NAME
@@ -72,11 +74,7 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
 
         val shown = path.nameWithoutExtension
 
-        val unread = read
-            .unread
-            .takeIf { it.isNotEmpty() }
-            ?.let { " It attaches ${it.joinToString()}, which holds no text that can be read." }
-            .orEmpty()
+        val unread = unreadOf(read = read)
 
         if (read.text.isBlank()) {
             context.reads.addEmpty(name = shown)
@@ -87,7 +85,11 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
         context.reads.add(note = path)
         val section = call.text(name = SECTION)
 
-        if (section.isNotEmpty()) {
+        // A section of a short note is all of it: read by "Highlights", Sprint 44 hid the points above it and the
+        // 4B said no note held them (the loop's dev run, 2026-11-19).
+        val isSection = section.isNotEmpty() && read.text.length > NOTE_CHARS
+
+        if (isSection) {
             return sectionOf(
                 text = read.text,
                 section = section,
@@ -102,7 +104,12 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
 
         val more = if (read.text.length > NOTE_CHARS) {
             "\n(Its first $NOTE_CHARS of ${read.text.length} characters. A write_from_notes step that names " +
-                "this note reads all of it.)"
+                "this note reads all of it.)" +
+                LongNote.restOf(
+                    text = read.text,
+                    task = context.task,
+                    shown = NOTE_CHARS
+                )
         } else {
             ""
         }
@@ -113,11 +120,35 @@ class ReadTool(noteTextCache: NoteTextCache) : ChatTool {
             ?.let { ", with its attached ${it.joinToString()}" }
             .orEmpty()
 
+        // Notes on the same topic that write the task's words: an answer waits for them (`docs/agent-figures.md`).
+        val topic = TopicNotes.of(
+            note = note,
+            text = read.text,
+            context = context,
+            cache = noteTextCache
+        )
+
+        context.reads.relate(notes = topic)
+
+        val also = topic
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(
+                prefix = "\n(Also about this, by its links or tags: ",
+                postfix = ". Read them too.)"
+            ) { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            .orEmpty()
+
         return ToolResult(
             forModel = "read \"$shown\" ($words words$with):\n$properties" +
-                "${read.text.take(n = NOTE_CHARS)}$more$unread"
+                "${read.text.take(n = NOTE_CHARS)}$more$unread$also"
         )
     }
+
+    private fun unreadOf(read: ReadNote): String = read
+        .unread
+        .takeIf { it.isNotEmpty() }
+        ?.let { " It attaches ${it.joinToString()}, which holds no text that can be read." }
+        .orEmpty()
 
     // One part of a long note, by its heading, its subheadings with it; a heading the note lacks gets its headings.
     private fun sectionOf(

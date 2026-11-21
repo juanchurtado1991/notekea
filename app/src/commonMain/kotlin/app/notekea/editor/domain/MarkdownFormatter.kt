@@ -7,6 +7,8 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.TextEdit
 import app.notekea.core.notes.domain.isTableRow
 import app.notekea.core.notes.domain.links.NoteLink
+import app.notekea.core.notes.domain.links.isWikiLinkable
+import app.notekea.core.notes.domain.links.markdownLink
 
 /**
  * What a formatting toolbar button does to a note's text, as the single [TextEdit] a person would type. With a
@@ -46,10 +48,13 @@ class MarkdownFormatter {
         }
 
         blocks.of(action = action)?.let { build ->
+            // A table or a divider holds no text: it goes after the selection, which stays in the note.
+            val holdsNothing = action is FormatAction.Table || action == FormatAction.Divider
+
             // After an embedded file or a divider, typing goes on under it.
             return blocks.edit(
                 text = text,
-                start = start,
+                start = if (holdsNothing) end else start,
                 end = end,
                 isCursorUnder = action is FormatAction.Embed || action == FormatAction.Divider,
                 build = build
@@ -100,7 +105,7 @@ class MarkdownFormatter {
             text = text,
             start = start,
             end = end,
-            target = action.target
+            action = action
         )
 
         is FormatAction.WebLink -> webLink(
@@ -363,12 +368,29 @@ class MarkdownFormatter {
         text: String,
         start: Int,
         end: Int,
-        target: String
+        action: FormatAction.NoteLink
     ): TextEdit {
-        val label = text.substring(
+        val target = action.target
+
+        val selected = text.substring(
             startIndex = start,
             endIndex = end
-        ).takeIf {
+        )
+
+        // `[[C# notes]]` would point to a heading of "C": such a name is reached by a Markdown link instead.
+        val markdownSource = action.source?.takeUnless { isWikiLinkable(target = target) }
+
+        if (markdownSource != null) {
+            val link = markdownLink(
+                label = selected.ifBlank { action.path.nameWithoutExtension },
+                target = action.path,
+                source = markdownSource
+            )
+
+            return TextEdit(start, end, link, start + link.length, start + link.length)
+        }
+
+        val label = selected.takeIf {
             it.isNotBlank() && it != target
         }
 

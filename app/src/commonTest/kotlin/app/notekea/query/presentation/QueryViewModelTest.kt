@@ -26,6 +26,7 @@ import app.notekea.query.domain.SaveQueryUseCase
 import app.notekea.query.domain.SetPropertyUseCase
 import app.notekea.query.domain.TranslateQueryUseCase
 import app.notekea.query.domain.VaultQuery
+import app.notekea.query.presentation.QueryEffect.NoteRewritten
 import app.notekea.query.presentation.QueryTestData.DUNE
 import app.notekea.query.presentation.QueryTestData.NOTES
 import app.notekea.query.presentation.QueryTestData.VAULT
@@ -163,7 +164,7 @@ class QueryViewModelTest {
 
     @Test
     fun `a block runs on the note a cell just wrote, before the scan`() = test {
-        store.texts[DUNE] = "---\nrating: 5\n---\nDune\n"
+        store.texts[DUNE] = BEFORE
         show()
         val version = viewModel.state.value.notesVersion
 
@@ -406,13 +407,8 @@ class QueryViewModelTest {
         collector.cancel()
 
         assertEquals(
-            expected = "---\nrating: 4\n---\nDune\n",
-            actual = store.texts[DUNE]
-        )
-
-        assertEquals(
-            expected = listOf<QueryEffect>(QueryEffect.NoteRewritten(path = DUNE)),
-            actual = effects
+            expected = listOf("---\nrating: 4\n---\nDune\n", BEFORE),
+            actual = listOf(store.texts[DUNE], (effects.single() as NoteRewritten).original)
         )
 
         assertEquals(
@@ -500,5 +496,9 @@ class QueryViewModelTest {
             expected = listOf<QueryEffect>(QueryEffect.OpenNote(path = DUNE)),
             actual = effects
         )
+    }
+
+    private companion object {
+        const val BEFORE = "---\nrating: 5\n---\nDune\n"
     }
 }

@@ -58,9 +58,10 @@ class TranslateQueryUseCase(
             when (filter.condition) {
                 QueryCondition.IN_FOLDER -> filter.copy(
                     property = "",
-                    value = catalog.folders.firstOrNull {
-                        it.equals(filter.value.trim('/'), ignoreCase = true)
-                    }
+                    value = folderOf(
+                        named = filter.value.trim('/'),
+                        folders = catalog.folders
+                    )
                         ?: return unknown(
                             name = filter.value,
                             among = catalog.folders
@@ -72,8 +73,12 @@ class TranslateQueryUseCase(
                     value = filter.value.removePrefix(prefix = "#")
                 )
 
+                // A property no note has is empty in every note: "no priority" with no priority written yet.
                 else -> filter.copy(
                     property = names[filter.property.lowercase()]?.name
+                        ?: filter.property.takeIf {
+                            filter.condition == QueryCondition.IS_EMPTY
+                        }
                         ?: return unknown(
                             name = filter.property,
                             among = catalog.keys.map { it.name }
@@ -100,6 +105,17 @@ class TranslateQueryUseCase(
             )
         )
     }
+
+    // A folder by its path, or by its own name where one folder alone has it: "Projects" is Work/Projects.
+    private fun folderOf(
+        named: String,
+        folders: List<String>
+    ): String? = folders.firstOrNull { it.equals(named, ignoreCase = true) }
+        ?: folders.singleOrNull {
+            it
+                .substringAfterLast(delimiter = '/')
+                .equals(named, ignoreCase = true)
+        }
 
     private fun unknown(
         name: String,

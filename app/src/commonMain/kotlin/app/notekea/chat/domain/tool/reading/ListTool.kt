@@ -17,7 +17,8 @@ class ListTool : ChatTool {
     override val name = NAME
 
     override val description =
-        "a folder's name or a tag; you get the names of the notes there, each with its properties' names. " +
+        "a folder's name or a tag; you get the names of the notes there, each with its properties' names, " +
+            "its tags and its open tasks. " +
             "With neither, the notes changed last."
 
     override val arguments = listOf(
@@ -42,9 +43,27 @@ class ListTool : ChatTool {
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val folder = call.text(name = FOLDER).trim('/')
-        val tag = call.text(name = TAG)
         val notes = context.notes.filter { it.file.path.isMarkdown }
+        val asked = call.text(name = FOLDER).trim('/')
+
+        // "Tags/idea", "#idea", or a folder no note is in that is a tag: the 9B listed "Tags/idea" three times.
+        val named = asked.removePrefix(prefix = "#").substringAfter(delimiter = "Tags/")
+        val isTagged = notes.any { it.hasTag(tag = named) }
+
+        val isFolder = notes.any {
+            isIn(
+                note = it.file.path,
+                folder = asked
+            )
+        }
+
+        val isTag =
+            asked.isNotEmpty() &&
+                !isFolder &&
+                isTagged
+
+        val folder = if (isTag) "" else asked
+        val tag = if (isTag) named else call.text(name = TAG)
         val isRecent = folder.isEmpty() && tag.isEmpty()
 
         val (where, found) = when {
@@ -81,7 +100,8 @@ class ListTool : ChatTool {
         )
     }
 
-    // A note's name with the names of its properties, so a task about notes "with a status" is seen in the list.
+    // A note's name with its properties' names, its tags and its open tasks, so a task about the notes "with a
+    // status", "tagged idea" or "with open tasks" is seen in the list, not read note by note.
     private fun nameOf(note: NoteEntry): String {
         val name = note
             .file
@@ -97,7 +117,25 @@ class ListTool : ChatTool {
                 it != TAGS
             }
 
-        return if (keys.isEmpty()) name else "$name (${keys.joinToString()})"
+        val open = note
+            .metadata
+            .tasks
+            .count {
+                !it.isDone
+            }
+
+        val held = listOfNotNull(
+            keys.takeIf { it.isNotEmpty() }?.joinToString(),
+            note
+                .allTags
+                .takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = " ") { "#$it" },
+            "$open open tasks".takeIf {
+                open > 0
+            }
+        )
+
+        return if (held.isEmpty()) name else "$name (${held.joinToString(separator = "; ")})"
     }
 
     private fun recent(notes: List<NoteEntry>): List<NoteEntry> = notes

@@ -12,6 +12,9 @@ internal class ActionJournal {
     val trashed = mutableListOf<RelativePath>()
     val undoSteps = mutableListOf<suspend (vaultPath: String) -> Unit>()
 
+    /** The text each note the plan made had when made: Undo trashes it only while it still has that text. */
+    val madeTexts = mutableMapOf<RelativePath, String>()
+
     fun plan(id: Long): DonePlan = DonePlan(
         id = id,
         created = created.toList(),

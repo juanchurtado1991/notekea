@@ -28,6 +28,26 @@ class FenceTrackerTest {
         )
     }
 
+    // Bug hunt K5: a fence in a quote or under a list item was not code, so its sample tasks counted.
+    @Test
+    fun `a fence inside a quote or indented under a list item opens and closes a block`() {
+        assertEquals(
+            expected = listOf(false, true, true, true, false, false, true, true, true, false),
+            actual = codeLines(
+                "> Example",
+                "> ```",
+                "> - [ ] sample",
+                ">```",
+                "> after",
+                "- Step",
+                "    ```",
+                "    - [ ] sample",
+                "    ```",
+                "- Next"
+            )
+        )
+    }
+
     @Test
     fun `text outside a block is not code`() {
         assertEquals(

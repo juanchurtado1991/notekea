@@ -6,10 +6,14 @@ import app.notekea.chat.domain.agent.AgentTaskMove
 import app.notekea.chat.domain.agent.GroundedSteps
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.agent.ProposalVault
+import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.context.ModelProfile
+import app.notekea.chat.domain.context.StepMemory
 import app.notekea.chat.domain.plan.ActionContext
+import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.skill.VaultGuide
+import app.notekea.chat.domain.sources.SourceSites
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolCallJson
@@ -18,6 +22,7 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.change.ProposeTool
+import app.notekea.chat.domain.tool.lookup.RecallTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.chat.domain.tool.work.HandTool
@@ -26,11 +31,19 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.memory.domain.MemoryLine
+import app.notekea.core.memory.domain.MemoryLines
+import app.notekea.core.memory.domain.MemorySection
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.web.domain.Countries
+import app.notekea.core.web.domain.SourceTrust
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -44,9 +57,18 @@ class RunTurnUseCase(
     private val toolsets: Toolsets,
     private val vaultGuide: VaultGuide,
     private val proposal: ProposalCheck,
-    private val clock: Clock
+    private val clock: Clock,
+    private val stepMemory: StepMemory? = null,
+    private val wholeLast: Int? = null,
+    private val sourceSites: SourceSites? = null,
+    private val frames: FrameSource? = null
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
+
+    private val turnEnd = TurnEnd(
+        finalAnswer = finalAnswer,
+        proposal = proposal
+    )
     private val router = TurnRouter(llmEngine = llmEngine)
 
     operator fun invoke(
@@ -56,13 +78,7 @@ class RunTurnUseCase(
         context: ActionContext,
         openNote: RelativePath?
     ): Flow<AgentStep> = flow {
-        val turn = ToolContext(
-            vaultPath = vaultPath,
-            notes = notes,
-            task = task,
-            openNote = openNote,
-            today = dateOf(written = context.today)
-        )
+        val remembered = vaultGuide.memoryOf(vaultPath, notes)
 
         val route = router.route(
             task = task,
@@ -71,12 +87,50 @@ class RunTurnUseCase(
 
         if (route.kind.isReply) return@flow emit(value = AgentStep.Replied(kind = route.kind))
 
-        val tools = toolsets.of(kind = route.kind)
+        val relevant = TurnSetup.relevantOf(task, remembered, route.kind)
+
+        val frame =
+            TurnSetup.frameOf(task, vaultPath, notes, relevant, route.kind, frames, openNote)
+
+        // The vault's own web sources are trusted by definition (`docs/agent-web.md`): none were (bug hunt, E7).
+        val turn = TurnSetup.contextOf(
+            task = task,
+            vaultPath = vaultPath,
+            notes = notes,
+            today = context.today,
+            remembered = remembered,
+            openNote = openNote,
+            frame = frame,
+            sources = sourceSites?.sitesOf(vaultPath = vaultPath).orEmpty()
+        )
+
+        val tools = StepRecall.toolsOf(
+            tools = toolsets.of(
+                kind = route.kind,
+                task = task
+            ),
+            memory = stepMemory
+        )
+
+        val memory = TurnSetup.memoryOf(relevant, frame)
+
+        // A line the task matched is said as a step, so a wrong memory is seen the first time it matters.
+        MemoryLines.matched(lines = memory).forEach {
+            emit(
+                value = AgentStep.Moving(
+                    number = 0,
+                    move = MemoryLines.MOVE,
+                    target = it.text
+                )
+            )
+        }
 
         val system = LoopPrompt.system(
             tools = tools,
             instructions = vaultGuide.instructionsOf(vaultPath, notes),
-            skill = route.skill
+            skill = route.skill,
+            memory = memory,
+            frame = frame
         )
 
         val state = TurnState(
@@ -85,15 +139,26 @@ class RunTurnUseCase(
             system = system,
             tools = tools,
             turn = turn,
+            memory = memory,
+            frame = frame,
             budget = ContextBudget(
                 llmEngine = llmEngine,
                 tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,
                 fixed = LoopPrompt.fixedOf(system, task, context),
-                replyTokens = CALL_TOKENS + WORK_TOKENS
+                // The retry's room: less overflowed a small context (the bug hunt of 2026-11-17, E4).
+                replyTokens = RETRY_TOKENS + WORK_TOKENS,
+                memory = stepMemory,
+                need = task,
+                space = Random.nextLong().toString(),
+                wholeLast = wholeLast
             )
         )
 
-        run(state = state)
+        try {
+            run(state = state)
+        } finally {
+            withContext(context = NonCancellable) { state.budget.forget() }
+        }
     }
 
     private suspend fun FlowCollector<AgentStep>.run(state: TurnState) {
@@ -110,6 +175,10 @@ class RunTurnUseCase(
             ) ?: return emit(value = unread(state = state))
 
             val tool = state.tools[call.name]
+
+            // Looping still on a change after it may only end: the turn ends on what it has.
+            val isStopped = state.mustStop && tool?.effect != ToolEffect.ENDS
+            if (isStopped) return emit(value = unread(state = state))
 
             val held = TurnChecks.heldOf(
                 call = call,
@@ -142,6 +211,19 @@ class RunTurnUseCase(
                     state = state
                 )
             }
+
+            // New sources found on the web wait for the person, unless this turn already says which to read.
+            val web = state.turn.web
+            val isApproved = UrlsNamed.writtenIn(text = state.task).isNotEmpty()
+
+            if (web.isWaiting && !isApproved) {
+                return emit(
+                    value = AgentStep.SourcesFound(
+                        sources = web.found,
+                        omitted = web.omitted
+                    )
+                )
+            }
         }
 
         // Held on the last step for the question it must ask: one call more, which may only ask it.
@@ -172,12 +254,6 @@ class RunTurnUseCase(
         emit(value = unread(state = state))
     }
 
-    // What the answer is written from: what was found, as far as the context goes.
-    private suspend fun fittedOf(state: TurnState): List<String> = state
-        .budget
-        .fit(state.found, state.dropped)
-        .entries
-
     // A call that reads or works: shown as a step, run once, and told when it is made again.
     private suspend fun FlowCollector<AgentStep>.made(
         number: Int,
@@ -187,7 +263,10 @@ class RunTurnUseCase(
     ) {
         val target = tool.targetOf(call, state.turn)
 
-        val shared = sharedBy(
+        // Another call is made: a tool withheld for its refusal is offered again.
+        state.withheld.clear()
+
+        val shared = SharedNames.of(
             call = call,
             state = state
         )
@@ -200,15 +279,16 @@ class RunTurnUseCase(
             )
         )
 
-        if (shared != null) {
-            state.found += shared
-
-            return
-        }
-
         val key = state.tools.keyOf(call, state.turn)
         val isNew = state.made.add(key)
         if (!isNew) state.repeated += key
+
+        // A shared name asked again counts as made again: the 4B appended to "Ideas" 29 times (the web's third run).
+        if (shared != null) {
+            state.found += if (isNew) shared else "(${call.name} $target $AGAIN $shared"
+
+            return
+        }
 
         // A change asked again is in the proposal already: the next one, or the end, is what is left.
         val isChange = tool.effect == ToolEffect.PROPOSES
@@ -221,17 +301,27 @@ class RunTurnUseCase(
         }
 
         if (!isNew) {
-            state.found += again
+            state.found += StepRecall.againOf(key, state).takeUnless { isChange } ?: again
 
             return
         }
 
         val before = state.turn.work.changes.size
-        state.found += tool.run(call, state.turn).forModel
+        state.foundAt[key] = state.found.size
+
+        state.found += StepRecall.resultOf(
+            call = call,
+            tool = tool,
+            state = state
+        )
 
         // A change not added (refused, or held back with a question) may be asked again as it was.
         val isRefused = tool.effect == ToolEffect.PROPOSES && state.turn.work.changes.size == before
         if (isRefused) state.made.remove(element = key)
+
+        // A refused tool is not offered until another call is made: at temperature 0 the 4B made one refused call
+        // four times running (the bug hunt of 2026-11-17, E3).
+        if (isRefused) state.withheld += call.name
 
         // Refused again as it was, it counts as made again and is not offered next: refused over and over, it
         // ends the turn.
@@ -247,82 +337,11 @@ class RunTurnUseCase(
         if (isRefused) state.refused += key
     }
 
-    // A bare name several notes share is not settled by the app's guess: the model is told, to ask or to say which.
-    private fun sharedBy(
-        call: ToolCall,
-        state: TurnState
-    ): String? {
-        val named = listOf(call.text(name = NOTE)) + call.list(name = NOTES)
-
-        return named
-            .filter { it.isNotEmpty() }
-            .firstNotNullOfOrNull { name ->
-                state
-                    .turn
-                    .sharing(name = name)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { paths ->
-                        "(${paths.size} notes are named \"$name\": ${paths.joinToString()}. When the task " +
-                            "means one of them and does not say which, ask_user with them as the options. " +
-                            "When it means them all, or says which, call again with each whole path.)"
-                    }
-            }
-    }
-
     private suspend fun FlowCollector<AgentStep>.ended(
         call: ToolCall,
         tool: ChatTool,
         state: TurnState
-    ) {
-        val step = when (tool.name) {
-            AskUserTool.NAME -> AgentStep.Asked(
-                question = call.text(name = AskUserTool.QUESTION),
-                options = AskUserTool.optionsOf(call = call)
-            )
-
-            ProposeTool.NAME -> proposed(
-                state = state,
-                summary = call.text(name = ProposeTool.SUMMARY)
-            )
-
-            else -> AgentStep.Finished(
-                summary = finalAnswer.written(
-                    task = state.task,
-                    found = fittedOf(state = state),
-                    summary = call.text(name = AnswerTool.TEXT)
-                )
-            )
-        }
-
-        emit(value = step)
-    }
-
-    // The changes the turn added, checked against the vault and written out for the card; the notes it read are
-    // what a note it writes is written from.
-    private suspend fun proposed(
-        state: TurnState,
-        summary: String
-    ): AgentStep {
-        val move = GroundedSteps.of(
-            move = AgentTaskMove(
-                move = ProposeTool.NAME,
-                summary = summary,
-                steps = state.turn.work.changes
-            ),
-            read = state.turn.reads.read
-        )
-
-        return proposal.stepOf(
-            move = move,
-            unreadable = state.turn.reads.blind,
-            task = state.task,
-            vault = ProposalVault(
-                path = state.turn.vaultPath,
-                notes = state.turn.notes,
-                openNote = state.turn.openNote
-            )
-        )
-    }
+    ) = emit(value = turnEnd.stepOf(call, tool, state))
 
     // The next call, asked again once with more room when it cannot be read; null when it cannot twice.
     private suspend fun callOf(
@@ -354,8 +373,7 @@ class RunTurnUseCase(
         isEnding: Boolean,
         tokens: Int
     ): ToolCall? {
-        val fitted = state.budget.fit(state.found, state.dropped)
-        state.drops += fitted.dropped
+        val fitted = StepRecall.shownOf(state = state)
 
         // A call just made again is not offered for the next one: the model takes another way.
         val again = state
@@ -369,14 +387,26 @@ class RunTurnUseCase(
                     ?.contains(other = AGAIN) == true
             }
 
-        val offered = if (isEnding) state.tools.ending() else state.tools
+        // Recall is offered once something is no longer shown: before, there is nothing to ask back.
+        val looking =
+            if (state.hidden.isEmpty()) state.tools.without(name = RecallTool.NAME) else state.tools
+
+        val offered = when {
+            state.mustStop -> state.tools.ends()
+            isEnding -> state.tools.ending()
+            else -> looking
+        }
 
         val asking = state
             .tools
             .only(name = AskUserTool.NAME)
             .takeIf { UnsettledEnd.mustAsk(state = state) }
 
-        val tools = asking ?: again?.let { offered.without(name = it) } ?: offered
+        val withheld = (listOfNotNull(again) + state.withheld)
+            .fold(initial = offered) { left, name -> left.without(name = name) }
+            .takeIf { it.tools.isNotEmpty() }
+
+        val tools = asking ?: withheld ?: offered
 
         val json = StringBuilder()
 
@@ -411,35 +441,20 @@ class RunTurnUseCase(
 
     // No call could be read, or the steps ran out: what it found is still worth an answer; with nothing, it stopped.
     private suspend fun unread(state: TurnState): AgentStep {
-        val hasLooked = state.found.any {
-            !it.startsWith(prefix = AgentFinalAnswer.AGAIN)
-        }
+        val hasLooked = state.found.any { AgentFinalAnswer.isResult(entry = it) }
 
         // Changes already added are what it was asked for: they go on the card, not into an answer.
-        if (state.turn.work.changes.isNotEmpty()) return proposed(state, "")
+        if (state.turn.work.changes.isNotEmpty()) return turnEnd.proposed(state, "")
         if (!hasLooked) return AgentStep.Stopped(problem = null)
 
         val answer = finalAnswer.written(
             task = state.task,
-            found = fittedOf(state = state),
-            summary = ""
+            found = turnEnd.fittedOf(state = state),
+            summary = "",
+            memory = state.memory.map { it.text }
         )
 
         return AgentStep.Finished(summary = answer)
-    }
-
-    private fun dateOf(written: String): CalendarDate? {
-        val parts = written
-            .split("-")
-            .mapNotNull { it.toIntOrNull() }
-
-        if (parts.size != DATE_PARTS) return null
-
-        return CalendarDate(
-            year = parts[0],
-            month = parts[1],
-            day = parts[2]
-        ).takeIf { it.isValid }
     }
 
     companion object {
@@ -448,10 +463,6 @@ class RunTurnUseCase(
         private const val CALL_TOKENS = 700
         private const val RETRY_TOKENS = 1_400
         private const val WORK_TOKENS = 300
-        private const val DATE_PARTS = 3
         private const val AGAIN = "again: its result is above."
-
-        private const val NOTE = "note"
-        private const val NOTES = "notes"
     }
 }

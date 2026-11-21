@@ -4,10 +4,12 @@ import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolRegistry
+import app.notekea.core.memory.domain.MemoryLine
 
 /**
  * One turn of the loop as it goes, held inside [RunTurnUseCase]'s flow and nowhere else: what its calls gave back
- * ([found]), the calls [made], the ones made again ([repeated]) and what the budget [dropped].
+ * ([found]), the calls [made], the ones made again ([repeated]) and what the budget [dropped], and what the task
+ * means ([frame], `docs/agent-frame.md`): null when no frame was made, and nothing is then held back for one.
  */
 internal class TurnState(
     val task: String,
@@ -15,7 +17,9 @@ internal class TurnState(
     val system: String,
     val tools: ToolRegistry,
     val turn: ToolContext,
-    val budget: ContextBudget
+    val budget: ContextBudget,
+    val memory: List<MemoryLine> = emptyList(),
+    val frame: TaskFrame? = null
 ) {
     val found = mutableListOf<String>()
     val made = mutableSetOf<String>()
@@ -24,16 +28,15 @@ internal class TurnState(
     val repeated = mutableListOf<String>()
     val drops = mutableListOf<Int>()
 
+    // The results not shown whole at the last step (dropped or folded), and where each call's result is in [found].
+    val hidden = mutableSetOf<Int>()
+    val foundAt = mutableMapOf<String, Int>()
+
     // The changes refused, so one refused again as it was counts as made again.
     val refused = mutableListOf<String>()
 
-    /** The notes the task can mean and does not say which of: the person is asked before the turn ends. */
-    val ambiguous by lazy {
-        AmbiguousTask.notesOf(
-            task = task,
-            notes = turn.notes
-        )
-    }
+    // The tool of the last call made, when it was refused: not offered until another call is made.
+    val withheld = mutableListOf<String>()
 
     val dropped: Int get() = drops.lastOrNull() ?: 0
 
@@ -42,6 +45,12 @@ internal class TurnState(
 
     /** A call made again three times is a loop: the next call may only end the turn, a grammar seeing to it. */
     val mustEnd: Boolean get() = repeated.size >= MOST_REPEATS
+
+    /**
+     * Twice that many: the turn may only end, no change tool offered. Two refused changes took turns for 28 steps
+     * (the loop's eighth run), as a change tool is still an ending call.
+     */
+    val mustStop: Boolean get() = repeated.size >= MOST_REPEATS * 2
 
     private companion object {
         const val MOST_REPEATS = 3

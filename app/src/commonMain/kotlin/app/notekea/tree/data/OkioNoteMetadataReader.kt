@@ -20,8 +20,8 @@ import okio.use
 
 /**
  * [NoteMetadataReader] on Okio: reads the frontmatter, then the text line by line for its tags ([TextTagFinder]) and
- * tasks ([NoteTaskCollector]), up to [MAX_TEXT_CHARACTERS]. Frontmatter is a `---` first line closed by `---` or `...`;
- * unclosed or longer than [MAX_FRONTMATTER_CHARACTERS], it is no frontmatter, as in Obsidian.
+ * tasks ([NoteTaskCollector]), up to [MAX_TEXT_CHARACTERS]. Frontmatter is a `---` first line closed by `---`, as
+ * `NoteDocument` reads it; unclosed or longer than [MAX_FRONTMATTER_CHARACTERS], it is none, as in Obsidian.
  */
 class OkioNoteMetadataReader(
     private val fileSystem: FileSystem,
@@ -46,9 +46,7 @@ class OkioNoteMetadataReader(
                     // were lost with its tags and tasks (the code review of 2026-11-13).
                     val readAhead = mutableListOf<String>()
 
-                    val yaml = firstLine?.takeIf {
-                        it.trimEnd() == OPENING_FENCE
-                    }?.let {
+                    val yaml = firstLine?.takeIf { FrontmatterBlocks.isDelimiter(line = it) }?.let {
                         frontmatterOf(
                             source = source,
                             lines = readAhead
@@ -103,7 +101,9 @@ class OkioNoteMetadataReader(
         while (length <= MAX_FRONTMATTER_CHARACTERS) {
             val line = lineOf(source = source) ?: return null
 
-            if (line.trimEnd() in CLOSING_FENCES) {
+            // The same rule as NoteDocument's: a `...` closing read here alone listed tasks that could not be
+            // toggled, as their offsets were counted from another body.
+            if (FrontmatterBlocks.isDelimiter(line = line)) {
                 return lines.joinToString(separator = LINE_SEPARATOR)
             }
 
@@ -163,7 +163,5 @@ class OkioNoteMetadataReader(
         private const val NEW_LINE = '\n'.code.toByte()
         private const val BYTE_ORDER_MARK = "\uFEFF"
         private const val LINE_SEPARATOR = "\n"
-        private const val OPENING_FENCE = "---"
-        private val CLOSING_FENCES = setOf("---", "...")
     }
 }

@@ -1,6 +1,8 @@
 package app.notekea.search.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NoteEntry
@@ -137,7 +139,16 @@ class SearchPassagesUseCase(
                 return null
             }
 
-        val best = lines.filterNot { isHeading(line = passage.substring(range = it)) }
+        val headings = headingsIn(
+            body = body,
+            start = hit.range.first,
+            lines = lines
+        )
+
+        val best = lines
+            .filterNot {
+                it in headings
+            }
             .maxByOrNull { range ->
                 sharedWords(
                     line = passage.substring(range = range),
@@ -150,8 +161,10 @@ class SearchPassagesUseCase(
             .takeWhile {
                 it.first < best.first
             }
-            .map { passage.substring(range = it) }
-            .lastOrNull { isHeading(line = it) }
+            .lastOrNull {
+                it in headings
+            }
+            ?.let { passage.substring(range = it) }
             ?.trimStart(HEADING_MARK)
             ?.trim()
             ?: hit.headingPath.lastOrNull()
@@ -174,13 +187,82 @@ class SearchPassagesUseCase(
         )
     }
 
-    private fun isHeading(line: String): Boolean = HEADING.matches(input = line)
+    /**
+     * Which of [lines], ranges of the passage that starts at [start] in [body], are headings: a `# comment` in a code
+     * block is none (bug hunt S8). The body before the passage is read for the fences open where it starts.
+     */
+    private fun headingsIn(
+        body: String,
+        start: Int,
+        lines: List<IntRange>
+    ): Set<IntRange> {
+        val fences = FenceTracker()
+        var lineStart = 0
+
+        while (lineStart < start) {
+            val lineEnd = body
+                .indexOf(
+                    char = StringPatterns.NEW_LINE_CHAR,
+                    startIndex = lineStart
+                )
+                .takeIf {
+                    it in 0 until start
+                } ?: start
+
+            fences.read(
+                text = body,
+                start = lineStart,
+                end = lineEnd
+            )
+
+            lineStart = lineEnd + 1
+        }
+
+        val headings = mutableSetOf<IntRange>()
+
+        lines.forEach { range ->
+            val line = start + range.first..start + range.last
+
+            val isCode = fences.read(
+                text = body,
+                start = line.first,
+                end = line.last + 1
+            )
+
+            val isHeading = !isCode && HEADING.matches(input = body.substring(range = line))
+            if (isHeading) headings += range
+        }
+
+        return headings
+    }
 
     private fun sharedWords(
         line: String,
         words: List<String>
     ): Int = textFolder.fold(text = line).let { folded ->
-        words.count { folded.contains(other = it) }
+        words.count {
+            foundPart(
+                folded = folded,
+                word = it
+            ) != null
+        }
+    }
+
+    /**
+     * What of [word] the [folded] text holds: the word, or else its longest stem (the word without up to
+     * [MAX_ENDING] last letters, at least [MIN_STEM] long), so "planting" finds "plants" and is marked in the row.
+     */
+    private fun foundPart(
+        folded: String,
+        word: String
+    ): String? {
+        if (folded.contains(other = word)) return word
+
+        val shortest = maxOf(MIN_STEM, word.length - MAX_ENDING)
+
+        return (word.length - 1 downTo shortest)
+            .map { word.take(n = it) }
+            .firstOrNull { folded.contains(other = it) }
     }
 
     /** [line] as plain text, from its sentence with most of [words], as long as a row shows, with those words found. */
@@ -193,10 +275,18 @@ class SearchPassagesUseCase(
             ranges = emptyList()
         ).text
 
+        // The sentence is chosen as the line was, by the words it holds in part too: a short word, a prefix or
+        // another form of a word found no sentence, and the row showed none of them (bug hunt S3).
         val found = PassageSnippet.of(
             passage = plain,
             words = words.toSet(),
-            normalized = textFolder::fold
+            normalized = textFolder::fold,
+            scores = {
+                sharedWords(
+                    line = it,
+                    words = words
+                )
+            }
         )
 
         val cut = found
@@ -212,7 +302,14 @@ class SearchPassagesUseCase(
 
         val folded = textFolder.fold(text = snippet)
 
-        val ranges = words.flatMap { word ->
+        val parts = words.mapNotNull {
+            foundPart(
+                folded = folded,
+                word = it
+            )
+        }
+
+        val ranges = parts.flatMap { word ->
             generateSequence(seed = folded.indexOf(string = word)) {
                 folded.indexOf(
                     string = word,
@@ -236,6 +333,10 @@ class SearchPassagesUseCase(
         // unrelated ones stay at 0.80.
         const val MIN_CLOSENESS = 0.82f
         const val MAX_SNIPPET = 140
+
+        // A stem drops at most a word's ending ("-ing", "-es", "-ción") and keeps enough letters to mean something.
+        const val MAX_ENDING = 3
+        const val MIN_STEM = 4
         const val ELLIPSIS = "…"
         const val HEADING_MARK = '#'
         const val TAG_MARK = "#"
