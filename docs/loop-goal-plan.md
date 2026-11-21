@@ -84,6 +84,10 @@ after the holds `holds.py` showed using the steps up: pool 318 (+2), figures not
 instead: dev -2. Looked at, **4.1** on dev: of the 23 change failures, two are a condition on a property; the rest
 are conditions the notes say in prose, which 4.1 marks as 2.2 does. So every step left goes through the 4B's marks or
 count, poor every way measured: **the developer's decision**, and design work stops here until then.
+Taken on 2026-11-21 (the goal says to take another step): **3, the count redesigned in one part**: the set's word
+picked by the model, under a grammar, from the words of the task the names write. Frame alone: dev 27 / 15, worse.
+The 4B picks the wrong word ("food" in "the food in the Azores") and makes sets of one person's notes of other kinds
+(a report card and the person); the Lauras and Javiers it missed have no two notes named after them. Reverted.
 
 ### Where the failures are
 
@@ -582,6 +586,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s62-topic` | `c70ba894` | 3.3: the hold for unread notes of the topic removed, level 3 | | 295 of 393 (-2 on `s61`; figures 2 won, 6 lost) | | | | no, reverted in `67084391`: the hold wins more than it loses, so it stays (3.3's rule); `s61` goes on to tuned |
 | 2026-11-21 | `s61-holds` tuned | `83db6e60` | the same, level 4 | | | 221 of 259 (+1 on `s46`, none lost); fresh 61 of 77 (+2) | | | yes, to the pool |
 | 2026-11-21 | `s61-holds` pool | `83db6e60` | the same, level 5 | | | | 318 of 436 (+2 on r1-line): figures 0 won, 2 lost; changes 6 won, 3 lost | | no, reverted: below +4 and the cause it aims at did not go down |
+| 2026-11-21 | `s63-word` | `f2412cb7` | option 3, part of the count redesigned: the set's word picked by the model from the task's words the names write, level 2 | dev 27 / 15; tuned 8 / 4 | | | | | no, reverted: misses -1, false alarms +4 (the wrong word picked; sets of one person's notes of other kinds) |
 
 Notes as the plan is carried out:
 
