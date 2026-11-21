@@ -57,6 +57,8 @@ different design: write what you found in the log at the end of this file, and t
 
 On 2026-11-20, the code as r1-line (`ad27622b`, `change_line` kept): the pool at 316 (72.5 %) on the 4B and 337
 (77.3 %, +10, mostly changes) on the 9B.
+The blind number (section 4, a pool round: the gain over the reference added to the reference's percentage on all
+40 exams): about 71.9 % on the 4B (+11 over the reference's 69.4 %) and about 78.5 % on the 9B (+25 over 72.8 %).
 
 ### A decision for the developer (2026-11-20)
 
