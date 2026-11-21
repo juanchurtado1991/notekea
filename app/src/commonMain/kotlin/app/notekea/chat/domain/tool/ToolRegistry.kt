@@ -37,14 +37,6 @@ class ToolRegistry(val tools: List<ChatTool>) {
         }
     )
 
-    /** Those of these tools named in [names]; null when none is: a call that may only be one of them. */
-    fun onlyOf(names: Collection<String>): ToolRegistry? = tools
-        .filter {
-            it.name in names
-        }
-        .takeIf { it.isNotEmpty() }
-        ?.let { ToolRegistry(tools = it) }
-
     /** The one tool named [name], when these have it: a call that may only be that one. */
     fun only(name: String): ToolRegistry? = byName[name]?.let { ToolRegistry(tools = listOf(it)) }
 
