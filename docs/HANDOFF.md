@@ -20,6 +20,9 @@ the gate on 2.4, or redesign the count) is in `docs/loop-goal-plan.md`, section 
 Meanwhile step 3.2 (rows numbered by the code, a tally by id) was built and measured on dev: -12, reverted; the
 log has why. Then 2.4's first half (an open frame asks at once): pool 318 (+2), reverted too. Four steps reverted in
 a row: what is left goes through the count, the developer's decision.
+Then, on 2026-11-20 and 21: one call for each mark (frame alone, worse), 3.3 (pool 318, +2) and the topic hold's
+removal (dev -2), all reverted. The code is r1-line's. What is left (2.4's second half, 4.1's prose part, a new count)
+goes through the 4B's marks or count, which were poor every way measured: the developer decides.
 Before that, 2026-11-17, with the loop's foundations on #145 (the task's frame, figures worked out by the app, a
 topic read whole), the blind evaluation pool, and **the plan to reach the blind targets, `docs/loop-goal-plan.md`,
 which is the next work: follow it step by step**; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request

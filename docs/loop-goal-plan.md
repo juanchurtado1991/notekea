@@ -77,6 +77,14 @@ and -12, figures 22 and 26 against 17. Reverted: the 4B names rows worse than it
 difference of three, the same refused call again), so the third step reverted in a row. Design work stays stopped
 until the developer picks a way; 3.2 as the plan writes it is measured and does not hold for the 4B.
 
+Then, each reverted by the rule (the log has them): **2.4's first half** (an open frame asks at once): pool 318 (+2),
+the misses not down, as the frames it asks at once were already asked at the end. **2.2's last try**, one call for
+each mark: the frame alone worse (dev false alarms 11 to 25). **3.3**, the next call held to `read` or a figure tool
+after the holds `holds.py` showed using the steps up: pool 318 (+2), figures not down; removing the topic hold
+instead: dev -2. Looked at, **4.1** on dev: of the 23 change failures, two are a condition on a property; the rest
+are conditions the notes say in prose, which 4.1 marks as 2.2 does. So every step left goes through the 4B's marks or
+count, poor every way measured: **the developer's decision**, and design work stops here until then.
+
 ### Where the failures are
 
 The failures of the nine exams at the baseline, counted by cause with `scripts/loop-eval/buckets.py`. The budget is
