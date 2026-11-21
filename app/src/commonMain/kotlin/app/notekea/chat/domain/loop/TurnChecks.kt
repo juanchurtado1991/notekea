@@ -1,6 +1,5 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.loop.TaskFrame.Companion.bare
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolEffect
@@ -23,13 +22,6 @@ internal object TurnChecks {
         )
 
         if (only != null) return only
-
-        val settled = settledOf(
-            call = call,
-            state = state
-        )
-
-        if (settled != null) return settled
 
         val unread = UnreadChoice.of(
             call = call,
@@ -120,51 +112,6 @@ internal object TurnChecks {
         return isNeedless && state.told.add(NOT_ASKED)
     }
 
-    // A question whose options are notes or entries the frame settled, the question it already answered
-    // (`docs/loop-goal-plan.md`, step 2.4): held back every time, as once left the model to ask again, and after the
-    // second time the next call may not ask. A question about something else goes through [isNeedlessQuestion].
-    private fun settledOf(
-        call: ToolCall,
-        state: TurnState
-    ): String? {
-        val frame = state.frame ?: return null
-
-        val isSettled =
-            call.name == AskUserTool.NAME &&
-                !frame.isOpen &&
-                frame.notes.isNotEmpty() &&
-                !isAskedFor(state = state)
-
-        if (!isSettled) return null
-
-        val entries = frame.targets.flatMap { it.entries }
-
-        val isWhich = AskUserTool
-            .optionsOf(call = call)
-            .any { option ->
-                val isNote = state.turn.noteNamed(name = option) in frame.candidates
-
-                isNote || entries.any {
-                    it.contains(
-                        other = option.trim(),
-                        ignoreCase = true
-                    )
-                }
-            }
-
-        if (!isWhich) return null
-
-        val isAgain = state.told.any { it.startsWith(prefix = SETTLED) }
-
-        state.told.add("$SETTLED ${state.told.size}")
-        if (isAgain) state.withheld += AskUserTool.NAME
-
-        val meant = frame.entry ?: frame.notes.joinToString { it.bare() }
-
-        return "(Not asked: the task already says which, $meant. Do the task with it now; ask only for something " +
-            "it needs that no note gives.)"
-    }
-
     // A question with one note as its only answer: the 4B found the one recipe of two servings, then asked "which
     // recipe? Options: Pancakes" (the loop's fifth run). Held back twice, as it asks again right away.
     private fun oneOptionOf(
@@ -205,7 +152,6 @@ internal object TurnChecks {
     private val ASKED_FOR = setOf(WebChecks.COUNTRY_UNKNOWN, UnsettledEnd.MUST_ASK)
 
     private const val ONE_OPTION = "one option"
-    private const val SETTLED = "settled asked"
     private const val ONE_OPTION_AGAIN = "one option again"
 
     private const val NOT_ASKED =
