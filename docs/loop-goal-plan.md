@@ -569,6 +569,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s59-first` | `48d76f77` | 2.4, first half: a frame open before the first step asks at once, with the frame's options, level 3 | | 299 of 393 (+0 on `s54-dev`, +2 on `s45-dev`: 9 won, 9 lost; should have asked 29) | | | | yes, to tuned |
 | 2026-11-20 | `s59-first` tuned | `48d76f77` | the same, level 4 | | | 217 of 259 (-3 on `s46`: 3 lost, facts and a change, none won); fresh 59 | | | yes, to the pool (at the edge of the rule's 3) |
 | 2026-11-20 | `s59-first` pool | `48d76f77` | the same, level 5 | | | | 318 of 436 (+2 on r1-line): should have asked 0 won, 0 lost; changes 4 won, 4 lost | | no, reverted: below +4 and the cause it aims at did not go down (the open frames it asks at once were already asked at the end). Fourth step reverted in a row |
+| 2026-11-20 | `s60-each` | `73d2ba5b` | 2.2's last try: each note or entry marked in a call of its own, level 2 | dev 27 / 25; tuned 7 / 6 | | | | | no, reverted: misses -1, false alarms +14 (alone, each entry looks like it could be the one). Both ways of marking compared, as 2.2 asks: one call stays |
 
 Notes as the plan is carried out:
 
