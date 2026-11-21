@@ -29,6 +29,13 @@ its thing matches the note, as far as its name and lines show. Say "no" when som
 match it: another name, another place, another date, another kind of thing. The person's memory, when shown, says
 what their words mean. Reply with JSON: every note's id with "yes" or "no"."""
 
+    const val THING_WORD =
+        """A request made to a notes app is about one thing in the person's notes. You are shown words of the
+request that names of notes write. Say which of them names the thing itself: the person, the place, the object or
+the document the request is about, not a word that says something about it (in "Ana's new phone number", Ana; in
+"move my dentist appointment to Friday", dentist). Reply with JSON, word: one of the words shown, or "$NOT_SAID"
+when none of them names the thing."""
+
     const val PICK =
         """A request made to a notes app is about one thing in the person's notes. Reply with JSON, pick: the note
 below (N1, N2…) it is about, or "$NOT_SAID" when none of them is."""

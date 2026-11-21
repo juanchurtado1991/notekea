@@ -36,6 +36,35 @@ internal object FrameGroups {
     }
 
     /**
+     * The words of [task] the shown notes' names write, each once, in the task's order: what the model picks the
+     * thing's word from (`docs/loop-goal-plan.md`, step 2: the 4B's own words copied the whole request).
+     */
+    fun namedOf(
+        task: String,
+        candidates: List<FrameCandidates.Candidate>
+    ): List<String> = FrameWords
+        .of(text = task)
+        .filter { word ->
+            word.any { it.isLetter() } && candidates.any { isNamed(it, word) }
+        }
+
+    /** Whether two or more of the shown notes' names write [word]: a set it could make. */
+    fun isShared(
+        word: String,
+        candidates: List<FrameCandidates.Candidate>
+    ): Boolean = candidates.count { isNamed(it, word) } >= 2
+
+    /** The notes whose names write [word], when two or more do and at most [MOST]; else none. */
+    fun ofWord(
+        word: String,
+        candidates: List<FrameCandidates.Candidate>
+    ): List<FrameCandidates.Candidate>? = candidates
+        .filter { isNamed(it, word) }
+        .takeIf {
+            it.size in 2..MOST
+        }
+
+    /**
      * The one note of [group] whose name has a word the others' names do not and the task writes ("Laura Castro's
      * email", "the work budget" for Work/Budget 2026), else the one whose whole name the task writes ("Declan Moran"
      * beside "Transcript - Declan Moran"); null when the names leave it to what the notes say.

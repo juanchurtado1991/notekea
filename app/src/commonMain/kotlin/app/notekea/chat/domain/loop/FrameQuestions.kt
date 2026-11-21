@@ -60,6 +60,30 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         return shown.markedNotesOf(fields = fields)
     }
 
+    /**
+     * The word of [named] that names the thing [task] is about, picked under a grammar from the words the code
+     * found; "" when none does; null when the reply cannot be read.
+     */
+    suspend fun thingWordOf(
+        task: String,
+        named: List<String>,
+        memory: List<MemoryLine>
+    ): String? {
+        val words = (named + FramePrompts.NOT_SAID).joinToString(separator = ",") { "\"$it\"" }
+
+        val fields = asked(
+            system = FramePrompts.THING_WORD,
+            user = "${remembered(memory = memory)}Words: ${named.joinToString()}\n\nRequest: $task",
+            schema = "{\"type\":\"object\",\"properties\":{\"$WORD\":{\"enum\":[$words]}},\"required\":[\"$WORD\"]}"
+        ) ?: return null
+
+        val word = fields[WORD] ?: return null
+
+        return word.takeIf {
+            it in named
+        }.orEmpty()
+    }
+
     /** The shown note [task] is about; null when none is. */
     suspend fun pickOf(
         task: String,
@@ -186,6 +210,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         const val COUNT = "count"
         const val WORDS = "words"
         const val THING = "thing"
+        const val WORD = "word"
         const val TOKENS = 100
         const val MARK_TOKENS = 10
         const val MOST_MARKED = 12
