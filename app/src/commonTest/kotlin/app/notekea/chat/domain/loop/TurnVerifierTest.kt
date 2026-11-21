@@ -209,7 +209,9 @@ class TurnVerifierTest {
 
             frames += bothLauras
 
+            // The question the open frame asks first is not made: the loop runs, and its end is held as before.
             script(
+                """{"tool":"answer","text":"Laura's phone is 8701-9032."}""",
                 """{"tool":"answer","text":"Laura's phone is 8701-9032."}""",
                 """{"tool":"ask_user","question":"Which Laura?","options":["Laura Castro","Laura Méndez"]}"""
             )
@@ -228,7 +230,7 @@ class TurnVerifierTest {
                 expected = listOf(true, false, true),
                 actual = listOf(
                     "the task means one of 2 notes and does not say which: People/Laura Castro; People/Laura Méndez" in
-                        callPrompts()[1],
+                        callPrompts()[2],
                     "\"answer\"" in schema,
                     steps.last() is AgentStep.Asked
                 )

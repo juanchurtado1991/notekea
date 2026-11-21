@@ -76,6 +76,10 @@ ids), as it left step 2's code as it was. Measured on dev twice (`s57-rows`, `s5
 and -12, figures 22 and 26 against 17. Reverted: the 4B names rows worse than it copied lines (wrong rows, a
 difference of three, the same refused call again), so the third step reverted in a row. Design work stays stopped
 until the developer picks a way; 3.2 as the plan writes it is measured and does not hold for the 4B.
+Then, as the goal says to take another step: **2, the first half of 2.4 only** (open: ask at once). It acts only
+where the frame is open, where the turn already ends held for the question, so a wrong verdict costs what it costs
+today; the second half (settled: never ask which) waits for level 2, as a frame that misses 37 % would then hold
+back right questions.
 
 ### Where the failures are
 
