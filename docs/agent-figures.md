@@ -41,8 +41,7 @@ confidence: the 9B made 6 such mistakes and the 4B about 16. Some examples:
   notes that share one of its tags. The ones that write a word of the task are added to the turn (`TurnReads.related`),
   and `read` tells the model they are about the same topic. A tag on more than 25 notes says nothing about the topic,
   so such a tag is ignored.
-- **`TopicUnread`** held back an answer given while any of those notes was unread. It was removed on 2026-11-20
-  (`docs/loop-goal-plan.md`, step 3.3): the 4B ran out of steps in 11 of its 13 failures with it, even when the next
-  call could only read. `read` still names the notes.
+- **`TopicUnread`.** An answer given while any of those notes is unread is held back once, and the model is told to
+  read them, above all before saying the notes do not hold something.
 
 Both are found by the note's own links and tags and by the task's words. No list says what a topic is.
