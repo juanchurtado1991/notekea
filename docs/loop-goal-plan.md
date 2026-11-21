@@ -59,6 +59,9 @@ On 2026-11-20, the code as r1-line (`ad27622b`, `change_line` kept): the pool at
 (77.3 %, +10, mostly changes) on the 9B.
 The blind number (section 4, a pool round: the gain over the reference added to the reference's percentage on all
 40 exams): about 71.9 % on the 4B (+11 over the reference's 69.4 %) and about 78.5 % on the 9B (+25 over 72.8 %).
+Round 2 (seed 2, 2026-11-21, the same code): about 73.8 % on the 4B (+19) and about 75.3 % on the 9B (+11); over
+both rounds about 72.8 % and 76.9 %. The two rounds differ by two to three points on each model, in opposite
+directions: one round is not enough to tell a step of under a point from the sample.
 
 ### A decision for the developer (2026-11-20)
 
@@ -589,6 +592,8 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `s61-holds` tuned | `83db6e60` | the same, level 4 | | | 221 of 259 (+1 on `s46`, none lost); fresh 61 of 77 (+2) | | | yes, to the pool |
 | 2026-11-21 | `s61-holds` pool | `83db6e60` | the same, level 5 | | | | 318 of 436 (+2 on r1-line): figures 0 won, 2 lost; changes 6 won, 3 lost | | no, reverted: below +4 and the cause it aims at did not go down |
 | 2026-11-21 | `s63-word` | `f2412cb7` | option 3, part of the count redesigned: the set's word picked by the model from the task's words the names write, level 2 | dev 27 / 15; tuned 8 / 4 | | | | | no, reverted: misses -1, false alarms +4 (the wrong word picked; sets of one person's notes of other kinds) |
+| 2026-11-21 | `r2-base` | `eba8683a` | round 2 opened (seed 2), the code as r1-line, level 5 | | | | 311 of 435 (71.5 %, +19 on the reference's 292: about 73.8 % blind): left 37 should have asked, 31 change wrong, 27 needless asks, 15 figures | | measured only (design work stopped); round 2's opening |
+| 2026-11-21 | `r2-base` 9B | `eba8683a` | the same on the 9B, level 5 | | | | 324 of 435 (74.5 %, +11 on the reference's 313: about 75.3 % blind): left 43 should have asked, 27 needless asks, 23 change wrong, 11 figures | | measured only; round 2's opening |
 
 Notes as the plan is carried out:
 

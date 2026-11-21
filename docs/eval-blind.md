@@ -80,6 +80,10 @@ tuned sets, and the pool below replaces them as the blind measure.
     same exams (+1.1 points: about 70.5 % blind); 9B 326 of 436 (74.8 %), +14 (+3.2 points: about 76.0 % blind).
     Closed 2026-11-20 at `ad27622b` (r1-line, `change_line` kept): 4B 316 (72.5 %), +11 (+2.5 points: about 71.9 %
     blind); 9B 337 (77.3 %), +25 (+5.7 points: about 78.5 % blind).
+  - **Round 2 (seed 2), opened 2026-11-21 at `eba8683a` (the code as r1-line):** 4B 311 of 435 (71.5 %), +19 over
+    the reference on the same exams (+4.4 points: about 73.8 % blind); 9B 324 of 435 (74.5 %), +11 (+2.5 points:
+    about 75.3 % blind). Over both rounds (870 tasks): 4B +30 (+3.4 points: about 72.8 %), 9B +36 (+4.1 points:
+    about 76.9 %). A round of ten exams moves the blind number by several points either way.
 - **Read by cause only**, with `scripts/loop-eval/buckets.py` and `compare.py`: never task by task.
 
 ## Runs
