@@ -206,38 +206,6 @@ class BugHuntTurnTest {
             )
         }
 
-    // The plan's step 2.4: the frame open before the first step, the question is asked at once, before any step can
-    // use the turn up, and its options are the frame's.
-    @Test
-    fun `a frame open before the first step asks at once, with the frame's options`() = runTest {
-        val lauras = listOf("People/Laura Castro.md", "People/Laura Méndez.md")
-
-        frames += frameOf(
-            FrameCount.ONE,
-            meant = lauras,
-            shown = lauras
-        )
-
-        val steps = run(
-            task = "what is the phone of Laura?",
-            paths = lauras,
-            calls = listOf("""{"tool":"ask_user","question":"Which Laura?","options":["Laura"]}""")
-        )
-
-        val asked = steps.last() as? AgentStep.Asked
-
-        assertEquals(
-            expected = listOf(true, 0, listOf("People/Laura Castro", "People/Laura Méndez")),
-            actual = listOf(
-                asked != null,
-                steps.count {
-                    it is AgentStep.Moving
-                },
-                asked?.options
-            )
-        )
-    }
-
     // L12: a change tool's "ask_user when the task does not say", then the question held as needless.
     @Test
     fun `a question a refused change told the model to ask is not held back`() = runTest {

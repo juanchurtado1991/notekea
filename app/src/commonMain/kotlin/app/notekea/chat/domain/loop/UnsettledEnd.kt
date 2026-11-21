@@ -30,48 +30,6 @@ internal object UnsettledEnd {
             "${frame.options.joinToString(separator = "; ")}. Ask the person with ask_user, these as the options.)"
     }
 
-    /**
-     * What the model is told before the first step when the frame is open (`docs/loop-goal-plan.md`, 2.4): the
-     * question is asked at once, as a loop run to its end only to be held there can run out of steps first.
-     */
-    fun openingOf(state: TurnState): String? {
-        val frame = state.frame?.takeIf { it.isOpen } ?: return null
-        if (!state.told.add(MUST_ASK)) return null
-
-        val what = if (frame.openNotes.isNotEmpty()) "notes" else "entries"
-
-        return "(The task means one of ${frame.options.size} $what and does not say which: " +
-            "${frame.options.joinToString(separator = "; ")}. Ask the person with ask_user, in the task's " +
-            "language, these as the options.)"
-    }
-
-    /**
-     * The question asked, with the frame's options as the code built them; null when [call] is no question, and
-     * the turn's end is held for it as before.
-     */
-    fun askedOf(
-        state: TurnState,
-        call: ToolCall?
-    ): ToolCall? {
-        val isAsked = call?.name == AskUserTool.NAME && state.tools[AskUserTool.NAME] != null
-
-        if (!isAsked) {
-            state.told.remove(element = MUST_ASK)
-
-            return null
-        }
-
-        val options = state
-            .frame
-            ?.options
-            .orEmpty()
-            .joinToString(separator = "\n")
-            .takeIf { it.isNotEmpty() }
-            ?: return call
-
-        return call.copy(arguments = call.arguments + (AskUserTool.OPTIONS to options))
-    }
-
     /** Whether the next call may only be ask_user: the turn was held back for a question it must ask. */
     fun mustAsk(state: TurnState): Boolean = MUST_ASK in state.told
 

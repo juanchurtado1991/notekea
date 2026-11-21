@@ -342,9 +342,7 @@ class RunTurnTest {
                 candidates = listOf(lease, office)
             )
 
-            // The question the open frame asks first is not made: the loop runs, and its end is held as before.
             script(
-                tag,
                 tag,
                 tag,
                 """{"tool":"propose","summary":"$SUMMARY"}""",
@@ -361,9 +359,9 @@ class RunTurnTest {
                 expected = listOf(true, true, true),
                 actual = listOf(
                     "2 notes are named \"Lease\": Home/Lease, Work/Lease. If the task does not" in
-                        callPrompts()[2],
+                        callPrompts()[1],
                     "(Not done: the task means one of 2 notes and does not say which: Home/Lease; Work/Lease." in
-                        callPrompts()[4],
+                        callPrompts()[3],
                     steps.last() is AgentStep.Asked
                 )
             )

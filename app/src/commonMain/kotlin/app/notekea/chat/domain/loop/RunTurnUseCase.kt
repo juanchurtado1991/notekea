@@ -164,10 +164,6 @@ class RunTurnUseCase(
     private suspend fun FlowCollector<AgentStep>.run(state: TurnState) {
         val deadline = clock.now() + TIME_LIMIT
 
-        // The frame open before the first step: the question is asked at once (2.4).
-        UnsettledEnd.openingOf(state = state)?.let { state.found += it }
-        if (isAsked(state = state)) return
-
         for (number in 1..MAX_STEPS) {
             if (clock.now() > deadline) break
             val isEnding = state.mustEnd || number == MAX_STEPS
@@ -231,7 +227,29 @@ class RunTurnUseCase(
         }
 
         // Held on the last step for the question it must ask: one call more, which may only ask it.
-        if (isAsked(state = state)) return
+        val asked = if (UnsettledEnd.mustAsk(state = state)) {
+            callOf(
+                state,
+                left = 1,
+                isEnding = true
+            )
+        } else {
+            null
+        }
+
+        val asking = asked?.let {
+            state.tools[it.name]
+        }
+
+        val isAsked = asked?.name == AskUserTool.NAME && asking != null
+
+        if (isAsked) {
+            return ended(
+                call = asked,
+                tool = asking,
+                state = state
+            )
+        }
 
         emit(value = unread(state = state))
     }
@@ -317,23 +335,6 @@ class RunTurnUseCase(
         }
 
         if (isRefused) state.refused += key
-    }
-
-    // Held for the question it must ask: one call more, which may only ask it, with the frame's options (2.4).
-    private suspend fun FlowCollector<AgentStep>.isAsked(state: TurnState): Boolean {
-        if (!UnsettledEnd.mustAsk(state = state)) return false
-
-        val call = callOf(
-            state,
-            left = 1,
-            isEnding = true
-        )
-
-        val asked = UnsettledEnd.askedOf(state, call) ?: return false
-
-        ended(asked, state.tools[asked.name] ?: return false, state)
-
-        return true
     }
 
     private suspend fun FlowCollector<AgentStep>.ended(
