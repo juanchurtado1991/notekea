@@ -69,6 +69,8 @@ Round 5 (seed 5): about 76.9 % (+33) and 78.0 % (+23); over the five rounds abou
 the 9B. A single round spans five points: a round's opening alone cannot say whether a target is met.
 Round 6 (seed 6): about 75.4 % (+26) and 77.2 % (+19); over the six rounds about 74.0 % on the 4B and 76.6 % on
 the 9B, against the weekend's 75 % and 80 %.
+Round 7 (seed 7): about 76.3 % (+30) and 76.9 % (+18); over the seven rounds, every exam measured at least once,
+about 74.3 % on the 4B and 76.7 % on the 9B, against the weekend's 75 % and 80 %.
 
 ### A decision for the developer (2026-11-20)
 
@@ -609,6 +611,8 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r5-base` 9B | `5779f3d4` | the same on the 9B, level 5 | | | | 334 of 439 (76.1 %, +23 on the reference's 311: about 78.0 % blind): left 43 should have asked, 23 change wrong, 14 needless asks, 13 figures | | measured only; round 5's opening |
 | 2026-11-21 | `r6-base` | `12aa698b` | round 6 opened (seed 6), the code as r1-line, level 5 | | | | 314 of 436 (72.0 %, +26 on the reference's 288: about 75.4 % blind): left 39 should have asked, 31 change wrong, 21 needless asks, 19 figures | | measured only; round 6's opening |
 | 2026-11-21 | `r6-base` 9B | `12aa698b` | the same on the 9B, level 5 | | | | 328 of 436 (75.2 %, +19 on the reference's 309: about 77.2 % blind): left 42 should have asked, 25 needless asks, 25 change wrong, 9 figures | | measured only; round 6's opening |
+| 2026-11-21 | `r7-base` | `3dc387b3` | round 7 opened (seed 7), the code as r1-line, level 5 | | | | 334 of 435 (76.8 %, +30 on the reference's 304: about 76.3 % blind): left 38 should have asked, 29 change wrong, 14 needless asks, 12 figures | | measured only; round 7's opening |
+| 2026-11-21 | `r7-base` 9B | `3dc387b3` | the same on the 9B, level 5 | | | | 331 of 435 (76.1 %, +18 on the reference's 313: about 76.9 % blind): left 44 should have asked, 19 change wrong, 15 needless asks, 12 figures, 11 facts | | measured only; round 7's opening |
 
 Notes as the plan is carried out:
 
