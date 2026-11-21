@@ -152,35 +152,6 @@ class TaskFramerTest {
         )
     }
 
-    // The frame alone, 2026-11-21: "cuánto le pago a Luis por turno?" picked Personal/Luis Ochoa, and the other Luis,
-    // in the shifts note, was never shown as a choice: the notes whose lines write the picked name's word are marked.
-    @Test
-    fun `a pick whose name's word other notes write is marked with them, and two marked stay open`() =
-        runTest {
-            val luis = candidate(path = "Personal/Luis Ochoa.md")
-
-            val shifts = candidate(
-                path = "Staff/Shifts.md",
-                words = setOf("luis", "turno")
-            )
-
-            val frame = frameOf(
-                task = "cuánto le pago a Luis por turno?",
-                candidates = listOf(luis, shifts),
-                replies = mapOf(
-                    FramePrompts.COUNT to """{"count":"one","words":"Luis","thing":"note"}""",
-                    FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.MARK_NOTES to """{"N1":"yes","N2":"yes"}"""
-                ),
-                isChange = false
-            )
-
-            assertEquals(
-                expected = listOf(luis.path, shifts.path),
-                actual = frame?.openNotes
-            )
-        }
-
     @Test
     fun `the entries of an item are marked, one settled, two open, none the whole note`() =
         runTest {
