@@ -265,6 +265,7 @@ class RunTurnUseCase(
 
         // Another call is made: a tool withheld for its refusal is offered again.
         state.withheld.clear()
+        state.narrowed.clear()
 
         val shared = SharedNames.of(
             call = call,
@@ -406,7 +407,15 @@ class RunTurnUseCase(
             .fold(initial = offered) { left, name -> left.without(name = name) }
             .takeIf { it.tools.isNotEmpty() }
 
-        val tools = asking ?: withheld ?: offered
+        // Held for what only some tools repair, the next call may only be one of them (step 3.3).
+        val narrowing = state
+            .tools
+            .onlyOf(names = state.narrowed)
+            .takeUnless {
+                state.mustStop || isEnding
+            }
+
+        val tools = asking ?: narrowing ?: withheld ?: offered
 
         val json = StringBuilder()
 
