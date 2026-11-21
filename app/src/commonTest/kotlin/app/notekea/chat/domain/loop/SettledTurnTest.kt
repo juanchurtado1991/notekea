@@ -177,6 +177,42 @@ class SettledTurnTest {
             )
         }
 
+    // Step 2.4 of docs/loop-goal-plan.md: a question between the notes the frame settled is held back every time,
+    // not once, and after the second time the next call may not ask.
+    @Test
+    fun `a question between the notes a settled frame was shown is held back every time`() =
+        runTest {
+            val people = listOf(
+                entry(path = "People/Tomás Herrera.md"),
+                entry(path = "People/Tomás Vargas.md")
+            )
+
+            store.texts[people[1].file.path] = "# Tomás Vargas\n\nphone: 8712-6650"
+
+            val which =
+                """{"tool":"ask_user","question":"Which?","options":["Tomás Herrera","Tomás Vargas"]}"""
+
+            val prompts = promptsOf(
+                task = "what is the phone number of Tomás from the chess club?",
+                notes = people,
+                frame = chessClub,
+                calls = listOf(
+                    """{"tool":"read","note":"People/Tomás Vargas"}""",
+                    which,
+                    which,
+                    """{"tool":"answer","text":"8712-6650"}"""
+                )
+            )
+
+            assertEquals(
+                expected = listOf(4, true),
+                actual = listOf(
+                    prompts.size,
+                    "the task already says which, People/Tomás Vargas" in prompts[3].last().text
+                )
+            )
+        }
+
     // The run after the bug hunt: "which of my two budgets is larger?" answered from one, "there is no second".
     @Test
     fun `an answer about several notes of one name waits for the unread one`() = runTest {
