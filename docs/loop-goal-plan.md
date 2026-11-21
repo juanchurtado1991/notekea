@@ -102,6 +102,10 @@ Taken on 2026-11-21 (the goal says to take another step): **3, the count redesig
 picked by the model, under a grammar, from the words of the task the names write. Frame alone: dev 27 / 15, worse.
 The 4B picks the wrong word ("food" in "the food in the Azores") and makes sets of one person's notes of other kinds
 (a report card and the person); the Lauras and Javiers it missed have no two notes named after them. Reverted.
+Taken on 2026-11-21 after the pool's seven rounds: **step 5**, the answer checked against the task (a small
+question under a grammar, before an answer ends the turn: does it say each thing the request asks; held back once
+with what it leaves out). Dev 297 of 393 (-2 on s54-dev, +0 on s45-dev), fact failures (cause 6) still 10. Reverted
+in `b9d8cb9a`: the cause it aims at did not go down, and the facts the 4B gets wrong are said, not left out.
 
 ### Where the failures are
 
@@ -613,6 +617,7 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r6-base` 9B | `12aa698b` | the same on the 9B, level 5 | | | | 328 of 436 (75.2 %, +19 on the reference's 309: about 77.2 % blind): left 42 should have asked, 25 needless asks, 25 change wrong, 9 figures | | measured only; round 6's opening |
 | 2026-11-21 | `r7-base` | `3dc387b3` | round 7 opened (seed 7), the code as r1-line, level 5 | | | | 334 of 435 (76.8 %, +30 on the reference's 304: about 76.3 % blind): left 38 should have asked, 29 change wrong, 14 needless asks, 12 figures | | measured only; round 7's opening |
 | 2026-11-21 | `r7-base` 9B | `3dc387b3` | the same on the 9B, level 5 | | | | 331 of 435 (76.1 %, +18 on the reference's 313: about 76.9 % blind): left 44 should have asked, 19 change wrong, 15 needless asks, 12 figures, 11 facts | | measured only; round 7's opening |
+| 2026-11-21 | `s64-check` | `0ac05c13` | step 5, the answer checked against the task before it ends the turn, level 3 | | 297 of 393 (-2 on s54-dev, +0 on s45-dev): lost 2 needless asks, 3 figures, 3 changes; won 2 should have asked, 1 needless ask, 3 figures; facts still 10 | | | | no, reverted in `b9d8cb9a`: below the rule, and cause 6 did not go down |
 
 Notes as the plan is carried out:
 
