@@ -573,6 +573,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `s61-holds` | `83db6e60` | 3.3: after a hold for unread notes of the topic or for figures no tool gave, the next call may only be `read` or a figure tool, level 3 | | 297 of 393 (-2 on `s54-dev`; 6 won, 8 lost); `holds.py`: unread topic 13 failed, 11 ran out; figures 5, 5 | | | | the topic hold still uses the steps up, so its removal is measured (`s62`) |
 | 2026-11-20 | `s62-topic` | `c70ba894` | 3.3: the hold for unread notes of the topic removed, level 3 | | 295 of 393 (-2 on `s61`; figures 2 won, 6 lost) | | | | no, reverted in `67084391`: the hold wins more than it loses, so it stays (3.3's rule); `s61` goes on to tuned |
 | 2026-11-21 | `s61-holds` tuned | `83db6e60` | the same, level 4 | | | 221 of 259 (+1 on `s46`, none lost); fresh 61 of 77 (+2) | | | yes, to the pool |
+| 2026-11-21 | `s61-holds` pool | `83db6e60` | the same, level 5 | | | | 318 of 436 (+2 on r1-line): figures 0 won, 2 lost; changes 6 won, 3 lost | | no, reverted: below +4 and the cause it aims at did not go down |
 
 Notes as the plan is carried out:
 
