@@ -70,6 +70,7 @@ class RunTurnUseCase(
         proposal = proposal
     )
     private val router = TurnRouter(llmEngine = llmEngine)
+    private val answerCheck = AnswerCheck(llmEngine = llmEngine)
 
     operator fun invoke(
         task: String,
@@ -180,9 +181,10 @@ class RunTurnUseCase(
             val isStopped = state.mustStop && tool?.effect != ToolEffect.ENDS
             if (isStopped) return emit(value = unread(state = state))
 
-            val held = TurnChecks.heldOf(
+            val held = answerCheck.heldOf(
                 call = call,
                 state = state,
+                isEnding = isEnding,
                 tool = tool
             )
 

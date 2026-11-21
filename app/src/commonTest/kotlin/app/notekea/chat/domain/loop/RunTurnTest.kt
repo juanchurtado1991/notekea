@@ -199,7 +199,7 @@ class RunTurnTest {
             val last = engine
                 .options
                 .filter {
-                    it.jsonSchema != null
+                    it.jsonSchema?.contains(other = "\"tool\"") == true
                 }
                 .last()
                 .jsonSchema
@@ -411,7 +411,7 @@ class RunTurnTest {
             val last = engine
                 .options
                 .filter {
-                    it.jsonSchema != null
+                    it.jsonSchema?.contains(other = "\"tool\"") == true
                 }
                 .last()
                 .jsonSchema
