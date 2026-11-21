@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool.app
 
+import app.notekea.chat.domain.loop.FrameWords
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
@@ -9,28 +10,27 @@ import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.core.notes.domain.NoteTextCache
 
 /**
- * Figures from the rows of a note, worked out by the app (`docs/loop-goal-plan.md`, step 3.2): the model names the
- * rows [RowsTool] numbered, and the code reads their figures and says the rows it did not count, so a row left out
- * is seen and none is copied wrong.
+ * Figures from lines of the notes read, worked out by the app (`docs/agent-figures.md`): the model names the lines
+ * that count and those left out with why; each figure must be written on its line, or the item is refused.
  */
 class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
     override val name = NAME
 
     override val description =
-        "figures from the rows of a note, worked out by the app: how (sum, average, count, product, min, max or " +
-            "difference), note, rows (the ids rows gave, as R1, R4, or all), column (the column or the word the " +
-            "figure is under, when a row writes several). Call rows first. Never add up yourself."
+        "figures from lines of the notes you read, worked out by the app: how (sum, average, count, product, " +
+            "min, max or difference), items (each \"figure | the line it is on\", one for every line that counts), " +
+            "left_out (each \"line | why it does not count\": refunded, paid, another year). Never add up yourself."
 
     override val arguments = listOf(
         ToolArgument(name = HOW),
-        ToolArgument(name = NOTE),
         ToolArgument(
-            name = ROWS,
+            name = ITEMS,
             isList = true
         ),
         ToolArgument(
-            name = COLUMN,
-            isRequired = false
+            name = LEFT_OUT,
+            isRequired = false,
+            isList = true
         )
     )
 
@@ -39,7 +39,7 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
     override fun targetOf(
         call: ToolCall,
         context: ToolContext
-    ): String = "${call.text(name = HOW)} of ${idsOf(call = call).joinToString(separator = " ")}"
+    ): String = "${call.text(name = HOW)} of ${call.list(name = ITEMS).size}"
 
     override suspend fun run(
         call: ToolCall,
@@ -50,145 +50,170 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
         }
             ?: return ToolResult(forModel = "tally: how is one of ${Tally.entries.joinToString { it.written }}.")
 
-        val named = call.text(name = NOTE)
+        val items = call.list(name = ITEMS).filter { it.isNotBlank() }
+        if (items.isEmpty()) return ToolResult(forModel = "tally: no items. Give each \"figure | line\".")
 
-        val (path, rows) = RowsTool.rowsOf(
-            name = named,
-            context = context,
-            noteTextCache = noteTextCache
-        ) ?: return ToolResult(forModel = "tally: no note \"$named\". Call rows with the note first.")
+        val lines = linesOf(context = context)
 
-        val ids = idsOf(call = call)
-        val column = call.text(name = COLUMN)
+        val used = mutableSetOf<Int>()
 
-        val isAll = ids.any {
-            it == ALL
+        val checked = items.map {
+            checkedOf(
+                item = it,
+                lines = lines,
+                used = used
+            )
         }
 
-        val unknown = ids.filter { id ->
-            id != ALL && rows.none { it.id == id }
+        val refused = checked.filter {
+            it.value == null
         }
 
-        val isUnknown = ids.isEmpty() || unknown.isNotEmpty()
-
-        if (isUnknown) {
+        if (refused.isNotEmpty()) {
             return ToolResult(
-                forModel = "tally: ${path.nameWithoutExtension} has rows R1 to R${rows.size}" +
-                    unknown
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { ", not ${it.joinToString()}" }
-                        .orEmpty() +
-                    ". Call rows with the note to see them, then tally them by id."
+                forModel = "tally: not worked out. ${refused.joinToString(separator = " ") { it.problem }} Read " +
+                    "the note each figure is in, then call tally again with the figure as that line writes it."
             )
         }
 
-        val counted = if (isAll) {
-            rows.filter {
-                hasFigure(
-                    row = it,
-                    column = column
-                )
-            }
-        } else {
-            ids.distinct().mapNotNull { id ->
-                rows.firstOrNull {
-                    it.id == id
-                }
-            }
-        }
-
-        return ToolResult(
-            forModel = talliedOf(
-                how = how,
-                counted = counted,
-                rows = rows,
-                column = column
-            )
-        )
-    }
-
-    // The result with the rows counted and those of the note left out, or why a row has no figure to count.
-    private fun talliedOf(
-        how: Tally,
-        counted: List<NoteRows.Row>,
-        rows: List<NoteRows.Row>,
-        column: String
-    ): String {
-        val figures = counted.map {
-            it to NoteRows.figureOf(
-                row = it,
-                column = column
-            )
-        }
-
-        val refused = figures.filter { (_, figure) ->
-            figure.value == null
-        }
-
-        val isRefused = refused.isNotEmpty() || figures.isEmpty()
-
-        if (isRefused) {
-            val under = if (column.isNotEmpty()) " under $column" else ""
-
-            val problems = refused
-                .joinToString(separator = " ") { (_, figure) -> figure.problem }
-                .ifEmpty { "No row of it writes a figure$under." }
-
-            return "tally: not worked out. $problems"
-        }
-
-        val values = figures.mapNotNull { (_, figure) -> figure.value }
+        val values = checked.mapNotNull { it.value }
         val result = how.of(values = values)
 
-        val shown = figures
-            .joinToString(separator = "\n") { (row, figure) ->
-                "- ${Arithmetic.written(value = figure.value ?: 0.0)}: ${NoteRows.shownOf(row = row).take(n = LINE)}"
+        val counted = checked
+            .joinToString(separator = "\n") {
+                "- ${Arithmetic.written(value = it.value ?: 0.0)}: ${it.line}"
             }
 
-        val left = rows
-            .filter { row ->
-                val isCounted = counted.any {
-                    it.id == row.id
-                }
-
-                !isCounted && hasFigure(
-                    row = row,
-                    column = column
-                )
-            }
+        val left = call
+            .list(name = LEFT_OUT)
+            .filter { it.isNotBlank() }
             .takeIf { it.isNotEmpty() }
             ?.joinToString(
                 separator = "\n",
-                prefix = "\nNot counted:\n"
-            ) { "- ${NoteRows.shownOf(row = it).take(n = LINE)}" }
+                prefix = "\nLeft out:\n"
+            ) { "- $it" }
             .orEmpty()
 
-        return "tally ${how.written} of ${values.size}: ${Arithmetic.written(value = result)}\n" +
-            "Counted:\n$shown$left"
+        return ToolResult(
+            forModel = "tally ${how.written} of ${values.size}: ${Arithmetic.written(value = result)}\n" +
+                "Counted:\n$counted$left"
+        )
     }
 
-    private fun hasFigure(
-        row: NoteRows.Row,
-        column: String
-    ): Boolean = NoteRows
-        .figureOf(
-            row = row,
-            column = column
-        ).value != null
+    // The lines of every note the turn read; with none read yet, of every note, as a figure may come from a search.
+    private suspend fun linesOf(context: ToolContext): List<String> {
+        val read = context
+            .reads
+            .read
+            .toSet()
 
-    // The ids written, however the model wrote them: "R1, R4", "r2", "3", or all.
-    private fun idsOf(call: ToolCall): List<String> = call
-        .list(name = ROWS)
-        .flatMap { it.split(',', ' ', ';') }
-        .map { it.trim().uppercase() }
-        .filter { it.isNotEmpty() }
-        .map { id ->
-            when {
-                id == ALL -> ALL
-                id.all { it.isDigit() } -> "R$id"
-                else -> id
+        val notes = context
+            .notes
+            .filter {
+                it.file.path.isMarkdown && (read.isEmpty() || it.file.path in read)
             }
+
+        return noteTextCache
+            .textsOf(
+                vaultPath = context.vaultPath,
+                notes = notes
+            )
+            .values
+            .flatMap { it.body.lines() }
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+    }
+
+    private class Checked(
+        val line: String,
+        val problem: String,
+        val value: Double?
+    )
+
+    // The item's figure, on the line of the notes that writes it and shares the most words with the item's line; a
+    // line already counted only when no other is as close. The first line sharing "2026" was the Counted lines once,
+    // the paid sessions shown for the unpaid ones, and the 4B summed again (the loop's dev run, 2026-11-19).
+    private fun checkedOf(
+        item: String,
+        lines: List<String>,
+        used: MutableSet<Int>
+    ): Checked {
+        val figure = item.substringBefore(delimiter = SEPARATOR)
+
+        val said = item.substringAfter(
+            delimiter = SEPARATOR,
+            missingDelimiterValue = ""
+        )
+
+        val value = FigureValues.firstIn(text = figure) ?: FigureValues.firstIn(text = item)
+            ?: return Checked(
+                value = null,
+                line = item,
+                problem = "\"$item\" holds no figure."
+            )
+
+        val words = FrameWords.of(text = said)
+
+        val index = lines
+            .indices
+            .filter {
+                isWritten(
+                    line = lines[it],
+                    value = value
+                )
+            }
+            .map {
+                it to sharedOf(
+                    words = words,
+                    line = lines[it]
+                )
+            }
+            .filter { (_, shared) ->
+                words.isEmpty() || shared > 0
+            }
+            .maxWithOrNull(
+                comparator = compareBy<Pair<Int, Int>> { (_, shared) -> shared }
+                    .thenBy { (at, _) ->
+                        if (at in used) 0 else 1
+                    }
+                    .thenByDescending { (at, _) -> at }
+            )
+            ?.first
+            ?: return Checked(
+                value = null,
+                line = item,
+                problem = "${Arithmetic.written(value = value)} is not written on such a line of the notes read."
+            )
+
+        used += index
+
+        return Checked(
+            value = value,
+            line = lines[index].take(n = LINE),
+            problem = ""
+        )
+    }
+
+    private fun isWritten(
+        line: String,
+        value: Double
+    ): Boolean = FigureValues.allIn(text = line).any {
+        FigureValues.isSame(
+            one = it,
+            other = value
+        )
+    }
+
+    private fun sharedOf(
+        words: Set<String>,
+        line: String
+    ): Int {
+        val lineWords = FrameWords.of(text = line)
+
+        return words.count { word ->
+            lineWords.any { FrameWords.isSame(word, it) }
         }
+    }
 
     private enum class Tally(val written: String) {
         SUM("sum"),
@@ -223,10 +248,9 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
     companion object {
         const val NAME = "tally"
         const val HOW = "how"
-        const val NOTE = "note"
-        const val ROWS = "rows"
-        const val COLUMN = "column"
-        private const val ALL = "ALL"
+        const val ITEMS = "items"
+        const val LEFT_OUT = "left_out"
+        private const val SEPARATOR = "|"
         private const val LINE = 140
     }
 }

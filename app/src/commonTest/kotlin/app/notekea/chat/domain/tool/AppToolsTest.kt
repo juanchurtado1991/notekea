@@ -6,7 +6,6 @@ import app.notekea.chat.domain.tool.app.CountTool
 import app.notekea.chat.domain.tool.app.DatePhrases
 import app.notekea.chat.domain.tool.app.DateTool
 import app.notekea.chat.domain.tool.app.DaysTool
-import app.notekea.chat.domain.tool.app.RowsTool
 import app.notekea.chat.domain.tool.app.TallyTool
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.FakeNoteContentStore
@@ -182,69 +181,37 @@ class AppToolsTest {
         )
     }
 
-    // The loop's dev run, 2026-11-20: Kyoto's costs were summed from copied lines, one row dropped unseen (3624 for
-    // 3834). The code reads the rows the model names by id, and says the rows it did not count.
+    // The loop's dev run, 2026-11-19: the unpaid sessions were counted as the first paid one, "2026" their one word.
     @Test
-    fun `a tally sums the rows named by id under their column, and lists the rows it did not count`() =
+    fun `a tally counts each figure on the line closest to its words, not the first that shares a year`() =
         runTest {
             store.texts[arepas] = listOf(
-                "# Costs",
-                "| Item | Amount (€) | Note |",
-                "|---|---|---|",
-                "| Hotel, 10 nights | 1450 | breakfast |",
-                "| Food | 610 | |",
-                "| Tea ceremony | 95 | refunded |"
+                "| 1 | 2026-08-12 | Assessment | \$45 | paid |",
+                "| 7 | 2026-10-14 | Single-leg strength | \$45 | unpaid |",
+                "| 8 | 2026-10-28 | Hop tests | \$45 | unpaid |"
             ).joinToString(separator = "\n")
 
-            val cache = NoteTextCache(
-                contentStore = store,
-                textFolder = TextFolder()
+            val tally = TallyTool(
+                noteTextCache = NoteTextCache(
+                    contentStore = store,
+                    textFolder = TextFolder()
+                )
             )
-
-            val rows = RowsTool(noteTextCache = cache).run(
-                call = ToolCall(
-                    name = RowsTool.NAME,
-                    arguments = mapOf("note" to "Arepas")
-                ),
-                context = context
-            ).forModel
-
-            val tally = TallyTool(noteTextCache = cache)
 
             val said = tally.run(
                 call = ToolCall(
                     name = tally.name,
                     arguments = mapOf(
                         "how" to "sum",
-                        "note" to "Arepas",
-                        "rows" to "R1, R2",
-                        "column" to "amount"
-                    )
-                ),
-                context = context
-            ).forModel
-
-            val several = tally.run(
-                call = ToolCall(
-                    name = tally.name,
-                    arguments = mapOf(
-                        "how" to "sum",
-                        "note" to "Arepas",
-                        "rows" to "R1"
+                        "items" to "\$45 | 2026-10-14 Single-leg strength\n\$45 | 2026-10-28 Hop tests"
                     )
                 ),
                 context = context
             ).forModel
 
             assertEquals(
-                expected = listOf(true, true, true, true, true),
-                actual = listOf(
-                    "R3 Item: Tea ceremony | Amount (€): 95" in rows,
-                    said.startsWith(prefix = "tally sum of 2: 2060"),
-                    "Not counted:\n- R3" in said,
-                    "several figures (10, 1450)" in several,
-                    context.reads.read == listOf(arepas)
-                )
+                expected = listOf(true, true, false),
+                actual = listOf("Single-leg" in said, "Hop tests" in said, "Assessment" in said)
             )
         }
 
