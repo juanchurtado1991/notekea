@@ -95,6 +95,9 @@ tuned sets, and the pool below replaces them as the blind measure.
     about 76.9 % blind); 9B 334 of 439 (76.1 %), +23 (+5.2 points: about 78.0 % blind). Over the five rounds (2180
     tasks, 33 of the 40 exams): 4B +94 (+4.3 points: about 73.7 %), 9B +81 (+3.7 points: about 76.5 %). One round
     spans 72–77 % on the 4B and 74–78.5 % on the 9B.
+  - **Round 6 (seed 6), opened 2026-11-21 at `12aa698b` (the same code):** 4B 314 of 436 (72.0 %), +26 (+6.0 points:
+    about 75.4 % blind); 9B 328 of 436 (75.2 %), +19 (+4.4 points: about 77.2 % blind). Over the six rounds (2616
+    tasks, 36 of the 40 exams): 4B +120 (+4.6 points: about 74.0 %), 9B +100 (+3.8 points: about 76.6 %).
 - **Read by cause only**, with `scripts/loop-eval/buckets.py` and `compare.py`: never task by task.
 
 ## Runs
