@@ -106,6 +106,10 @@ Taken on 2026-11-21 after the pool's seven rounds: **step 5**, the answer checke
 question under a grammar, before an answer ends the turn: does it say each thing the request asks; held back once
 with what it leaves out). Dev 297 of 393 (-2 on s54-dev, +0 on s45-dev), fact failures (cause 6) still 10. Reverted
 in `b9d8cb9a`: the cause it aims at did not go down, and the facts the 4B gets wrong are said, not left out.
+Then **2.4's second half** (option 2, the gate lifted for it): a question between the notes a settled frame was
+shown held back every time, and after the second time the next call may not ask. Dev 294 (-5 on s54-dev, -3 on
+s45-dev), needless asks 13, not down. Reverted in `ab546c48`: the 4B's needless questions are not between the frame's
+notes, and holding the loop longer costs figures.
 
 ### Where the failures are
 
@@ -618,6 +622,7 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r7-base` | `3dc387b3` | round 7 opened (seed 7), the code as r1-line, level 5 | | | | 334 of 435 (76.8 %, +30 on the reference's 304: about 76.3 % blind): left 38 should have asked, 29 change wrong, 14 needless asks, 12 figures | | measured only; round 7's opening |
 | 2026-11-21 | `r7-base` 9B | `3dc387b3` | the same on the 9B, level 5 | | | | 331 of 435 (76.1 %, +18 on the reference's 313: about 76.9 % blind): left 44 should have asked, 19 change wrong, 15 needless asks, 12 figures, 11 facts | | measured only; round 7's opening |
 | 2026-11-21 | `s64-check` | `0ac05c13` | step 5, the answer checked against the task before it ends the turn, level 3 | | 297 of 393 (-2 on s54-dev, +0 on s45-dev): lost 2 needless asks, 3 figures, 3 changes; won 2 should have asked, 1 needless ask, 3 figures; facts still 10 | | | | no, reverted in `b9d8cb9a`: below the rule, and cause 6 did not go down |
+| 2026-11-21 | `s65-settled` | `f49273e9` | step 2.4's second half (a settled frame's which-question held back every time), level 3 | | 294 of 393 (-5 on s54-dev, -3 on s45-dev): lost 3 needless asks, 4 figures, 2 changes, 1 days; won 2 should have asked, 1 needless ask, 1 figure, 1 fact; needless asks 13 | | | | no, reverted in `ab546c48`: below the rule, and cause 2 did not go down |
 
 Notes as the plan is carried out:
 
