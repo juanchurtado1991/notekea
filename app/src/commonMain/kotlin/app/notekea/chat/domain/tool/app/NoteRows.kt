@@ -83,21 +83,12 @@ internal object NoteRows {
     ): Figure {
         val wanted = column.trim()
 
-        // The column whose name shares the most words with the one asked: the 4B asked "Distance (mi)" of a
-        // column named Distance, and "Hours of sleep" of Hours (the dev run of 2026-11-20).
-        val cell = row
-            .cells
-            .map {
-                it to sharedOf(
-                    name = it.first,
-                    wanted = wanted
-                )
-            }
-            .filter { (_, shared) ->
-                shared > 0
-            }
-            .maxByOrNull { (_, shared) -> shared }
-            ?.first
+        val cell = row.cells.firstOrNull { (name, _) ->
+            wanted.isNotEmpty() && isSame(
+                name = name,
+                wanted = wanted
+            )
+        }
 
         val text = cell?.second ?: row.text
 
@@ -170,18 +161,16 @@ internal object NoteRows {
         }
     }
 
-    // How many words a column's [name] shares with the one [wanted]; the most when they are written alike.
-    private fun sharedOf(
+    private fun isSame(
         name: String,
         wanted: String
-    ): Int {
-        val isUnnamed = name.isBlank() || wanted.isBlank()
-        if (isUnnamed) return 0
-        if (name.equals(other = wanted, ignoreCase = true)) return Int.MAX_VALUE
+    ): Boolean {
+        if (name.equals(other = wanted, ignoreCase = true)) return true
 
+        val words = FrameWords.of(text = wanted)
         val own = FrameWords.of(text = name)
 
-        return FrameWords.of(text = wanted).count { one ->
+        return words.isNotEmpty() && words.all { one ->
             own.any {
                 FrameWords.isSame(
                     one = one,
