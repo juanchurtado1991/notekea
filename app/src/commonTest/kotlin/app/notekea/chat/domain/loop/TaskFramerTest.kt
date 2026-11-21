@@ -50,9 +50,27 @@ class TaskFramerTest {
         task: String,
         candidates: List<FrameCandidates.Candidate>,
         replies: Map<String, String>,
-        isChange: Boolean = true
+        isChange: Boolean = true,
+        marks: List<String> = emptyList()
     ): TaskFrame? {
-        engine.reply = { messages -> replies[messages.first().text].orEmpty() }
+        // Each id is marked in a call of its own (step 2.2): the marks are given in turn, N1 or E1 each time.
+        val left = ArrayDeque(elements = marks)
+
+        engine.reply = { messages ->
+            val asked = messages.first().text
+            val id = if (asked == FramePrompts.MARK_ENTRIES) "E1" else "N1"
+            val isMark = asked == FramePrompts.MARK_NOTES || asked == FramePrompts.MARK_ENTRIES
+
+            when {
+                isMark && marks.isNotEmpty() ->
+                    left
+                        .removeFirstOrNull()
+                        ?.let { "{\"$id\":\"$it\"}" }
+                        .orEmpty()
+
+                else -> replies[asked].orEmpty()
+            }
+        }
 
         return framer.frameOf(
             task = task,
@@ -114,15 +132,16 @@ class TaskFramerTest {
     @Test
     fun `namesakes with words of their own are marked and the code counts, one settled, both or none open`() =
         runTest {
-            suspend fun marked(marks: String) = frameOf(
+            suspend fun marked(vararg marks: String) = frameOf(
                 task = worded,
                 candidates = listOf(kitchen, servers),
-                replies = mapOf(FramePrompts.COUNT to wordedOne, FramePrompts.MARK_NOTES to marks)
+                replies = mapOf(FramePrompts.COUNT to wordedOne),
+                marks = marks.toList()
             )
 
-            val both = marked(marks = """{"N1":"yes","N2":"yes"}""")
-            val single = marked(marks = """{"N1":"no","N2":"yes"}""")
-            val none = marked(marks = """{"N1":"no","N2":"no"}""")
+            val both = marked("yes", "yes")
+            val single = marked("no", "yes")
+            val none = marked("no", "no")
 
             assertEquals(
                 expected = listOf(
@@ -136,14 +155,12 @@ class TaskFramerTest {
         }
 
     @Test
-    fun `a reply that does not mark every note is no frame`() = runTest {
+    fun `a note left unmarked, its call's reply empty, is no frame`() = runTest {
         val frame = frameOf(
             task = worded,
             candidates = listOf(kitchen, servers),
-            replies = mapOf(
-                FramePrompts.COUNT to wordedOne,
-                FramePrompts.MARK_NOTES to """{"N1":"yes"}"""
-            )
+            replies = mapOf(FramePrompts.COUNT to wordedOne),
+            marks = listOf("yes")
         )
 
         assertEquals(
@@ -155,19 +172,19 @@ class TaskFramerTest {
     @Test
     fun `the entries of an item are marked, one settled, two open, none the whole note`() =
         runTest {
-            suspend fun marked(marks: String) = frameOf(
+            suspend fun marked(vararg marks: String) = frameOf(
                 task = "move the appointment to 11:00",
                 candidates = listOf(dentist),
                 replies = mapOf(
                     FramePrompts.COUNT to appointment,
-                    FramePrompts.PICK to """{"pick":"N1"}""",
-                    FramePrompts.MARK_ENTRIES to marks
-                )
+                    FramePrompts.PICK to """{"pick":"N1"}"""
+                ),
+                marks = marks.toList()
             )
 
-            val two = marked(marks = """{"E1":"yes","E2":"yes"}""")
-            val single = marked(marks = """{"E1":"no","E2":"yes"}""")
-            val none = marked(marks = """{"E1":"no","E2":"no"}""")
+            val two = marked("yes", "yes")
+            val single = marked("no", "yes")
+            val none = marked("no", "no")
 
             assertEquals(
                 expected = listOf(dentist.entries, dentist.entries[1], FrameReason.ENTRY, false),

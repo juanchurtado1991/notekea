@@ -42,23 +42,27 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
     }
 
     /**
-     * The notes of [group] [task] could be about, each marked yes or no by the model and counted by the code
-     * (`docs/loop-goal-plan.md`, step 2.2); null when the reply cannot be read.
+     * The notes of [group] [task] could be about, each marked yes or no by the model in a call of its own and
+     * counted by the code (`docs/loop-goal-plan.md`, step 2.2: one call for each id, as the marks of one call were
+     * poor on level 2); null when a reply cannot be read.
      */
     suspend fun markedNotesOf(
         task: String,
         group: List<FrameCandidates.Candidate>,
         memory: List<MemoryLine>
-    ): List<FrameCandidates.Candidate>? {
-        val shown = FrameShown(
-            notes = group.take(n = MOST_MARKED),
-            extra = emptyList()
-        )
+    ): List<FrameCandidates.Candidate>? = group
+        .take(n = MOST_MARKED)
+        .map { note ->
+            val shown = FrameShown(
+                notes = listOf(note),
+                extra = emptyList()
+            )
 
-        val fields = marked(FramePrompts.MARK_NOTES, task, memory, shown) ?: return null
+            val fields = marked(FramePrompts.MARK_NOTES, task, memory, shown) ?: return null
 
-        return shown.markedNotesOf(fields = fields)
-    }
+            shown.markedNotesOf(fields = fields) ?: return null
+        }
+        .flatten()
 
     /** The shown note [task] is about; null when none is. */
     suspend fun pickOf(
@@ -75,22 +79,29 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         )
     )?.let { (shown, fields) -> shown.noteOf(fields = fields) }
 
-    /** The entries of [note] [task] could be about, each marked yes or no; null when the reply cannot be read. */
+    /**
+     * The entries of [note] [task] could be about, each marked yes or no in a call of its own; null when a reply
+     * cannot be read.
+     */
     suspend fun markedEntriesOf(
         task: String,
         note: FrameCandidates.Candidate,
         memory: List<MemoryLine>
-    ): List<String>? {
-        val shown = FrameShown(
-            notes = listOf(note),
-            extra = emptyList(),
-            entries = note.entries.take(n = MOST_MARKED)
-        )
+    ): List<String>? = note
+        .entries
+        .take(n = MOST_MARKED)
+        .map { entry ->
+            val shown = FrameShown(
+                notes = listOf(note),
+                extra = emptyList(),
+                entries = listOf(entry)
+            )
 
-        val fields = marked(FramePrompts.MARK_ENTRIES, task, memory, shown) ?: return null
+            val fields = marked(FramePrompts.MARK_ENTRIES, task, memory, shown) ?: return null
 
-        return shown.markedEntriesOf(fields = fields)
-    }
+            shown.markedEntriesOf(fields = fields) ?: return null
+        }
+        .flatten()
 
     /** The notes [task] names, each of them; null when the reply cannot be read. */
     suspend fun severalOf(
