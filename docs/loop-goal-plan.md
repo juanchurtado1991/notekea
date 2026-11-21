@@ -119,6 +119,12 @@ name the task writes (a second Luis in a shifts note) marked with it; one marked
 alone: dev 24 / 28 (from 28 / 11), tuned 8 / 10 (from 8 / 4). Reverted in `62d61383`: the other note that writes the
 name is mostly the same person or thing, and the 4B marks both yes. The misses left are the ones only reading tells
 apart, which no set made from words can.
+Then **3.1 read** (its table, on the dev runs s45, s54 and s64): the same six days tasks fail in all three. Four are
+a wrong date found (a start read a week off, the invoice's sent date for its due date, the wrong note's "un día de
+antelación", a deadline the note says only as "two weeks before"): the frame and the reading, not `days`. One is
+`days` itself: "cuántos días faltan para el cumple de Andrés" gave the birth date, 1983, and `days` said -15692; a
+date that recurs each year has no next occurrence in the tool. One is a sum of several waits. Fixing `days` for
+yearly dates wins one dev task at most, under the rule's +4 on the pool, so it is left written here, not built.
 
 ### Where the failures are
 
