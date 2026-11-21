@@ -62,9 +62,6 @@ internal object TurnChecks {
                 call = call,
                 state = state,
                 tool = tool
-            ) ?: TopicUnread.heldOf(
-                call = call,
-                state = state
             ) ?: AnswerFigures.heldOf(
                 call = call,
                 state = state

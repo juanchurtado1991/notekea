@@ -128,8 +128,6 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
             cache = noteTextCache
         )
 
-        context.reads.relate(notes = topic)
-
         val also = topic
             .takeIf { it.isNotEmpty() }
             ?.joinToString(

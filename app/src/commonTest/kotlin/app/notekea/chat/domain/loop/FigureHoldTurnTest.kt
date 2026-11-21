@@ -96,8 +96,10 @@ class FigureHoldTurnTest {
             }
     }
 
+    // `docs/loop-goal-plan.md`, step 3.3: held for unread notes of its topic, the 4B ran out of steps in 11 of 13
+    // failures even when the next call could only read; the hold is gone, and the read still names them.
     @Test
-    fun `an answer held for a note of its topic it has not read is followed by a read, and then any call`() =
+    fun `an answer with notes of its topic unread is not held, and the read names them`() =
         runTest {
             store.texts[RelativePath(value = "Health/Papa.md")] = "Papa's allergy: see [[Care plan]]."
             store.texts[RelativePath(value = "Health/Care plan.md")] = "Papa's allergy is penicillin."
@@ -107,15 +109,21 @@ class FigureHoldTurnTest {
                 paths = listOf("Health/Papa.md", "Health/Care plan.md"),
                 scripted = listOf(
                     """{"tool":"read","note":"Health/Papa"}""",
-                    """{"tool":"answer","text":"Papa has no allergy."}""",
-                    """{"tool":"read","note":"Health/Care plan"}""",
-                    """{"tool":"answer","text":"Penicillin."}"""
+                    """{"tool":"answer","text":"See the care plan."}"""
                 )
             )
 
             assertEquals(
-                expected = listOf(true, false, true),
-                actual = listOf("\"answer\"" in schemas[1], "\"answer\"" in schemas[2], "\"answer\"" in schemas[3])
+                expected = listOf(2, true),
+                actual = listOf(
+                    schemas.size,
+                    engine.generated.any { m ->
+                        m
+                            .last()
+                            .text
+                            .contains("Read them too")
+                    }
+                )
             )
         }
 

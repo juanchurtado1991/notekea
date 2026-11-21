@@ -3,13 +3,11 @@ package app.notekea.chat.domain.tool
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * What a turn read: the notes that held text (what a note it writes is written from), those that held none, and the
- * unread notes about the topic of one read that write the task's words ([related], `docs/agent-figures.md`).
+ * What a turn read: the notes that held text (what a note it writes is written from), those that held none.
  */
 class TurnReads {
     private val held = mutableListOf<RelativePath>()
     private val empty = mutableListOf<String>()
-    private val topic = mutableListOf<RelativePath>()
 
     /** The notes read so far that held text. */
     val read: List<RelativePath> get() = held.distinct()
@@ -19,15 +17,6 @@ class TurnReads {
         .distinct()
         .takeIf { held.isEmpty() }
         .orEmpty()
-
-    /** The notes about the topic of the ones read, not read yet. */
-    val related: List<RelativePath> get() = topic.distinct().filterNot {
-        it in held
-    }
-
-    fun relate(notes: List<RelativePath>) {
-        topic += notes
-    }
 
     fun add(note: RelativePath) {
         held += note
