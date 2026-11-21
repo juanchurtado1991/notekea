@@ -65,6 +65,8 @@ directions: one round is not enough to tell a step of under a point from the sam
 Round 3 (seed 3, the same code): about 73.7 % on the 4B (+19) and 76.5 % on the 9B (+16); over the three rounds
 Round 4 (seed 4): about 72.2 % (+12) and 74.2 % (+6); over the four rounds about 72.9 % on the 4B and 76.1 % on the
 9B, against the weekend's 75 % and 80 %.
+Round 5 (seed 5): about 76.9 % (+33) and 78.0 % (+23); over the five rounds about 73.7 % on the 4B and 76.5 % on
+the 9B. A single round spans five points: a round's opening alone cannot say whether a target is met.
 
 ### A decision for the developer (2026-11-20)
 
@@ -601,6 +603,8 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r3-base` 9B | `6d2439ab` | the same on the 9B, level 5 | | | | 338 of 437 (77.3 %, +16 on the reference's 322: about 76.5 % blind): left 44 should have asked, 18 needless asks, 18 change wrong, 14 figures | | measured only; round 3's opening |
 | 2026-11-21 | `r4-base` | `47b1ceee` | round 4 opened (seed 4), the code as r1-line, level 5 | | | | 315 of 433 (72.7 %, +12 on the reference's 303: about 72.2 % blind): left 34 change wrong, 33 should have asked, 22 needless asks, 17 figures | | measured only; round 4's opening |
 | 2026-11-21 | `r4-base` 9B | `47b1ceee` | the same on the 9B, level 5 | | | | 328 of 433 (75.8 %, +6 on the reference's 322: about 74.2 % blind): left 41 should have asked, 22 change wrong, 19 needless asks, 16 figures | | measured only; round 4's opening |
+| 2026-11-21 | `r5-base` | `5779f3d4` | round 5 opened (seed 5), the code as r1-line, level 5 | | | | 339 of 439 (77.2 %, +33 on the reference's 306: about 76.9 % blind): left 36 should have asked, 25 change wrong, 15 figures, 13 needless asks | | measured only; round 5's opening |
+| 2026-11-21 | `r5-base` 9B | `5779f3d4` | the same on the 9B, level 5 | | | | 334 of 439 (76.1 %, +23 on the reference's 311: about 78.0 % blind): left 43 should have asked, 23 change wrong, 14 needless asks, 13 figures | | measured only; round 5's opening |
 
 Notes as the plan is carried out:
 
