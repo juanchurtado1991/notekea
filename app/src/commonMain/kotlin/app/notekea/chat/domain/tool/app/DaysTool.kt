@@ -6,6 +6,7 @@ import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
+import app.notekea.core.domain.time.CalendarDate
 
 /**
  * The days from one day to another, counted by the app (`docs/agent-figures.md`): "how many days until the trip",
@@ -67,7 +68,34 @@ class DaysTool : ChatTool {
         val days = end.epochDay - start.epochDay
         val shown = "${DatePhrases.written(date = start)} to ${DatePhrases.written(date = end)}"
 
-        return ToolResult(forModel = "days: $days days from $shown.")
+        return ToolResult(forModel = "days: $days days from $shown.${yearlyOf(start = start, end = end)}")
+    }
+
+    // A day of a past year from a later one is mostly a day that comes back each year, a birthday or an anniversary:
+    // "cuántos días faltan para el cumple de Andrés" gave his birth date, 1983, and got -15692 days (the loop's dev
+    // exams, 2026-11-21). Its next return is told beside the count, and the model takes the one the task asks.
+    private fun yearlyOf(
+        start: CalendarDate,
+        end: CalendarDate
+    ): String {
+        if (end.year >= start.year) return ""
+
+        val next = listOf(start.year, start.year + 1)
+            .map {
+                CalendarDate(
+                    year = it,
+                    month = end.month,
+                    day = end.day
+                )
+            }
+            .firstOrNull {
+                it.isValid && it >= start
+            } ?: return ""
+
+        val left = next.epochDay - start.epochDay
+
+        return " If it comes back each year (a birthday, an anniversary), the next is " +
+            "${DatePhrases.written(date = next)}, $left days from ${DatePhrases.written(date = start)}."
     }
 
     companion object {
