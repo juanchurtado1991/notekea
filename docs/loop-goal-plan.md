@@ -114,6 +114,11 @@ Measured then, to see whether 2.4 could hold for the 9B alone: **the frame alone
 before. Dev 35 misses of 74 (47 %) and 15 false alarms of 319; tuned 9 of 29 and 5 of 126. Worse than the 4B's 28 /
 11: the 9B's frame is not better, so 2.4 does not hold for it either. Of its dev misses 18 are a pick (no set by
 names, and the model picks one note where the task leaves two open): the count's sets, as on the 4B.
+Then **3, the count redesigned in its sets**: after a pick, the notes whose lines write a word of the picked
+name the task writes (a second Luis in a shifts note) marked with it; one marked is that note, several open. Frame
+alone: dev 24 / 28 (from 28 / 11), tuned 8 / 10 (from 8 / 4). Reverted in `62d61383`: the other note that writes the
+name is mostly the same person or thing, and the 4B marks both yes. The misses left are the ones only reading tells
+apart, which no set made from words can.
 
 ### Where the failures are
 
@@ -628,6 +633,7 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `s64-check` | `0ac05c13` | step 5, the answer checked against the task before it ends the turn, level 3 | | 297 of 393 (-2 on s54-dev, +0 on s45-dev): lost 2 needless asks, 3 figures, 3 changes; won 2 should have asked, 1 needless ask, 3 figures; facts still 10 | | | | no, reverted in `b9d8cb9a`: below the rule, and cause 6 did not go down |
 | 2026-11-21 | `s65-settled` | `f49273e9` | step 2.4's second half (a settled frame's which-question held back every time), level 3 | | 294 of 393 (-5 on s54-dev, -3 on s45-dev): lost 3 needless asks, 4 figures, 2 changes, 1 days; won 2 should have asked, 1 needless ask, 1 figure, 1 fact; needless asks 13 | | | | no, reverted in `ab546c48`: below the rule, and cause 2 did not go down |
 | 2026-11-21 | `r1-frame9b` | `d42c9c32` | the frame alone on the 9B, the code as r1-line, level 2 | dev 35 misses of 74 (47 %), 15 false alarms of 319; tuned 9 of 29, 5 of 126 | | | | | measured only: worse than the 4B's 28 / 11, so 2.4 does not hold for the 9B |
+| 2026-11-21 | `s66-kin` | `d666d4b8` | option 3: a pick marked with the notes whose lines write its name's word, level 2 | dev 24 / 28; tuned 8 / 10 | | | | | no, reverted in `62d61383`: misses -4, false alarms +17 |
 
 Notes as the plan is carried out:
 
