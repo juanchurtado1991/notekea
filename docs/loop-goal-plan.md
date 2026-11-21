@@ -110,6 +110,10 @@ Then **2.4's second half** (option 2, the gate lifted for it): a question betwee
 shown held back every time, and after the second time the next call may not ask. Dev 294 (-5 on s54-dev, -3 on
 s45-dev), needless asks 13, not down. Reverted in `ab546c48`: the 4B's needless questions are not between the frame's
 notes, and holding the loop longer costs figures.
+Measured then, to see whether 2.4 could hold for the 9B alone: **the frame alone on the 9B**, never measured
+before. Dev 35 misses of 74 (47 %) and 15 false alarms of 319; tuned 9 of 29 and 5 of 126. Worse than the 4B's 28 /
+11: the 9B's frame is not better, so 2.4 does not hold for it either. Of its dev misses 18 are a pick (no set by
+names, and the model picks one note where the task leaves two open): the count's sets, as on the 4B.
 
 ### Where the failures are
 
@@ -623,6 +627,7 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r7-base` 9B | `3dc387b3` | the same on the 9B, level 5 | | | | 331 of 435 (76.1 %, +18 on the reference's 313: about 76.9 % blind): left 44 should have asked, 19 change wrong, 15 needless asks, 12 figures, 11 facts | | measured only; round 7's opening |
 | 2026-11-21 | `s64-check` | `0ac05c13` | step 5, the answer checked against the task before it ends the turn, level 3 | | 297 of 393 (-2 on s54-dev, +0 on s45-dev): lost 2 needless asks, 3 figures, 3 changes; won 2 should have asked, 1 needless ask, 3 figures; facts still 10 | | | | no, reverted in `b9d8cb9a`: below the rule, and cause 6 did not go down |
 | 2026-11-21 | `s65-settled` | `f49273e9` | step 2.4's second half (a settled frame's which-question held back every time), level 3 | | 294 of 393 (-5 on s54-dev, -3 on s45-dev): lost 3 needless asks, 4 figures, 2 changes, 1 days; won 2 should have asked, 1 needless ask, 1 figure, 1 fact; needless asks 13 | | | | no, reverted in `ab546c48`: below the rule, and cause 2 did not go down |
+| 2026-11-21 | `r1-frame9b` | `d42c9c32` | the frame alone on the 9B, the code as r1-line, level 2 | dev 35 misses of 74 (47 %), 15 false alarms of 319; tuned 9 of 29, 5 of 126 | | | | | measured only: worse than the 4B's 28 / 11, so 2.4 does not hold for the 9B |
 
 Notes as the plan is carried out:
 
