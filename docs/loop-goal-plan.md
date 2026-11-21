@@ -63,7 +63,8 @@ Round 2 (seed 2, 2026-11-21, the same code): about 73.8 % on the 4B (+19) and ab
 both rounds about 72.8 % and 76.9 %. The two rounds differ by two to three points on each model, in opposite
 directions: one round is not enough to tell a step of under a point from the sample.
 Round 3 (seed 3, the same code): about 73.7 % on the 4B (+19) and 76.5 % on the 9B (+16); over the three rounds
-about 73.1 % and 76.8 %, against the weekend's 75 % and 80 %.
+Round 4 (seed 4): about 72.2 % (+12) and 74.2 % (+6); over the four rounds about 72.9 % on the 4B and 76.1 % on the
+9B, against the weekend's 75 % and 80 %.
 
 ### A decision for the developer (2026-11-20)
 
@@ -598,6 +599,8 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r2-base` 9B | `eba8683a` | the same on the 9B, level 5 | | | | 324 of 435 (74.5 %, +11 on the reference's 313: about 75.3 % blind): left 43 should have asked, 27 needless asks, 23 change wrong, 11 figures | | measured only; round 2's opening |
 | 2026-11-21 | `r3-base` | `6d2439ab` | round 3 opened (seed 3), the code as r1-line, level 5 | | | | 337 of 437 (77.1 %, +19 on the reference's 318: about 73.7 % blind): left 37 should have asked, 21 change wrong, 20 needless asks, 15 figures | | measured only; round 3's opening |
 | 2026-11-21 | `r3-base` 9B | `6d2439ab` | the same on the 9B, level 5 | | | | 338 of 437 (77.3 %, +16 on the reference's 322: about 76.5 % blind): left 44 should have asked, 18 needless asks, 18 change wrong, 14 figures | | measured only; round 3's opening |
+| 2026-11-21 | `r4-base` | `47b1ceee` | round 4 opened (seed 4), the code as r1-line, level 5 | | | | 315 of 433 (72.7 %, +12 on the reference's 303: about 72.2 % blind): left 34 change wrong, 33 should have asked, 22 needless asks, 17 figures | | measured only; round 4's opening |
+| 2026-11-21 | `r4-base` 9B | `47b1ceee` | the same on the 9B, level 5 | | | | 328 of 433 (75.8 %, +6 on the reference's 322: about 74.2 % blind): left 41 should have asked, 22 change wrong, 19 needless asks, 16 figures | | measured only; round 4's opening |
 
 Notes as the plan is carried out:
 
