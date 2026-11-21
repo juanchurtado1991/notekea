@@ -71,7 +71,11 @@ rule built on it moves errors around. The plan does not say what to do then. The
 2. **Lift the gate on 2.4**, and let the loop ask with the frame as it is.
 3. **Redesign the count**: a call the 4B can answer, or the code finding the sets without the model's words.
 
-Until the developer picks one, only measurements that change nothing are run.
+Taken meanwhile (the goal says to take another step): **1, step 3.2** (rows the code numbers, a tally by their
+ids), as it left step 2's code as it was. Measured on dev twice (`s57-rows`, `s58-rows`): 288 and 287 of 393, -11
+and -12, figures 22 and 26 against 17. Reverted: the 4B names rows worse than it copied lines (wrong rows, a
+difference of three, the same refused call again), so the third step reverted in a row. Design work stays stopped
+until the developer picks a way; 3.2 as the plan writes it is measured and does not hold for the 4B.
 
 ### Where the failures are
 
@@ -560,6 +564,8 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `r1-line` 9B | `8b6fbd58` | round 1 closed on the 9B, the code as r1-line (`change_line` kept), level 5 | | | | 337 of 436 (77.3 %, +10 on r1-tally's 327): change wrong 14 won, 5 lost; figures 2 won, 2 lost; left: 41 should have asked, 25 change wrong, 15 needless asks | | measured only (design work stopped); the 9B's figure for round 1 |
 | 2026-11-20 | `r1-line` 9B dev | `bc2e6972` | the nine exams on the 9B, first since the baseline (277), level 3 | | 291 of 393 (74.0 %, +14 on the baseline): left 36 should have asked, 17 needless asks, 17 figures, 23 changes | | | | measured only |
 | 2026-11-20 | `r1-line` 9B tuned | `e839309b` | the tuned tasks and the fresh vault on the 9B, first since the baseline (234, 58), level 4 | | | 226 of 259 (87.3 %); fresh 59 of 77 (76.6 %): left 9 should have asked, 5 needless asks, 5 figures, 13 changes | | | measured only |
+| 2026-11-20 | `s57-rows` | `b1c496bb` | 3.2, `rows` numbers a note's rows and `tally` counts them by id; after a figure hold the next call may only be a figure tool, level 3 | | 288 of 393 (-11 on `s54-dev`; figures 22, 5 won, 10 lost; days 4) | | | | no, mended: the column was found only when every word asked was in its name ("Distance (mi)" for Distance), so tables refused their rows; now the column sharing the most words |
+| 2026-11-20 | `s58-rows` | `0cc9bed7` | the same, the column mended, level 3 | | 287 of 393 (-12; figures 26, 4 won, 13 lost) | | | | no, reverted in `a5cf687e` and `4f143673`: the 4B names the wrong rows, takes a difference of three, and repeats a refused tally; copying lines did better. Third step reverted in a row |
 
 Notes as the plan is carried out:
 

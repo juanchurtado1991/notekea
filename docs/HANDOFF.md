@@ -17,6 +17,8 @@ the developer and another step is taken. A short report on Sunday.
 On 2026-11-20 the pool stands at 316 (72.5 %) on the 4B and 337 (77.3 %) on the 9B. Two steps on the count were
 reverted in a row, so design work has stopped; the decision this leaves for the developer (go on to step 3, lift
 the gate on 2.4, or redesign the count) is in `docs/loop-goal-plan.md`, section 2.
+Meanwhile step 3.2 (rows numbered by the code, a tally by id) was built and measured on dev: -12, reverted; the
+log has why.
 Before that, 2026-11-17, with the loop's foundations on #145 (the task's frame, figures worked out by the app, a
 topic read whole), the blind evaluation pool, and **the plan to reach the blind targets, `docs/loop-goal-plan.md`,
 which is the next work: follow it step by step**; before that, 2026-11-15, with step 6a of the one agent loop measured on the three models; before that, 2026-11-13, with videos and all of M5 on `feature/videos`, one pull request
