@@ -62,6 +62,8 @@ The blind number (section 4, a pool round: the gain over the reference added to 
 Round 2 (seed 2, 2026-11-21, the same code): about 73.8 % on the 4B (+19) and about 75.3 % on the 9B (+11); over
 both rounds about 72.8 % and 76.9 %. The two rounds differ by two to three points on each model, in opposite
 directions: one round is not enough to tell a step of under a point from the sample.
+Round 3 (seed 3, the same code): about 73.7 % on the 4B (+19) and 76.5 % on the 9B (+16); over the three rounds
+about 73.1 % and 76.8 %, against the weekend's 75 % and 80 %.
 
 ### A decision for the developer (2026-11-20)
 
@@ -594,6 +596,8 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `s63-word` | `f2412cb7` | option 3, part of the count redesigned: the set's word picked by the model from the task's words the names write, level 2 | dev 27 / 15; tuned 8 / 4 | | | | | no, reverted: misses -1, false alarms +4 (the wrong word picked; sets of one person's notes of other kinds) |
 | 2026-11-21 | `r2-base` | `eba8683a` | round 2 opened (seed 2), the code as r1-line, level 5 | | | | 311 of 435 (71.5 %, +19 on the reference's 292: about 73.8 % blind): left 37 should have asked, 31 change wrong, 27 needless asks, 15 figures | | measured only (design work stopped); round 2's opening |
 | 2026-11-21 | `r2-base` 9B | `eba8683a` | the same on the 9B, level 5 | | | | 324 of 435 (74.5 %, +11 on the reference's 313: about 75.3 % blind): left 43 should have asked, 27 needless asks, 23 change wrong, 11 figures | | measured only; round 2's opening |
+| 2026-11-21 | `r3-base` | `6d2439ab` | round 3 opened (seed 3), the code as r1-line, level 5 | | | | 337 of 437 (77.1 %, +19 on the reference's 318: about 73.7 % blind): left 37 should have asked, 21 change wrong, 20 needless asks, 15 figures | | measured only; round 3's opening |
+| 2026-11-21 | `r3-base` 9B | `6d2439ab` | the same on the 9B, level 5 | | | | 338 of 437 (77.3 %, +16 on the reference's 322: about 76.5 % blind): left 44 should have asked, 18 needless asks, 18 change wrong, 14 figures | | measured only; round 3's opening |
 
 Notes as the plan is carried out:
 
