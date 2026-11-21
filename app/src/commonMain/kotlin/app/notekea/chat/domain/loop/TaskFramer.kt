@@ -96,8 +96,13 @@ class TaskFramer(llmEngine: LlmEngine) {
             if (fitting.size != 1) return targetsOf(fitting.ifEmpty { namesakes }) to said
 
             fitting.single() to said
+        } else if (group == null) {
+            val (kin, by) = kinOf(task, words, picked, candidates, memory) ?: return null
+            if (kin.size != 1) return targetsOf(kin) to by
+
+            kin.single() to by
         } else {
-            picked to if (fits.isEmpty()) FrameReason.PICK else reason
+            picked to reason
         }
 
         return entriesOf(task, reply, meant, memory, by)
@@ -155,6 +160,43 @@ class TaskFramer(llmEngine: LlmEngine) {
         return asking.markedNotesOf(task, told, memory)?.let {
             it to FrameReason.MARKS
         }
+    }
+
+    // The note picked, and the shown notes whose lines write a word of its name the task writes, a second Luis in
+    // the staff list beside Personal/Luis Ochoa (the frame alone, 2026-11-21: 13 of the 4B's 28 misses were a pick
+    // with no set by names). The model marks each; one marked is that note, several leave it open, none the pick.
+    private suspend fun kinOf(
+        task: String,
+        words: String,
+        picked: FrameCandidates.Candidate,
+        candidates: List<FrameCandidates.Candidate>,
+        memory: List<MemoryLine>
+    ): Pair<List<FrameCandidates.Candidate>, FrameReason>? {
+        val asked = FrameWords.of(text = words)
+
+        val said = FrameWords
+            .of(text = picked.path.nameWithoutExtension)
+            .filter { asked.writes(word = it) }
+
+        val kin = candidates.filter { candidate ->
+            val isOther = candidate != picked
+
+            isOther && said.any { candidate.words.writes(word = it) }
+        }
+
+        if (kin.isEmpty()) return listOf(picked) to FrameReason.PICK
+
+        val marked = asking.markedNotesOf(task, listOf(picked) + kin, memory) ?: return null
+        if (marked.isEmpty()) return listOf(picked) to FrameReason.PICK
+
+        return marked to FrameReason.MARKS
+    }
+
+    private fun Set<String>.writes(word: String): Boolean = any {
+        FrameWords.isSame(
+            one = it,
+            other = word
+        )
     }
 
     private fun targetsOf(group: List<FrameCandidates.Candidate>): List<FrameTarget> =
