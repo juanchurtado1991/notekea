@@ -110,35 +110,6 @@ class TaskFramerTest {
         )
     }
 
-    // The frame alone, 2026-11-20: the 4B's words were the whole request, so "Luis" made no set beside "turno". The
-    // model picks the thing's word from those the names write, and the word makes the set.
-    @Test
-    fun `the thing's word picked from the words the names write makes the set`() = runTest {
-        val ochoa = candidate(path = "Personal/Luis Ochoa.md")
-        val perez = candidate(path = "Personal/Luis Pérez.md")
-        val shifts = candidate(path = "Personal/Turnos semana 46.md")
-        val whole = """{"count":"one","words":"cuánto le pago a Luis por turno","thing":"note"}"""
-
-        suspend fun framed(word: String) = frameOf(
-            task = "cuánto le pago a Luis por turno?",
-            candidates = listOf(ochoa, perez, shifts),
-            replies = mapOf(
-                FramePrompts.COUNT to whole,
-                FramePrompts.THING_WORD to """{"word":"$word"}""",
-                FramePrompts.PICK to """{"pick":"N3"}"""
-            )
-        )
-
-        assertEquals(
-            expected = listOf(listOf(ochoa.path, perez.path), emptyList<RelativePath>(), shifts.path),
-            actual = listOf(
-                framed(word = "luis")?.openNotes,
-                framed(word = "not said")?.openNotes,
-                framed(word = "not said")?.meant
-            )
-        )
-    }
-
     // docs/loop-goal-plan.md, step 2.2: asked to pick one or say "not said", the model always picked one.
     @Test
     fun `namesakes with words of their own are marked and the code counts, one settled, both or none open`() =

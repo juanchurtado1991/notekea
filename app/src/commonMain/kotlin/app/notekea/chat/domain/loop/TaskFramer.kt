@@ -58,7 +58,12 @@ class TaskFramer(llmEngine: LlmEngine) {
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
         val words = reply.words.ifBlank { task }
 
-        val group = (groupOf(task, words, candidates, memory) ?: return null).group
+        val group = FrameGroups
+            .of(
+                task = words,
+                candidates = candidates
+            )
+            .firstOrNull()
 
         val (fits, reason) = group
             ?.let {
@@ -97,36 +102,6 @@ class TaskFramer(llmEngine: LlmEngine) {
 
         return entriesOf(task, reply, meant, memory, by)
     }
-
-    // The set of notes the thing's word makes. With several words of the task in the names and one of them shared by
-    // two names or more, the model picks which names the thing from those words, under a grammar: written by the
-    // 4B itself, the words were the whole request, so "Luis" made no set beside "turno" (the frame alone, 2026-11-20).
-    // Null when the reply cannot be read.
-    private suspend fun groupOf(
-        task: String,
-        words: String,
-        candidates: List<FrameCandidates.Candidate>,
-        memory: List<MemoryLine>
-    ): Grouped? {
-        val named = FrameGroups.namedOf(task, candidates)
-        val isAsked = named.size > 1 && named.any { FrameGroups.isShared(it, candidates) }
-
-        if (!isAsked) {
-            return Grouped(
-                group = FrameGroups.of(
-                    task = words,
-                    candidates = candidates
-                ).firstOrNull()
-            )
-        }
-
-        val word = asking.thingWordOf(task, named, memory) ?: return null
-
-        return Grouped(group = FrameGroups.ofWord(word, candidates))
-    }
-
-    // The set the thing's word makes, or none.
-    private class Grouped(val group: List<FrameCandidates.Candidate>?)
 
     // The entries of the note meant a change could be about, when its thing is an item and the note has several
     // (a question about "the budget" sums its rows: marking them asked on 26 of 319 tasks, the frame alone):

@@ -84,10 +84,6 @@ after the holds `holds.py` showed using the steps up: pool 318 (+2), figures not
 instead: dev -2. Looked at, **4.1** on dev: of the 23 change failures, two are a condition on a property; the rest
 are conditions the notes say in prose, which 4.1 marks as 2.2 does. So every step left goes through the 4B's marks or
 count, poor every way measured: **the developer's decision**, and design work stops here until then.
-Taken on 2026-11-21 (the goal says to take another step): **3, the count redesigned in one part**: the set's word is
-no longer the 4B's own words (it copied the whole request, so "Luis" made no set beside "turno"); when the task has
-several words the names write and one of them is shared, the model picks the thing's word from those words, under a
-grammar, and that word makes the set. A closed choice, as the marks are; the rest of the frame is as it was.
 
 ### Where the failures are
 
