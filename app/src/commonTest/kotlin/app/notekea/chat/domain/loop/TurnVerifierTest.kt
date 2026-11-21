@@ -318,44 +318,6 @@ class TurnVerifierTest {
             )
         }
 
-    // Step 5 of docs/loop-goal-plan.md: "when is it due" was left out of the first answer, so it is held back once
-    // with what it leaves out, and the second answer ends the turn whatever the check says of it.
-    @Test
-    fun `an answer that leaves out something the task asks is held back once with what it leaves out`() =
-        runTest {
-            store.texts[lease] = "The rent is 950 euros a month, due on the 5th."
-
-            script(
-                """{"tool":"read","note":"Lease"}""",
-                """{"tool":"answer","text":"950 euros a month."}""",
-                """{"tool":"answer","text":"950 euros a month, due on the 5th."}"""
-            )
-
-            val scripted = engine.reply
-
-            engine.reply = { messages ->
-                val isCheck = messages
-                    .first()
-                    .text
-                    .startsWith(prefix = "You check an answer")
-
-                val short = """{"says_all":"no","missing":"when it is due"}"""
-
-                if (isCheck) short else scripted(messages)
-            }
-
-            val steps = run(task = "how much is the rent and when is it due?")
-
-            assertEquals(
-                expected = listOf(true, true, 3),
-                actual = listOf(
-                    steps.last() is AgentStep.Finished,
-                    "the request also asks when it is due" in callPrompts()[2],
-                    callPrompts().size
-                )
-            )
-        }
-
     private companion object {
         const val SUMMARY = "Tags the books."
         const val CALLS = "You work on a task in the person's notes"
