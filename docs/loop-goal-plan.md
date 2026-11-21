@@ -570,6 +570,7 @@ One row for each measurement. Keep it short.
 | 2026-11-20 | `r1-line` 9B tuned | `e839309b` | the tuned tasks and the fresh vault on the 9B, first since the baseline (234, 58), level 4 | | | 226 of 259 (87.3 %); fresh 59 of 77 (76.6 %): left 9 should have asked, 5 needless asks, 5 figures, 13 changes | | | measured only |
 | 2026-11-20 | `s57-rows` | `b1c496bb` | 3.2, `rows` numbers a note's rows and `tally` counts them by id; after a figure hold the next call may only be a figure tool, level 3 | | 288 of 393 (-11 on `s54-dev`; figures 22, 5 won, 10 lost; days 4) | | | | no, mended: the column was found only when every word asked was in its name ("Distance (mi)" for Distance), so tables refused their rows; now the column sharing the most words |
 | 2026-11-20 | `s58-rows` | `0cc9bed7` | the same, the column mended, level 3 | | 287 of 393 (-12; figures 26, 4 won, 13 lost) | | | | no, reverted in `a5cf687e` and `4f143673`: the 4B names the wrong rows, takes a difference of three, and repeats a refused tally; copying lines did better. Third step reverted in a row |
+| 2026-11-20 | `s59-first` | `48d76f77` | 2.4, first half: a frame open before the first step asks at once, with the frame's options, level 3 | | 299 of 393 (+0 on `s54-dev`, +2 on `s45-dev`: 9 won, 9 lost; should have asked 29) | | | | yes, to tuned |
 
 Notes as the plan is carried out:
 
