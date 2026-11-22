@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-21 (pool rounds 2 to 8 opened at the same code; over the eight rounds, every exam at least once, about 74.3 % blind on the 4B and 76.4 % on the 9B, against the weekend's 75 % and 80 %; design work stopped; the yearly days step, s67, held on dev and tuned and fell 6 on the pool, reverted); before that 2026-11-20 (the 9B at 337 on the pool); before that 2026-11-19, with the plan to the blind targets under way on #145: the pool's first round at 73.4 %
+Last updated: 2026-11-21 (pool rounds 2 to 9 opened at the same code; over the nine rounds, every exam at least once, about 74.5 % blind on the 4B and 76.6 % on the 9B, against the weekend's 75 % and 80 %; design work stopped; the yearly days step, s67, held on dev and tuned and fell 6 on the pool, reverted); before that 2026-11-20 (the 9B at 337 on the pool); before that 2026-11-19, with the plan to the blind targets under way on #145: the pool's first round at 73.4 %
 (4B) and 75.0 % (9B), the targets 85 % and 90 %; where it stands and what to measure next is in
 `docs/loop-goal-plan.md`, sections 2 ("Now") and 7 (the log). Step 4.2, `change_line` (card design B, the
 developer's choice), is built and measured at 316 of 436 on the pool (-4, within the noise), and kept by the developer; next is
