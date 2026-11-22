@@ -70,7 +70,7 @@ the 9B. A single round spans five points: a round's opening alone cannot say whe
 Round 6 (seed 6): about 75.4 % (+26) and 77.2 % (+19); over the six rounds about 74.0 % on the 4B and 76.6 % on
 the 9B, against the weekend's 75 % and 80 %.
 Round 7 (seed 7): about 76.3 % (+30) and 76.9 % (+18); over the seven rounds, every exam measured at least once,
-about 74.3 % on the 4B and 76.7 % on the 9B, against the weekend's 75 % and 80 %.
+about 74.3 % on the 4B and 76.7 % on the 9B, against the weekend's 75 % and 80 %. Round 8 (seed 8): about 74.4 % (+22) and 74.6 % (+8); over the eight rounds, about 74.3 % and 76.4 %.
 
 ### A decision for the developer (2026-11-20)
 
@@ -637,6 +637,7 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r7-base` | `3dc387b3` | round 7 opened (seed 7), the code as r1-line, level 5 | | | | 334 of 435 (76.8 %, +30 on the reference's 304: about 76.3 % blind): left 38 should have asked, 29 change wrong, 14 needless asks, 12 figures | | measured only; round 7's opening |
 | 2026-11-21 | `r7-base` 9B | `3dc387b3` | the same on the 9B, level 5 | | | | 331 of 435 (76.1 %, +18 on the reference's 313: about 76.9 % blind): left 44 should have asked, 19 change wrong, 15 needless asks, 12 figures, 11 facts | | measured only; round 7's opening |
 | 2026-11-21 | `r8-base` | `1dfa435e` | round 8 opened (seed 8), the code as r1-line, level 5 | | | | 318 of 436 (72.9 %, +22 on the reference's 296: about 74.4 % blind): left 36 change wrong, 31 should have asked, 23 needless asks, 19 figures | | measured only; round 8's opening |
+| 2026-11-21 | `r8-base` 9B | `3833e089` | the same on the 9B, level 5 | | | | 328 of 436 (75.2 %, +8 on the reference's 320: about 74.6 % blind): left 42 should have asked, 24 change wrong, 21 needless asks, 13 figures | | measured only; round 8's opening |
 | 2026-11-21 | `s64-check` | `0ac05c13` | step 5, the answer checked against the task before it ends the turn, level 3 | | 297 of 393 (-2 on s54-dev, +0 on s45-dev): lost 2 needless asks, 3 figures, 3 changes; won 2 should have asked, 1 needless ask, 3 figures; facts still 10 | | | | no, reverted in `b9d8cb9a`: below the rule, and cause 6 did not go down |
 | 2026-11-21 | `s65-settled` | `f49273e9` | step 2.4's second half (a settled frame's which-question held back every time), level 3 | | 294 of 393 (-5 on s54-dev, -3 on s45-dev): lost 3 needless asks, 4 figures, 2 changes, 1 days; won 2 should have asked, 1 needless ask, 1 figure, 1 fact; needless asks 13 | | | | no, reverted in `ab546c48`: below the rule, and cause 2 did not go down |
 | 2026-11-21 | `r1-frame9b` | `d42c9c32` | the frame alone on the 9B, the code as r1-line, level 2 | dev 35 misses of 74 (47 %), 15 false alarms of 319; tuned 9 of 29, 5 of 126 | | | | | measured only: worse than the 4B's 28 / 11, so 2.4 does not hold for the 9B |
