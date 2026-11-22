@@ -70,7 +70,7 @@ the 9B. A single round spans five points: a round's opening alone cannot say whe
 Round 6 (seed 6): about 75.4 % (+26) and 77.2 % (+19); over the six rounds about 74.0 % on the 4B and 76.6 % on
 the 9B, against the weekend's 75 % and 80 %.
 Round 7 (seed 7): about 76.3 % (+30) and 76.9 % (+18); over the seven rounds, every exam measured at least once,
-about 74.3 % on the 4B and 76.7 % on the 9B, against the weekend's 75 % and 80 %. Round 8 (seed 8): about 74.4 % (+22) and 74.6 % (+8); over the eight rounds, about 74.3 % and 76.4 %. Round 9 (seed 9): about 75.8 % (+28) and 78.1 % (+23); over the nine rounds, about 74.5 % and 76.6 %.
+about 74.3 % on the 4B and 76.7 % on the 9B, against the weekend's 75 % and 80 %. Round 8 (seed 8): about 74.4 % (+22) and 74.6 % (+8); over the eight rounds, about 74.3 % and 76.4 %. Round 9 (seed 9): about 75.8 % (+28) and 78.1 % (+23); over the nine rounds, about 74.5 % and 76.6 %. Round 10 (seed 10): about 74.0 % (+20) and 77.6 % (+21); over the ten rounds, about 74.4 % and 76.7 %. The weekend closed on 2026-11-22 with neither target met.
 
 ### A decision for the developer (2026-11-20)
 
@@ -641,6 +641,7 @@ One row for each measurement. Keep it short.
 | 2026-11-21 | `r9-base` | `24bb68ae` | round 9 opened (seed 9), the code as r1-line, level 5 | | | | 325 of 436 (74.5 %, +28 on the reference's 297: about 75.8 % blind): left 40 should have asked, 28 change wrong, 17 needless asks, 14 figures | | measured only; round 9's opening |
 | 2026-11-21 | `r9-base` 9B | `7e0cbfde` | the same on the 9B, level 5 | | | | 330 of 436 (75.7 %, +23 on the reference's 307: about 78.1 % blind): left 45 should have asked, 23 change wrong, 15 needless asks, 13 figures | | measured only; round 9's opening |
 | 2026-11-21 | `r10-base` | `4a5a9212` | round 10 opened (seed 10), the code as r1-line, level 5 | | | | 321 of 439 (73.1 %, +20 on the reference's 301: about 74.0 % blind): left 34 change wrong, 32 should have asked, 17 needless asks, 17 figures, 14 facts | | measured only; round 10's opening |
+| 2026-11-22 | `r10-base` 9B | `e0d0c1e4` | the same on the 9B, level 5 | | | | 328 of 439 (74.7 %, +21 on the reference's 307: about 77.6 % blind): left 44 should have asked, 26 change wrong, 18 needless asks, 15 figures | | measured only; round 10's opening |
 | 2026-11-21 | `s64-check` | `0ac05c13` | step 5, the answer checked against the task before it ends the turn, level 3 | | 297 of 393 (-2 on s54-dev, +0 on s45-dev): lost 2 needless asks, 3 figures, 3 changes; won 2 should have asked, 1 needless ask, 3 figures; facts still 10 | | | | no, reverted in `b9d8cb9a`: below the rule, and cause 6 did not go down |
 | 2026-11-21 | `s65-settled` | `f49273e9` | step 2.4's second half (a settled frame's which-question held back every time), level 3 | | 294 of 393 (-5 on s54-dev, -3 on s45-dev): lost 3 needless asks, 4 figures, 2 changes, 1 days; won 2 should have asked, 1 needless ask, 1 figure, 1 fact; needless asks 13 | | | | no, reverted in `ab546c48`: below the rule, and cause 2 did not go down |
 | 2026-11-21 | `r1-frame9b` | `d42c9c32` | the frame alone on the 9B, the code as r1-line, level 2 | dev 35 misses of 74 (47 %), 15 false alarms of 319; tuned 9 of 29, 5 of 126 | | | | | measured only: worse than the 4B's 28 / 11, so 2.4 does not hold for the 9B |
