@@ -38,6 +38,7 @@ import app.notekea.autotest.cases.m3.chatCases
 import app.notekea.autotest.cases.m3.chatReopenedCases
 import app.notekea.autotest.cases.m3.modelManagerCases
 import app.notekea.autotest.cases.m4.agentCases
+import app.notekea.autotest.cases.m4.chatMemoryCases
 import app.notekea.autotest.cases.m4.chatTalkCases
 import app.notekea.autotest.cases.m4.importCases
 import app.notekea.autotest.cases.m4.loopCases
@@ -127,6 +128,7 @@ object NotekeaSuite {
             importCases()
             repairCases()
             loopCases()
+            chatMemoryCases()
             sourceCases()
             videoCases()
             onboardingCases()

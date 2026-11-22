@@ -31,6 +31,7 @@ fun SuiteBuilder.settingsCases() {
     look()
     language()
     macLook()
+    memorySettings()
     webUpdateSettingCases()
 }
 
@@ -83,6 +84,32 @@ private fun SuiteBuilder.macLook() {
                 "En el chat la pregunta va en negrita, sin burbujas, y las fuentes como líneas. En " +
                 "macOS el aviso de eliminar muestra el logo arriba y los botones uno debajo del otro; " +
                 "en Windows y Linux, en fila. Todo se lee bien en modo claro y oscuro."
+        )
+    }
+}
+
+private fun SuiteBuilder.memorySettings() {
+    manual(
+        id = "5.2-08",
+        reason = ManualReason.EYES
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "La memoria del chat en Ajustes")
+
+        steps(
+            text =
+            "1. En Notekea, abre la Playground Vault y Ajustes → Memoria del chat.\n2. Escribe " +
+                "Colombia en el país.\n3. Apaga y vuelve a encender recordar entre conversaciones.\n4. " +
+                "Haz clic derecho en una línea de lo que el chat aprendió y elige Olvidar.\n5. Haz clic " +
+                "en Olvidar todo… y confirma."
+        )
+
+        expected(
+            text =
+            "Una sección de la barra lateral como en los Ajustes del Sistema de macOS: el interruptor, " +
+                "los campos de Sobre ti y lo aprendido con su fecha. El país pasa a ser \"I live in " +
+                "Colombia\" en Notekea/Memory.md un momento después de escribirlo. Olvidar saca su " +
+                "línea. Olvidar todo mueve la nota a .trash después de confirmar."
         )
     }
 }
