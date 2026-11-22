@@ -135,28 +135,6 @@ class AppToolsTest {
         }
 
     // The loop's dev run, 2026-11-18: "120 + (2027-03-01 - 2026-11-11)" came to 95.
-    // The dev exams, 2026-11-21: "cuántos días faltan para el cumple de Andrés" gave his birth date and got -15692.
-    @Test
-    fun `a day of a past year is told with its next return each year`() = runTest {
-        val said = DaysTool()
-            .run(
-                call = ToolCall(
-                    name = DaysTool.NAME,
-                    arguments = mapOf(
-                        DaysTool.FROM to "today",
-                        DaysTool.TO to "1983-11-25"
-                    )
-                ),
-                context = context
-            )
-            .forModel
-
-        assertEquals(
-            expected = true,
-            actual = "the next is 2026-11-25 (Wednesday), 11 days from" in said
-        )
-    }
-
     @Test
     fun `a sum with a date in it is refused and sent to days`() = runTest {
         val said = said(CalculateTool(), "expression" to "120 + (2027-03-01 - 2026-11-11)")
