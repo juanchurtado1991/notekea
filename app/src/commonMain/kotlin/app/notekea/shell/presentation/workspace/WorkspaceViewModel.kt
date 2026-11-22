@@ -53,12 +53,19 @@ class WorkspaceViewModel(
     private val panelRestored = CompletableDeferred<Unit>()
 
     init {
+        // Restored or not, the panel is no longer waited for: a read that failed left every later toggle, resize
+        // and mode waiting for good (the code review of 2026-11-22).
         launchGuarded(onError = ::showUnexpectedError) {
-            val panel = tools.getSidePanel()
+            try {
+                val panel = tools.getSidePanel()
 
-            reduce { it.copy(sidePanel = panel) }
-            panelRestored.complete(value = Unit)
+                reduce { it.copy(sidePanel = panel) }
+            } finally {
+                panelRestored.complete(value = Unit)
+            }
+        }
 
+        launchGuarded(onError = ::showUnexpectedError) {
             saved = tools.getWorkspace(vaultPath = vaultPath)
             restoreIfReady()
         }

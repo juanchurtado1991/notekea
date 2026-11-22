@@ -386,6 +386,9 @@ class VaultTreeViewModel(
     private fun delete() {
         val path = state.value.pendingDelete ?: return
 
+        // The code review of 2026-11-22: asked until the trash ended, a second Enter trashed the entry again.
+        reduce { it.copy(pendingDelete = null) }
+
         launchGuarded(onError = ::showUnexpectedError) {
             val outcome = trash.moveToTrash(
                 vaultPath = vaultPath,

@@ -26,8 +26,12 @@ internal class AnswerStore(private val file: Path) {
         is ManualAnswer.NotRun -> listOf(answer.id, NOT_RUN)
 
         is ManualAnswer.Failed ->
-            listOf(answer.id, FAILED, escape(answer.note), answer.screenshot.orEmpty()) +
-                answer.steps.map(::escape)
+            listOf(
+                answer.id,
+                FAILED,
+                LineEscape.escape(text = answer.note),
+                answer.screenshot.orEmpty()
+            ) + answer.steps.map(LineEscape::escape)
     }.joinToString(separator = SEPARATOR)
 
     private fun parse(line: String): ManualAnswer? {
@@ -42,40 +46,12 @@ internal class AnswerStore(private val file: Path) {
 
             FAILED -> ManualAnswer.Failed(
                 id = id,
-                note = unescape(fields.getOrElse(2) { "" }),
+                note = LineEscape.unescape(text = fields.getOrElse(2) { "" }),
                 screenshot = fields.getOrNull(3)?.takeIf { it.isNotBlank() },
-                steps = fields.drop(n = 4).map(::unescape)
+                steps = fields.drop(n = 4).map(LineEscape::unescape)
             )
 
             else -> null
-        }
-    }
-
-    private fun escape(text: String): String = text
-        .replace("\\", "\\\\")
-        .replace("\t", "\\t")
-        .replace("\n", "\\n")
-
-    private fun unescape(text: String): String = buildString {
-        var index = 0
-
-        while (index < text.length) {
-            val char = text[index]
-
-            if (char == '\\' && index + 1 < text.length) {
-                append(
-                    when (text[index + 1]) {
-                        't' -> '\t'
-                        'n' -> '\n'
-                        else -> text[index + 1]
-                    }
-                )
-
-                index += 2
-            } else {
-                append(char)
-                index++
-            }
         }
     }
 

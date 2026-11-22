@@ -197,7 +197,8 @@ internal fun EditorList(
                 ) {
                     PageItem(bringIntoView = defaultBringIntoView) { EditorSkeleton() }
                 }
-            } else {
+            } else if (state.loadError == null) {
+                // A note that failed to load has no text to draw or to type into: what is typed is never saved.
                 blocks(
                     state = state,
                     page = page,

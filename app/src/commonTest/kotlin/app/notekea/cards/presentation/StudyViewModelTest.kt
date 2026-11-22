@@ -15,6 +15,7 @@ import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -68,6 +69,34 @@ class StudyViewModelTest {
         )
     }
 
+    // The code review of 2026-11-22: the effect named the note only, so unsaved edits dropped the card's schedule.
+    @Test
+    fun `an answer tells the editors the note's text before it, to carry their unsaved edits over`() =
+        runTest(dispatcher) {
+            engine.readiness = Outcome.Failure(error = LlmError.NoModel)
+            val viewModel = started()
+            val effects = mutableListOf<StudyEffect>()
+
+            val collector = launch {
+                viewModel.effects.collect { effects += it }
+            }
+
+            viewModel.onIntent(intent = StudyIntent.OnReveal)
+            viewModel.onIntent(intent = StudyIntent.OnAnswer(answer = CardAnswer.GOOD))
+            advanceUntilIdle()
+            collector.cancel()
+
+            assertEquals(
+                expected = listOf<StudyEffect>(
+                    StudyEffect.NoteRewritten(
+                        path = note,
+                        original = DECK
+                    )
+                ),
+                actual = effects
+            )
+        }
+
     @Test
     fun `a card is multiple choice, a right choice is Good, a wrong one Hard, and the next card is made ahead`() =
         runTest(dispatcher) {
@@ -120,7 +149,7 @@ class StudyViewModelTest {
         }
 
     private fun TestScope.started(): StudyViewModel {
-        store.texts[note] = "#flashcards\nCapital of Peru::Lima\nCapital of Chile::Santiago"
+        store.texts[note] = DECK
         store.suspendsLikeDisk = true
 
         val viewModel = StudyViewModel(
@@ -147,6 +176,7 @@ class StudyViewModelTest {
     }
 
     private companion object {
+        const val DECK = "#flashcards\nCapital of Peru::Lima\nCapital of Chile::Santiago"
         const val WRONG_PERU = "{\"wrong\":[\"Quito\",\"Bogotá\",\"lima \",\"Santiago\"]}"
         const val WRONG_CHILE = "{\"wrong\":[\"Buenos Aires\",\"Montevideo\",\"Asunción\"]}"
     }

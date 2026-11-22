@@ -10,15 +10,9 @@ data class MemoryLine(
     val origin: String?
 ) {
     /**
-     * What a line of *People and names* settles: the words in quotes ("Laura") and the note they mean (the first
-     * wikilink, [[Laura Castro]]); null for a line of another section or of another shape.
-     */
-    val named: Named?
-        get() = names.firstOrNull()
-
-    /**
-     * Every name the line settles: each phrase in quotes before the link means its note, so `"the weekly review" and
-     * "la revisión semanal" are [[Work/Weekly review]]` settles both (the loop's fifth run asked which for the second).
+     * Every name a line of *People and names* settles: each phrase in quotes before the link means its note, so
+     * `"the weekly review" and "la revisión semanal" are [[Work/Weekly review]]` settles both (the loop's fifth run
+     * asked which for the second); none for a line of another section or of another shape.
      */
     val names: List<Named>
         get() {

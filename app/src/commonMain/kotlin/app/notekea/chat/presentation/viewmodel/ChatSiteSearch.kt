@@ -33,7 +33,13 @@ internal class ChatSiteSearch(
             null
         }
 
-        is ChatIntent.OnSiteClip -> host.launch { clipAndAnswer(id = intent.id) }
+        // The code review of 2026-11-22: a clip of an older turn started while one was answering took
+        // the place of that answer's work, so both ran and Stop ended the wrong one.
+        is ChatIntent.OnSiteClip -> if (host.state.value.isAnswering) {
+            null
+        } else {
+            host.launch { clipAndAnswer(id = intent.id) }
+        }
 
         else -> null
     }
@@ -143,20 +149,37 @@ internal class ChatSiteSearch(
                 }
             }
         } finally {
-            val isNotFound = AnswerPrompt.isNotFound(text = answer)
+            ended(
+                id = id,
+                answer = answer
+            )
+        }
 
-            host
-                .update(id) {
+        onAnswered()
+    }
+
+    // The turn ends on [answer], while it still answers. The code review of 2026-11-22: a clip answer
+    // that was stopped was written here as not found or answered, when its work was cancelled.
+    private fun ended(
+        id: Long,
+        answer: String
+    ) {
+        val isNotFound = AnswerPrompt.isNotFound(text = answer)
+        val outcome = if (isNotFound) TurnOutcome.NOT_FOUND else TurnOutcome.ANSWERED
+
+        host
+            .update(id) {
+                if (it.isAnswering) {
                     it.copy(
                         step = ChatStep.DONE,
                         progress = null,
                         answer = if (isNotFound) "" else answer,
-                        outcome = if (isNotFound) TurnOutcome.NOT_FOUND else TurnOutcome.ANSWERED
+                        outcome = outcome
                     )
+                } else {
+                    it
                 }
-        }
-
-        onAnswered()
+            }
     }
 
     private fun entryOf(id: Long): ChatEntry? = host

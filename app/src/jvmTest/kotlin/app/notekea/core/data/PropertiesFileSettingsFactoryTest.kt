@@ -178,6 +178,41 @@ class PropertiesFileSettingsFactoryTest {
         )
     }
 
+    // The code review of 2026-11-22: a change was taken as written before it was on disk, so one whose save failed
+    // was left out of every later save.
+    @Test
+    fun `a change whose save failed is written by the next save that works`() {
+        val settings = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+        val file = appData.resolve(SETTINGS_FILE)
+
+        Files.createDirectories(file.resolve("in the way"))
+
+        val failure = runCatching {
+            settings.putString(
+                key = "theme",
+                value = "forest"
+            )
+        }
+
+        file.deleteRecursively()
+
+        settings.putString(
+            key = "language",
+            value = "es"
+        )
+
+        val reloaded = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+
+        assertEquals(
+            expected = listOf<Any?>(true, "forest", "es"),
+            actual = listOf<Any?>(
+                failure.isFailure,
+                reloaded.getStringOrNull(key = "theme"),
+                reloaded.getStringOrNull(key = "language")
+            )
+        )
+    }
+
     companion object {
         private const val THREADS = 8
         private const val WRITES = 50

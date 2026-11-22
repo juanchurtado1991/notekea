@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -34,7 +36,7 @@ class SettingsAppearanceStore(
         emitAll(current.filterNotNull())
     }
 
-    override suspend fun save(appearance: Appearance) {
+    override suspend fun save(appearance: Appearance) = saving.withLock {
         withContext(context = dispatchers.io) {
             settings.putString(
                 key = THEME_KEY,
@@ -59,6 +61,10 @@ class SettingsAppearanceStore(
 
         current.value = appearance
     }
+
+    // One save at a time, in the order asked: two quick changes left the file on one and the
+    // windows on the other (the code review of 2026-11-22).
+    private val saving = Mutex()
 
     private suspend fun read(): Appearance = withContext(context = dispatchers.io) {
         Appearance(

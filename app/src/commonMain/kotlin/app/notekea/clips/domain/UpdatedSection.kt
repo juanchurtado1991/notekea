@@ -13,6 +13,10 @@ internal class UpdatedSection(
     private val vaultPath: String,
     private val today: String
 ) {
+    // The code review of 2026-11-22: each rewritten note's text before, without which an editor that has the note
+    // open with unsaved edits put the old page back on its next save.
+    private val originals = mutableMapOf<RelativePath, String>()
+
     suspend fun run(onPage: suspend (url: String) -> Unit): UpdateStep.Done {
         val clips = section.notes.associateWith { note ->
             onPage(note.source)
@@ -43,6 +47,7 @@ internal class UpdatedSection(
         }
 
         return result.copy(
+            originals = originals.toMap(),
             added = added(
                 clips = fresh.map {
                     cleaned[it.url] ?: it
@@ -101,7 +106,10 @@ internal class UpdatedSection(
             )
         )
 
-        return if (isWritten) true else null
+        if (!isWritten) return null
+        originals[note.path] = latest
+
+        return true
     }
 
     // The pages the index links now that no note of the section came from. A link that only redirects to a page a

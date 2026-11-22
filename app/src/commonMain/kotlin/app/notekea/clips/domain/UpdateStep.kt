@@ -12,11 +12,12 @@ sealed interface UpdateStep {
     ) : UpdateStep
 
     /**
-     * It ended: the notes whose page changed ([updated]), the notes of pages that are new ([added]), how many were
-     * the same and how many pages could not be read.
+     * It ended: the notes whose page changed ([updated]) and the text each had before ([originals]), the notes of
+     * pages that are new ([added]), how many were the same and how many pages could not be read.
      */
     data class Done(
         val updated: List<RelativePath> = emptyList(),
+        val originals: Map<RelativePath, String> = emptyMap(),
         val added: List<RelativePath> = emptyList(),
         val unchanged: Int = 0,
         val failed: Int = 0

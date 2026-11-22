@@ -6,10 +6,13 @@ import com.testbuddy.ManualReason
 import com.testbuddy.crash.AppEnvironment
 import com.testbuddy.crash.Breadcrumbs
 import com.testbuddy.sampleSuite
+import java.io.InputStream
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.stream.Stream
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.AfterTest
@@ -209,6 +212,40 @@ class ManagerSessionTest {
 
         assertNotEquals(0, exitCode.get(1, TimeUnit.MINUTES))
         assertTrue(log.readText().isNotBlank())
+    }
+
+    // The code review of 2026-11-22: an event that broke the manager ended the reading before the end was told.
+    @Test
+    fun `a run whose event breaks the manager still tells its end`() {
+        val exitCode = CompletableFuture<Int>()
+
+        AutomaticRun(
+            log = root.resolve("run.txt"),
+            onEvent = { error("The manager could not take it") },
+            onEnd = { exitCode.complete(it) },
+            startProcess = { EndedProcess(output = RunnerEvent.Done.line() + "\n") }
+        ).start()
+
+        assertEquals(0, exitCode.get(10, TimeUnit.SECONDS))
+    }
+
+    // A process that already said [output] and ended well.
+    private class EndedProcess(output: String) : Process() {
+        private val said = output.byteInputStream()
+
+        override fun getOutputStream(): OutputStream = OutputStream.nullOutputStream()
+
+        override fun getInputStream(): InputStream = said
+
+        override fun getErrorStream(): InputStream = InputStream.nullInputStream()
+
+        override fun waitFor(): Int = 0
+
+        override fun exitValue(): Int = 0
+
+        override fun destroy() = Unit
+
+        override fun descendants(): Stream<ProcessHandle> = Stream.empty()
     }
 
     @Test

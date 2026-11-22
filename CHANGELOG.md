@@ -140,6 +140,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A whole-project code review (2026-11-22), each fix with its test. The chat: a figure like "0.125" was read as 125;
+  a `tally` made again with its figures put right, and a `digest` asked another question, were taken for a repeat
+  and not run; a change that replaced an earlier one was taken as refused; `tasks` ignored "today" or "next Friday";
+  a model failure inside a digest ended the turn; a clip of an older turn could start a second answer, and Undo
+  clicked twice could fail an undone card. The editor: a note that failed to open kept the text of the one before
+  it, a block id on its own line under a blank line was "missing", and table cells were off in a note with mixed
+  line breaks. Elsewhere: a side panel that could not be read stopped answering; a setting whose save failed was
+  never saved again; a note and its conflict copy in `.trash` showed as a conflict; a web update or a clip that
+  failed closed without a word; an answered card could be undone by unsaved edits; a delete confirmed twice showed
+  an error; a document page that failed to draw was never drawn again.
+
 - The chat's loop reads a short note whole when asked for one of its sections, so the figures above a heading are
   not missed.
 - `tally` counts each figure on the line of the notes closest to its words: it took the first line sharing a word

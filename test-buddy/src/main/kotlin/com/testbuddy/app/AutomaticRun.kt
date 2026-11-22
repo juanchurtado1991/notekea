@@ -26,21 +26,32 @@ internal class AutomaticRun(
             isDaemon = true,
             name = "test-buddy-run"
         ) {
-            log
-                .toFile()
-                .bufferedWriter()
-                .use { writer ->
-                    started
-                        .inputStream
-                        .bufferedReader()
-                        .forEachLine { line ->
-                            val event = RunnerEvent.parse(line = line)
-                            if (event == null) writer.appendLine(line) else onEvent(event)
-                        }
-                }
-
-            onEnd(started.waitFor())
+            // The code review of 2026-11-22: an event that broke the manager ended this thread before the end was
+            // told, and the manager stayed on "running". A run nobody reads any more is stopped, then told as ended.
+            try {
+                read(started = started)
+            } catch (failure: Throwable) {
+                stop()
+                throw failure
+            } finally {
+                onEnd(started.waitFor())
+            }
         }
+    }
+
+    private fun read(started: Process) {
+        log
+            .toFile()
+            .bufferedWriter()
+            .use { writer ->
+                started
+                    .inputStream
+                    .bufferedReader()
+                    .forEachLine { line ->
+                        val event = RunnerEvent.parse(line = line)
+                        if (event == null) writer.appendLine(line) else onEvent(event)
+                    }
+            }
     }
 
     fun stop() {

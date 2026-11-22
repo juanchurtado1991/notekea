@@ -30,8 +30,4 @@ internal class ManualData(
             )
         }
     }
-
-    fun clear() {
-        target.deleteRecursively()
-    }
 }

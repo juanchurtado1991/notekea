@@ -3,6 +3,7 @@ package app.notekea.chat.domain.tool.reading
 import app.notekea.chat.domain.plan.TextParts
 import app.notekea.chat.domain.prompt.WritePrompt
 import app.notekea.chat.domain.tool.ChatTool
+import app.notekea.chat.domain.tool.DistinctCalls
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
@@ -10,6 +11,7 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
+import app.notekea.core.llm.domain.LlmException
 import app.notekea.core.notes.domain.NoteTextCache
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -22,7 +24,8 @@ import kotlinx.coroutines.coroutineScope
 class DigestTool(
     private val llmEngine: LlmEngine,
     noteTextCache: NoteTextCache
-) : ChatTool {
+) : ChatTool,
+    DistinctCalls {
     private val opener = NoteOpener(noteTextCache = noteTextCache)
 
     override val name = NAME
@@ -46,6 +49,12 @@ class DigestTool(
     ): String = call.list(name = NOTES).joinToString {
         context.pathOf(name = it) ?: it
     }
+
+    // The same notes asked another question are read again: what they say about it is another answer.
+    override fun sameAs(
+        call: ToolCall,
+        context: ToolContext
+    ): String = "${targetOf(call = call, context = context)}: ${call.text(name = QUESTION)}"
 
     override suspend fun run(
         call: ToolCall,
@@ -100,7 +109,15 @@ class DigestTool(
                 }
             }
             .awaitAll()
-            .filter { it.isNotBlank() }
+
+        val read = said.filterNotNull()
+
+        val failed = (said.size - read.size)
+            .takeIf {
+                it > 0
+            }
+            ?.let { "\n($it of its parts could not be read, as the model failed: digest it again.)" }
+            .orEmpty()
 
         val unread = (all.size - parts)
             .takeIf {
@@ -109,30 +126,36 @@ class DigestTool(
             ?.let { "\n(Its last $it parts were not read: digest it alone to read them.)" }
             .orEmpty()
 
-        "digest \"${note.shown}\" (${all.size.coerceAtMost(maximumValue = parts)} parts read):\n" +
-            said.joinToString(separator = "\n") + unread
+        "digest \"${note.shown}\" (${read.size} parts read):\n" +
+            read.filter { it.isNotBlank() }.joinToString(separator = "\n") + failed + unread
     }
 
+    // What a part says; null when the model failed on it. The code review of 2026-11-22: the failure
+    // was not caught, and one part that failed ended the whole turn.
     private suspend fun saidOf(
         note: OpenedNote,
         question: String,
         part: String
-    ): String {
+    ): String? {
         val text = StringBuilder()
 
-        llmEngine
-            .generate(
-                messages = WritePrompt.digest(
-                    request = question,
-                    name = note.shown,
-                    text = part
-                ),
-                options = GenerationOptions(
-                    maxTokens = DIGEST_TOKENS,
-                    temperature = TEMPERATURE
+        try {
+            llmEngine
+                .generate(
+                    messages = WritePrompt.digest(
+                        request = question,
+                        name = note.shown,
+                        text = part
+                    ),
+                    options = GenerationOptions(
+                        maxTokens = DIGEST_TOKENS,
+                        temperature = TEMPERATURE
+                    )
                 )
-            )
-            .collect { text.append(it) }
+                .collect { text.append(it) }
+        } catch (_: LlmException) {
+            return null
+        }
 
         return text.toString().trim()
     }

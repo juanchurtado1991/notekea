@@ -40,6 +40,8 @@ internal class ChatActions(
     private val clock: Clock,
     private val host: ChatHost
 ) {
+    private val undoing = mutableSetOf<Long>()
+
     /** Acts on [request] for the entry [id]; returns what is left to do: answer it, talk, or nothing. */
     suspend fun act(
         id: Long,
@@ -239,13 +241,7 @@ internal class ChatActions(
 
     /** The card's step [step] creates its note in [folder], while the card still waits for Do it. */
     fun place(intent: ChatIntent.OnActionPlace) {
-        val entry = host
-            .state
-            .value
-            .entries
-            .firstOrNull {
-                it.id == intent.id
-            }
+        val entry = entryOf(id = intent.id)
 
         val action = entry?.action?.takeIf {
             it.status == ActionStatus.PROPOSED
@@ -282,17 +278,25 @@ internal class ChatActions(
         host.update(entry.id) { it.copy(action = action.copy(status = ActionStatus.CANCELLED)) }
     }
 
+    // The code review of 2026-11-22: a second Undo while the first ran undid the plan twice, and the
+    // card it had undone said it failed. The card is read as it is now, and one undo of it runs.
     suspend fun undo(entry: ChatEntry) {
-        val action = entry.action ?: return
+        val action = entryOf(id = entry.id)?.action ?: return
 
         val done = action.done?.takeIf {
             action.status == ActionStatus.DONE
         } ?: return
 
-        val undone = actionRunner.undo(
-            vaultPath = vaultPath,
-            done = done
-        )
+        if (!undoing.add(element = entry.id)) return
+
+        val undone = try {
+            actionRunner.undo(
+                vaultPath = vaultPath,
+                done = done
+            )
+        } finally {
+            undoing -= entry.id
+        }
 
         // Only what was taken back is said to be: an undo that could not run says so, on the card.
         val after = when (undone) {
@@ -306,6 +310,14 @@ internal class ChatActions(
 
         host.update(entry.id) { it.copy(action = after) }
     }
+
+    private fun entryOf(id: Long): ChatEntry? = host
+        .state
+        .value
+        .entries
+        .firstOrNull {
+            it.id == id
+        }
 
     /** Today's date as the model reads it, YYYY-MM-DD. */
     fun today(): String = dateOf(date = localCalendar.momentOf(instant = clock.now()).date)

@@ -119,13 +119,17 @@ class JGitRepository(
             val root = File(vaultPath)
             if (!root.isDirectory) return@withContext emptyList()
 
-            // Never into .git, whose objects outnumber the notes; this runs after every sync.
+            // Never into a hidden folder: .git's objects outnumber the notes and this runs after
+            // every sync, and a note beside its copy in .trash was a conflict nothing settled (the
+            // code review of 2026-11-22).
             root
                 .walkTopDown()
                 .onEnter {
-                    it.name != GIT_FOLDER
+                    it == root || !it.name.startsWith(prefix = HIDDEN_PREFIX)
                 }
-                .filter { it.isFile }
+                .filter {
+                    it.isFile && !it.name.startsWith(prefix = HIDDEN_PREFIX)
+                }
                 .map { RelativePath(value = it.relativeTo(root).invariantSeparatorsPath) }
                 .mapNotNull { ConflictCopies.noteOf(copy = it) }
                 .filter { File(vaultPath, it.value).isFile }
@@ -349,7 +353,7 @@ class JGitRepository(
         const val MERGE = "merge"
         const val URL = "url"
         const val FETCH = "fetch"
-        const val GIT_FOLDER = ".git"
+        const val HIDDEN_PREFIX = "."
         const val REMOTE_REFS = "refs/remotes/origin/"
         const val TOKEN_USER = "x-access-token"
         const val FIRST_MESSAGE = "Notekea: the vault before its first sync"

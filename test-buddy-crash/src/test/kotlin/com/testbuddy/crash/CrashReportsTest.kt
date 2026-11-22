@@ -92,6 +92,30 @@ class CrashReportsTest {
         assertEquals("crash-2026-10-26T10-15-13Z.txt", names.first())
     }
 
+    // The code review of 2026-11-22: the second error of a second replaced the report of the first, the root cause.
+    @Test
+    fun `two errors in the same second leave two reports`() {
+        record(
+            error = IllegalStateException("The root cause"),
+            steps = emptyList()
+        )
+
+        record(
+            error = IllegalStateException("What followed"),
+            steps = emptyList()
+        )
+
+        val crashes = folder.resolve("crashes")
+
+        assertEquals(
+            listOf(true, true),
+            listOf(
+                "The root cause" in Files.readString(crashes.resolve("crash-2026-10-26T10-15-30Z.txt")),
+                "What followed" in Files.readString(crashes.resolve("crash-2026-10-26T10-15-30Z-2.txt"))
+            )
+        )
+    }
+
     @Test
     fun `a report that cannot be written has no path but its text`() {
         Files.writeString(folder.resolve("crashes"), "a file where the folder should be")

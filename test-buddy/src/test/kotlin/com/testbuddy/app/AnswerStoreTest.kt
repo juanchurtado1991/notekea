@@ -29,6 +29,21 @@ class AnswerStoreTest {
         assertEquals(answers.associateBy { it.id }, AnswerStore(file = file).load())
     }
 
+    // The code review of 2026-11-22: a note pasted from a Windows file was cut at its first line when read back.
+    @Test
+    fun `a note with Windows line breaks survives whole`() {
+        val answers = listOf(
+            ManualAnswer.Failed(
+                id = "5",
+                note = "first\r\nsecond",
+                steps = listOf("Paste\r\nthe file")
+            )
+        )
+
+        AnswerStore(file = file).save(answers = answers)
+        assertEquals(answers.associateBy { it.id }, AnswerStore(file = file).load())
+    }
+
     @Test
     fun `no file and unreadable lines give no answers`() {
         assertEquals(emptyMap(), AnswerStore(file = file).load())

@@ -95,9 +95,6 @@ class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
             }
         }
 
-        written.clear()
-        written.putAll(saved)
-
         try {
             Files.newOutputStream(temporaryFile).use { merged.store(it, null) }
 
@@ -105,6 +102,11 @@ class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
                 source = temporaryFile,
                 target = file
             )
+
+            // Only once it is on disk: taken as written before, a save that failed was never tried again, and the
+            // setting went back at the next start (the code review of 2026-11-22).
+            written.clear()
+            written.putAll(saved)
         } finally {
             Files.deleteIfExists(temporaryFile)
         }

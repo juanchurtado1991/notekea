@@ -289,4 +289,49 @@ class AppToolsTest {
                 )
             )
         }
+
+    // The code review of 2026-11-22: a tally refused, then made again with its figures put right, had the same key
+    // ("sum of 2") and was told its result was above.
+    @Test
+    fun `two tallies of as many lines are two calls, and the same tally twice is one`() {
+        val tally = TallyTool(
+            noteTextCache = NoteTextCache(
+                contentStore = store,
+                textFolder = TextFolder()
+            )
+        )
+
+        val registry = ToolRegistry(tools = listOf(tally))
+
+        val keys =
+            listOf("45 | Hop tests\n54 | Assessment", "45 | Hop tests\n45 | Assessment").map {
+                registry.keyOf(
+                    call = ToolCall(
+                        name = tally.name,
+                        arguments = mapOf(
+                            "how" to "sum",
+                            "items" to it
+                        )
+                    ),
+                    context = context
+                )
+            }
+
+        assertEquals(
+            expected = listOf(false, "sum of 2"),
+            actual = listOf(
+                keys.first() == keys.last(),
+                tally.targetOf(
+                    call = ToolCall(
+                        name = tally.name,
+                        arguments = mapOf(
+                            "how" to "sum",
+                            "items" to "45 | Hop tests\n54 | Assessment"
+                        )
+                    ),
+                    context = context
+                )
+            )
+        )
+    }
 }

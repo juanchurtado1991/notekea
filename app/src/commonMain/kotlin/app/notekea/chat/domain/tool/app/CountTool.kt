@@ -52,21 +52,27 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
 
         val tasks = notes.flatMap { it.metadata.tasks }
 
+        // The code review of 2026-11-22: matched as a part of a word, a property named "keywords" was
+        // counted as words and "footnotes" as notes.
+        val asked = what
+            .split(regex = NOT_WORD)
+            .map { it.removeSuffix(suffix = PLURAL) }
+
         val count = when {
-            "word" in what -> wordsIn(
+            "word" in asked -> wordsIn(
                 notes = notes,
                 context = context
             )
 
-            "open" in what -> tasks.count {
+            "open" in asked -> tasks.count {
                 !it.isDone
             }
 
-            "done" in what -> tasks.count { it.isDone }
+            "done" in asked -> tasks.count { it.isDone }
 
-            "task" in what -> tasks.size
+            "task" in asked -> tasks.size
 
-            "note" in what -> notes.size
+            "note" in asked -> notes.size
 
             else -> return ToolResult(
                 forModel = summed(
@@ -179,5 +185,7 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
         const val WHAT = "what"
         const val WHERE = "where"
         private const val TAG_MARK = "#"
+        private const val PLURAL = "s"
+        private val NOT_WORD = Regex(pattern = "[^\\p{L}\\p{N}]+")
     }
 }

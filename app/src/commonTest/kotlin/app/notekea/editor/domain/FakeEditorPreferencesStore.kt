@@ -11,8 +11,13 @@ class FakeEditorPreferencesStore : EditorPreferencesStore {
     val sidePanelSaveMillis = ArrayDeque<Long>()
     var sidePanel = SidePanelPreferences.DEFAULT
     var isPropertiesExpanded = true
+    var isSidePanelUnreadable = false
 
-    override suspend fun sidePanel(): SidePanelPreferences = sidePanel
+    override suspend fun sidePanel(): SidePanelPreferences {
+        check(value = !isSidePanelUnreadable) { "The side panel cannot be read" }
+
+        return sidePanel
+    }
 
     override suspend fun setSidePanel(preferences: SidePanelPreferences) {
         sidePanelSaveMillis.removeFirstOrNull()?.let { delay(timeMillis = it) }

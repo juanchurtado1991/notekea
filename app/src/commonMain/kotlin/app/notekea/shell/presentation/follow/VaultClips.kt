@@ -53,9 +53,14 @@ internal fun FollowAssistants(
     ClipsOf(
         clip = clip,
         workspace = viewModels.workspace,
-        onRewritten = { path ->
+        onRewritten = { path, original ->
             viewModels.editors.forEach {
-                it.onIntent(intent = EditorIntent.OnNoteRewritten(path = path))
+                it.onIntent(
+                    intent = EditorIntent.OnNoteRewritten(
+                        path = path,
+                        original = original
+                    )
+                )
             }
         }
     )
@@ -117,7 +122,7 @@ private fun ReportLoaded(
 internal fun ClipsOf(
     clip: ClipViewModel,
     workspace: WorkspaceViewModel,
-    onRewritten: (RelativePath) -> Unit = {}
+    onRewritten: (RelativePath, String) -> Unit = { _, _ -> }
 ) {
     val state by clip.state.collectAsState()
 
@@ -127,8 +132,11 @@ internal fun ClipsOf(
                 is ClipEffect.Opened ->
                     workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path))
 
-                // A note an update rewrote is read again by an editor that has it open.
-                is ClipEffect.Rewritten -> effect.paths.forEach(onRewritten)
+                // A note an update rewrote is read again by an editor that has it open, its unsaved edits kept on
+                // the text it was rewritten from.
+                is ClipEffect.Rewritten -> effect.originals.forEach { (path, original) ->
+                    onRewritten(path, original)
+                }
             }
         }
     }

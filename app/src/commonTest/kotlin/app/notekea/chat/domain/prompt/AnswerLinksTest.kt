@@ -34,6 +34,21 @@ class AnswerLinksTest {
         )
     }
 
+    // The code review of 2026-11-22: the site was cut only at `/`, so a page read at an address
+    // with a query and no path was a site of its own, and the links to it were taken out.
+    @Test
+    fun `a link to a site the turn read stays, however that address ended or was written`() {
+        val answer = "It grows 2.3 million tonnes [FAO](https://www.fao.org/data)."
+
+        assertEquals(
+            expected = answer,
+            actual = AnswerLinks.kept(
+                answer = answer,
+                known = "fetch https://FAO.org?lang=en: 2.3 million tonnes"
+            )
+        )
+    }
+
     @Test
     fun `an answer from the notes alone is not asked for links, and one from a page is`() {
         val asked = listOf(

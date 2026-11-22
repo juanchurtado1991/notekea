@@ -42,7 +42,10 @@ class EmbeddedNoteText {
         )
     }
 
-    /** The block marked `^id`, without its marker; null when no line carries it. */
+    /**
+     * The block marked `^id`, without its marker; null when no line carries it. An id alone on its line names the
+     * block above it, across one blank line at most, as Obsidian writes it under a table or a quote.
+     */
     private fun block(
         body: String,
         id: String
@@ -55,7 +58,12 @@ class EmbeddedNoteText {
 
         if (id.isEmpty() || marked < 0) return null
         val isOwnLine = lines[marked].trim() == MarkdownSyntax.BLOCK_ANCHOR_CHAR + id
-        val end = if (isOwnLine) marked - 1 else marked
+
+        val end = when {
+            !isOwnLine -> marked
+            lines.getOrNull(index = marked - 1)?.isBlank() == true -> marked - 2
+            else -> marked - 1
+        }
 
         val start = when {
             isOwnLine -> (end downTo 0).firstOrNull { lines[it].isBlank() }?.plus(1) ?: 0

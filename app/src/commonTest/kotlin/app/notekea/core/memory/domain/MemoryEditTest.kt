@@ -98,6 +98,19 @@ class MemoryEditTest {
         )
     }
 
+    // The code review of 2026-11-22: a heading with two spaces after `##` was read but not
+    // found by the edit, and got a second section.
+    @Test
+    fun `a line goes under its heading however many spaces the heading was written with`() {
+        val spaced = "# Memory\n\n##  Sources\n- Trusted: fao.org\n"
+
+        assertEquals(
+            expected = "# Memory\n\n##  Sources\n- Trusted: fao.org\n" +
+                "- Trusted: who.int <!-- 2026-11-16, chat: you said -->\n",
+            actual = remembered("Trusted: who.int", MemorySection.SOURCES, into = spaced)
+        )
+    }
+
     @Test
     fun `a line forgotten is taken out whatever its origin, and a line the note lacks changes nothing`() {
         assertEquals(

@@ -1,8 +1,10 @@
 package com.testbuddy.crash
 
 import java.io.IOException
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.time.Clock
 import java.time.temporal.ChronoUnit
 
@@ -34,7 +36,7 @@ public object CrashReports {
         val path = try {
             save(
                 folder = config.reportFolder,
-                name = "crash-${time.replace(':', '-')}.txt",
+                stem = "crash-${time.replace(':', '-')}",
                 text = text
             )
         } catch (_: IOException) {
@@ -80,14 +82,25 @@ public object CrashReports {
             }
     }
 
+    // The code review of 2026-11-22: two errors in one second share a name, and the second replaced the first, the
+    // root cause. A report only goes to a file that is not there yet: "crash-….txt", then "crash-…-2.txt" and on.
     private fun save(
         folder: Path,
-        name: String,
+        stem: String,
         text: String
     ): String {
         Files.createDirectories(folder)
-        val file = folder.resolve(name)
-        Files.writeString(file, text)
+
+        val file = generateSequence(seed = 1) {
+            it + 1
+        }
+            .map { folder.resolve(if (it == 1) "$stem.txt" else "$stem-$it.txt") }
+            .first {
+                isCreated(
+                    file = it,
+                    text = text
+                )
+            }
 
         Files.list(folder).use { files ->
             files
@@ -103,5 +116,15 @@ public object CrashReports {
         }
 
         return file.toString()
+    }
+
+    private fun isCreated(
+        file: Path,
+        text: String
+    ): Boolean = try {
+        Files.writeString(file, text, StandardOpenOption.CREATE_NEW)
+        true
+    } catch (_: FileAlreadyExistsException) {
+        false
     }
 }

@@ -6,20 +6,16 @@ import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFileAttributes
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import okio.Buffer
 import okio.FileSystem
 import okio.IOException
 import okio.Path
 import okio.Path.Companion.toPath
-import okio.use
-import kotlin.random.Random
 
 /**
- * [NoteContentStore] on Okio. A write goes to a hidden temporary file next to the note, reaches the disk itself, takes
- * the note's [attributes] and replaces the note with an atomic move; on failure the note is left as it was. Windows
- * refuses the move while another reader has the note open, so it is tried again a few times, [MOVE_PAUSE_MILLIS] apart.
+ * [NoteContentStore] on Okio. A write goes to a hidden temporary file next to the note, reaches
+ * the disk itself, takes the note's [attributes] and replaces the note with an atomic move; on
+ * failure the note is left as it was ([writeWhole]).
  */
 class OkioNoteContentStore(
     private val fileSystem: FileSystem,
@@ -70,116 +66,26 @@ class OkioNoteContentStore(
             path = path
         )
 
-        val temporary = file.parent?.div(child = temporaryName())
-            ?: return@withContext Outcome.Failure(
-                error = NotesError.OperationFailed(path = path.value)
-            )
-
         try {
-            writeDurably(
-                file = temporary,
-                content = content
-            )
-
-            attributes.copy(
-                sourcePath = file.toString(),
-                targetPath = temporary.toString()
-            )
-
-            moveRetrying(
-                source = temporary,
-                target = file
+            fileSystem.writeWhole(
+                file = file,
+                content = content,
+                beforeMove = { temporary ->
+                    attributes.copy(
+                        sourcePath = file.toString(),
+                        targetPath = temporary.toString()
+                    )
+                }
             )
 
             Outcome.Success(value = Unit)
         } catch (_: IOException) {
             Outcome.Failure(error = NotesError.OperationFailed(path = path.value))
-        } finally {
-            removeLeftover(file = temporary)
         }
-    }
-
-    /** Runs however a write ends, a cancelled one too: nothing else knows this random name. */
-    private fun removeLeftover(file: Path) {
-        try {
-            fileSystem.delete(
-                path = file,
-                mustExist = false
-            )
-        } catch (_: IOException) {
-            // The note is as it should be; a locked temporary file stays hidden.
-        }
-    }
-
-    /** The same length for every note; random, so two notes saved at once never share one. */
-    private fun temporaryName(): String {
-        val id = Random
-            .nextInt()
-            .toUInt()
-            .toString(radix = HEX_RADIX)
-            .padStart(
-                length = ID_LENGTH,
-                padChar = ID_PADDING
-            )
-
-        return HIDDEN_PREFIX + id + TEMPORARY_SUFFIX
-    }
-
-    private fun writeDurably(
-        file: Path,
-        content: String
-    ) {
-        val bytes = Buffer().writeUtf8(string = content)
-
-        fileSystem.openReadWrite(
-            file = file,
-            mustCreate = true
-        ).use { handle ->
-            handle.write(
-                fileOffset = 0L,
-                source = bytes,
-                byteCount = bytes.size
-            )
-
-            handle.flush()
-        }
-    }
-
-    private suspend fun moveRetrying(
-        source: Path,
-        target: Path
-    ) {
-        repeat(times = MOVE_ATTEMPTS - 1) {
-            try {
-                fileSystem.atomicMove(
-                    source = source,
-                    target = target
-                )
-
-                return
-            } catch (_: IOException) {
-                delay(timeMillis = MOVE_PAUSE_MILLIS)
-            }
-        }
-
-        fileSystem.atomicMove(
-            source = source,
-            target = target
-        )
     }
 
     private fun fileOf(
         vaultPath: String,
         path: RelativePath
     ): Path = vaultPath.toPath() / path.value
-
-    companion object {
-        private const val HEX_RADIX = 16
-        private const val HIDDEN_PREFIX = "."
-        private const val ID_LENGTH = 8
-        private const val ID_PADDING = '0'
-        private const val TEMPORARY_SUFFIX = ".notekea-tmp"
-        private const val MOVE_ATTEMPTS = 5
-        private const val MOVE_PAUSE_MILLIS = 50L
-    }
 }

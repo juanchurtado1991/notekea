@@ -44,6 +44,21 @@ class RunnerEventTest {
         assertEquals(null, RunnerEvent.parse(line = "Info: (Vault) loaded 12 notes"))
     }
 
+    // The code review of 2026-11-22: a message quoting a Windows file was cut at its first line by who reads lines.
+    @Test
+    fun `a message with Windows line breaks stays on one line and reads back whole`() {
+        val event = RunnerEvent.Step(text = "expected:\r\nfirst\r\nsecond")
+
+        assertEquals(
+            listOf<RunnerEvent?>(event),
+            event
+                .line()
+                .reader()
+                .readLines()
+                .map { RunnerEvent.parse(line = it) }
+        )
+    }
+
     @Test
     fun `the run in its own process tells each start, step and end, then that it is done`() {
         val suite = sampleSuite {

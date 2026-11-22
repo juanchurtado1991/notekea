@@ -31,6 +31,7 @@ import app.notekea.resources.clip_update_none
 import app.notekea.resources.clip_update_reading
 import app.notekea.resources.clip_update_starting
 import app.notekea.resources.clip_update_title
+import app.notekea.resources.settings_web_failed
 import org.jetbrains.compose.resources.stringResource
 
 private const val DIALOG_WIDTH_DP = 520
@@ -62,17 +63,20 @@ fun ClipUpdateDialog(
             )
 
             val reading = state.update as? UpdateStep.Reading
-            if (done != null) Summary(done = done) else Progress(reading = reading)
+
+            when {
+                done != null -> Summary(done = done)
+                state.hasUpdateFailed -> Failure()
+                else -> Progress(reading = reading)
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                val close =
-                    if (done != null) Res.string.clip_update_close else Res.string.clip_cancel
-
-                val style =
-                    if (done != null) NotekeaButtonStyle.PRIMARY else NotekeaButtonStyle.TEXT
+                val isOver = done != null || state.hasUpdateFailed
+                val close = if (isOver) Res.string.clip_update_close else Res.string.clip_cancel
+                val style = if (isOver) NotekeaButtonStyle.PRIMARY else NotekeaButtonStyle.TEXT
 
                 NotekeaButton(
                     text = stringResource(resource = close),
@@ -113,6 +117,15 @@ private fun Progress(reading: UpdateStep.Reading?) {
         label = stringResource(resource = Res.string.clip_update_title),
         fraction = fraction,
         modifier = Modifier.fillMaxWidth()
+    )
+}
+
+// The update broke before it could count anything: said in the words Settings uses for it.
+@Composable
+private fun Failure() {
+    Text(
+        text = stringResource(resource = Res.string.settings_web_failed),
+        style = MaterialTheme.typography.bodyMedium
     )
 }
 

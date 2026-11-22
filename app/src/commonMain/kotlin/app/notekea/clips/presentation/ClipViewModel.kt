@@ -75,6 +75,7 @@ class ClipViewModel(
                 it.copy(
                     url = intent.url,
                     error = null,
+                    hasWriteFailed = false,
                     section = null
                 )
             }
@@ -135,7 +136,8 @@ class ClipViewModel(
             reduce {
                 it.copy(
                     step = ClipStep.Fetching,
-                    error = null
+                    error = null,
+                    hasWriteFailed = false
                 )
             }
 
@@ -230,7 +232,7 @@ class ClipViewModel(
             )
         }
 
-        updating = launchGuarded(onError = ::logError) {
+        updating = launchGuarded(onError = ::updateFailed) {
             updateWebSources(
                 vaultPath = vaultPath,
                 target = path,
@@ -249,7 +251,10 @@ class ClipViewModel(
     // The editors read the rewritten notes again, and the automatic update's next turn counts from a run that read
     // at least one page: offline, it is tried again the next time it is looked at.
     private suspend fun finished(done: UpdateStep.Done) {
-        if (done.updated.isNotEmpty()) emit(effect = ClipEffect.Rewritten(paths = done.updated))
+        if (done.originals.isNotEmpty()) {
+            emit(effect = ClipEffect.Rewritten(originals = done.originals))
+        }
+
         val read = done.updated.size + done.added.size + done.unchanged
         if (read > 0 || done.failed == 0) automatic?.done(vaultPath = vaultPath)
         reduce { it.copy(hasUpdateFailed = read == 0 && done.failed > 0) }
@@ -299,21 +304,52 @@ class ClipViewModel(
 
         val path = freePath(wanted = WebClipNote.pathOf(title = clip.title))
 
+        val isSaved = isWritten(
+            path = path,
+            text = WebClipNote.textOf(clip, today())
+        )
+
+        if (!isSaved) return writeFailed()
+
+        reduce { ClipState() }
+        emit(effect = ClipEffect.Opened(path = path))
+    }
+
+    // The code review of 2026-11-22: a note the disk refused was taken as written, and the dialog closed on nothing.
+    private suspend fun isWritten(
+        path: RelativePath,
+        text: String
+    ): Boolean {
         val created = noteFileOperations.createFile(
             vaultPath = vaultPath,
             path = path
         )
 
-        if (created is Outcome.Failure) return reduce { it.copy(step = null) }
+        if (created is Outcome.Failure) return false
 
-        noteContentStore.write(
+        val saved = noteContentStore.write(
             vaultPath = vaultPath,
             path = path,
-            content = WebClipNote.textOf(clip, today())
+            content = text
         )
 
-        reduce { ClipState() }
-        emit(effect = ClipEffect.Opened(path = path))
+        if (saved is Outcome.Success) return true
+
+        noteFileOperations.deleteEmptyFile(
+            vaultPath = vaultPath,
+            path = path
+        )
+
+        return false
+    }
+
+    // The dialog stays open and says so; no note is opened.
+    private fun writeFailed() = reduce {
+        it.copy(
+            step = null,
+            progress = null,
+            hasWriteFailed = true
+        )
     }
 
     // The page as the index of its folder of pages, both under a name no note or folder has yet ("Overview 2").
@@ -346,18 +382,14 @@ class ClipViewModel(
             path = folder
         )
 
-        notes.forEach { (path, text) ->
-            noteFileOperations.createFile(
-                vaultPath = vaultPath,
-                path = path
-            )
-
-            noteContentStore.write(
-                vaultPath = vaultPath,
+        val isSaved = notes.all { (path, text) ->
+            isWritten(
                 path = path,
-                content = text
+                text = text
             )
         }
+
+        if (!isSaved) return writeFailed()
 
         reduce { ClipState() }
         emit(effect = ClipEffect.Opened(path = notes.first().first))
@@ -394,12 +426,23 @@ class ClipViewModel(
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }
 
-        // An update that failed half way never leaves the status bar saying it is still reading.
         reduce {
             it.copy(
                 step = null,
-                progress = null,
-                update = null
+                progress = null
+            )
+        }
+    }
+
+    // The code review of 2026-11-22: an update that threw left its dialog on "Looking at the notes…" for good. It
+    // never leaves the status bar saying it is still reading either.
+    private fun updateFailed(throwable: Throwable) {
+        logger.w(throwable = throwable) { UPDATE_FAILED_MESSAGE }
+
+        reduce {
+            it.copy(
+                update = null,
+                hasUpdateFailed = true
             )
         }
     }
@@ -407,5 +450,6 @@ class ClipViewModel(
     private companion object {
         const val LOG_TAG = "ClipViewModel"
         const val FAILED_MESSAGE = "The page could not be clipped"
+        const val UPDATE_FAILED_MESSAGE = "The web sources could not be updated"
     }
 }

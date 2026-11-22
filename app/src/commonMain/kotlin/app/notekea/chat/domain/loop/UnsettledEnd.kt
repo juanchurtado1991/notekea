@@ -3,7 +3,6 @@ package app.notekea.chat.domain.loop
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolEffect
-import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 
 /**
@@ -18,7 +17,7 @@ internal object UnsettledEnd {
         state: TurnState,
         tool: ChatTool?
     ): String? {
-        val isEnd = tool is ShowTool || tool?.effect == ToolEffect.ENDS
+        val isEnd = tool?.effect == ToolEffect.ENDS
         if (!isEnd || call.name == AskUserTool.NAME) return null
 
         val frame = state.frame?.takeIf { it.isOpen } ?: return null

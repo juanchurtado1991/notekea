@@ -36,6 +36,7 @@ import app.notekea.resources.clip_error_not_article
 import app.notekea.resources.clip_error_offline
 import app.notekea.resources.clip_error_refused
 import app.notekea.resources.clip_error_slow
+import app.notekea.resources.clip_error_write
 import app.notekea.resources.clip_explain
 import app.notekea.resources.clip_fetching
 import app.notekea.resources.clip_levels
@@ -92,6 +93,11 @@ fun ClipDialog(
             )
 
             state.error?.let { ErrorBanner(message = messageOf(error = it)) }
+
+            if (state.hasWriteFailed) {
+                ErrorBanner(message = stringResource(resource = Res.string.clip_error_write))
+            }
+
             progressOf(step = state.step)?.let { NotekeaStatusProgress(label = it) }
 
             state.progress?.let {

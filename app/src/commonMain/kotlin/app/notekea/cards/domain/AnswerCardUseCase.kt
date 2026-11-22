@@ -15,7 +15,7 @@ class AnswerCardUseCase(private val noteContentStore: NoteContentStore) {
         card: StudyCard,
         answer: CardAnswer,
         today: CalendarDate
-    ): StudyCard? {
+    ): AnsweredCard? {
         val text = noteContentStore.read(
             vaultPath = vaultPath,
             path = card.note
@@ -49,6 +49,11 @@ class AnswerCardUseCase(private val noteContentStore: NoteContentStore) {
             )
         )
 
-        return if (written is Outcome.Success) scheduled else null
+        if (written is Outcome.Failure) return null
+
+        return AnsweredCard(
+            card = scheduled,
+            original = text
+        )
     }
 }

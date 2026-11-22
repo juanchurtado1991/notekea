@@ -20,10 +20,10 @@ object MemoryNote {
                 lines = emptyList()
             )
         ) { read, line ->
-            val heading = HEADING.matchEntire(input = line)
+            val heading = MemorySection.ofHeadingLine(line = line)
 
             if (heading != null) {
-                read.copy(section = MemorySection.of(heading = heading.groupValues[1]))
+                read.copy(section = heading)
             } else {
                 val kept = BULLET
                     .matchEntire(input = line)
@@ -76,7 +76,6 @@ object MemoryNote {
         )
     }
 
-    private val HEADING = Regex(pattern = "^##\\s+(.+)$")
     private val BULLET = Regex(pattern = "^[-*]\\s+(.+)$")
     private val ORIGIN = Regex(pattern = "<!--(.*?)-->")
 

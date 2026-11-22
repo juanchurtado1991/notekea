@@ -41,17 +41,52 @@ class DocumentViewerViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private fun viewModel(reader: DocumentReader = TextReader()) = DocumentViewerViewModel(
+        vaultPath = VAULT,
+        path = GUIDE,
+        reader = reader,
+        pdfPages = pages,
+        fileOpener = FakeFileOpener(),
+        dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+    )
+
+    // The code review of 2026-11-22: a page whose drawing threw was taken as still being drawn, for good.
+    @Test
+    fun `a page whose drawing broke is drawn the next time it comes into view`() =
+        runTest(dispatcher) {
+            val viewModel = viewModel()
+
+            pages.brokenRenders = 1
+            advanceUntilIdle()
+            viewModel.onIntent(intent = DocumentViewerIntent.OnPageShown(page = 0))
+            advanceUntilIdle()
+            val broken = viewModel.state.value.pages.keys
+            viewModel.onIntent(intent = DocumentViewerIntent.OnPageShown(page = 0))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(emptySet<Int>(), setOf(0)),
+                actual = listOf(broken, viewModel.state.value.pages.keys)
+            )
+        }
+
+    // The code review of 2026-11-22: a document whose reading threw left its tab on the spinner for good.
+    @Test
+    fun `a document whose reading breaks stops loading and says why`() = runTest(dispatcher) {
+        val viewModel = viewModel(reader = BrokenReader())
+
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf<Any?>(false, DocumentError.Unreadable(message = BROKEN)),
+            actual = listOf(viewModel.state.value.isLoading, viewModel.state.value.error)
+        )
+    }
+
     @Test
     fun `a page in view is drawn, and a hidden tab lets its pages and its PDF go`() =
         runTest(dispatcher) {
-            val viewModel = DocumentViewerViewModel(
-                vaultPath = VAULT,
-                path = GUIDE,
-                reader = TextReader(),
-                pdfPages = pages,
-                fileOpener = FakeFileOpener(),
-                dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
-            )
+            val viewModel = viewModel()
 
             advanceUntilIdle()
             viewModel.onIntent(intent = DocumentViewerIntent.OnPageShown(page = 0))
@@ -74,8 +109,16 @@ class DocumentViewerViewModelTest {
             Outcome.Success(value = DocumentText(text = "## Page 1\n\nTrams.\n"))
     }
 
+    private class BrokenReader : DocumentReader {
+        override suspend fun read(
+            vaultPath: String,
+            path: RelativePath
+        ): Outcome<DocumentText, DocumentError> = error(BROKEN)
+    }
+
     private class CountingPdfPages : PdfPages {
         var releases = 0
+        var brokenRenders = 0
 
         override suspend fun count(
             vaultPath: String,
@@ -87,7 +130,11 @@ class DocumentViewerViewModelTest {
             path: RelativePath,
             page: Int,
             scale: Float
-        ): Outcome<ByteArray, DocumentError> = Outcome.Success(value = Base64.decode(source = PNG))
+        ): Outcome<ByteArray, DocumentError> {
+            if (brokenRenders-- > 0) error(BROKEN)
+
+            return Outcome.Success(value = Base64.decode(source = PNG))
+        }
 
         override suspend fun marks(
             vaultPath: String,
@@ -106,6 +153,7 @@ class DocumentViewerViewModelTest {
 
     private companion object {
         const val VAULT = "/home/ana/Notes"
+        const val BROKEN = "The PDF broke"
         const val PNG =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         val GUIDE = RelativePath(value = "Guide.pdf")

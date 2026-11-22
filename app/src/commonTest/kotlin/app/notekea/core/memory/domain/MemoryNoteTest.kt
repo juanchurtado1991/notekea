@@ -73,18 +73,22 @@ class MemoryNoteTest {
 
         assertEquals(
             expected = listOf(
-                MemoryLine.Named(
-                    said = "Laura",
-                    note = "Laura Castro"
+                listOf(
+                    MemoryLine.Named(
+                        said = "Laura",
+                        note = "Laura Castro"
+                    )
                 ),
-                MemoryLine.Named(
-                    said = "el presu",
-                    note = "Budget 2027 (work)"
+                listOf(
+                    MemoryLine.Named(
+                        said = "el presu",
+                        note = "Budget 2027 (work)"
+                    )
                 ),
-                null,
-                null
+                emptyList(),
+                emptyList()
             ),
-            actual = lines.map { it.named }
+            actual = lines.map { it.names }
         )
     }
 }

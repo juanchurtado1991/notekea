@@ -120,6 +120,8 @@ class UpdateWebSourcesTest {
                 original = "Not a web source."
             )
 
+            val before = textOf(path = "Web sources/Docs.md")
+
             val steps = update(
                 vaultPath = "/vault",
                 target = RelativePath(value = "Web sources"),
@@ -128,10 +130,12 @@ class UpdateWebSourcesTest {
 
             val index = contents.texts.getValue(RelativePath(value = "Web sources/Docs.md"))
 
+            // The code review of 2026-11-22: the text before went untold, so an editor's unsaved edits undid it.
             assertEquals(
                 expected = listOf<Any?>(
                     UpdateStep.Done(
                         updated = listOf(RelativePath(value = "Web sources/Docs.md")),
+                        originals = mapOf(RelativePath(value = "Web sources/Docs.md") to before),
                         added = listOf(RelativePath(value = "Web sources/Docs/Datadog.md")),
                         unchanged = 2,
                         failed = 0
@@ -170,6 +174,8 @@ class UpdateWebSourcesTest {
                 original = "Kept as it is."
             )
 
+            val before = textOf(path = "Web sources/Sleep.md")
+
             val sleep = update(
                 vaultPath = "/vault",
                 target = RelativePath(value = "Web sources/Sleep.md"),
@@ -191,7 +197,10 @@ class UpdateWebSourcesTest {
                             url = "https://y.com/sleep"
                         )
                     ),
-                    UpdateStep.Done(updated = listOf(RelativePath(value = "Web sources/Sleep.md"))),
+                    UpdateStep.Done(
+                        updated = listOf(RelativePath(value = "Web sources/Sleep.md")),
+                        originals = mapOf(RelativePath(value = "Web sources/Sleep.md") to before)
+                    ),
                     UpdateStep.Done(failed = 1),
                     "Kept as it is."
                 ),

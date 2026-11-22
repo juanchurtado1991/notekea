@@ -357,14 +357,13 @@ class EditorViewModel(
             )
         }
 
-        if (path == null) {
-            saving.replaceBuffer(
-                body = "",
-                isNewNote = true
-            )
+        // The code review of 2026-11-22: a note that failed to open kept the text of the note before it.
+        saving.replaceBuffer(
+            body = "",
+            isNewNote = true
+        )
 
-            return
-        }
+        if (path == null) return
 
         when (val outcome = openNote(vaultPath = vaultPath, path = path)) {
             is Outcome.Failure -> reduce {

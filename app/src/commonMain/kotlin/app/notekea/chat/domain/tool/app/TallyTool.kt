@@ -2,6 +2,7 @@ package app.notekea.chat.domain.tool.app
 
 import app.notekea.chat.domain.loop.FrameWords
 import app.notekea.chat.domain.tool.ChatTool
+import app.notekea.chat.domain.tool.DistinctCalls
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
@@ -13,7 +14,9 @@ import app.notekea.core.notes.domain.NoteTextCache
  * Figures from lines of the notes read, worked out by the app (`docs/agent-figures.md`): the model names the lines
  * that count and those left out with why; each figure must be written on its line, or the item is refused.
  */
-class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
+class TallyTool(private val noteTextCache: NoteTextCache) :
+    ChatTool,
+    DistinctCalls {
     override val name = NAME
 
     override val description =
@@ -40,6 +43,14 @@ class TallyTool(private val noteTextCache: NoteTextCache) : ChatTool {
         call: ToolCall,
         context: ToolContext
     ): String = "${call.text(name = HOW)} of ${call.list(name = ITEMS).size}"
+
+    // Two sums of three lines are two calls: a tally refused, then made again with its figures put right, was told
+    // "its result is above" and never worked out.
+    override fun sameAs(
+        call: ToolCall,
+        context: ToolContext
+    ): String =
+        "${call.text(name = HOW)} of ${call.list(name = ITEMS).joinToString(separator = SEPARATOR)}"
 
     override suspend fun run(
         call: ToolCall,

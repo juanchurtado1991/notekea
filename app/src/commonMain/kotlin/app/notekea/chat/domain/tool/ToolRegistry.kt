@@ -10,11 +10,26 @@ class ToolRegistry(val tools: List<ChatTool>) {
 
     operator fun get(name: String): ChatTool? = byName[name]
 
-    /** What tells a call made twice: the tool and what it acts on, however the model names it. */
+    /**
+     * What tells a call made twice: the tool and what it acts on, however the model names it, or what the tool
+     * itself says tells its calls apart ([DistinctCalls]).
+     */
     fun keyOf(
         call: ToolCall,
         context: ToolContext
-    ): String = "${call.name}:${byName[call.name]?.targetOf(call, context).orEmpty()}".lowercase()
+    ): String {
+        val tool = byName[call.name]
+
+        val told = (tool as? DistinctCalls)?.sameAs(
+            call = call,
+            context = context
+        ) ?: tool?.targetOf(
+            call = call,
+            context = context
+        )
+
+        return "${call.name}:${told.orEmpty()}".lowercase()
+    }
 
     /** The tools that end the turn and no other. */
     fun ends(): ToolRegistry = ToolRegistry(

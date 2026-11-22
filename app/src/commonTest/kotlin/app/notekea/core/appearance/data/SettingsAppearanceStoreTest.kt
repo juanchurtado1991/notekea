@@ -5,7 +5,9 @@ import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.domain.FakeAppDispatchers
 import com.russhwolf.settings.MapSettings
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -13,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -132,6 +135,55 @@ class SettingsAppearanceStoreTest {
             expected = listOf(Appearance(), Appearance(theme = ColorTheme.DESERT)),
             actual = seen
         )
+    }
+
+    // The code review of 2026-11-22: a second save ran inside the first, which then put its own
+    // appearance over it in the windows while the file kept the second.
+    @Test
+    fun `two saves at once end with the file and the windows on the one asked last`() = runTest(
+        context = testDispatcher
+    ) {
+        val store = store()
+        val elsewhere = HeldDispatcher()
+
+        // The first save comes from a dispatcher of its own, held between its steps.
+        launch(context = elsewhere) {
+            store.save(appearance = Appearance(theme = ColorTheme.FOREST))
+        }
+
+        elsewhere.runHeld()
+
+        launch { store.save(appearance = Appearance(theme = ColorTheme.DESERT)) }
+
+        advanceUntilIdle()
+        elsewhere.runHeld()
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf(ColorTheme.DESERT, ColorTheme.DESERT),
+            actual = listOf(store, store()).map {
+                it
+                    .observe()
+                    .first()
+                    .theme
+            }
+        )
+    }
+
+    // Runs what it is given only when told, so a test decides when a coroutine on it goes on.
+    private class HeldDispatcher : CoroutineDispatcher() {
+        private val held = mutableListOf<Runnable>()
+
+        override fun dispatch(
+            context: CoroutineContext,
+            block: Runnable
+        ) {
+            held += block
+        }
+
+        fun runHeld() {
+            while (held.isNotEmpty()) held.removeAt(index = 0).run()
+        }
     }
 
     @Test

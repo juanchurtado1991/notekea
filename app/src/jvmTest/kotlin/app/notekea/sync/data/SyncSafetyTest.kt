@@ -1,6 +1,9 @@
 package app.notekea.sync.data
 
+import app.notekea.core.data.JvmAppDispatchers
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.SyncError
+import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.TransportException
 import java.io.File
@@ -8,6 +11,7 @@ import java.nio.file.Files
 import kotlin.io.path.createFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
 
 /**
  * The code review of 2026-11-13: a second conflict of a note overwrote the copy the first one kept, "keep both"
@@ -111,6 +115,30 @@ class SyncSafetyTest {
         assertEquals(
             expected = listOf("Big [1].mp4") to setOf("Note.md"),
             actual = untracked
+        )
+    }
+
+    // The code review of 2026-11-22: a note beside its conflict copy in `.trash` was a conflict
+    // for good.
+    @Test
+    fun `a note and its conflict copy in a hidden folder are not a conflict to settle`() {
+        val folder = Files.createTempDirectory("notekea-hidden").toFile()
+
+        val files =
+            listOf("Plan.md", "Plan (conflict).md", ".trash/Old.md", ".trash/Old (conflict).md")
+
+        files.forEach {
+            File(folder, it).apply { parentFile.mkdirs() }.writeText("A note.")
+        }
+
+        val repository = JGitRepository(
+            dispatchers = JvmAppDispatchers(),
+            clock = Clock.System
+        )
+
+        assertEquals(
+            expected = listOf(RelativePath(value = "Plan.md")),
+            actual = runBlocking { repository.conflicts(vaultPath = folder.path) }
         )
     }
 

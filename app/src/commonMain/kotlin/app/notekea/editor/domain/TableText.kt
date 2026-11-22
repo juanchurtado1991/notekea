@@ -15,11 +15,6 @@ class TableText private constructor(
     val rows: List<List<TableCell>>,
     val afterStart: Int?
 ) {
-    val lastCell: TableCell
-        get() = rows
-            .last()
-            .last()
-
     fun cell(
         row: Int,
         column: Int
@@ -51,7 +46,8 @@ class TableText private constructor(
             if (!text.startsWith(prefix = MarkdownSyntax.TABLE_COLUMN)) return null
 
             val content = text.trimEnd()
-            val lines = content.lines()
+            // The code review of 2026-11-22: lines were also cut at `\r`, so a row after `\r\n` started one early.
+            val lines = content.split(NEW_LINE)
 
             if (lines.size < 2 || FILE_EMBED in content) return null
 

@@ -16,10 +16,14 @@ class UiZoomViewModel(
 ) : BaseViewModel<Float, UiZoomIntent, Nothing>(initialState = UiZoomLevels.DEFAULT) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
+    // A zoom chosen before the kept one came back stays: the load put the old one over it (the
+    // code review of 2026-11-22).
+    private var isChanged = false
+
     init {
         launchGuarded(onError = ::logUnexpectedError) {
             val kept = getUiZoom()
-            reduce { kept }
+            if (!isChanged) reduce { kept }
         }
     }
 
@@ -36,6 +40,7 @@ class UiZoomViewModel(
     }
 
     private fun change(scale: Float) {
+        isChanged = true
         reduce { scale }
 
         launchGuarded(onError = ::logUnexpectedError) { saveUiZoom(scale = scale) }

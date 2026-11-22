@@ -387,6 +387,21 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
         )
     }
 
+    // The code review of 2026-11-22: a second Enter trashed the entry again, and its failure was shown.
+    @Test
+    fun `a delete confirmed twice trashes the entry once`() = runTreeTest {
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
+        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf(path(WELCOME)),
+            actual = trash.trashed.toList()
+        )
+    }
+
     @Test
     fun `a cancelled delete trashes nothing`() = runTreeTest {
         val viewModel = startedViewModel()

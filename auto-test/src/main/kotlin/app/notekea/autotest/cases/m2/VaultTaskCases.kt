@@ -18,8 +18,6 @@ private const val SCROLL_TRIES = 10
 private const val SCROLL_WAIT_MILLIS = 500L
 private const val FLAT_TASK = "Find a flat near the river"
 private const val LAUNCH_FILE = "$SAMPLE/Projects/Notekea launch.md"
-private const val OPEN_TASKS =
-    "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba).\n2. Haz clic en Tareas en la barra de la izquierda."
 
 /** The cases of 2.11, vault tasks (`MVP_SMOKE_TEST.md`): the Tasks tab. */
 fun SuiteBuilder.vaultTaskCases() {

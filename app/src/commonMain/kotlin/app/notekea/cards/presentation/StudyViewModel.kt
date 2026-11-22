@@ -210,7 +210,7 @@ class StudyViewModel(
         askCurrent()
 
         launchGuarded(onError = ::logError) {
-            val scheduled = writing.withLock {
+            val answered = writing.withLock {
                 answerCard(
                     vaultPath = vaultPath,
                     card = card,
@@ -219,10 +219,18 @@ class StudyViewModel(
                 )
             }
 
-            if (scheduled != null) emit(effect = StudyEffect.NoteRewritten(path = card.note))
+            // The code review of 2026-11-22: without the text before, unsaved edits took the schedule out again.
+            if (answered != null) {
+                emit(
+                    effect = StudyEffect.NoteRewritten(
+                        path = card.note,
+                        original = answered.original
+                    )
+                )
+            }
 
             reduce { current ->
-                val next = listOfNotNull(current.nextDate, scheduled?.due).minOrNull()
+                val next = listOfNotNull(current.nextDate, answered?.card?.due).minOrNull()
                 current.copy(nextDate = next)
             }
         }

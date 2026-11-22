@@ -1116,6 +1116,7 @@
     <string name="clip_error_slow">The page took too long to answer. Try again in a moment.</string>
     <string name="clip_error_large">The page is too large to be an article.</string>
     <string name="clip_error_refused">The site refused the page: it may need a login, a subscription, or not exist.</string>
+    <string name="clip_error_write">The page was read, but its note could not be written in the vault. Check the disk and try again.</string>
     <string name="clip_section_question">This page links %1$d more pages under %2$s. Clip only this page, or those pages too? Each becomes a note in a folder, with this page as their index.</string>
     <string name="clip_section_more">These are the 30 closest to this page; %1$d more can be clipped with All, which takes longer.</string>
     <string name="clip_with_all">All %1$d pages</string>

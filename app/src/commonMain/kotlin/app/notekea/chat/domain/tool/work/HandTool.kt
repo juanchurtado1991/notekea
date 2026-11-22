@@ -38,10 +38,5 @@ class HandTool(
             description = "when the request asks how to do something in Notekea, or what the chat can do: the " +
                 "app's guide answers it. Never do it for them."
         )
-
-        val overview = HandTool(
-            kind = WorkKind.OVERVIEW,
-            description = "when the request asks what the vault holds as a whole: its map answers it."
-        )
     }
 }

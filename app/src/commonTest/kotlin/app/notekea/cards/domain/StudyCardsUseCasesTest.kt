@@ -60,7 +60,7 @@ class StudyCardsUseCasesTest {
 
             assertEquals(
                 expected = listOf<Any?>(3, "#flashcards\n\nA new first line\nCapital of Peru::Lima <!--SR:!2026-11-14,3,250-->"),
-                actual = listOf(answered?.line, store.texts[note])
+                actual = listOf(answered?.card?.line, store.texts[note])
             )
         }
 

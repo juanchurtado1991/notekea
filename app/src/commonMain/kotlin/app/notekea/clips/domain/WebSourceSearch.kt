@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.WebSourcesFolder
+import app.notekea.core.web.domain.WebHost
 
 /**
  * When the notes do not hold an answer (the developer's request of 2026-11-13): the pages of the sites the vault
@@ -18,7 +19,7 @@ class WebSourceSearch(
     /** The sites ("wordpress.org") the vault has sections of web sources of. */
     suspend fun sites(vaultPath: String): List<String> = sectionsOf(vaultPath = vaultPath)
         .mapNotNull { it.index?.source }
-        .map { hostOf(url = it) }
+        .map { WebHost.of(address = it) }
         .distinct()
 
     /** At most [MOST] pages not clipped yet, the closest to [question] first; [onFound] told how many it weighs. */
@@ -170,11 +171,6 @@ class WebSourceSearch(
             }
             .toDouble()
     }
-
-    private fun hostOf(url: String): String = url
-        .substringAfter(delimiter = "://")
-        .substringBefore(delimiter = '/')
-        .removePrefix(prefix = "www.")
 
     companion object {
         const val MOST = 5

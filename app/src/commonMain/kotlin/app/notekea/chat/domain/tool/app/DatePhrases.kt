@@ -56,10 +56,13 @@ internal object DatePhrases {
         listOf("next week", "proxima semana", "semana que viene") to WEEK
     )
 
-    /** The day [phrase] names, counted from [today]; null when it names none this reads. */
+    /**
+     * The day [phrase] names, counted from [today]; null when it names none this reads. A day written whole
+     * (2026-12-06) is read with no [today].
+     */
     fun of(
         phrase: String,
-        today: CalendarDate
+        today: CalendarDate?
     ): CalendarDate? {
         val said = phrase
             .lowercase()
@@ -68,6 +71,20 @@ internal object DatePhrases {
             }
             .joinToString(separator = "")
 
+        return offset(said = said)
+            ?: written(said = said)
+            ?: today?.let {
+                counted(
+                    said = said,
+                    today = it
+                )
+            }
+    }
+
+    private fun counted(
+        said: String,
+        today: CalendarDate
+    ): CalendarDate? {
         val fixed = FIXED.firstOrNull { (words, _) ->
             words.any {
                 it in said
@@ -80,12 +97,12 @@ internal object DatePhrases {
             }
         }
 
-        return offset(said = said)
-            ?: written(said = said)
-            ?: named(
-                said = said,
-                today = today
-            )
+        val day = named(
+            said = said,
+            today = today
+        )
+
+        return day
             ?: inWeek(
                 said = said,
                 weekday = weekday + 1,

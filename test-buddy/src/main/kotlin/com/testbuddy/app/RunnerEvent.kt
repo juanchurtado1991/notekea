@@ -7,7 +7,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * What the automatic run in its own process tells the manager, one line each on its output: a case starts, it takes a
  * step, it ends. Lines start with [PREFIX], so the app's own output in between is ignored; tabs and line breaks in a
- * message are escaped.
+ * message are escaped ([LineEscape]).
  */
 internal sealed class RunnerEvent {
     data class Started(val id: String) : RunnerEvent()
@@ -23,7 +23,7 @@ internal sealed class RunnerEvent {
         is Step -> listOf(STEP, text)
         is Ended -> resultFields(result = result)
         Done -> listOf(DONE)
-    }.joinToString(separator = SEPARATOR) { escape(it) }
+    }.joinToString(separator = SEPARATOR) { LineEscape.escape(text = it) }
 
     companion object {
         const val PREFIX = "TEST-BUDDY\t"
@@ -34,7 +34,7 @@ internal sealed class RunnerEvent {
             val fields = line
                 .removePrefix(PREFIX)
                 .split(SEPARATOR)
-                .map(::unescape)
+                .map(LineEscape::unescape)
 
             return when (fields.firstOrNull()) {
                 STARTED -> fields.getOrNull(1)?.let { Started(id = it) }
@@ -106,36 +106,6 @@ internal sealed class RunnerEvent {
                 }
 
                 else -> null
-            }
-        }
-
-        private fun escape(text: String) = text
-            .replace("\\", "\\\\")
-            .replace("\t", "\\t")
-            .replace("\n", "\\n")
-
-        private fun unescape(text: String): String = buildString {
-            var index = 0
-
-            while (index < text.length) {
-                val char = text[index]
-
-                if (char == '\\' && index + 1 < text.length) {
-                    append(
-                        if (text[index + 1] == 't') {
-                            '\t'
-                        } else if (text[index + 1] == 'n') {
-                            '\n'
-                        } else {
-                            text[index + 1]
-                        }
-                    )
-
-                    index += 2
-                } else {
-                    append(char)
-                    index++
-                }
             }
         }
 

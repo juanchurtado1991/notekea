@@ -77,6 +77,27 @@ class EmbeddedNoteTextTest {
         )
     }
 
+    // The code review of 2026-11-22: an id under a blank line, as Obsidian writes it for a table, named no block.
+    @Test
+    fun `a marker on its own line names the block above it across one blank line, never across two`() {
+        val text = "| A | B |\n|---|---|\n| 1 | 2 |\n\n^table\n\n> Quoted\n> twice\n\n^quote\n\n" +
+            "Far.\n\n\n^far\n"
+
+        assertEquals(
+            expected = listOf(
+                "| A | B |\n|---|---|\n| 1 | 2 |",
+                "> Quoted\n> twice",
+                null
+            ),
+            actual = listOf("Note#^table", "Note#^quote", "Note#^far").map {
+                embeddedNoteText.of(
+                    text = text,
+                    target = it
+                )
+            }
+        )
+    }
+
     @Test
     fun `a line of a code block is not a heading, neither where the section starts nor where it ends`() {
         val text =

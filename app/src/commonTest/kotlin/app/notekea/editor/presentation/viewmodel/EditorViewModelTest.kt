@@ -179,6 +179,28 @@ class EditorViewModelTest : EditorViewModelTestBase() {
         )
     }
 
+    // The code review of 2026-11-22: a note that failed to open kept the text of the note before it, still editable.
+    @Test
+    fun `a note that cannot be read leaves no text of the note before it, and nothing to edit`() =
+        runEditorTest {
+            open(path = AREPAS)
+            store.unreadable += WELCOME
+
+            open(path = WELCOME)
+
+            assertEquals(
+                expected = Triple(NotesError.Unreadable(path = WELCOME.value), "", false),
+                actual = Triple(
+                    viewModel.state.value.loadError,
+                    viewModel
+                        .buffer
+                        .text
+                        .toString(),
+                    viewModel.state.value.isEditable
+                )
+            )
+        }
+
     @Test
     fun `a refused save is shown and the next save succeeds`() = runEditorTest {
         open(path = AREPAS)

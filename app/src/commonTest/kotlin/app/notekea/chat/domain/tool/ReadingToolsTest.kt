@@ -236,6 +236,35 @@ class ReadingToolsTest {
             )
         }
 
+    // The code review of 2026-11-22: the same notes asked another question had the same key, and were not read.
+    @Test
+    fun `a digest of the same notes with another question is another call`() {
+        val digest = DigestTool(
+            llmEngine = engine,
+            noteTextCache = cache
+        )
+
+        val registry = ToolRegistry(tools = listOf(digest))
+
+        val keys = listOf("how is it ended?", "how is it ended?", "who signed it?").map {
+            registry.keyOf(
+                call = ToolCall(
+                    name = digest.name,
+                    arguments = mapOf(
+                        "notes" to "Lease",
+                        "question" to it
+                    )
+                ),
+                context = context
+            )
+        }
+
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(keys[0] == keys[1], keys[0] == keys[2])
+        )
+    }
+
     private companion object {
         const val LEASE =
             "Intro line.\n\n# Lease\nSigned in May.\n\n## Rent\nThe rent is 950 euros a month.\n\n" +

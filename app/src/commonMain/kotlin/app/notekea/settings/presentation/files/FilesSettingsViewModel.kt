@@ -63,7 +63,11 @@ class FilesSettingsViewModel(
         }
     }
 
+    // The code review of 2026-11-22: a load over a choice not saved yet put the old value back, which the save then
+    // wrote. A field waiting to be saved, or changed before the load ends, keeps what the person chose.
     private suspend fun load(vault: String) {
+        val jobs = saving.toMap()
+        val unsaved = jobs.filterValues { it.isActive }.keys
         val attachments = reader.attachmentFolderPath(vaultPath = vault).orEmpty()
         val daily = reader.dailyNotes(vaultPath = vault)
         val templates = reader.templates(vaultPath = vault)
@@ -71,16 +75,33 @@ class FilesSettingsViewModel(
         // Every folder, the empty ones too: a new folder made for the attachments could not be chosen.
         val folders = attachmentStore.folders(vaultPath = vault)
 
-        reduce {
-            it.copy(
-                attachments = attachments,
-                dailyFolder = daily?.folder.orEmpty(),
-                dailyFormat = daily?.format.orEmpty(),
-                templatesFolder = templates?.folder.orEmpty(),
+        reduce { current ->
+            val kept = unsaved + Field.entries.filter {
+                saving[it] !== jobs[it]
+            }
+
+            val isDailyKept = Field.DAILY in kept
+            val format = if (isDailyKept) current.dailyFormat else daily?.format.orEmpty()
+            val dailyFolder = if (isDailyKept) current.dailyFolder else daily?.folder.orEmpty()
+
+            val shownAttachments =
+                if (Field.ATTACHMENTS in kept) current.attachments else attachments
+
+            val templatesFolder = if (Field.TEMPLATES in kept) {
+                current.templatesFolder
+            } else {
+                templates?.folder.orEmpty()
+            }
+
+            current.copy(
+                attachments = shownAttachments,
+                dailyFolder = dailyFolder,
+                dailyFormat = format,
+                templatesFolder = templatesFolder,
                 folders = folders.map { it.value }.sorted(),
                 formats = DateFormatChoice.choicesOf(
                     today = localCalendar.momentOf(instant = clock.now()).date,
-                    current = daily?.format.orEmpty()
+                    current = format
                 )
             )
         }

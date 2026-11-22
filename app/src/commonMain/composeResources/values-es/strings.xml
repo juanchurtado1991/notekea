@@ -1116,6 +1116,7 @@
     <string name="clip_error_slow">La página tardó demasiado en responder. Inténtalo de nuevo en un momento.</string>
     <string name="clip_error_large">La página es demasiado grande para ser un artículo.</string>
     <string name="clip_error_refused">El sitio rechazó la página: puede pedir iniciar sesión o una suscripción, o no existir.</string>
+    <string name="clip_error_write">La página se leyó, pero su nota no se pudo escribir en la bóveda. Revisa el disco e inténtalo de nuevo.</string>
     <string name="clip_section_question">Esta página enlaza %1$d páginas más bajo %2$s. ¿Recortar solo esta página o también esas? Cada una será una nota en una carpeta, con esta página como índice.</string>
     <string name="clip_section_more">Estas son las 30 más cercanas a esta página; otras %1$d se recortan con Todas, que tarda más.</string>
     <string name="clip_with_all">Todas (%1$d páginas)</string>

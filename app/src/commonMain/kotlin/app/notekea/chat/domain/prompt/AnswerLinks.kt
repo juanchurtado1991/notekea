@@ -1,5 +1,7 @@
 package app.notekea.chat.domain.prompt
 
+import app.notekea.core.web.domain.WebHost
+
 /**
  * The links of an answer, kept only when they lead where the turn has been: the 4B ended nearly every answer from the
  * notes with a link it made up, "[site](https://example.com/greenhouse)" (the loop's fifth run, 2026-11-16).
@@ -18,13 +20,13 @@ internal object AnswerLinks {
     ): String {
         val sites = ADDRESS
             .findAll(input = known)
-            .map { siteOf(address = it.value) }
+            .map { WebHost.of(address = it.value) }
             .toSet()
 
         return LINK
             .replace(input = answer) { link ->
                 val words = link.groupValues[WORDS].trim()
-                val isKnown = siteOf(address = link.groupValues[WHERE]) in sites
+                val isKnown = WebHost.of(address = link.groupValues[WHERE]) in sites
 
                 val isEmpty =
                     words.lowercase() in EMPTY_WORDS || READ.containsMatchIn(input = words)
@@ -45,12 +47,6 @@ internal object AnswerLinks {
             )
             .trim()
     }
-
-    private fun siteOf(address: String): String = address
-        .substringAfter(delimiter = "://")
-        .substringBefore(delimiter = '/')
-        .removePrefix(prefix = "www.")
-        .lowercase()
 
     private const val BEFORE = 1
     private const val WORDS = 2

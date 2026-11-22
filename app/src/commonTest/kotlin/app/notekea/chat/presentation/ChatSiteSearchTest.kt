@@ -16,12 +16,14 @@ import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.RelativePath
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
@@ -38,6 +40,9 @@ class ChatSiteSearchTest {
     private val dispatcher = StandardTestDispatcher()
     private val engine = FakeLlmEngine()
     private val clipped = mutableListOf<String>()
+
+    // A clip waits for it, when set.
+    private var held: CompletableDeferred<Unit>? = null
 
     private val pages = listOf(
         SourcePage(
@@ -66,6 +71,7 @@ class ChatSiteSearchTest {
             pages: List<SourcePage>,
             onProgress: suspend (PageProgress) -> Unit
         ): List<ClippedPage> {
+            held?.await()
             clipped += pages.map { it.url }
 
             return pages.map {
@@ -191,4 +197,65 @@ class ChatSiteSearchTest {
                 actual = listOf(during, viewModel.state.value.entries.size)
             )
         }
+
+    // The code review of 2026-11-22: a clip of an older turn clicked while the newest answered ran beside it, and
+    // took the place of the work Stop ends.
+    @Test
+    fun `a clip of an older turn clicked while a turn is answering clips nothing`() =
+        runTest(dispatcher) {
+            val viewModel = withSites()
+
+            send(viewModel, ChatIntent.OnQuestionChange(text = "how do I open a store?"))
+            send(viewModel, ChatIntent.OnSend)
+            val older = last(viewModel).id
+            send(viewModel, ChatIntent.OnSiteSearch(id = older))
+
+            send(viewModel, ChatIntent.OnQuestionChange(text = "how do I take payments?"))
+            viewModel.onIntent(intent = ChatIntent.OnSend)
+            viewModel.onIntent(intent = ChatIntent.OnSiteClip(id = older))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = emptyList<String>(),
+                actual = clipped
+            )
+        }
+
+    // The code review of 2026-11-22: a clip answer stopped was written as ended again when its work was cancelled.
+    @Test
+    fun `a clip answer that is stopped stays stopped`() = runTest(dispatcher) {
+        val viewModel = withSites()
+
+        send(viewModel, ChatIntent.OnQuestionChange(text = "how do I open a store?"))
+        send(viewModel, ChatIntent.OnSend)
+        val id = last(viewModel).id
+        send(viewModel, ChatIntent.OnSiteSearch(id = id))
+
+        held = CompletableDeferred()
+        viewModel.onIntent(intent = ChatIntent.OnSiteClip(id = id))
+        runCurrent()
+        send(viewModel, ChatIntent.OnStop)
+
+        assertEquals(
+            expected = TurnOutcome.STOPPED,
+            actual = last(viewModel).outcome
+        )
+    }
+
+    private fun TestScope.withSites(): ChatViewModel {
+        val viewModel = chatViewModel(
+            engine = engine,
+            store = FakeNoteContentStore(),
+            index = FakeVectorIndex(),
+            embedder = FakeTextEmbedder(),
+            runner = FakeActionRunner(),
+            history = FakeChatHistoryStore(),
+            clipboard = FakeTextClipboard(),
+            sourceSites = sites
+        )
+
+        send(viewModel, ChatIntent.OnIndexChange(isReady = true))
+
+        return viewModel
+    }
 }

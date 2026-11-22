@@ -306,7 +306,7 @@ class RunTurnUseCase(
             return
         }
 
-        val before = state.turn.work.changes.size
+        val before = state.turn.work.changes
         state.foundAt[key] = state.found.size
 
         state.found += StepRecall.resultOf(
@@ -316,7 +316,9 @@ class RunTurnUseCase(
         )
 
         // A change not added (refused, or held back with a question) may be asked again as it was.
-        val isRefused = tool.effect == ToolEffect.PROPOSES && state.turn.work.changes.size == before
+        // The code review of 2026-11-22: a change put in an earlier one's place left the proposal's
+        // size as it was, and was taken as refused.
+        val isRefused = tool.effect == ToolEffect.PROPOSES && state.turn.work.changes == before
         if (isRefused) state.made.remove(element = key)
 
         // A refused tool is not offered until another call is made: at temperature 0 the 4B made one refused call

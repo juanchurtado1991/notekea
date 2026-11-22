@@ -97,9 +97,11 @@ class SearchTool(
         return listOf("Every note that writes \"$written\" (${names.size}): $shown$more")
     }
 
+    // The code review of 2026-11-22: split at spaces, commas, stops and "?" only, a word kept its
+    // quotes, its brackets or its "¿", and matched nothing.
     private fun wordsOf(query: String): List<String> = query
         .lowercase()
-        .split(' ', ',', '.', '?')
+        .split(regex = NOT_WORD)
         .filter {
             it.length >= MIN_WORD
         }
@@ -139,5 +141,6 @@ class SearchTool(
         private const val PROPERTY_NOTES = 8
         private const val PASSAGE_CHARS = 400
         private const val WRITING_NOTES = 40
+        private val NOT_WORD = Regex(pattern = "[^\\p{L}\\p{N}]+")
     }
 }

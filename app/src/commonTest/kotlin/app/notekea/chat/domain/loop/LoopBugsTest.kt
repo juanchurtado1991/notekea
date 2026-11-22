@@ -130,6 +130,46 @@ class LoopBugsTest {
         )
     }
 
+    // The code review of 2026-11-22: a change put in an earlier one's place left the proposal's size as it was, so
+    // it was taken as refused and its tool was not offered next.
+    @Test
+    fun `a change that replaces an earlier one is not refused, and its tool is offered next`() =
+        runTest {
+            val one = """{"tool":"add_tag","notes":["Recipes/Arepas"],"tag":"latin"}"""
+
+            val both =
+                """{"tool":"add_tag","notes":["Recipes/Arepas","Recipes/Black beans"],"tag":"latin"}"""
+
+            val propose = """{"tool":"propose","summary":"Tag both with latin."}"""
+            val script = listOf(one, both, propose)
+
+            steps(task = "tag the arepas and the black beans with latin") {
+                script[it.coerceAtMost(script.lastIndex)]
+            }
+
+            val offered = engine
+                .generated
+                .indices
+                .filter {
+                    engine
+                        .generated[it]
+                        .first()
+                        .text
+                        .startsWith(prefix = CALLS)
+                }
+                .map {
+                    engine
+                        .options[it]
+                        .jsonSchema
+                        .orEmpty()
+                }
+
+            assertEquals(
+                expected = true,
+                actual = "add_tag" in offered[2]
+            )
+        }
+
     private companion object {
         const val CALLS = "You work on a task in the person's notes"
         const val MOST_CALLS = 12

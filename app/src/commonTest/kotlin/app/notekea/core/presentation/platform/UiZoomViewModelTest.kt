@@ -67,6 +67,22 @@ class UiZoomViewModelTest {
         )
     }
 
+    // The code review of 2026-11-22: the kept zoom, read late, was put over the one just chosen.
+    @Test
+    fun `a zoom chosen before the kept one is read stays, in the window and for the next run`() =
+        runTest(context = testDispatcher) {
+            store.setScale(scale = 1.3f)
+            val viewModel = viewModel()
+
+            viewModel.onIntent(intent = UiZoomIntent.OnLarger)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(1.1f, 1.1f),
+                actual = listOf(viewModel.state.value, store.scale())
+            )
+        }
+
     @Test
     fun `a zoom that cannot be read or kept still changes the window`() = runTest(
         context = testDispatcher

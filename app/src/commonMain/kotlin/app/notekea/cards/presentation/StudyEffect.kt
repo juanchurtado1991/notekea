@@ -8,6 +8,9 @@ sealed interface StudyEffect {
         val line: Int
     ) : StudyEffect
 
-    /** A card's schedule was written in [path]: an editor that has it open reads it again. */
-    data class NoteRewritten(val path: RelativePath) : StudyEffect
+    /** A card's schedule was written in [path], over [original]: an editor that has it open reads it again. */
+    data class NoteRewritten(
+        val path: RelativePath,
+        val original: String
+    ) : StudyEffect
 }

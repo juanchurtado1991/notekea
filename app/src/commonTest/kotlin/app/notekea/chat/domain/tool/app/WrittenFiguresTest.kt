@@ -100,4 +100,16 @@ class WrittenFiguresTest {
                 ?.substringBefore(delimiter = ":")
         )
     }
+
+    // The code review of 2026-11-22: "0.125" was read as 125, three digits after one mark taken for thousands.
+    @Test
+    fun `three digits after a mark are thousands only after one to three digits that do not open with a zero`() {
+        val written =
+            listOf("0.125", "0,125", "2.500", "12,000", "1.234.567", "1234.567", "38,5", "1,234.50")
+
+        assertEquals(
+            expected = listOf(0.125, 0.125, 2500.0, 12000.0, 1234567.0, 1234.567, 38.5, 1234.5),
+            actual = written.map { FigureValues.valueOf(written = it) }
+        )
+    }
 }

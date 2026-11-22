@@ -36,10 +36,7 @@ object MemoryEdit {
         }
 
         val heading = lines.indexOfFirst {
-            it.trim().equals(
-                other = "## ${section.heading}",
-                ignoreCase = true
-            )
+            MemorySection.ofHeadingLine(line = it) == section
         }
 
         if (heading < 0) return (lines + "" + "## ${section.heading}" + written).joined()
@@ -130,10 +127,7 @@ object MemoryEdit {
     ): Int? {
         val sections = lines
             .runningFold(initial = MemorySection.OTHER) { current, written ->
-                HEADING
-                    .matchEntire(input = written.trim())
-                    ?.let { MemorySection.of(heading = it.groupValues[1]) }
-                    ?: current
+                MemorySection.ofHeadingLine(line = written) ?: current
             }
             .drop(n = 1)
 
@@ -198,7 +192,6 @@ object MemoryEdit {
     private fun List<String>.joined(): String = joinToString(separator = "\n") + "\n"
 
     private val BULLET = Regex(pattern = "^[-*]\\s+(.+)$")
-    private val HEADING = Regex(pattern = "^##\\s+(.+)$")
     private val ORIGIN = Regex(pattern = "<!--(.*?)-->")
     private val DOMAIN = Regex(
         pattern = "[a-z0-9*][a-z0-9.-]*\\.[a-z]{2,}",

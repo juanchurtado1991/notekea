@@ -16,8 +16,11 @@ import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.WebSourcesFolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -169,8 +172,112 @@ class ClipSectionDialogTest {
             )
         }
 
+    // The code review of 2026-11-22: a note the vault refused closed the dialog as if it had been written.
+    @Test
+    fun `a note the vault refuses is said in the dialog, which stays open, and no empty note is left`() =
+        runTest(dispatcher) {
+            val note = RelativePath(value = "Web sources/Introduction.md")
+            val viewModel = asked()
+
+            store.refused += note
+            viewModel.onIntent(intent = ClipIntent.OnClipPage)
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+
+            assertEquals(
+                expected = listOf(true, true, false, false),
+                actual = listOf(
+                    state.hasWriteFailed,
+                    state.isOpen,
+                    state.isBusy,
+                    note in files.existing
+                )
+            )
+        }
+
+    // The code review of 2026-11-22: a section with a page the vault refused was opened on notes left empty.
+    @Test
+    fun `a section with a note the vault refuses is said in the dialog instead of opened`() =
+        runTest(dispatcher) {
+            val viewModel = asked()
+
+            store.refused += RelativePath(value = "Web sources/Introduction/Axiom.md")
+            viewModel.onIntent(intent = ClipIntent.OnClipSection)
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+
+            assertEquals(
+                expected = listOf(true, true, false),
+                actual = listOf(
+                    state.hasWriteFailed,
+                    state.isOpen,
+                    state.isBusy
+                )
+            )
+        }
+
+    // The code review of 2026-11-22: an update that threw left its dialog on "Looking at the notes…" for good.
+    @Test
+    fun `an update that breaks is shown as failed in its dialog`() = runTest(dispatcher) {
+        val viewModel = viewModel()
+
+        attachments.contents[RelativePath(value = "Web sources/Old.md")] = ByteArray(size = 0)
+        store.onRead = { error("The disk broke") }
+
+        viewModel.onIntent(
+            intent = ClipIntent.OnUpdate(
+                path = WebSourcesFolder.PATH,
+                isShown = true
+            )
+        )
+
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+
+        assertEquals(
+            expected = listOf<Any?>(true, true, null),
+            actual = listOf(
+                state.hasUpdateFailed,
+                state.isUpdateShown,
+                state.update
+            )
+        )
+    }
+
+    // The code review of 2026-11-22: the update named the notes it rewrote only, so unsaved edits undid it.
+    @Test
+    fun `an update tells the editors the text each rewritten note had before`() =
+        runTest(dispatcher) {
+            val note = RelativePath(value = "Web sources/Axiom.md")
+            val viewModel = viewModel()
+            val effects = mutableListOf<ClipEffect>()
+
+            val collector = launch {
+                viewModel.effects.collect { effects += it }
+            }
+
+            store.texts[note] = CLIPPED
+            attachments.contents[note] = ByteArray(size = 0)
+            viewModel.onIntent(intent = ClipIntent.OnUpdate(path = note))
+            advanceUntilIdle()
+            collector.cancel()
+
+            assertEquals(
+                expected = listOf<ClipEffect>(
+                    ClipEffect.Rewritten(originals = mapOf(note to CLIPPED))
+                ),
+                actual = effects
+            )
+        }
+
     private companion object {
         const val VAULT = "/vault"
+
+        const val CLIPPED = "---\nsource: \"https://x.com/docs/integrations/axiom\"\n" +
+            "clipped: 2026-10-01\n---\n\n# Title\n\n## Original text\n\nOld text.\n"
         const val URL = "https://x.com/docs/integrations/introduction"
         const val PREFIX = "https://x.com/docs/integrations/"
     }

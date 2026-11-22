@@ -15,6 +15,8 @@ data class ClipState(
     val url: String = "",
     val step: ClipStep? = null,
     val error: ClipError? = null,
+    // The page was clipped but the vault refused its note (a full or read-only disk): said in the dialog, left open.
+    val hasWriteFailed: Boolean = false,
     // The pages the page links under its own path: the dialog asks whether to clip them too.
     val section: SectionLinks? = null,
     // What the section offers, in a sentence the model wrote; none without a model.

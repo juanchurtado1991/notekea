@@ -113,6 +113,32 @@ class FilesSettingsViewModelTest {
         )
     }
 
+    // The code review of 2026-11-22: Settings shown again before the pause ended put the old folder back and wrote it.
+    @Test
+    fun `a folder chosen and not saved yet stays when the settings are read again`() =
+        runTest(dispatcher) {
+            val writer = FakeVaultSettingsWriter()
+
+            val viewModel = FilesSettingsViewModel(
+                reader = FakeVaultSettingsReader(attachmentFolder = "Assets"),
+                writer = writer,
+                attachmentStore = FakeAttachmentStore(),
+                localCalendar = FakeLocalCalendar(),
+                clock = Clock.System,
+                vaultPath = "/home/ana/Notes"
+            )
+
+            advanceUntilIdle()
+            viewModel.onIntent(intent = FilesSettingsIntent.OnAttachmentsChange(folder = "files"))
+            viewModel.onIntent(intent = FilesSettingsIntent.OnShown)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf<Any>("files", listOf("app.json attachmentFolderPath=files")),
+                actual = listOf(viewModel.state.value.attachments, writer.written)
+            )
+        }
+
     // The developer's smoke of 2026-11-13: free text fields nobody understood. The folders are the vault's own, and
     // a date format shows as a date.
     @Test

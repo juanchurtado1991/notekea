@@ -50,14 +50,19 @@ internal object FigureValues {
         return plain.toDoubleOrNull()
     }
 
-    // One kind of mark: groups of three after it are thousands ("12,000", "2.500", "1.234.567"); else it is the
-    // decimal mark ("38,5", "2.75").
+    // One kind of mark: groups of three after it are thousands ("12,000", "2.500", "1.234.567") when one to three
+    // digits that do not open with a zero come before them; else it is the decimal mark ("38,5", "2.75", "0.125").
     private fun separated(
         figure: String,
         mark: Char
     ): String {
         val parts = figure.split(mark)
-        val isGrouped = parts.size > 2 || parts.last().length == THOUSANDS
+        val first = parts.first()
+
+        val isGrouped =
+            first.length in 1..THOUSANDS &&
+                !first.startsWith(prefix = "0") &&
+                parts.drop(n = 1).all { it.length == THOUSANDS }
 
         val joint = if (isGrouped) "" else "."
 

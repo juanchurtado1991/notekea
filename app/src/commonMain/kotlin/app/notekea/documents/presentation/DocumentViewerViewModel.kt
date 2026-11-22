@@ -1,5 +1,6 @@
 package app.notekea.documents.presentation
 
+import app.notekea.core.documents.domain.DocumentError
 import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.documents.domain.DocumentReader
 import app.notekea.core.documents.domain.DocumentText
@@ -35,7 +36,7 @@ class DocumentViewerViewModel(
     private val drawing = mutableSetOf<Int>()
 
     init {
-        launchGuarded(onError = ::logError) { load() }
+        launchGuarded(onError = ::showLoadFailure) { load() }
     }
 
     override fun handleIntent(intent: DocumentViewerIntent) {
@@ -173,39 +174,58 @@ class DocumentViewerViewModel(
         if (isDrawn) return
 
         launchGuarded(onError = ::logError) {
-            val png = pdfPages.render(
-                vaultPath = vaultPath,
-                path = path,
-                page = page,
-                scale = PAGE_SCALE
+            // The code review of 2026-11-22: a page whose drawing threw stayed in [drawing], never drawn again.
+            try {
+                render(page = page)
+            } finally {
+                drawing -= page
+            }
+        }
+    }
+
+    private suspend fun render(page: Int) {
+        val png = pdfPages.render(
+            vaultPath = vaultPath,
+            path = path,
+            page = page,
+            scale = PAGE_SCALE
+        )
+
+        val image = (png as? Outcome.Success)?.value?.let {
+            decodedImage(
+                bytes = it,
+                dispatcher = dispatchers.io
             )
+        }
 
-            val image = (png as? Outcome.Success)?.value?.let {
-                decodedImage(
-                    bytes = it,
-                    dispatcher = dispatchers.io
-                )
+        reduce { current ->
+            // Only the pages near the one read stay drawn, so a long PDF does not fill the memory.
+            val kept = current.pages.filterKeys {
+                kotlin.math.abs(it - page) <= KEPT_PAGES
             }
 
-            reduce { current ->
-                // Only the pages near the one read stay drawn, so a long PDF does not fill the memory.
-                val kept = current.pages.filterKeys {
-                    kotlin.math.abs(it - page) <= KEPT_PAGES
-                }
-
-                current.copy(
-                    pages = image?.let {
-                        kept + (page to it)
-                    } ?: kept
-                )
-            }
-
-            drawing -= page
+            current.copy(
+                pages = image?.let {
+                    kept + (page to it)
+                } ?: kept
+            )
         }
     }
 
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }
+    }
+
+    // The code review of 2026-11-22: a document whose reading threw left its tab on the spinner for good.
+    private fun showLoadFailure(throwable: Throwable) {
+        logError(throwable = throwable)
+
+        reduce {
+            it.copy(
+                isLoading = false,
+                error = DocumentError.Unreadable(message = throwable.message.orEmpty())
+            )
+        }
     }
 
     override fun onCleared() {

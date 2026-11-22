@@ -55,6 +55,7 @@ class UpdateWebSourcesUseCase(
 
             report = report.copy(
                 updated = report.updated + result.updated,
+                originals = report.originals + result.originals,
                 added = report.added + result.added,
                 unchanged = report.unchanged + result.unchanged,
                 failed = report.failed + result.failed

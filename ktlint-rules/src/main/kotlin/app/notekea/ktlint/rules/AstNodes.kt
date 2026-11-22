@@ -77,13 +77,6 @@ internal fun ASTNode.previousLeaf(): ASTNode? {
     return withPrevious?.treePrev?.lastLeaf()
 }
 
-internal fun ASTNode.followingLeaf(): ASTNode? {
-    val withNext = generateSequence(seed = this) {
-        it.treeParent
-    }.firstOrNull { it.treeNext != null }
-    return withNext?.treeNext?.firstLeaf()
-}
-
 internal fun ASTNode.isLineBreak(): Boolean =
     elementType == WHITE_SPACE && text.contains(LINE_BREAK)
 

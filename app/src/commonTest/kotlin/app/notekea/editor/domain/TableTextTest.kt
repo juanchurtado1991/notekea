@@ -41,6 +41,31 @@ class TableTextTest {
         )
     }
 
+    // The code review of 2026-11-22: a row after a Windows line break had its cells one character early.
+    @Test
+    fun `the cells of a table with Windows line breaks are where its texts are`() {
+        val text = "| Name | Qty |\r\n| :-- | --: |\r\n| Corn flour | 2 |\r\n| Salt | 1 |\r\n"
+
+        val table = assertNotNull(
+            actual = TableText.of(
+                text = text,
+                offset = OFFSET
+            )
+        )
+
+        assertEquals(
+            expected = listOf(listOf("Name", "Qty"), listOf("Corn flour", "2"), listOf("Salt", "1")),
+            actual = table.rows.map { row ->
+                row.map {
+                    text.substring(
+                        startIndex = it.start - OFFSET,
+                        endIndex = it.end - OFFSET
+                    )
+                }
+            }
+        )
+    }
+
     @Test
     fun `an empty cell keeps the cursor between its two spaces, and a cell keeps one typed space at its end`() {
         val table = assertNotNull(actual = TableText.of(text = "|  | a  |\n| --- | --- |"))
