@@ -43,6 +43,22 @@ All on pool round 10 (`scripts/loop-eval/measure.sh <label> pool <small|medium|l
 
 Lowest risk first. Each line: what repeats → what replaces it (lines saved).
 
+**Where it stands (2026-11-22, evening).** One commit a block went in, each with `check koverVerify` green but for
+the developer's local failures: 1 `0b2bffce`, 2 `4b66642c`, 3 `f5981ee6`, 4 `05f4233c`, 5 `f7d5c857`, 6 `e7d59192`,
+7 `44cfa9c1` (the golden file) and `81fb2aae`. Done differently from the plan: `Outcome` became a sealed class, as
+the Konsist rules allow no extension on an interface (the same for `CalendarDate.today` and `ReplyText.of`, in
+place of extensions of `LocalCalendar` and `LlmEngine`). Left for the next pass:
+
+- 1: `FrameWords` on `TextFolder` (measured by the evals); the line loops beyond `TaskFinder` and `EmbedFinder`.
+- 2: `launchDebounced` (Files settings reads its jobs to save them all; the editor's go through its host).
+- 3: `LoopHarness`, `EvalModels`/`EvalReports`/`EvalProperties`, `themedScene`/`SceneClock`, `TwoComputers`, the
+  inline effect collectors.
+- 4: public `await`/`shown`/`awaitShown`, one result codec, `NotekeaRule` and `Emit`.
+- 5: the settings rows, `NotekeaFormDialog`/`NotekeaDialogButtons`, `NotekeaMediaCard`, `FieldKeys.kt`,
+  `NotekeaMenuAnchor` (each a look to compare).
+- 6: `RewriteNoteUseCase`, the Okio path helpers, `NoteMetadata.of`, the editor's edits and toolbar list,
+  `CachedSettingsStore`.
+
 1. **Core helpers.** `(x as? Outcome.Success)?.value` at 43 sites → `Outcome.valueOrNull()`, `errorOrNull()`,
    `map` (120). Hand-padded ISO dates at 10 sites → `CalendarDate.iso`, `CalendarDate.ofIso`, and
    `LocalCalendar.today(clock)` for 13 sites (110). `.value.removeSuffix(MARKDOWN_EXTENSION)` at 30 sites →
