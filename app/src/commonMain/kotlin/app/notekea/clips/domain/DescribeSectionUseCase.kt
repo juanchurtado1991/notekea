@@ -5,6 +5,7 @@ import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
  * What a section's pages offer, in a sentence, for the question that asks whether to clip them (the developer's idea
@@ -17,33 +18,30 @@ class DescribeSectionUseCase(private val llmEngine: LlmEngine) {
         language: String? = null
     ): String? {
         val listed = links.urls.joinToString(separator = "\n") { "- ${links.aboutOf(url = it)}" }
-        val written = StringBuilder()
 
-        try {
-            llmEngine
-                .generate(
-                    messages = listOf(
-                        ChatMessage(
-                            role = ChatRole.SYSTEM,
-                            text = INSTRUCTIONS + (language?.let { " Write it in $it." } ?: "")
-                        ),
-                        ChatMessage(
-                            role = ChatRole.USER,
-                            text = "Pages under ${links.prefix}:\n$listed"
-                        )
+        val written = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = listOf(
+                    ChatMessage(
+                        role = ChatRole.SYSTEM,
+                        text = INSTRUCTIONS + (language?.let { " Write it in $it." } ?: "")
                     ),
-                    options = GenerationOptions(
-                        maxTokens = MAX_TOKENS,
-                        temperature = 0f
+                    ChatMessage(
+                        role = ChatRole.USER,
+                        text = "Pages under ${links.prefix}:\n$listed"
                     )
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = 0f
                 )
-                .collect { written.append(it) }
+            )
         } catch (_: LlmException) {
             return null
         }
 
         return written
-            .toString()
             .trim()
             .takeIf { it.isNotEmpty() }
     }

@@ -7,6 +7,7 @@ import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
  * The chat compacted, as Claude Code's /compact: what was said before the last turns, the [summary] kept so far and
@@ -35,32 +36,29 @@ class CompactChatUseCase(private val llmEngine: LlmEngine) {
 
         val conversation = summary?.let { "Summary so far: $it\n\n$said" } ?: said
 
-        val written = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = listOf(
-                        ChatMessage(
-                            role = ChatRole.SYSTEM,
-                            text = INSTRUCTIONS
-                        ),
-                        ChatMessage(
-                            role = ChatRole.USER,
-                            text = conversation.trim()
-                        )
+        val written = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = listOf(
+                    ChatMessage(
+                        role = ChatRole.SYSTEM,
+                        text = INSTRUCTIONS
                     ),
-                    options = GenerationOptions(
-                        maxTokens = MAX_TOKENS,
-                        temperature = 0f
+                    ChatMessage(
+                        role = ChatRole.USER,
+                        text = conversation.trim()
                     )
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = 0f
                 )
-                .collect { written.append(it) }
+            )
         } catch (exception: LlmException) {
             return Outcome.Failure(error = exception.error)
         }
 
-        return Outcome.Success(value = written.toString().trim())
+        return Outcome.Success(value = written.trim())
     }
 
     private companion object {

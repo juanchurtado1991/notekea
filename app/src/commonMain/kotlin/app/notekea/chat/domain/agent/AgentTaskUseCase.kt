@@ -24,6 +24,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
@@ -243,24 +244,21 @@ class AgentTaskUseCase(
         mustEnd: Boolean,
         tokens: Int = MOVE_TOKENS
     ): AgentTaskMove? {
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = AgentTaskPrompt.messages(task, context, found, movesLeft, mustEnd),
-                    options = GenerationOptions(
-                        maxTokens = tokens,
-                        temperature = 0f,
-                        jsonSchema = AgentTaskPrompt.schemaOf(mustEnd = mustEnd)
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = AgentTaskPrompt.messages(task, context, found, movesLeft, mustEnd),
+                options = GenerationOptions(
+                    maxTokens = tokens,
+                    temperature = 0f,
+                    jsonSchema = AgentTaskPrompt.schemaOf(mustEnd = mustEnd)
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return null
         }
 
-        return planReader.readTask(json = json.toString())
+        return planReader.readTask(json = json)
     }
 
     // No move could be read, twice: what it found is still worth an answer; with nothing found, it stopped.

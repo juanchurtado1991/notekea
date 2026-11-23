@@ -7,6 +7,7 @@ import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
  * The first call of a turn, a cheap one: which kind of work the request is, so the loop is given only that work's
@@ -17,8 +18,6 @@ class TurnRouter(private val llmEngine: LlmEngine) {
         task: String,
         skills: List<Skill>
     ): TurnRoute {
-        val json = StringBuilder()
-
         // Room for the longest skill name as well: one longer than the reply's room was cut, and the reply unread.
         val longest = skills
             .map { escaped(text = it.name) }
@@ -27,25 +26,24 @@ class TurnRouter(private val llmEngine: LlmEngine) {
 
         val tokens = ROUTE_TOKENS + llmEngine.countTokens(text = longest)
 
-        try {
-            llmEngine
-                .generate(
-                    messages = messagesOf(
-                        task = task,
-                        skills = skills
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = tokens,
-                        temperature = 0f,
-                        jsonSchema = schemaOf(skills = skills)
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = messagesOf(
+                    task = task,
+                    skills = skills
+                ),
+                options = GenerationOptions(
+                    maxTokens = tokens,
+                    temperature = 0f,
+                    jsonSchema = schemaOf(skills = skills)
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return NONE
         }
 
-        val fields = ToolCallJson.fields(json = json.toString()) ?: return NONE
+        val fields = ToolCallJson.fields(json = json) ?: return NONE
 
         return TurnRoute(
             kind = RouteWords.kindOf(

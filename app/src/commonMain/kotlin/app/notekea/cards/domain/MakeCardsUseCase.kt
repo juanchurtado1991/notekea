@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.RelativePath
 
@@ -27,28 +28,24 @@ class MakeCardsUseCase(
         )
             ?: return Outcome.Failure(error = CardsProblem.NOTE_UNREADABLE)
 
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = CardsPrompt.messages(
-                        title = note.nameWithoutExtension,
-                        text = text
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = MAX_TOKENS,
-                        temperature = 0f,
-                        jsonSchema = CardsPrompt.SCHEMA
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = CardsPrompt.messages(
+                    title = note.nameWithoutExtension,
+                    text = text
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = 0f,
+                    jsonSchema = CardsPrompt.SCHEMA
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return Outcome.Failure(error = CardsProblem.MODEL_FAILED)
         }
 
-        val proposed =
-            reader.read(json = json.toString()) ?: return failed(CardsProblem.MODEL_FAILED)
+        val proposed = reader.read(json = json) ?: return failed(CardsProblem.MODEL_FAILED)
 
         val known = CardFormat
             .cardsOf(

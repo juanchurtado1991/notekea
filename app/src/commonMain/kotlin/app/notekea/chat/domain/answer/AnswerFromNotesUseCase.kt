@@ -10,6 +10,7 @@ import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
@@ -188,28 +189,25 @@ class AnswerFromNotesUseCase(
         seed: Int,
         language: String?
     ): String {
-        val draft = StringBuilder()
-
-        llmEngine
-            .generate(
-                messages = AnswerPrompt
-                    .messages(
-                        question = question,
-                        excerpts = read.map { it.text }
-                    )
-                    .inLanguage(
-                        language = language,
-                        kept = AnswerPrompt.NOT_FOUND
-                    ),
-                options = GenerationOptions(
-                    maxTokens = MAX_TOKENS,
-                    temperature = DRAFT_TEMPERATURE,
-                    seed = seed
+        val draft = ReplyText.of(
+            llmEngine = llmEngine,
+            messages = AnswerPrompt
+                .messages(
+                    question = question,
+                    excerpts = read.map { it.text }
                 )
+                .inLanguage(
+                    language = language,
+                    kept = AnswerPrompt.NOT_FOUND
+                ),
+            options = GenerationOptions(
+                maxTokens = MAX_TOKENS,
+                temperature = DRAFT_TEMPERATURE,
+                seed = seed
             )
-            .collect { draft.append(it) }
+        )
 
-        return draft.toString()
+        return draft
     }
 
     /**

@@ -13,6 +13,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import kotlinx.coroutines.flow.Flow
@@ -146,24 +147,21 @@ class AgentAnswerUseCase(
         val found =
             gathered.map { "${it.note.nameWithoutExtension}: ${it.text.take(n = FOUND_CHARS)}" }
 
-        val json = StringBuilder()
-
-        llmEngine
-            .generate(
-                messages = AgentPrompt.messages(
-                    question = question,
-                    notes = names.take(n = MAX_NAMES),
-                    found = found
-                ),
-                options = GenerationOptions(
-                    maxTokens = MOVE_TOKENS,
-                    temperature = 0f,
-                    jsonSchema = AgentPrompt.SCHEMA
-                )
+        val json = ReplyText.of(
+            llmEngine = llmEngine,
+            messages = AgentPrompt.messages(
+                question = question,
+                notes = names.take(n = MAX_NAMES),
+                found = found
+            ),
+            options = GenerationOptions(
+                maxTokens = MOVE_TOKENS,
+                temperature = 0f,
+                jsonSchema = AgentPrompt.SCHEMA
             )
-            .collect { json.append(it) }
+        )
 
-        return planReader.readMove(json = json.toString())
+        return planReader.readMove(json = json)
     }
 
     private suspend fun searched(
@@ -204,28 +202,25 @@ class AgentAnswerUseCase(
         read: List<AnswerSource>,
         language: String?
     ): Flow<AnswerStep> = flow {
-        val written = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = AnswerPrompt
-                        .messages(
-                            question = question,
-                            excerpts = read.map { it.text }
-                        )
-                        .inLanguage(
-                            language = language,
-                            kept = AnswerPrompt.NOT_FOUND
-                        ),
-                    options = GenerationOptions(maxTokens = ANSWER_TOKENS)
-                )
-                .collect { written.append(it) }
+        val written = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = AnswerPrompt
+                    .messages(
+                        question = question,
+                        excerpts = read.map { it.text }
+                    )
+                    .inLanguage(
+                        language = language,
+                        kept = AnswerPrompt.NOT_FOUND
+                    ),
+                options = GenerationOptions(maxTokens = ANSWER_TOKENS)
+            )
         } catch (exception: LlmException) {
             return@flow emit(AnswerStep.Failed(ChatError.Model(exception.error)))
         }
 
-        val text = written.toString().trim()
+        val text = written.trim()
         val isNotFound = AnswerPrompt.isNotFound(text = text)
         if (isNotFound) return@flow emit(value = AnswerStep.NotFound)
 

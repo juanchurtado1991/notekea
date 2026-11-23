@@ -9,6 +9,7 @@ import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
@@ -325,20 +326,17 @@ class ComposeNotesUseCase(
         maxTokens: Int,
         jsonSchema: String? = null
     ): String {
-        val text = StringBuilder()
-
-        llmEngine
-            .generate(
-                messages = messages,
-                options = GenerationOptions(
-                    maxTokens = maxTokens,
-                    temperature = TEMPERATURE,
-                    jsonSchema = jsonSchema
-                )
+        val text = ReplyText.of(
+            llmEngine = llmEngine,
+            messages = messages,
+            options = GenerationOptions(
+                maxTokens = maxTokens,
+                temperature = TEMPERATURE,
+                jsonSchema = jsonSchema
             )
-            .collect { text.append(it) }
+        )
 
-        return text.toString().trim()
+        return text.trim()
     }
 
     private fun pathOf(

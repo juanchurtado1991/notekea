@@ -31,6 +31,7 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.memory.domain.MemoryLine
 import app.notekea.core.memory.domain.MemoryLines
 import app.notekea.core.memory.domain.MemorySection
@@ -410,35 +411,32 @@ class RunTurnUseCase(
 
         val tools = asking ?: withheld ?: offered
 
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = LoopPrompt.messages(
-                        system = state.system,
-                        task = state.task,
-                        context = state.context,
-                        work = state
-                            .turn
-                            .work
-                            .described(),
-                        found = fitted.entries,
-                        left = left,
-                        isEnding = isEnding
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = tokens,
-                        temperature = 0f,
-                        jsonSchema = tools.schema()
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = LoopPrompt.messages(
+                    system = state.system,
+                    task = state.task,
+                    context = state.context,
+                    work = state
+                        .turn
+                        .work
+                        .described(),
+                    found = fitted.entries,
+                    left = left,
+                    isEnding = isEnding
+                ),
+                options = GenerationOptions(
+                    maxTokens = tokens,
+                    temperature = 0f,
+                    jsonSchema = tools.schema()
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return null
         }
 
-        return ToolCallJson.read(json = json.toString())
+        return ToolCallJson.read(json = json)
     }
 
     // No call could be read, or the steps ran out: what it found is still worth an answer; with nothing, it stopped.

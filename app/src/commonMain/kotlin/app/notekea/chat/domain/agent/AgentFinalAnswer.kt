@@ -6,6 +6,7 @@ import app.notekea.chat.domain.prompt.AnswerLinks
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
  * The answer agent mode ends a question with, written from what its moves found and nothing else (the developer's
@@ -34,29 +35,26 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
 
         if (isEmptyHanded) return ""
 
-        val text = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = AgentTaskPrompt.answer(
-                        task = task,
-                        found = saidOf(memory = memory) + looked,
-                        conclusion = summary
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = ANSWER_TOKENS,
-                        temperature = 0f
-                    )
+        val text = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = AgentTaskPrompt.answer(
+                    task = task,
+                    found = saidOf(memory = memory) + looked,
+                    conclusion = summary
+                ),
+                options = GenerationOptions(
+                    maxTokens = ANSWER_TOKENS,
+                    temperature = 0f
                 )
-                .collect { text.append(it) }
+            )
         } catch (_: LlmException) {
             return summary
         }
 
         return AnswerLinks
             .kept(
-                answer = text.toString(),
+                answer = text,
                 known = (looked + task).joinToString(separator = "\n")
             )
             .ifEmpty { summary }

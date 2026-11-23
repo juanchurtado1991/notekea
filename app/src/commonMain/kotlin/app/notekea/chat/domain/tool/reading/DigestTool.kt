@@ -12,6 +12,7 @@ import app.notekea.chat.domain.tool.ToolResult
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteTextCache
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -137,27 +138,24 @@ class DigestTool(
         question: String,
         part: String
     ): String? {
-        val text = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = WritePrompt.digest(
-                        request = question,
-                        name = note.shown,
-                        text = part
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = DIGEST_TOKENS,
-                        temperature = TEMPERATURE
-                    )
+        val text = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = WritePrompt.digest(
+                    request = question,
+                    name = note.shown,
+                    text = part
+                ),
+                options = GenerationOptions(
+                    maxTokens = DIGEST_TOKENS,
+                    temperature = TEMPERATURE
                 )
-                .collect { text.append(it) }
+            )
         } catch (_: LlmException) {
             return null
         }
 
-        return text.toString().trim()
+        return text.trim()
     }
 
     companion object {

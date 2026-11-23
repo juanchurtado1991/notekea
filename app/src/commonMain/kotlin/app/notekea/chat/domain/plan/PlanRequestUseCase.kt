@@ -11,6 +11,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
  * Turns what was typed in the chat into a plan of up to five steps from the fixed list of [ActionKind]s (3.9), as JSON
@@ -55,29 +56,26 @@ class PlanRequestUseCase(
         context: ActionContext,
         isRetried: Boolean = false
     ): Outcome<List<PlannedStep>, ChatError> {
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = ActionPrompt.messages(
-                        request = request,
-                        context = context,
-                        isRetried = isRetried
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = MAX_TOKENS,
-                        temperature = 0f,
-                        jsonSchema = ActionPrompt.SCHEMA
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = ActionPrompt.messages(
+                    request = request,
+                    context = context,
+                    isRetried = isRetried
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = 0f,
+                    jsonSchema = ActionPrompt.SCHEMA
                 )
-                .collect { json.append(it) }
+            )
         } catch (exception: LlmException) {
             return Outcome.Failure(error = ChatError.Model(error = exception.error))
         }
 
         val steps = planReader
-            .read(json = json.toString())
+            .read(json = json)
             ?.take(n = ActionPrompt.MAX_STEPS)
             .orEmpty()
 

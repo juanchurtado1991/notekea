@@ -3,6 +3,7 @@ package app.notekea.query.domain
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
  * Turns a request in plain words into a query of the vault (3.8): the model only writes the query, which is checked
@@ -18,28 +19,25 @@ class TranslateQueryUseCase(
         catalog: QueryCatalog,
         today: String
     ): QueryTranslation {
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = QueryPrompt.messages(
-                        request = request,
-                        catalog = catalog,
-                        today = today
-                    ),
-                    options = GenerationOptions(
-                        maxTokens = MAX_TOKENS,
-                        temperature = 0f,
-                        jsonSchema = QueryPrompt.SCHEMA
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = QueryPrompt.messages(
+                    request = request,
+                    catalog = catalog,
+                    today = today
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = 0f,
+                    jsonSchema = QueryPrompt.SCHEMA
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return QueryTranslation.Failed
         }
 
-        val written = reader.read(json = json.toString()) ?: return QueryTranslation.Failed
+        val written = reader.read(json = json) ?: return QueryTranslation.Failed
 
         return checked(
             query = written,

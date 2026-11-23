@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import kotlin.random.Random
 
 /**
@@ -19,19 +20,16 @@ class MakeChoicesUseCase(
     suspend operator fun invoke(card: StudyCard): CardChoices? {
         if (llmEngine.readiness() is Outcome.Failure) return null
 
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = ChoicesPrompt.messages(card = card),
-                    options = GenerationOptions(
-                        maxTokens = MAX_TOKENS,
-                        temperature = TEMPERATURE,
-                        jsonSchema = ChoicesPrompt.SCHEMA
-                    )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = ChoicesPrompt.messages(card = card),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = TEMPERATURE,
+                    jsonSchema = ChoicesPrompt.SCHEMA
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return null
         }
@@ -39,7 +37,7 @@ class MakeChoicesUseCase(
         val rightKey = keyOf(text = card.answer)
 
         val wrong = reader
-            .read(json = json.toString())
+            .read(json = json)
             .orEmpty()
             .map { it.trim() }
             .filter {

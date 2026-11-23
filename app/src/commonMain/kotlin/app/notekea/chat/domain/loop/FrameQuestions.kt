@@ -6,6 +6,7 @@ import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.memory.domain.MemoryLine
 
 /**
@@ -144,33 +145,30 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
         schema: String,
         tokens: Int = TOKENS
     ): Map<String, String>? {
-        val json = StringBuilder()
-
-        try {
-            llmEngine
-                .generate(
-                    messages = listOf(
-                        ChatMessage(
-                            role = ChatRole.SYSTEM,
-                            text = system
-                        ),
-                        ChatMessage(
-                            role = ChatRole.USER,
-                            text = user
-                        )
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = listOf(
+                    ChatMessage(
+                        role = ChatRole.SYSTEM,
+                        text = system
                     ),
-                    options = GenerationOptions(
-                        maxTokens = tokens,
-                        temperature = 0f,
-                        jsonSchema = schema
+                    ChatMessage(
+                        role = ChatRole.USER,
+                        text = user
                     )
+                ),
+                options = GenerationOptions(
+                    maxTokens = tokens,
+                    temperature = 0f,
+                    jsonSchema = schema
                 )
-                .collect { json.append(it) }
+            )
         } catch (_: LlmException) {
             return null
         }
 
-        return ToolCallJson.fields(json = json.toString())
+        return ToolCallJson.fields(json = json)
     }
 
     private fun remembered(memory: List<MemoryLine>): String = memory

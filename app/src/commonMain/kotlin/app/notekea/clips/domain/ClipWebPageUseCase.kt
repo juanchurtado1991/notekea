@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -101,20 +102,16 @@ class ClipWebPageUseCase(
 
     // The model's notes, or none when it failed: the article is still worth keeping.
     private suspend fun written(article: Article): String? = try {
-        val text = StringBuilder()
-
-        llmEngine
-            .generate(
-                messages = ClipPrompt.messages(article = article),
-                options = GenerationOptions(
-                    maxTokens = MAX_TOKENS,
-                    temperature = 0f
-                )
+        val text = ReplyText.of(
+            llmEngine = llmEngine,
+            messages = ClipPrompt.messages(article = article),
+            options = GenerationOptions(
+                maxTokens = MAX_TOKENS,
+                temperature = 0f
             )
-            .collect { text.append(it) }
+        )
 
         text
-            .toString()
             .trim()
             .takeIf { it.isNotEmpty() }
     } catch (_: LlmException) {

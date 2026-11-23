@@ -5,6 +5,7 @@ import app.notekea.chat.domain.prompt.WritePrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
+import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import kotlinx.coroutines.async
@@ -191,19 +192,16 @@ internal class NotesWriter(
         messages: List<ChatMessage>,
         maxTokens: Int
     ): String {
-        val text = StringBuilder()
-
-        llmEngine
-            .generate(
-                messages = messages,
-                options = GenerationOptions(
-                    maxTokens = maxTokens,
-                    temperature = TEMPERATURE
-                )
+        val text = ReplyText.of(
+            llmEngine = llmEngine,
+            messages = messages,
+            options = GenerationOptions(
+                maxTokens = maxTokens,
+                temperature = TEMPERATURE
             )
-            .collect { text.append(it) }
+        )
 
-        return text.toString().trim()
+        return text.trim()
     }
 
     private companion object {
