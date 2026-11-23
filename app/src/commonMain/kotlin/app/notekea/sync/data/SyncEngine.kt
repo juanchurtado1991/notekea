@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -48,14 +47,25 @@ class SyncEngine(
     private val mutableStatus = MutableStateFlow<SyncStatus>(value = SyncStatus.NotConfigured)
     private val mutableLeftOut = MutableStateFlow<List<RelativePath>>(value = emptyList())
     private val cycle = Mutex()
+    private val notice = Mutex()
     private var jobs: List<Job> = emptyList()
 
     override val status: StateFlow<SyncStatus> = mutableStatus.asStateFlow()
 
     override val leftOut: StateFlow<List<RelativePath>> = mutableLeftOut.asStateFlow()
 
-    override fun acknowledgeLeftOut() {
-        mutableLeftOut.value = emptyList()
+    override suspend fun acknowledgeLeftOut() = notice.withLock {
+        repository.acknowledgeLeftOut(
+            vaultPath = vaultPath,
+            files = mutableLeftOut.value
+        )
+
+        mutableLeftOut.value = repository.leftOut(vaultPath = vaultPath)
+    }
+
+    // Whatever committed (a cycle, connecting, settling a conflict) may have left a file out: read after each.
+    private suspend fun readLeftOut() = notice.withLock {
+        mutableLeftOut.value = repository.leftOut(vaultPath = vaultPath)
     }
 
     override fun start() {
@@ -123,7 +133,10 @@ class SyncEngine(
 
         val saved = tokens.read(remoteUrl = settings.remoteUrl)
 
-        when (val connected = repository.connect(vaultPath, settings.remoteUrl, saved)) {
+        val connected = repository.connect(vaultPath, settings.remoteUrl, saved)
+        readLeftOut()
+
+        when (connected) {
             is Outcome.Success -> {
                 settingsStore.write(
                     vaultPath = vaultPath,
@@ -177,11 +190,13 @@ class SyncEngine(
             // Settling a conflict commits the vault: the merge cut short is repaired first.
             if (isInterrupted()) return
 
-            repository.resolve(
-                vaultPath = vaultPath,
-                note = note,
-                choice = choice
-            )
+            repository
+                .resolve(
+                    vaultPath = vaultPath,
+                    note = note,
+                    choice = choice
+                )
+                .also { readLeftOut() }
         }
 
         // A conflict that could not be settled says why, as a repair that failed does.
@@ -243,15 +258,13 @@ class SyncEngine(
             val error = SyncCycle.run(
                 repository = repository,
                 vaultPath = vaultPath,
-                token = token,
-                onLeftOut = { files ->
-                    mutableLeftOut.update { (it + files).distinct() }
-                }
+                token = token
             )
 
             mutableStatus.value = error?.let { statusOf(error = it) } ?: settled()
         } finally {
             if (mutableStatus.value == SyncStatus.Syncing) mutableStatus.value = before
+            readLeftOut()
         }
     }
 

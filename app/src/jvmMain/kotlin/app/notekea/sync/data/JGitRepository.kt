@@ -10,7 +10,6 @@ import app.notekea.sync.domain.PullResult
 import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.UnfinishedSync
-import app.notekea.sync.domain.VaultCommit
 import kotlinx.coroutines.withContext
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -73,7 +72,7 @@ class JGitRepository(
     override suspend fun commitAll(
         vaultPath: String,
         message: String
-    ): Outcome<VaultCommit, SyncError> = git(vaultPath = vaultPath) {
+    ): Outcome<Boolean, SyncError> = git(vaultPath = vaultPath) {
         commitIn(
             git = it,
             message = message
@@ -98,6 +97,23 @@ class JGitRepository(
         pushIn(
             git = it,
             token = token
+        )
+    }
+
+    override suspend fun leftOut(vaultPath: String): List<RelativePath> =
+        withContext(context = dispatchers.io) {
+            LeftOutNotice
+                .waiting(gitDir = File(vaultPath, Constants.DOT_GIT))
+                .map { RelativePath(value = it) }
+        }
+
+    override suspend fun acknowledgeLeftOut(
+        vaultPath: String,
+        files: List<RelativePath>
+    ) = withContext(context = dispatchers.io) {
+        LeftOutNotice.told(
+            gitDir = File(vaultPath, Constants.DOT_GIT),
+            paths = files.map { it.value }
         )
     }
 
@@ -211,7 +227,7 @@ class JGitRepository(
     private fun commitIn(
         git: Git,
         message: String
-    ): VaultCommit = JGitCommit.all(
+    ): Boolean = JGitCommit.all(
         git = git,
         message = message
     )

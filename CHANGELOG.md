@@ -158,7 +158,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A synced file that grows past 100 MB leaves the repository and stays in the vault, and a dialog names it: only
   new files were measured, so one already synced that grew was committed and every later push was refused. Files
   too large to sync says they are over the limit no Git host takes, stay on this computer and are no longer synced,
-  and that one synced before leaves the other devices at their next sync (case 4.2-08).
+  and that one synced before leaves the other devices at their next sync (case 4.2-08). The files wait with the
+  repository until OK, so they are also named when connecting a vault left them out, when the commit failed after
+  leaving them out, and after the app was closed; a file the remote already holds that large stays synced (its host
+  takes it); and the dialog's list scrolls.
 - A whole-project code review (2026-11-22), each fix with its test. The chat: a figure like "0.125" was read as 125;
   a `tally` made again with its figures put right, and a `digest` asked another question, were taken for a repeat
   and not run; a change that replaced an earlier one was taken as refused; `tasks` ignored "today" or "next Friday";

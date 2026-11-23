@@ -271,24 +271,39 @@ class SyncEngineTest {
 
     // The code review of 2026-11-22: a file that grew past 100 MB left the repository without a word.
     @Test
-    fun `the files a commit left out are kept until the person read them, each named once`() =
-        runTest {
-            settings.settings[VAULT] = SyncSettings(remoteUrl = URL)
-            val engine = engine()
-            repository.leftOut = listOf(FILM)
-            engine.syncNow()
-            engine.syncNow()
-            val told = engine.leftOut.value
+    fun `the files a commit left out are kept until the person read them`() = runTest {
+        settings.settings[VAULT] = SyncSettings(remoteUrl = URL)
+        val engine = engine()
+        repository.waiting = listOf(FILM)
+        engine.syncNow()
+        engine.syncNow()
+        val told = engine.leftOut.value
 
-            engine.acknowledgeLeftOut()
-            repository.leftOut = emptyList()
-            engine.syncNow()
+        engine.acknowledgeLeftOut()
+        engine.syncNow()
 
-            assertEquals(
-                expected = listOf(listOf(FILM), emptyList()),
-                actual = listOf(told, engine.leftOut.value)
-            )
-        }
+        assertEquals(
+            expected = listOf(listOf(FILM), emptyList(), emptyList()),
+            actual = listOf(told, engine.leftOut.value, repository.waiting)
+        )
+    }
+
+    // The review of that fix, 2026-11-23: connecting commits the whole vault, and what it left out was told nowhere.
+    @Test
+    fun `the files connecting left out are told too`() = runTest {
+        val engine = engine()
+        repository.waiting = listOf(FILM)
+
+        engine.connect(
+            settings = SyncSettings(remoteUrl = URL),
+            token = TOKEN
+        )
+
+        assertEquals(
+            expected = listOf(FILM),
+            actual = engine.leftOut.value
+        )
+    }
 
     private companion object {
         const val VAULT = "/vaults/Notes"

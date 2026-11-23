@@ -15,7 +15,7 @@ interface VaultSync {
     val leftOut: StateFlow<List<RelativePath>>
 
     /** The person read which files were left out: [leftOut] is empty until a commit leaves out another. */
-    fun acknowledgeLeftOut()
+    suspend fun acknowledgeLeftOut()
 
     /** Starts syncing as the vault's settings say: nothing for a vault that does not sync. */
     fun start()

@@ -16,11 +16,11 @@ interface GitRepository {
         token: String?
     ): Outcome<PullResult, SyncError>
 
-    /** Commits every change of the vault, leaving out the files too large to sync ([VaultCommit.leftOut]). */
+    /** Commits every change of the vault but the files too large to sync; false when there was nothing to commit. */
     suspend fun commitAll(
         vaultPath: String,
         message: String
-    ): Outcome<VaultCommit, SyncError>
+    ): Outcome<Boolean, SyncError>
 
     suspend fun pull(
         vaultPath: String,
@@ -31,6 +31,18 @@ interface GitRepository {
         vaultPath: String,
         token: String?
     ): Outcome<Unit, SyncError>
+
+    /**
+     * The files any commit left out of the repository for their size (over 100 MB, which no Git host takes) that the
+     * person has not been told of; kept with the repository, so closing the app does not lose them.
+     */
+    suspend fun leftOut(vaultPath: String): List<RelativePath>
+
+    /** The person read that [files] were left out: they are no longer in [leftOut]. */
+    suspend fun acknowledgeLeftOut(
+        vaultPath: String,
+        files: List<RelativePath>
+    )
 
     /** The files changed here and not on the remote: uncommitted, or in commits not pushed. */
     suspend fun pendingChanges(vaultPath: String): Int

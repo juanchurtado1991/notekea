@@ -1,7 +1,5 @@
 package app.notekea.sync.data
 
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.sync.domain.VaultCommit
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.EmptyCommitException
 import org.eclipse.jgit.lib.RepositoryState
@@ -18,15 +16,15 @@ internal object JGitCommit {
     private const val AUTHOR = "Notekea"
     private const val AUTHOR_EMAIL = "notekea@localhost"
 
-    /** What was committed, and the files left out for their size; not made when there was nothing to commit. */
+    /** False when there was nothing to commit. */
     fun all(
         git: Git,
         message: String
-    ): VaultCommit {
+    ): Boolean {
         val status = git.status().call()
-        if (status.isClean) return VaultCommit(isMade = false)
+        if (status.isClean) return false
 
-        val large = LargeFiles.leaveOut(
+        LargeFiles.leaveOut(
             git = git,
             changed = status.untracked + status.modified + status.changed + status.added
         )
@@ -47,14 +45,9 @@ internal object JGitCommit {
             .addFilepattern(ALL)
             .call()
 
-        val isMade = commit(
+        return commit(
             git = git,
             message = message
-        )
-
-        return VaultCommit(
-            isMade = isMade,
-            leftOut = large.map { RelativePath(value = it) }
         )
     }
 

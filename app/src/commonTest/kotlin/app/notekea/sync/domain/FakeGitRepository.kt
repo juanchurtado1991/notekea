@@ -6,7 +6,8 @@ import kotlinx.coroutines.delay
 
 /**
  * A [GitRepository] that records what it was asked and answers as set: [pullError] and [pushErrors] fail those
- * steps (each push error once), [conflictsAfterPull] are left by the next pull, [pending] files wait to be pushed.
+ * steps (each push error once), [conflictsAfterPull] are left by the next pull, [pending] files wait to be pushed,
+ * [waiting] were left out for their size and not told yet.
  */
 class FakeGitRepository : GitRepository {
     val calls = mutableListOf<String>()
@@ -15,7 +16,7 @@ class FakeGitRepository : GitRepository {
     val pushErrors = ArrayDeque<SyncError>()
     var conflictsAfterPull: List<RelativePath> = emptyList()
     var pending = 0
-    var leftOut: List<RelativePath> = emptyList()
+    var waiting: List<RelativePath> = emptyList()
     private var conflicts: List<RelativePath> = emptyList()
 
     override suspend fun connect(
@@ -41,16 +42,20 @@ class FakeGitRepository : GitRepository {
     override suspend fun commitAll(
         vaultPath: String,
         message: String
-    ): Outcome<VaultCommit, SyncError> {
+    ): Outcome<Boolean, SyncError> {
         delay(timeMillis = 1)
         calls += "commit"
 
-        return Outcome.Success(
-            value = VaultCommit(
-                isMade = true,
-                leftOut = leftOut
-            )
-        )
+        return Outcome.Success(value = true)
+    }
+
+    override suspend fun leftOut(vaultPath: String): List<RelativePath> = waiting
+
+    override suspend fun acknowledgeLeftOut(
+        vaultPath: String,
+        files: List<RelativePath>
+    ) {
+        waiting = waiting - files.toSet()
     }
 
     override suspend fun pull(

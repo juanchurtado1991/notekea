@@ -4,7 +4,6 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.SyncError
-import app.notekea.sync.domain.VaultCommit
 import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -55,7 +54,7 @@ class JGitCommitTest {
     private suspend fun commit(): Outcome<Boolean, SyncError> = git.commitAll(
         vaultPath = vault.path,
         message = "work"
-    ).map { it.isMade }
+    )
 
     private suspend fun started() {
         write(
@@ -155,33 +154,36 @@ class JGitCommitTest {
             )
         }
 
-    // The dialog that tells the person (the code review of 2026-11-22) names what the commit left out.
+    // The dialog that tells the person (the code review of 2026-11-22) names what a commit left out. They wait with
+    // the repository, so the app closing, or the commit failing afterwards, does not lose them (2026-11-23).
     @Test
-    fun `the commit names the files it left out for their size`() = runBlocking {
-        started()
+    fun `the files left out for their size wait with the repository until the person read them`() =
+        runBlocking {
+            started()
 
-        write(
-            path = "Notes.md",
-            text = "A note."
-        )
+            RandomAccessFile(File(vault, "Film.mp4"), "rw").use {
+                it.setLength(LargeFiles.MAX_BYTES + 1)
+            }
 
-        RandomAccessFile(File(vault, "Film.mp4"), "rw").use {
-            it.setLength(LargeFiles.MAX_BYTES + 1)
-        }
+            commit()
 
-        assertEquals(
-            expected = Outcome.Success(
-                value = VaultCommit(
-                    isMade = true,
-                    leftOut = listOf(RelativePath(value = "Film.mp4"))
-                )
-            ),
-            actual = git.commitAll(
-                vaultPath = vault.path,
-                message = "work"
+            val reopened = JGitRepository(
+                dispatchers = JvmAppDispatchers(),
+                clock = Clock.System
             )
-        )
-    }
+
+            val waiting = reopened.leftOut(vaultPath = vault.path)
+
+            reopened.acknowledgeLeftOut(
+                vaultPath = vault.path,
+                files = waiting
+            )
+
+            assertEquals(
+                expected = listOf(listOf(RelativePath(value = "Film.mp4")), emptyList()),
+                actual = listOf(waiting, git.leftOut(vaultPath = vault.path))
+            )
+        }
 
     @Test
     fun `a lock left by a sync killed minutes ago is removed, a fresh one is not`() = runBlocking {

@@ -58,13 +58,23 @@ class SyncStatusViewModel(
     override fun handleIntent(intent: SyncStatusIntent) {
         when (intent) {
             SyncStatusIntent.OnOpenSettings -> emit(effect = SyncStatusEffect.OpenSettings)
+
             is SyncStatusIntent.OnReview -> review(note = intent.note)
+
             is SyncStatusIntent.OnChoose -> choose(choice = intent.choice)
+
             SyncStatusIntent.OnReviewDismiss -> reduce { it.copy(review = null) }
+
             SyncStatusIntent.OnRepairShow -> reduce { it.copy(isRepairShown = true) }
+
             SyncStatusIntent.OnRepairDismiss -> reduce { it.copy(isRepairShown = false) }
+
             is SyncStatusIntent.OnRepair -> repair(choice = intent.choice)
-            SyncStatusIntent.OnLeftOutDismiss -> engine.acknowledgeLeftOut()
+
+            SyncStatusIntent.OnLeftOutDismiss -> launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) { engine.acknowledgeLeftOut() }
         }
     }
 

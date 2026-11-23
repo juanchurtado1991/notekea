@@ -10,8 +10,10 @@ edits: they make `SampleVaultTest`, `SmokeDataTest` and six Auto-Test index case
 
 ## 1. A synced file that grows past 100 MB (decided by the developer) — done
 
-Done: `LargeFiles` untracks and excludes, `VaultCommit.leftOut` carries the paths to `VaultSync.leftOut`, and
-`LargeFilesDialog` names them (case 4.2-08). What follows is the brief it was built from.
+Done: `LargeFiles` untracks and excludes, the paths wait in `.git/notekea-left-out` (`LeftOutNotice`) until
+`VaultSync.leftOut` shows them, and `LargeFilesDialog` names them (case 4.2-08). The first version carried them in
+the commit's result: its own review (2026-11-23) found that connecting, a failed commit and a closed app lost them,
+and that a file a host already took was deleted for every device. What follows is the brief it was built from.
 
 It leaves the repository (it stays in the vault) **and a dialog tells the person**. The first half is written, not
 committed: `git apply ~/.cache/notekea-loop-runs/large-tracked-files.patch` (`LargeFiles.leaveOut(changed = …)`

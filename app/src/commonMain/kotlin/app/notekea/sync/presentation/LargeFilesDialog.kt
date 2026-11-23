@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +27,9 @@ import app.notekea.resources.sync_large_title
 import org.jetbrains.compose.resources.stringResource
 
 private const val DIALOG_WIDTH_DP = 480
+
+// Past this the list scrolls: a folder of films left out at once kept OK out of the window.
+private const val LIST_MAX_HEIGHT_DP = 240
 
 /**
  * The files a sync left out of the repository because they are over 100 MB, which no Git host takes (the code review
@@ -55,6 +61,9 @@ fun LargeFilesDialog(
             )
 
             Column(
+                modifier = Modifier
+                    .heightIn(max = LIST_MAX_HEIGHT_DP.dp)
+                    .verticalScroll(state = rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
             ) {
                 files.forEach {

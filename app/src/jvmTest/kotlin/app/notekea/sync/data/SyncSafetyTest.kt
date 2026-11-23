@@ -118,6 +118,53 @@ class SyncSafetyTest {
         )
     }
 
+    // The review of 2026-11-23: a host that took a file that large takes it again; leaving it out deleted it from
+    // the repository and from every other device.
+    @Test
+    fun `a file the remote already holds over the limit stays in the repository when it changes`() {
+        val folder = Files.createTempDirectory("notekea-held").toFile()
+
+        val left = Git
+            .init()
+            .setDirectory(folder)
+            .call()
+            .use { git ->
+                val film = File(folder, "Film.mp4").apply { writeBytes(ByteArray(size = BIG)) }
+
+                git
+                    .add()
+                    .addFilepattern("Film.mp4")
+                    .call()
+
+                val pushed = git
+                    .commit()
+                    .setMessage("A film")
+                    .call()
+
+                git
+                    .repository
+                    .updateRef("refs/remotes/origin/${git.repository.branch}")
+                    .apply { setNewObjectId(pushed) }
+                    .update()
+
+                film.writeBytes(ByteArray(size = BIG + 1))
+
+                LargeFiles.leaveOut(
+                    git = git,
+                    changed = git
+                        .status()
+                        .call()
+                        .modified,
+                    maxBytes = LIMIT
+                )
+            }
+
+        assertEquals(
+            expected = emptyList(),
+            actual = left
+        )
+    }
+
     // The code review of 2026-11-22: a note beside its conflict copy in `.trash` was a conflict
     // for good.
     @Test

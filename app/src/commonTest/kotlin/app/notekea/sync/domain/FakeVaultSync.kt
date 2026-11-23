@@ -11,7 +11,7 @@ class FakeVaultSync : VaultSync {
     val calls = mutableListOf<String>()
     var connectFailure: SyncError? = null
 
-    override fun acknowledgeLeftOut() {
+    override suspend fun acknowledgeLeftOut() {
         calls += "acknowledge"
         leftOut.value = emptyList()
     }
