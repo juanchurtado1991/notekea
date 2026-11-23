@@ -34,7 +34,6 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 private const val FIELD_VERTICAL_PADDING_DP = 1
 private const val PREVIEW_NAME = "Tomato plan"
 private const val PREVIEW_WIDTH_DP = 220
-private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
  * Single-line field that edits a name in place (renaming in the tree). It takes focus and selects the whole text when
@@ -128,18 +127,6 @@ private fun InlineFieldFrame(
                 vertical = FIELD_VERTICAL_PADDING_DP.dp
             )
     ) { field() }
-}
-
-private fun Modifier.submitOrCancelOnKeys(
-    onSubmit: () -> Unit,
-    onCancel: () -> Unit
-): Modifier = onPreviewKeyEvent { event ->
-    val isKeyDown = event.type == KeyEventType.KeyDown
-    val isSubmit = isKeyDown && event.key in SUBMIT_KEYS
-    val isCancel = isKeyDown && event.key == Key.Escape
-    if (isSubmit) onSubmit()
-    if (isCancel) onCancel()
-    isSubmit || isCancel
 }
 
 @Preview

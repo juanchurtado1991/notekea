@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.drop
 
 private const val PREVIEW_TITLE = "Tomato plan"
 private const val PREVIEW_WIDTH_DP = 420
-private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
  * A page title that edits in place (the note's name above the editor), with a line under it only while focused or
@@ -82,21 +81,14 @@ fun NotekeaTitleField(
                 if (isFocused && !it.isFocused) commit()
                 isFocused = it.isFocused
             }
-            .onPreviewKeyEvent { event ->
-                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-
-                when (event.key) {
-                    in SUBMIT_KEYS -> focusManager.clearFocus()
-
-                    Key.Escape -> state.setTextAndPlaceCursorAtEnd(text = value).also {
+            .submitOrCancelOnKeys(
+                onSubmit = { focusManager.clearFocus() },
+                onCancel = {
+                    state.setTextAndPlaceCursorAtEnd(text = value).also {
                         focusManager.clearFocus()
                     }
-
-                    else -> return@onPreviewKeyEvent false
                 }
-
-                true
-            }
+            )
             .titleUnderline(
                 color = underlineColor(
                     isFocused = isFocused,

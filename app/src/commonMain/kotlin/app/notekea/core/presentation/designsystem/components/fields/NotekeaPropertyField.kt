@@ -39,7 +39,6 @@ private const val FIELD_VERTICAL_PADDING_DP = 2
 private const val PREVIEW_PLACEHOLDER = "Empty"
 private const val PREVIEW_VALUE = "In progress"
 private const val PREVIEW_WIDTH_DP = 240
-private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
  * A value edited in place, plain text until hovered or focused. What is typed goes to [onCommit] on Enter or when the
@@ -68,6 +67,11 @@ fun NotekeaPropertyField(
         if (text != value && isValid(text)) onCommit(text)
     }
 
+    val cancel = {
+        text = value
+        focusManager.clearFocus()
+    }
+
     val isShowingDisplay =
         !isFocused &&
             displayValue != null &&
@@ -83,13 +87,10 @@ fun NotekeaPropertyField(
             .onFocusChanged {
                 if (!it.isFocused) commit()
             }
-            .onPreviewKeyEvent { event ->
-                keyAction(
-                    event = event,
-                    focusManager = focusManager,
-                    onCancel = { text = value }
-                )
-            },
+            .submitOrCancelOnKeys(
+                onSubmit = { focusManager.clearFocus() },
+                onCancel = cancel
+            ),
         textStyle = MaterialTheme
             .typography
             .bodyMedium
@@ -117,29 +118,6 @@ fun NotekeaPropertyField(
 }
 
 /** Enter leaves the field (which commits); Esc puts the value back and leaves it. Returns whether it was one. */
-private fun keyAction(
-    event: KeyEvent,
-    focusManager: FocusManager,
-    onCancel: () -> Unit
-): Boolean {
-    if (event.type != KeyEventType.KeyDown) return false
-
-    return when (event.key) {
-        in SUBMIT_KEYS -> {
-            focusManager.clearFocus()
-            true
-        }
-
-        Key.Escape -> {
-            onCancel()
-            focusManager.clearFocus()
-            true
-        }
-
-        else -> false
-    }
-}
-
 @Composable
 private fun FieldFrame(
     isFocused: Boolean,

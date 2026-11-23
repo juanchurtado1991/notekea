@@ -35,7 +35,6 @@ private val FIELD_PADDING = PaddingValues(
     horizontal = NotekeaDimensions.SpacingM,
     vertical = NotekeaDimensions.SpacingXs
 )
-private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 private val TEXT_MIN_HEIGHT = NotekeaDimensions.ControlHeight - NotekeaDimensions.SpacingXs * 2
 
 /**

@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.designsystem.components.fields.SUBMIT_KEYS
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
@@ -43,7 +44,6 @@ import org.jetbrains.compose.resources.stringResource
 private const val FIELD_WIDTH_DP = 240
 private const val PREVIEW_COUNT = "2 of 5"
 private const val PREVIEW_QUERY = "arepas"
-private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
  * An inline bar that finds text in the current page (Find in note) or the notes on the graph: a field that takes focus

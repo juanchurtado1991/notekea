@@ -1,6 +1,7 @@
 package app.notekea.core.presentation.designsystem.components.menus
 
 import androidx.compose.ui.input.key.Key
+import app.notekea.core.presentation.designsystem.components.fields.SUBMIT_KEYS
 
 /** What a key pressed in a [NotekeaPalette]'s field does; any other key types into the field. */
 enum class PaletteKeyAction {
@@ -11,8 +12,6 @@ enum class PaletteKeyAction {
     SWITCH;
 
     companion object {
-        private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
-
         /** The action of [key]; Tab switches only when the palette [canSwitch], and Shift+Tab never does. */
         fun of(
             key: Key,
