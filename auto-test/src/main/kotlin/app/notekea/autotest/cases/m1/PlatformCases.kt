@@ -4,7 +4,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
 import app.notekea.autotest.closeWindowWith
-import app.notekea.autotest.openVault
 import app.notekea.autotest.typeAtEnd
 import app.notekea.core.platform.data.JvmSystemEnvironment
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
@@ -124,10 +123,7 @@ private fun SuiteBuilder.shortcutModifier() {
         id = "1.1-02",
         title = "Shortcuts use Cmd on macOS and Ctrl elsewhere"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         click(text = WELCOME)
         press(shortcut = Mod + Key.N)
@@ -140,10 +136,7 @@ private fun SuiteBuilder.dialogButtonOrder() {
         id = "1.1-03",
         title = "Dialog buttons in the system's order"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         click(text = WELCOME)
         pressDelete()
@@ -184,10 +177,7 @@ private fun SuiteBuilder.appDataFolder() {
 
         val before = filesIn(folder = folders.data.resolve(PERSONAL_NOTES))
 
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         expectAppDataFile()
 

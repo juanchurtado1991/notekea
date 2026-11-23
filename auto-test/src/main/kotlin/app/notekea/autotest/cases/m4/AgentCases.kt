@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m4
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.ChatModels
 import app.notekea.autotest.cases.m1.PLAYGROUND
+import app.notekea.autotest.cases.m1.SAMPLE
 import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
 import app.notekea.autotest.cases.m3.ask
 import app.notekea.autotest.cases.m3.chooseMode
@@ -13,7 +14,6 @@ import app.notekea.autotest.cases.m3.replyTo
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE_VAULT = "Sample Vault"
 private const val NOTES_ABOUT = "me podes contar de que tratan las notas?"
 private const val TASK = "find my recipe made with corn flour and tag it with latin"
 private const val AREPAS = "$PLAYGROUND/Recipes/Arepas.md"
@@ -128,7 +128,7 @@ private fun SuiteBuilder.autoPicks() {
         id = "4.7-04",
         reason = ManualReason.COSTLY
     ) {
-        prepare(SAMPLE_VAULT)
+        prepare(SAMPLE)
 
         title(
             text =

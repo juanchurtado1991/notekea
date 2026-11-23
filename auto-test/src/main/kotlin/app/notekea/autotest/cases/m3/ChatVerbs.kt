@@ -5,11 +5,9 @@ import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.cases.m1.AREPAS_FLOUR
-import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.cases.m1.openPlaygroundNote
 import app.notekea.autotest.notekea
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.chat.domain.language.SpokenLanguage
 import com.testbuddy.CaseFailure
@@ -53,10 +51,7 @@ internal fun CaseScope.openChat(withArepas: Boolean = true) {
             shownText = AREPAS_FLOUR
         )
     } else {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
     }
 
     pressInWindow(shortcut = Mod + Key.L)

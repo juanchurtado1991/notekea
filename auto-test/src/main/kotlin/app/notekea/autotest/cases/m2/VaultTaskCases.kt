@@ -1,16 +1,15 @@
 package app.notekea.autotest.cases.m2
 
+import app.notekea.autotest.cases.m1.SAMPLE
+import app.notekea.autotest.cases.m1.openSample
 import app.notekea.autotest.clickLast
 import app.notekea.autotest.expectLineSelected
 import app.notekea.autotest.expectOrderOnScreen
-import app.notekea.autotest.openVault
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
-private const val SAMPLE = "Sample Vault"
-private const val HOME = "Home"
 private const val TASKS = "Tasks"
 private const val DEMO_TASK = "Record a demo video"
 private const val EDITED_TASK = "Record a short demo video"
@@ -34,10 +33,7 @@ private fun SuiteBuilder.tasksTab() {
         id = "2.11-01",
         title = "The Tasks tab lists the vault's tasks by note"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = TASKS)
         expectText(text = "By note")
@@ -52,10 +48,7 @@ private fun SuiteBuilder.groupsAndLimits() {
         id = "2.11-02",
         title = "Tasks group by date and are limited by folder and done"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = TASKS)
         click(text = "By date")
@@ -82,10 +75,7 @@ private fun SuiteBuilder.checkingATask() {
         id = "2.11-03",
         title = "A task checked or unchecked in the tab is written to its note"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = TASKS)
         // Only its folder, so its card is on screen whatever the vault holds above it.
@@ -117,10 +107,7 @@ private fun SuiteBuilder.changedOutside() {
         id = "2.11-04",
         title = "A task changed outside Notekea shows its new text in the Tasks tab"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = TASKS)
         scrollTo(text = DEMO_TASK)
@@ -140,10 +127,7 @@ private fun SuiteBuilder.openingATask() {
         id = "2.11-05",
         title = "A task's text opens its note at the task"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = TASKS)
         scrollTo(text = FLAT_TASK)

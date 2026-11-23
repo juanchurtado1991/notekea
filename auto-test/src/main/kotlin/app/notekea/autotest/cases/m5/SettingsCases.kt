@@ -6,8 +6,8 @@ import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.clickLast
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import com.testbuddy.CaseScope
@@ -40,10 +40,7 @@ private fun SuiteBuilder.language() {
         id = "5.2-04",
         title = "Choosing Español in Settings → General shows Notekea in Spanish at once, and English brings it back"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         pressInWindow(shortcut = Mod + Key.Comma)
         expectText(text = LANGUAGE)
@@ -119,10 +116,7 @@ private fun SuiteBuilder.lastVault() {
         id = "5.2-01",
         title = "Mod+, opens Settings on General, and turning off the last vault starts on the welcome screen"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         pressInWindow(shortcut = Mod + Key.Comma)
         expectText(text = LANGUAGE)
@@ -140,10 +134,7 @@ private fun SuiteBuilder.filesInObsidian() {
         id = "5.2-02",
         title = "Settings → Files writes the date format chosen to the vault's .obsidian, as Obsidian keeps it"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         pressInWindow(shortcut = Mod + Key.Comma)
         // The tree's section header says Files too: Settings' section is drawn over it, last.

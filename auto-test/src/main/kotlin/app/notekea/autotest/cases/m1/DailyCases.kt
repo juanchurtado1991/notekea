@@ -35,10 +35,7 @@ private fun SuiteBuilder.todayButton() {
         id = "1.10-01",
         title = "Today makes today's note once, in Journal"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         val today = "$PLAYGROUND/Journal/${LocalDate.now()}.md"
         clickIcon(label = "Today")
@@ -62,10 +59,7 @@ private fun SuiteBuilder.todayFromAnywhere() {
         id = "1.10-02",
         title = "Mod+D opens today's note from the middle of typing"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = WELCOME)
 
@@ -89,10 +83,7 @@ private fun SuiteBuilder.dayArrows() {
         id = "1.10-03",
         title = "The arrows and Mod+Alt+arrows step through the daily notes"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         openNote(
             name = "2026-10-21",

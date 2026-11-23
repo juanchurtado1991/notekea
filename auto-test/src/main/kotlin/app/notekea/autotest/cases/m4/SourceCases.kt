@@ -2,8 +2,7 @@ package app.notekea.autotest.cases.m4
 
 import app.notekea.autotest.StandInDocsSite
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
-import app.notekea.autotest.openVault
+import app.notekea.autotest.cases.m1.openPlayground
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
@@ -47,10 +46,7 @@ private fun SuiteBuilder.document() {
                 "<p>$GUIDE_SENTENCE</p></body></html>"
         )
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         click(text = GUIDE)
         expectText(text = GUIDE_HEADING)
@@ -100,10 +96,7 @@ private fun SuiteBuilder.localClip() {
         id = "4.4-01",
         title = "Clip a web page refuses an address on this computer before downloading anything"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         click(text = "Clip a web page")
         click(text = "https://example.com/an-article")
@@ -190,10 +183,7 @@ private fun SuiteBuilder.allOfSection() {
         id = "4.4-04",
         title = "A documentation page offers its closest thirty pages or all of them, and All clips every one"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         click(text = "Clip a web page")
         click(text = "https://example.com/an-article")
@@ -226,10 +216,7 @@ private fun SuiteBuilder.review() {
     ) {
         Files.writeString(file(path = "$PLAYGROUND/$CARDS"), "# Capitals\n\n#flashcards\n\n$QUESTION::$ANSWER\n")
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Study cards")
 

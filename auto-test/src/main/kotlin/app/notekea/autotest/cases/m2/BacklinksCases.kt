@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m2
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import app.notekea.autotest.cases.m1.SAMPLE
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
 import com.testbuddy.CaseFailure
@@ -10,7 +11,6 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE = "Sample Vault"
 private const val TAB_CLICKS = 3
 private const val TAB_MILLIS = 2_000L
 private const val AREPAS = "Arepas"

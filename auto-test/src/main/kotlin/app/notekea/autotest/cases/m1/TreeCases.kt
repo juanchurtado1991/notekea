@@ -5,7 +5,6 @@ import app.notekea.autotest.clickInTree
 import app.notekea.autotest.expectFolder
 import app.notekea.autotest.expectNaming
 import app.notekea.autotest.expectNotInTree
-import app.notekea.autotest.openVault
 import app.notekea.autotest.relaunch
 import app.notekea.autotest.renameInTree
 import app.notekea.autotest.rightClickInTree
@@ -33,10 +32,7 @@ private fun SuiteBuilder.treeOpensTabs() {
         id = "1.4-01",
         title = "Clicking the tree opens notes and folders in tabs"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         // The names also show in tabs, the note's folder and the inspector (Related, 2.4): the clicks go to the tree.
         clickInTree(text = "Projects")
@@ -63,10 +59,7 @@ private fun SuiteBuilder.treeKeyboard() {
         id = "1.4-02",
         title = "The tree with the keyboard"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         clickInTree(text = "Journal")
         treeRow(text = "2026-10-21")
@@ -90,10 +83,7 @@ private fun SuiteBuilder.sortByDate() {
         id = "1.4-03",
         title = "Sorting by date modified, remembered after a relaunch"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = RECIPES)
         clickIcon(label = "Sort notes: name")
@@ -112,10 +102,7 @@ private fun SuiteBuilder.newNotesAndFolders() {
         id = "1.4-04",
         title = "New notes and folders where they were asked for"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = RECIPES)
         press(shortcut = Mod + Key.N)
@@ -138,10 +125,7 @@ private fun SuiteBuilder.renameInTheTree() {
         id = "1.4-05",
         title = "Renaming in the tree, and names that cannot be used"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         // Travel is opened first: the renames below reorder the tree while it lays out.
         clickInTree(text = "Travel")
@@ -187,10 +171,7 @@ private fun SuiteBuilder.renameUpdatesLinks() {
         id = "1.4-06",
         title = "Renaming a note updates the links to it"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = RECIPES)
 

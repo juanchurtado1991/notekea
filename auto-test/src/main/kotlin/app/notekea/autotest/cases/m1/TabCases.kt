@@ -6,7 +6,6 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.noteText
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import app.notekea.autotest.treeRow
@@ -38,10 +37,7 @@ private fun SuiteBuilder.toolRail() {
         id = "1.11-01",
         title = "The tool rail stays, and every icon works with the sidebar hidden"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         listOf(
             "Files",
@@ -68,10 +64,7 @@ private fun SuiteBuilder.sidebarHeader() {
         id = "1.11-02",
         title = "Expand all and Collapse all, and the open folders after a relaunch"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Expand all folders")
         expectText(text = NESTED_NOTE)
@@ -89,10 +82,7 @@ private fun SuiteBuilder.clicksOpenTabs() {
         id = "1.11-03",
         title = "Each click in the tree opens a tab, or goes to the open one"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = WELCOME)
         clickInTree(text = "Recipes")
@@ -115,10 +105,7 @@ private fun SuiteBuilder.tabsBehind() {
         id = "1.11-04",
         title = "Mod+click and the middle button open tabs behind the shown one"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = WELCOME)
         expandInTree(name = "Recipes")
@@ -146,10 +133,7 @@ private fun SuiteBuilder.closingTabs() {
         id = "1.11-05",
         title = "Closing tabs with ✕, the middle button, Mod+W and Close other tabs"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = "Recipes")
 
@@ -181,10 +165,7 @@ private fun SuiteBuilder.tabShortcuts() {
         id = "1.11-06",
         title = "Ctrl+Tab and Mod+1…9 move between tabs, also while typing"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         expandInTree(name = "Recipes")
 

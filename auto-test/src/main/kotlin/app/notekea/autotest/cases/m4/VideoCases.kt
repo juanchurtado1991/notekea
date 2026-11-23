@@ -2,9 +2,8 @@ package app.notekea.autotest.cases.m4
 
 import app.notekea.autotest.StandInDocsSite
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.cases.m1.openPlaygroundNote
-import app.notekea.autotest.openVault
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
@@ -134,10 +133,7 @@ private fun SuiteBuilder.clippedVideo() {
         id = "4.9-05",
         title = "A clipped page's YouTube video is kept under Videos, as its card"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         click(text = "Clip a web page")
         click(text = "https://example.com/an-article")

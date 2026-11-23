@@ -3,10 +3,9 @@ package app.notekea.autotest.cases.m4
 import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.ChatModels
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
 import app.notekea.autotest.notekea
-import app.notekea.autotest.openVault
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
@@ -29,10 +28,7 @@ internal fun SuiteBuilder.studyChoiceCases() {
         Files.writeString(file(path = "$PLAYGROUND/$CARDS"), "# Rivers\n\n#flashcards\n\n$QUESTION::$ANSWER\n")
         notekea().useChatModel()
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Study cards")
 

@@ -7,7 +7,6 @@ import androidx.compose.ui.test.pressKey
 import app.notekea.autotest.SmokeScenarios
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.openNote
-import app.notekea.autotest.openVault
 import app.notekea.autotest.relaunch
 import app.notekea.autotest.titleField
 import app.notekea.autotest.typeAtEnd
@@ -278,10 +277,7 @@ internal fun CaseScope.openPlaygroundNote(
     name: String,
     shownText: String
 ) {
-    openVault(
-        name = PLAYGROUND,
-        shownText = WELCOME
-    )
+    openPlayground()
 
     openNote(
         name = name,

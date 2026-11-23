@@ -1,12 +1,12 @@
 package app.notekea.autotest.cases.m2
 
+import app.notekea.autotest.cases.m1.SAMPLE
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
 import app.notekea.autotest.typeAtEnd
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE = "Sample Vault"
 private const val GHOST = "Ghost Serializer"
 
 // The 40 notes and Assets/Weekly menu.pdf, which 4.5 reads as a document.

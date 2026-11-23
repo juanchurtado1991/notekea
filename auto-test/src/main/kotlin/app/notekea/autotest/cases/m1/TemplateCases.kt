@@ -57,10 +57,7 @@ private fun SuiteBuilder.firstTemplate() {
         id = "1.12-01",
         title = "Without templates, Create makes an example and inserts it"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = WELCOME)
         cursorAtEnd(part = WELCOME_TEXT)

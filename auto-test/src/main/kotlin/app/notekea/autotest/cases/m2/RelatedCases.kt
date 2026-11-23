@@ -1,5 +1,6 @@
 package app.notekea.autotest.cases.m2
 
+import app.notekea.autotest.cases.m1.SAMPLE
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
 import app.notekea.autotest.typeAtEnd
@@ -8,7 +9,6 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE = "Sample Vault"
 private const val SAMPLE_READY = "41 notes ready to search"
 private const val ALREADY_LINKED = "Already linked"
 private const val WAIT_MILLIS = 10_000L

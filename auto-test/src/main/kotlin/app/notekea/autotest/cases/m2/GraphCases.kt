@@ -1,14 +1,14 @@
 package app.notekea.autotest.cases.m2
 
 import androidx.compose.ui.input.key.Key
+import app.notekea.autotest.cases.m1.SAMPLE
+import app.notekea.autotest.cases.m1.openSample
 import app.notekea.autotest.openNote
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE = "Sample Vault"
 private const val OPEN_GRAPH =
     "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba) y espera a que la barra de abajo " +
         "diga \"41 notas listas para buscar\".\n2. Abre Recipes/Arepas y pulsa Ctrl+G (Cmd+G en macOS)."
@@ -31,10 +31,7 @@ private fun SuiteBuilder.graphFromNote() {
         id = "2.7-01",
         title = "The graph opens around a note, and a note chosen on it opens"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = "Home"
-        )
+        openSample()
 
         openNote(
             name = "Arepas",
@@ -208,10 +205,7 @@ private fun SuiteBuilder.noNote() {
         id = "2.7-08",
         title = "With no note open the graph asks to find one"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = "Home"
-        )
+        openSample()
 
         pressInWindow(shortcut = Mod + Key.G)
         expectText(text = "No note selected")

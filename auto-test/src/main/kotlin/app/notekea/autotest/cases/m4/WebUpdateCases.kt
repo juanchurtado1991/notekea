@@ -2,8 +2,7 @@ package app.notekea.autotest.cases.m4
 
 import app.notekea.autotest.StandInDocsSite
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
-import app.notekea.autotest.openVault
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.rightClickInTree
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
@@ -34,10 +33,7 @@ internal fun SuiteBuilder.webUpdateCases() {
             "---\nsource: \"$page\"\nclipped: 2026-10-01\n---\n\n# Page 3\n\n$MINE\n\n## Original text\n\nAs it was.\n"
         )
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         rightClickInTree(text = FOLDER)
         click(text = "Update from the web")

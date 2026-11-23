@@ -1,8 +1,7 @@
 package app.notekea.autotest.cases.m3
 
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
-import app.notekea.autotest.openVault
+import app.notekea.autotest.cases.m1.openPlayground
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
@@ -24,10 +23,7 @@ private fun SuiteBuilder.recommendedSize() {
         id = "3.1-01",
         title = "Settings → AI model recommends a size, with the others folded under it"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Settings")
         click(text = "AI model")
@@ -45,10 +41,7 @@ private fun SuiteBuilder.startPauseAndCancel() {
         id = "3.1-05",
         title = "A download shows its progress, pauses and is cancelled, leaving nothing behind"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Settings")
         click(text = "AI model")

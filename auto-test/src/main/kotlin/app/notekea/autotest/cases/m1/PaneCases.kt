@@ -10,7 +10,6 @@ import app.notekea.autotest.expectNotInOutline
 import app.notekea.autotest.inOutline
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import app.notekea.autotest.typeAtEnd
@@ -157,10 +156,7 @@ private fun SuiteBuilder.folderCards() {
         id = "1.11-11",
         title = "A folder opens as a grid of cards that open what they show"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = "Editor")
 
@@ -235,10 +231,7 @@ private fun SuiteBuilder.quickFolderClicks() {
         id = "1.11-14",
         title = "Opening and closing folders quickly never shows an error"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Collapse all folders")
 
@@ -260,10 +253,7 @@ private fun SuiteBuilder.reorderTabs() {
         id = "1.11-15",
         title = "Tabs are reordered by dragging them along the row"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         expandInTree(name = "Recipes")
         clickInTree(text = WELCOME)
@@ -347,10 +337,7 @@ private fun SuiteBuilder.tabSlides() {
 }
 
 private fun CaseScope.openTwoNotes() {
-    openVault(
-        name = PLAYGROUND,
-        shownText = WELCOME
-    )
+    openPlayground()
 
     expandInTree(name = "Recipes")
     clickInTree(text = WELCOME)

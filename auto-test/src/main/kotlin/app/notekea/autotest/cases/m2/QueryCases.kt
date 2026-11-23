@@ -2,19 +2,19 @@ package app.notekea.autotest.cases.m2
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
+import app.notekea.autotest.cases.m1.HOME
+import app.notekea.autotest.cases.m1.SAMPLE
+import app.notekea.autotest.cases.m1.openSample
 import app.notekea.autotest.clickLast
 import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.openNote
-import app.notekea.autotest.openVault
 import app.notekea.autotest.relaunch
 import app.notekea.autotest.typeAtEnd
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE = "Sample Vault"
-private const val HOME = "Home"
 private const val QUERY = "Query"
 private const val STATE_BLOCKS =
     "\n\n```query\nfilters:\n  - property: rating\n    condition: more than\n" +
@@ -38,10 +38,7 @@ private fun SuiteBuilder.queryTab() {
         id = "2.10-01",
         title = "The Query tab lists the vault's notes"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = "Home"
-        )
+        openSample()
 
         clickIcon(label = "Query")
         expectText(text = "Add filter")
@@ -54,10 +51,7 @@ private fun SuiteBuilder.booksByRating() {
         id = "2.10-02",
         title = "Books by rating list the right notes, in order, and the query stays"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = QUERY)
         addFolderRule(folder = "Books")
@@ -94,10 +88,7 @@ private fun SuiteBuilder.projectsAndMeetings() {
         id = "2.10-03",
         title = "Projects by status and meetings by date list the right notes"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         clickIcon(label = QUERY)
         addFolderRule(folder = "Projects")
@@ -165,10 +156,7 @@ private fun SuiteBuilder.savedInANote() {
         id = "2.10-05",
         title = "A query saved in a note is a table in the note and YAML in its file"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         openNote(
             name = "Reading list",
@@ -198,10 +186,7 @@ private fun SuiteBuilder.queryStates() {
         id = "2.10-06",
         title = "A broken block, an unknown property and no match each say so"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = "Home"
-        )
+        openSample()
 
         openNote(
             name = "Reading list",

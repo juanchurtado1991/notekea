@@ -53,10 +53,7 @@ private fun SuiteBuilder.vaultOpens() {
         id = "1.3-02",
         title = "A vault opens with its notes, without hidden folders"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         listOf("Ideas", "Journal", "Projects", "Recipes", "Travel", "attachments").forEach {
             expectText(text = it)
@@ -74,10 +71,7 @@ private fun SuiteBuilder.lastVaultReopens() {
         id = "1.3-03",
         title = "The last vault reopens at launch"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         relaunch()
         expectText(text = WELCOME)
@@ -90,10 +84,7 @@ private fun SuiteBuilder.recentVaults() {
         id = "1.3-04",
         title = "Recent vaults, the most recent first"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         openAnother(
             name = "Work Obsidian",
@@ -147,10 +138,7 @@ private fun SuiteBuilder.movedVault() {
         id = "1.3-06",
         title = "A moved vault can be located or removed"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         openAnother(
             name = "Movable Vault",

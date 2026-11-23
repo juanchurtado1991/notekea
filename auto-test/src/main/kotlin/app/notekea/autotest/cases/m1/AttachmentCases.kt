@@ -10,7 +10,6 @@ import androidx.compose.ui.text.TextRange
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.noteText
-import app.notekea.autotest.openVault
 import app.notekea.autotest.renameInTree
 import com.testbuddy.CaseScope
 import com.testbuddy.SuiteBuilder
@@ -75,10 +74,7 @@ private fun SuiteBuilder.attachmentFiles() {
         id = "1.8-12",
         title = "The attachments folder lists every file, each opening in a tab"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = "attachments")
 

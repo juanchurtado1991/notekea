@@ -60,6 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   chat's, tree's and graph's hosts delegate to.
   Block 3, tests: `ViewModelTestBase` sets the main dispatcher for 43 test classes; `noteTextCache(store)` and
   `effectsOf(viewModel)` build what tests built by hand.
+  Block 4, the Auto-Test: `openPlayground()`, `openPersonalNotes()` and `openSample()`, and the vaults' names in
+  `CaseVaults.kt` only.
 - The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
   app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
   when it says which, and works on each when it means several. It replaces the word lists that decided this

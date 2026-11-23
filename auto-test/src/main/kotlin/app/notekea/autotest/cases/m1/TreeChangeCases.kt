@@ -18,7 +18,6 @@ import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
 private const val DELETE_NOTE = "Delete note"
-private const val SAMPLE_VAULT = "Sample Vault"
 private const val REVEAL_WAIT_MILLIS = 10_000L
 
 /** The cases of 1.4 that change the tree: deleting, other apps, a large vault, the sidebar (`MVP_SMOKE_TEST.md`). */
@@ -38,10 +37,7 @@ private fun SuiteBuilder.deleteNoteAndFolder() {
         id = "1.4-07",
         title = "Deleting a note and a folder, after a question"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = "Travel")
         clickInTree(text = "Packing checklist")
@@ -67,10 +63,7 @@ private fun SuiteBuilder.showInFiles() {
         id = "1.4-08",
         title = "Show in Files asks the file manager for the note, from the right click and from Shift+F10"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         // Each system names its file manager (Show in Finder, Show in File Explorer).
         val reveal = when (system) {
@@ -116,10 +109,7 @@ private fun SuiteBuilder.outsideChanges() {
         id = "1.4-09",
         title = "Changes by other apps show without a click"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = "Ideas")
         expectText(text = "Reading list")
@@ -157,10 +147,7 @@ private fun SuiteBuilder.sidebarHides() {
         id = "1.4-11",
         title = "The sidebar hides and shows, and stays as it was left"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         press(shortcut = Mod + Key.Backslash)
         expectNoText(text = "Recipes")
@@ -231,7 +218,7 @@ private fun SuiteBuilder.noteIcons() {
         id = "1.4-14",
         reason = ManualReason.EYES
     ) {
-        prepare(SAMPLE_VAULT)
+        prepare(SAMPLE)
         title(text = "Home, las plantillas y las notas diarias tienen sus propios iconos")
 
         steps(

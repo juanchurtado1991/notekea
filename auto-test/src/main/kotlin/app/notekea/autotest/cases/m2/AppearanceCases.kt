@@ -6,7 +6,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
-import app.notekea.autotest.openVault
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.relaunch
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
@@ -60,10 +60,7 @@ private fun SuiteBuilder.keptChoice() {
         id = "2.12-01",
         title = "A color theme and a mode chosen in Settings are kept after a relaunch"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Settings")
         click(text = "Appearance")
@@ -86,10 +83,7 @@ private fun SuiteBuilder.startingChoice() {
         id = "2.12-04",
         title = "Before anything is chosen Notekea is in Workspace Blue, following the system"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Settings")
         click(text = "Appearance")

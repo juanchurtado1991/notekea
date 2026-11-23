@@ -47,10 +47,7 @@ private fun SuiteBuilder.starBookmarks() {
         id = "1.13-01",
         title = "The star bookmarks the note, and a second click removes it"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = WELCOME)
         clickIcon(label = "Bookmark this note")
@@ -206,10 +203,7 @@ private fun SuiteBuilder.missingBookmark() {
         id = "1.13-06",
         title = "A bookmark of a deleted note is greyed out and can be removed"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickInTree(text = "Editor")
         clickInTree(text = "Shared note")
@@ -249,10 +243,7 @@ private fun SuiteBuilder.bookmarksStayOut() {
 
 /** Opens the Playground Vault and bookmarks Welcome, Recipes, Arepas plate.png and Ideas, as 1.13-02 does. */
 private fun CaseScope.bookmarkFour() {
-    openVault(
-        name = PLAYGROUND,
-        shownText = WELCOME
-    )
+    openPlayground()
 
     clickInTree(text = WELCOME)
     clickIcon(label = "Bookmark this note")

@@ -3,8 +3,7 @@ package app.notekea.autotest.cases.m5
 import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.StandInDocsSite
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
-import app.notekea.autotest.openVault
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import com.testbuddy.ShortcutModifier.Mod
@@ -35,10 +34,7 @@ internal fun SuiteBuilder.webUpdateSettingCases() {
             "---\nsource: \"$page\"\nclipped: 2026-10-01\n---\n\n# Page 4\n\n## Original text\n\nAs it was.\n"
         )
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         pressInWindow(shortcut = Mod + Key.Comma)
         expectText(text = "Update on their own")
@@ -71,10 +67,7 @@ internal fun SuiteBuilder.webUpdateSettingCases() {
             "---\nsource: \"$page\"\nclipped: 2026-10-01\n---\n\n# Page 4\n\n## Original text\n\nAs it was.\n"
         )
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         pressInWindow(shortcut = Mod + Key.Comma)
         expectText(text = "Web sources")

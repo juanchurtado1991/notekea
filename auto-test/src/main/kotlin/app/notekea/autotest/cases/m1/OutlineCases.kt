@@ -11,7 +11,6 @@ import androidx.compose.ui.test.performTextInput
 import app.notekea.autotest.expectInOutline
 import app.notekea.autotest.expectNotInOutline
 import app.notekea.autotest.inOutline
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import com.testbuddy.CaseFailure
@@ -217,10 +216,7 @@ private fun SuiteBuilder.outlineOfNewNote() {
         id = "1.9-08",
         title = "A new note's outline fills in as headings are typed"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         pressInWindow(shortcut = Mod + Key.N)
         press(key = Key.Enter)

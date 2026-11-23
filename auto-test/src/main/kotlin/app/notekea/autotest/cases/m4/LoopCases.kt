@@ -1,5 +1,6 @@
 package app.notekea.autotest.cases.m4
 
+import app.notekea.autotest.cases.m1.SAMPLE
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
@@ -7,14 +8,13 @@ import com.testbuddy.SuiteBuilder
  * Agent mode with the one loop (`docs/agent-loop.md`, step 5), turned on in Settings → General while it is a
  * preview. By hand: it needs the Medium model.
  */
-private const val SAMPLE_VAULT = "Sample Vault"
 
 internal fun SuiteBuilder.loopCases() {
     manual(
         id = "4.7-08",
         reason = ManualReason.COSTLY
     ) {
-        prepare(SAMPLE_VAULT)
+        prepare(SAMPLE)
         title(text = "Con el nuevo bucle, el modo Agente pregunta con botones y hace las sumas")
 
         steps(
@@ -39,7 +39,7 @@ internal fun SuiteBuilder.loopCases() {
         id = "4.7-09",
         reason = ManualReason.COSTLY
     ) {
-        prepare(SAMPLE_VAULT)
+        prepare(SAMPLE)
         title(text = "Con el nuevo bucle, el chat conversa, abre notas y paneles, y describe la bóveda")
 
         steps(

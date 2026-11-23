@@ -1,8 +1,9 @@
 package app.notekea.autotest.cases.m2
 
 import androidx.compose.ui.input.key.Key
+import app.notekea.autotest.cases.m1.SAMPLE
+import app.notekea.autotest.cases.m1.openSample
 import app.notekea.autotest.expectLineSelected
-import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.waitForResult
 import com.testbuddy.CaseScope
@@ -11,8 +12,6 @@ import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 
-private const val SAMPLE = "Sample Vault"
-private const val HOME = "Home"
 private const val REST_LINE =
     "Mix the flour, the water and the salt, then let it rest five minutes. ^dough"
 private const val HOT_PAN_LINE = "Shape discs and cook them on a hot pan, five minutes a side."
@@ -33,10 +32,7 @@ private fun SuiteBuilder.passageRows() {
         id = "2.6-01",
         title = "A search result names its heading and opens the note at the passage"
     ) {
-        openVault(
-            name = SAMPLE,
-            shownText = HOME
-        )
+        openSample()
 
         pressInWindow(shortcut = Mod + Shift + Key.F)
         type(text = "rest five minutes")

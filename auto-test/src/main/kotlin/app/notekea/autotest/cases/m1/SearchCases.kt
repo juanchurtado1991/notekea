@@ -34,10 +34,7 @@ private fun SuiteBuilder.contentSearch() {
         id = "1.6-04",
         title = "Searching the notes' text lists matches as plain lines"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         pressInWindow(shortcut = Mod + Shift + Key.F)
         expectText(text = SEARCH_TEXT)
@@ -62,10 +59,7 @@ private fun SuiteBuilder.tagSearch() {
         id = "1.6-05",
         title = "Searching a tag finds the notes that have it"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         pressInWindow(shortcut = Mod + Shift + Key.F)
         type(text = "#recipe")
@@ -86,10 +80,7 @@ private fun SuiteBuilder.paletteKeyboard() {
         id = "1.6-06",
         title = "Tab switches the palette's search, Esc closes it"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         pressInWindow(shortcut = Mod + Key.P)
         type(text = "a")
@@ -113,10 +104,7 @@ private fun SuiteBuilder.tagLink() {
         id = "1.6-07",
         title = "A tag in a note opens the search for it"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         openNote(
             name = "2026-10-21",
@@ -146,10 +134,7 @@ private fun SuiteBuilder.emptyResults() {
         id = "1.6-08",
         title = "No match, and an empty Content search, explain themselves"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         pressInWindow(shortcut = Mod + Key.P)
         type(text = "zzz")
@@ -167,10 +152,7 @@ private fun SuiteBuilder.outsideEditFound() {
         id = "1.6-09",
         title = "A note changed by another app is found by its new text"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         SmokeScenarios(
             smokeData = folders.data,
@@ -247,10 +229,7 @@ private fun SuiteBuilder.railSearchButton() {
         id = "1.6-12",
         title = "The tool rail's magnifier opens the palette"
     ) {
-        openVault(
-            name = PERSONAL_NOTES,
-            shownText = WELCOME
-        )
+        openPersonalNotes()
 
         openPaletteFromRail()
         press(shortcut = Mod + Key.Backslash)

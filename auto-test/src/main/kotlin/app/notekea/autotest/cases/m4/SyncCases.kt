@@ -4,12 +4,11 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.ChatModels
 import app.notekea.autotest.cases.m1.PLAYGROUND
-import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.cases.m1.openPlayground
 import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
 import app.notekea.autotest.cases.m3.awaitReply
 import app.notekea.autotest.cases.m3.expectAnyText
 import app.notekea.autotest.notekea
-import app.notekea.autotest.openVault
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
@@ -186,10 +185,7 @@ private fun SuiteBuilder.helpAndSize() {
             it.setLength(LARGE_BYTES)
         }
 
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Settings")
         expectText(text = "Ask about Settings")
@@ -243,10 +239,7 @@ private fun SuiteBuilder.helpShows() {
         id = "4.2-06",
         title = "A question in Ask about Settings opens the section of the setting it names, which Show shows again"
     ) {
-        openVault(
-            name = PLAYGROUND,
-            shownText = WELCOME
-        )
+        openPlayground()
 
         clickIcon(label = "Settings")
         expectText(text = "Language")
@@ -264,10 +257,7 @@ private fun SuiteBuilder.helpShows() {
 
 /** Opens the Playground Vault and Settings → Sync. */
 private fun CaseScope.openSync() {
-    openVault(
-        name = PLAYGROUND,
-        shownText = WELCOME
-    )
+    openPlayground()
 
     clickIcon(label = "Settings")
     click(text = "Sync")
