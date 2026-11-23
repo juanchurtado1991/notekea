@@ -13,7 +13,7 @@ class BlindExamsTest {
         .all
         .map { Triple(it.id, it.vault, it.cases) }
         .map { (id, vault, cases) ->
-            BlindPool.Exam(
+            BlindExam(
                 id = id,
                 vault = vault,
                 cases = cases,

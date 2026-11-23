@@ -1,148 +1,127 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-import app.notekea.chat.eval.AgentWideCase.End
 import app.notekea.chat.eval.AgentWideCase.Kind
 
 /** Questions the wine shop owner asks about her notes; three the notes do not answer. */
 internal object BlindVinotecaAnswers {
     val all = listOf(
-        AgentWideCase(
+        answer(
             task = "¿cuántas botellas de tinto de Cerro Alto tengo en stock?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("55")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántas botellas me entran en total con los pedidos pendientes?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("168")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuánto le debo a Cerro Azul?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("1.020.000"),
             lacks = listOf("1.865.000")
         ),
-        AgentWideCase(
+        answer(
             task = "¿en qué mes de este año vendí más vino?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("Septiembre")
         ),
-        AgentWideCase(
+        answer(
             task = "en total, contando también las que ya entregué, " +
                 "¿cuántas botellas llevan las cajas del club de noviembre?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("37")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántos días faltan para la degustación de espumantes?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "date", "answer"),
-            ends = End.ANSWER,
             computed = listOf("31 días")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántos días pasan entre que le hice el pedido a Cerro Azul " +
                 "y la entrega estimada?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "date", "answer"),
-            ends = End.ANSWER,
             computed = listOf("21 días")
         ),
-        AgentWideCase(
+        answer(
             task = "¿hay algún problema con el Blend de Altura 2019?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("read", "links", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("corcho")
         ),
-        AgentWideCase(
+        answer(
             task = "¿a qué dirección le mando la caja del club a Valeria?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("read", "links", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("Rioja 1182")
         ),
-        AgentWideCase(
+        answer(
             task = "según el reglamento de importación, " +
                 "¿cuántas botellas de muestra puedo traer por envío?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("18 botellas")
         ),
-        AgentWideCase(
+        answer(
             task = "¿quién va a ser mi contacto en Cerro Azul desde enero?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("Inés Calvo")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántas cajas regalo corporativas tengo comprometidas para fin de año?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("97")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuánta gente vino en total a las tres degustaciones que hice este año?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("read", "read", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("39")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántas botellas de Vientos del Este tengo entre tintos, " +
                 "blancos y espumantes?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("read", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("117")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántas botellas vendí por mes en promedio en julio, agosto y septiembre?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("513")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuál es el pedido mínimo de Cerro Alto?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("4 cajas")
         ),
-        AgentWideCase(
+        answer(
             task = "pasame el teléfono de Martín Ferreyra",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("el teléfono de martín ferreyra es")
         ),
-        AgentWideCase(
+        answer(
             task = "¿cuántas botellas vendí en noviembre?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("en noviembre vendiste")
         ),
-        AgentWideCase(
+        answer(
             task = "¿qué puntaje le puse al Petit Verdot de Cerro Alto?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("el petit verdot tiene un puntaje")
         )
     )

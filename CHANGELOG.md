@@ -64,6 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `CaseVaults.kt` only.
   Block 5, the design system: `NotekeaMutedText` for the ten private copies of muted text.
   Block 6, the domain: `ReplyText.of` reads a model's whole reply where 17 places joined its pieces by hand.
+  Block 7, the blind exams: `answer`, `change`, `ask` and `exam` in `blind/BlindDsl.kt` and one `BlindExam`; the 59
+  `Blind*Cases.kt` are gone. `BlindGoldenTest` checks against `blind-exams.txt`, written from the exams before, that
+  every case is the same and in the same order, so the logged runs stay comparable.
 - The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
   app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
   when it says which, and works on each when it means several. It replaces the word lists that decided this

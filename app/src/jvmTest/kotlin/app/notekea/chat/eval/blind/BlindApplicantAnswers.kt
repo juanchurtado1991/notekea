@@ -1,143 +1,122 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-import app.notekea.chat.eval.AgentWideCase.End
 import app.notekea.chat.eval.AgentWideCase.Kind
 
 internal object BlindApplicantAnswers {
     val all = listOf(
-        AgentWideCase(
+        answer(
             task = "how much have i paid in app fees so far",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("195")
         ),
-        AgentWideCase(
+        answer(
             task = "how much do I still owe in application fees?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("185")
         ),
-        AgentWideCase(
+        answer(
             task = "what's my SAT superscore?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("1440")
         ),
-        AgentWideCase(
+        answer(
             task = "what's my average AP score",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("4.2")
         ),
-        AgentWideCase(
+        answer(
             task = "what would sound valley actually cost me per year after grants and " +
                 "scholarships, not counting loans or work-study?",
             kind = Kind.DOCUMENT,
             tools = listOf("read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("30900")
         ),
-        AgentWideCase(
+        answer(
             task = "which school has the lowest estimated net price?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("Rainier State")
         ),
-        AgentWideCase(
+        answer(
             task = "how many days between when I submitted the FAFSA and when the Sound Valley " +
                 "offer came?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "date", "answer"),
-            ends = End.ANSWER,
             computed = listOf("34 days")
         ),
-        AgentWideCase(
+        answer(
             task = "how many days left until the washington futures deadline?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "date", "answer"),
-            ends = End.ANSWER,
             computed = listOf("81 days")
         ),
-        AgentWideCase(
+        answer(
             task = "what's the word limit for the rainier state honors essay?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "links", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("350")
         ),
-        AgentWideCase(
+        answer(
             task = "what did mr ortiz want from me for his rec letter?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("brag sheet", "build log")
         ),
-        AgentWideCase(
+        answer(
             task = "how many words is the latest draft of my personal statement?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("641")
         ),
-        AgentWideCase(
+        answer(
             task = "what's our SAI?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("8,200")
         ),
-        AgentWideCase(
+        answer(
             task = "who's interviewing me for northbridge?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("Colin Marsh")
         ),
-        AgentWideCase(
+        answer(
             task = "how much have the campus visits actually cost so far, not counting refunds?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("313")
         ),
-        AgentWideCase(
+        answer(
             task = "which tour did I rate higher, cascade pacific or rainier state?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("Cascade Pacific")
         ),
-        AgentWideCase(
+        answer(
             task = "how much is the greenlake award worth?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("2,500")
         ),
-        AgentWideCase(
+        answer(
             task = "what was my PSAT score?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("your psat score was")
         ),
-        AgentWideCase(
+        answer(
             task = "when does cascade pacific release ED decisions?",
             kind = Kind.DOCUMENT,
-            tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER
+            tools = listOf("search", "read", "answer")
         ),
-        AgentWideCase(
+        answer(
             task = "what's hannah lee's phone number?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("her number is 206-555-0143")
         )
     )

@@ -1,102 +1,87 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-import app.notekea.chat.eval.AgentWideCase.End
 import app.notekea.chat.eval.AgentWideCase.Kind
 
 /** Requests the food bank vault cannot settle, then traps whose words do settle them. */
 internal object BlindFoodBankAsks {
     val all = listOf(
-        AgentWideCase(
+        ask(
             task = "set Grace's status to on-leave",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Kim", "Mensah")
         ),
-        AgentWideCase(
+        ask(
             task = "add a line to the budget: new hand truck, $240",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("grant", "operat")
         ),
-        AgentWideCase(
+        ask(
             task = "add 'check the fire extinguisher tags' to the checklist",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("distribution")
         ),
-        AgentWideCase(
+        ask(
             task = "move the pickup to Friday",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Fairmount", "Riverside", "Brigid")
         ),
-        AgentWideCase(
+        ask(
             task = "take Grace off the Nov 22 shift",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Kim", "Mensah")
         ),
-        AgentWideCase(
+        ask(
             task = "change the mobile pantry stop to start at 4pm",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Fishtown", "Hunting Park", "Eastwick")
         ),
-        AgentWideCase(
+        ask(
             task = "push the training back to Dec 3",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("forklift")
         ),
-        AgentWideCase(
+        ask(
             task = "mark the turkey pledge as fully received",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Riverside", "Ostrowski")
         ),
-        AgentWideCase(
+        answer(
             task = "how many hours did Grace Mensah put in in October?",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("13"),
             lacks = listOf("21 hours")
         ),
-        AgentWideCase(
+        change(
             task = "add 'restock nitrile gloves' to the distribution checklist",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "add_task", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Distribution", "restock nitrile gloves")
         ),
-        AgentWideCase(
+        change(
             task = "push the Fairmount pickup to Friday",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Pickups", "Fairmount")
         ),
-        AgentWideCase(
+        answer(
             task = "what's the total planned spend across both budgets?",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("23360")
         ),
-        AgentWideCase(
+        change(
             task = "tag both Graces with #saturday-crew",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "add_tag", "add_tag", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Grace Kim", "Grace Mensah", "saturday-crew")
         )
     )

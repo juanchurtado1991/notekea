@@ -1,64 +1,83 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-
 /**
  * The nine exams written blind on 2026-11-17 (`docs/eval-blind.md`), each a vault of one invented person and the
  * tasks a person like them would type. Never tuned on: they are measured before a change to the loop and after it,
  * and their failures are read only by kind.
  */
 internal object BlindExams {
-    class Exam(
-        val id: String,
-        val vault: String,
-        val cases: List<AgentWideCase>
-    )
-
     val all = listOf(
-        Exam(
+        // A fintech team's tech lead.
+        exam(
             id = "tech-lead",
-            vault = BlindTechLeadCases.VAULT,
-            cases = BlindTechLeadCases.all
+            vault = "Blind Tech Lead",
+            BlindTechLeadAnswers.all,
+            BlindTechLeadChanges.all,
+            BlindTechLeadAsks.all
         ),
-        Exam(
+        // A second-year marine biology PhD student.
+        exam(
             id = "grad-student",
-            vault = BlindGradStudentCases.VAULT,
-            cases = BlindGradStudentCases.all
+            vault = "Blind Grad Student",
+            BlindGradStudentAnswers.all,
+            BlindGradStudentChanges.all,
+            BlindGradStudentAsks.all
         ),
-        Exam(
+        // Guadalajara restaurateur.
+        exam(
             id = "restaurante",
-            vault = BlindRestauranteCases.VAULT,
-            cases = BlindRestauranteCases.all
+            vault = "Blind Restaurante",
+            BlindRestauranteAnswers.all,
+            BlindRestauranteChanges.all,
+            BlindRestauranteAsks.all
         ),
-        Exam(
+        // Toronto couple, money+home.
+        exam(
             id = "household",
-            vault = BlindHouseholdCases.VAULT,
-            cases = BlindHouseholdCases.all
+            vault = "Blind Household",
+            BlindHouseholdAnswers.all,
+            BlindHouseholdChanges.all,
+            BlindHouseholdAsks.all
         ),
-        Exam(
+        // A parent in Bogotá with a family of five.
+        exam(
             id = "familia",
-            vault = BlindFamiliaCases.VAULT,
-            cases = BlindFamiliaCases.all
+            vault = "Blind Familia",
+            BlindFamiliaAnswers.all,
+            BlindFamiliaChanges.all,
+            BlindFamiliaAsks.all
         ),
-        Exam(
+        // Orla Keane, freelance journalist in Dublin.
+        exam(
             id = "freelance-writer",
-            vault = BlindFreelanceWriterCases.VAULT,
-            cases = BlindFreelanceWriterCases.all
+            vault = "Blind Freelance Writer",
+            BlindFreelanceWriterAnswers.all,
+            BlindFreelanceWriterChanges.all,
+            BlindFreelanceWriterAsks.all
         ),
-        Exam(
+        // Denver runner, knee rehab.
+        exam(
             id = "health-log",
-            vault = BlindHealthLogCases.VAULT,
-            cases = BlindHealthLogCases.all
+            vault = "Blind Health Log",
+            BlindHealthLogAnswers.all,
+            BlindHealthLogChanges.all,
+            BlindHealthLogAsks.all
         ),
-        Exam(
+        // A Madrid property manager running 8 rental flats for five owners.
+        exam(
             id = "inmuebles",
-            vault = BlindInmueblesCases.VAULT,
-            cases = BlindInmueblesCases.all
+            vault = "Blind Inmuebles",
+            BlindInmueblesAnswers.all,
+            BlindInmueblesChanges.all,
+            BlindInmueblesAsks.all
         ),
-        Exam(
+        // A retired teacher in Lisbon: trips, book club, Japanese, garden, photography, volunteering.
+        exam(
             id = "hobbies",
-            vault = BlindHobbiesCases.VAULT,
-            cases = BlindHobbiesCases.all
+            vault = "Blind Hobbies",
+            BlindHobbiesAnswers.all,
+            BlindHobbiesChanges.all,
+            BlindHobbiesAsks.all
         )
     )
 }

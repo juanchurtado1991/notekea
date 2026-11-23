@@ -1,138 +1,118 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-import app.notekea.chat.eval.AgentWideCase.End
 import app.notekea.chat.eval.AgentWideCase.Kind
 
 /** Questions for the bakery vault: facts, sums, dates, long notes and three it cannot answer. */
 internal object BlindPanaderiaAnswers {
     val all = listOf(
-        AgentWideCase(
+        answer(
             task = "cuánto me deben en total por las facturas de noviembre?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("1599"),
             lacks = listOf("1895")
         ),
-        AgentWideCase(
+        answer(
             task = "cuánto me debe Marleny Quispe?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("385"),
             lacks = listOf("681")
         ),
-        AgentWideCase(
+        answer(
             task = "cuánto ya me pagaron de las facturas de este mes?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("2268")
         ),
-        AgentWideCase(
+        answer(
             task = "a qué hora le dejamos el pan a Marleny?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("7:15")
         ),
-        AgentWideCase(
+        answer(
             task = "a cuánto está ahora el saco de harina?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("115")
         ),
-        AgentWideCase(
+        answer(
             task = "cuánto sumaron los pedidos de octubre, descontando la devolución?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("5770")
         ),
-        AgentWideCase(
+        answer(
             task = "cuántos días van desde el último mantenimiento del horno?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "date", "answer"),
-            ends = End.ANSWER,
             computed = listOf("84 días")
         ),
-        AgentWideCase(
+        answer(
             task = "cuántos días faltan para que vengan a ver la cámara de frío?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "date", "answer"),
-            ends = End.ANSWER,
             computed = listOf("9 días")
         ),
-        AgentWideCase(
+        answer(
             task = "a cuánto vendo el panetón al por mayor?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("24")
         ),
-        AgentWideCase(
+        answer(
             task = "a qué temperatura se hornea el panetón?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("165")
         ),
-        AgentWideCase(
+        answer(
             task = "cuánto le voy a cobrar a Marleny por sus panetones de navidad?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("1440")
         ),
-        AgentWideCase(
+        answer(
             task = "con cuánta anticipación me tienen que pedir vacaciones?",
             kind = Kind.LONG_NOTE,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("20 días")
         ),
-        AgentWideCase(
+        answer(
             task = "cuánto fue la planilla de octubre sin contar el bono?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("6300")
         ),
-        AgentWideCase(
+        answer(
             task = "cuántos panes franceses hicimos entre el lunes 9 y el martes 10?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("3550")
         ),
-        AgentWideCase(
+        answer(
             task = "promedio diario de pan de tres puntas producido del 9 al 11 de noviembre?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "read", "calculate", "answer"),
-            ends = End.ANSWER,
             computed = listOf("630")
         ),
-        AgentWideCase(
+        answer(
             task = "cuál es el RUC de Marleny Quispe?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("ruc de marleny quispe es 10294718365")
         ),
-        AgentWideCase(
+        answer(
             task = "cuánto me costó el arreglo de la amasadora?",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("amasadora costó s/ 450", "amasadora costó 450")
         ),
-        AgentWideCase(
+        answer(
             task = "cuándo es el cumpleaños de Luis Apaza?",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             lacks = listOf("luis apaza cumple el 27")
         )
     )

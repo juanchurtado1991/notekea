@@ -1,101 +1,86 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-import app.notekea.chat.eval.AgentWideCase.End
 import app.notekea.chat.eval.AgentWideCase.Kind
 
 /** Requests the Blind Streamer notes cannot settle, then look-alikes whose words do settle them. */
 internal object BlindStreamerAsks {
     val all = listOf(
-        AgentWideCase(
+        ask(
             task = "mueve el collab con Santi al sábado",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Morales", "Herrera")
         ),
-        AgentWideCase(
+        ask(
             task = "add Santi as a mod in the chat rules",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Morales", "Herrera")
         ),
-        AgentWideCase(
+        ask(
             task = "en el presupuesto cambia el disponible a 300.000",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("equipo")
         ),
-        AgentWideCase(
+        ask(
             task = "agrega maratón de juegos de terror a mis ideas",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("contenido")
         ),
-        AgentWideCase(
+        ask(
             task = "cancela el pedido de Sonar Audio",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("brazo", "XLR")
         ),
-        AgentWideCase(
+        ask(
             task = "en el calendario de contenido pasa el video pendiente al 2026-11-20",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Hollow Lantern", "Orbe", "setup")
         ),
-        AgentWideCase(
+        ask(
             task = "mark the pending invoice as paid",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Nébula", "Orbe")
         ),
-        AgentWideCase(
+        ask(
             task = "anota en la nota de Laura que cumple años el 3 de diciembre",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "ask_user"),
-            ends = End.ASK,
             holds = listOf("Pineda", "Quintero")
         ),
-        AgentWideCase(
+        change(
             task = "mueve el collab con Santi Herrera al sábado 28",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Santi Herrera", "Collabs pendientes")
         ),
-        AgentWideCase(
+        change(
             task = "marca como pagada la factura de Teclados Orbe",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("FAC-025", "pagada")
         ),
-        AgentWideCase(
+        change(
             task = "en el presupuesto de equipo sube el tope a 1.800.000",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("1.800.000")
         ),
-        AgentWideCase(
+        change(
             task = "add speedrun relay to my collab ideas",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "append", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("speedrun relay")
         ),
-        AgentWideCase(
+        answer(
             task = "what time are the collabs with both Santis?",
             kind = Kind.AMBIGUOUS,
             tools = listOf("search", "read", "answer"),
-            ends = End.ANSWER,
             holds = listOf("20:00", "16:00")
         )
     )

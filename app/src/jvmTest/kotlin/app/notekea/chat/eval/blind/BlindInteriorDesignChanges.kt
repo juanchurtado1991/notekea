@@ -1,100 +1,86 @@
 package app.notekea.chat.eval.blind
 
-import app.notekea.chat.eval.AgentWideCase
-import app.notekea.chat.eval.AgentWideCase.End
 import app.notekea.chat.eval.AgentWideCase.Kind
 
 /** Changes proposed to the Blind Interior Design vault. */
 internal object BlindInteriorDesignChanges {
     val all = listOf(
-        AgentWideCase(
+        change(
             task = "add a task to the clapham schedule: book the signage fitter",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "add_task", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Clapham Cafe", "signage fitter")
         ),
-        AgentWideCase(
+        change(
             task = "hannah lowe signed today, set her status to client",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "set_property", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Hannah Lowe", "status", "client")
         ),
-        AgentWideCase(
+        change(
             task = "tag every client with an unpaid invoice #owes",
             kind = Kind.SEVERAL_NOTES,
             tools = listOf("search", "read", "list", "add_tag", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Ravi Patel", "Meera Patel", "Hannah Lowe", "owes"),
             lacks = listOf("Tom Ashby")
         ),
-        AgentWideCase(
+        change(
             task = "start today's journal note with: Linden confirmed the Moss velvet reorder",
             kind = Kind.DOCUMENT,
             tools = listOf("list", "write_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("journal", "Moss velvet reorder")
         ),
-        AgentWideCase(
+        change(
             task = "make a note Opening checklist in the clapham cafe folder " +
                 "with the clapham orders still pending",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "write_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Opening checklist", "Dome", "Teal", "Perch"),
             lacks = listOf("Bistro")
         ),
-        AgentWideCase(
+        change(
             task = "the hampstead linen came today, mark it delivered",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Oat", "delivered")
         ),
-        AgentWideCase(
+        change(
             task = "move Mood board - Hampstead into the hampstead townhouse project folder",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "move", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Mood board - Hampstead", "Hampstead Townhouse")
         ),
-        AgentWideCase(
+        change(
             task = "rename Colour palettes to Colour palettes 2026",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "rename", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Colour palettes 2026")
         ),
-        AgentWideCase(
+        change(
             task = "give oakbarrow a rating of 3",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "set_property", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Oakbarrow", "rating")
         ),
-        AgentWideCase(
+        change(
             task = "push sofia's islington slot to 2026-11-25",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Sofia", "2026-11-25")
         ),
-        AgentWideCase(
+        change(
             task = "write me a note Studio/Owed listing every unpaid invoice " +
                 "with client and amount",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "write_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("INV-2026-044", "INV-2026-047", "INV-2026-050"),
             lacks = listOf("INV-2026-049")
         ),
-        AgentWideCase(
+        change(
             task = "update the hampstead schedule, the alcove shelves are smoked " +
                 "sage paint now not oiled",
             kind = Kind.DOCUMENT,
             tools = listOf("search", "read", "edit_note", "propose"),
-            ends = End.PROPOSE,
             holds = listOf("Smoked Sage", "alcove")
         )
     )
