@@ -19,10 +19,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
 import app.notekea.core.presentation.designsystem.components.NotekeaDialog
+import app.notekea.core.presentation.designsystem.components.NotekeaDialogButtons
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
@@ -46,6 +48,7 @@ private const val DIALOG_HEIGHT_DP = 560
 @Composable
 fun ConflictDialog(
     review: ConflictReview,
+    buttonOrder: DialogButtonOrder,
     onChoose: (ConflictChoice) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -89,7 +92,10 @@ fun ConflictDialog(
                 )
             }
 
-            Choices(onChoose = onChoose)
+            Choices(
+                buttonOrder = buttonOrder,
+                onChoose = onChoose
+            )
         }
     }
 }
@@ -127,31 +133,36 @@ private fun RowScope.Version(
 }
 
 @Composable
-private fun Choices(onChoose: (ConflictChoice) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(
-            space = NotekeaDimensions.SpacingS,
-            alignment = Alignment.End
-        )
-    ) {
-        NotekeaButton(
-            text = stringResource(resource = Res.string.sync_keep_both),
-            onClick = { onChoose(ConflictChoice.BOTH) },
-            style = NotekeaButtonStyle.TEXT
-        )
-
-        NotekeaButton(
-            text = stringResource(resource = Res.string.sync_keep_theirs),
-            onClick = { onChoose(ConflictChoice.THEIRS) },
-            style = NotekeaButtonStyle.SECONDARY
-        )
-
-        NotekeaButton(
-            text = stringResource(resource = Res.string.sync_keep_mine),
-            onClick = { onChoose(ConflictChoice.MINE) }
-        )
-    }
+private fun Choices(
+    buttonOrder: DialogButtonOrder,
+    onChoose: (ConflictChoice) -> Unit
+) {
+    NotekeaDialogButtons(
+        buttonOrder = buttonOrder,
+        buttons = listOf(
+            {
+                NotekeaButton(
+                    text = stringResource(resource = Res.string.sync_keep_both),
+                    onClick = { onChoose(ConflictChoice.BOTH) },
+                    style = NotekeaButtonStyle.SECONDARY
+                )
+            },
+            {
+                NotekeaButton(
+                    text = stringResource(resource = Res.string.sync_keep_theirs),
+                    onClick = { onChoose(ConflictChoice.THEIRS) },
+                    style = NotekeaButtonStyle.SECONDARY
+                )
+            },
+            {
+                NotekeaButton(
+                    text = stringResource(resource = Res.string.sync_keep_mine),
+                    onClick = { onChoose(ConflictChoice.MINE) }
+                )
+            }
+        ),
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Preview
@@ -164,6 +175,7 @@ private fun ConflictDialogPreview() {
                 mine = "# Plan\n\nBuy seeds on Monday.\n",
                 theirs = "# Plan\n\nBuy seeds on Friday.\n"
             ),
+            buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
             onChoose = {},
             onDismiss = {}
         )

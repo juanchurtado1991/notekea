@@ -52,6 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The buttons of Clip a web page and of a sync conflict follow the platform, as a confirmation's did: on Windows
+  the primary one comes first (Clip, then Cancel; Keep mine, Keep theirs, Keep both). Cancel and Keep both are
+  outlined buttons, as Cancel is when deleting a note. One component, `NotekeaDialogButtons`, lays out the three
+  dialogs' buttons (the developer's choice among three rendered options, 2026-11-23).
 - The code review's refactor (2026-11-22, `docs/code-review-2026-11-22.md` section 3), nothing a person sees: what
   repeated is written once. Block 1, core helpers: `Outcome` is a sealed class with `valueOrNull`, `errorOrNull` and
   `map`; `CalendarDate.iso`, `ofIso` and `today`; `RelativePath.bare()`; `lineStartAt`, `lineEndAt`, `forEachLine`

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.shell.presentation.follow.SyncConflictsOf
 import app.notekea.sync.domain.FakeVaultSync
@@ -33,7 +34,12 @@ class SyncConflictsScreenTest {
         sync.status.value = SyncStatus.Conflict(notes = listOf(PLAN))
 
         setContent {
-            NotekeaTheme(darkTheme = false) { SyncConflictsOf(sync = viewModel) }
+            NotekeaTheme(darkTheme = false) {
+                SyncConflictsOf(
+                    sync = viewModel,
+                    platformConventions = PreviewPlatformConventions.linux
+                )
+            }
         }
 
         onNodeWithText(text = "Changed here and on another computer: Plan").assertExists()

@@ -17,9 +17,11 @@ import androidx.compose.ui.unit.dp
 import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.ClipStep
 import app.notekea.clips.domain.SectionLinks
+import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaDialog
+import app.notekea.core.presentation.designsystem.components.NotekeaDialogButtons
 import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
 import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusProgress
@@ -61,9 +63,18 @@ private val DEEPER = listOf(2, 3)
 @Composable
 fun ClipDialog(
     state: ClipState,
+    buttonOrder: DialogButtonOrder,
     onIntent: (ClipIntent) -> Unit
 ) {
     if (!state.isOpen) return
+
+    val clip: @Composable () -> Unit = {
+        NotekeaButton(
+            text = stringResource(resource = Res.string.clip_clip),
+            onClick = { onIntent(ClipIntent.OnClip) },
+            enabled = state.canClip
+        )
+    }
 
     NotekeaDialog(
         onDismiss = { onIntent(ClipIntent.OnDismiss) },
@@ -117,27 +128,22 @@ fun ClipDialog(
                     )
                 }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(
-                    space = NotekeaDimensions.SpacingS,
-                    alignment = Alignment.End
-                )
-            ) {
-                NotekeaButton(
-                    text = stringResource(resource = Res.string.clip_cancel),
-                    onClick = { onIntent(ClipIntent.OnDismiss) },
-                    style = NotekeaButtonStyle.TEXT
-                )
-
-                if (!state.isAsking) {
-                    NotekeaButton(
-                        text = stringResource(resource = Res.string.clip_clip),
-                        onClick = { onIntent(ClipIntent.OnClip) },
-                        enabled = state.canClip
-                    )
-                }
-            }
+            NotekeaDialogButtons(
+                buttonOrder = buttonOrder,
+                buttons = listOfNotNull(
+                    {
+                        NotekeaButton(
+                            text = stringResource(resource = Res.string.clip_cancel),
+                            onClick = { onIntent(ClipIntent.OnDismiss) },
+                            style = NotekeaButtonStyle.SECONDARY
+                        )
+                    },
+                    clip.takeIf {
+                        !state.isAsking
+                    }
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -238,6 +244,7 @@ private fun ClipDialogPreview() {
                 url = "https://example.com/sleep",
                 step = ClipStep.Checking
             ),
+            buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
             onIntent = {}
         )
     }

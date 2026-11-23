@@ -8,6 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.ai.presentation.ModelDownloadViewModel
 import app.notekea.clips.presentation.WebUpdateStatus
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.WindowDialog
@@ -68,7 +69,10 @@ internal fun VaultStatusOf(
 
 /** Over the workspace while notes changed in two places: the banner, and the review of one side by side. */
 @Composable
-internal fun SyncConflictsOf(sync: SyncStatusViewModel) {
+internal fun SyncConflictsOf(
+    sync: SyncStatusViewModel,
+    platformConventions: PlatformConventions
+) {
     val state by sync.state.collectAsState()
 
     ConflictBanner(
@@ -99,6 +103,7 @@ internal fun SyncConflictsOf(sync: SyncStatusViewModel) {
     state.review?.let { review ->
         ConflictDialog(
             review = review,
+            buttonOrder = platformConventions.dialogButtonOrder,
             onChoose = { sync.onIntent(SyncStatusIntent.OnChoose(choice = it)) },
             onDismiss = { sync.onIntent(SyncStatusIntent.OnReviewDismiss) }
         )

@@ -17,6 +17,7 @@ import app.notekea.clips.presentation.ClipUpdateDialog
 import app.notekea.clips.presentation.ClipViewModel
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.WebSourcesFolder
+import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NoteLooks
@@ -53,6 +54,7 @@ internal fun FollowAssistants(
     ClipsOf(
         clip = clip,
         workspace = viewModels.workspace,
+        buttonOrder = state.platformConventions.dialogButtonOrder,
         onRewritten = { path, original ->
             viewModels.editors.forEach {
                 it.onIntent(
@@ -122,6 +124,7 @@ private fun ReportLoaded(
 internal fun ClipsOf(
     clip: ClipViewModel,
     workspace: WorkspaceViewModel,
+    buttonOrder: DialogButtonOrder,
     onRewritten: (RelativePath, String) -> Unit = { _, _ -> }
 ) {
     val state by clip.state.collectAsState()
@@ -143,6 +146,7 @@ internal fun ClipsOf(
 
     ClipDialog(
         state = state,
+        buttonOrder = buttonOrder,
         onIntent = clip::onIntent
     )
 
@@ -189,6 +193,7 @@ private fun ClipsOfPreview() {
     NotekeaPreviewThemes {
         ClipDialog(
             state = ClipState(isOpen = true),
+            buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
             onIntent = {}
         )
     }
@@ -203,6 +208,7 @@ private fun FollowAssistantsPreview() {
                 isOpen = true,
                 url = "https://example.com/sleep"
             ),
+            buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
             onIntent = {}
         )
     }

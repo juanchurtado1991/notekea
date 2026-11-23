@@ -168,19 +168,10 @@ private fun DialogButtons(
         return
     }
 
-    Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        when (buttonOrder) {
-            DialogButtonOrder.CANCEL_THEN_PRIMARY -> {
-                cancel()
-                confirm()
-            }
-
-            DialogButtonOrder.PRIMARY_THEN_CANCEL -> {
-                confirm()
-                cancel()
-            }
-        }
-    }
+    NotekeaDialogButtons(
+        buttonOrder = buttonOrder,
+        buttons = listOf(cancel, confirm)
+    )
 }
 
 @Preview

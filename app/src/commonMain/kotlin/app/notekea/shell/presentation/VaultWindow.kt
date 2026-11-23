@@ -169,7 +169,7 @@ fun VaultWindow(
                 searchIndex = {
                     VaultStatusOf(syncViewModel, searchIndexViewModel, modelDownloadViewModel)
                 },
-                banner = { SyncConflictsOf(sync = syncViewModel) }
+                banner = { SyncConflictsOf(syncViewModel, state.platformConventions) }
             )
         }
 
