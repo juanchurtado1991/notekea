@@ -19,7 +19,7 @@ evaluation loads: E2B as small, E4B as medium, 12B as large).
 | Qwen3.5-4B Q4_K_M | 2.74 GB | 3.1 GB (measured) | 324 (73.8 %) |
 | **Gemma 4 E4B QAT** | 4.22 GB | ~4.7 GB | **315 (71.8 %)** |
 | Qwen3.5-9B Q4_K_M | 5.68 GB | 5.9 GB (measured) | 330 (75.2 %) |
-| **Gemma 4 12B QAT** | 6.72 GB | ~7.2 GB | being measured |
+| **Gemma 4 12B QAT** | 6.72 GB | ~7.2 GB | **357 (81.3 %)** |
 
 Gemma's memory is the file plus what the tournament's models added; it is not measured yet.
 
@@ -36,6 +36,12 @@ How the failures end, by the report's kind:
 By cause, the E4B against the Qwen 4B: asked when it should not 25 against 17, figures 20 against 14, days 8 against
 4; it is ahead on changes (30 against 36), on asking when it must (28 against 32) and on facts (10 against 12). 51
 tasks went from right to wrong and 42 the other way: the two families fail on different tasks.
+
+The 12B fails 82: asking when it must 34, asking when it should not 19, changes 16, figures 8, facts 3, days 1,
+other 1. By kind: ended the wrong way 50, never found it 11, ran out of steps 10, did the wrong thing 6, found it and
+did not say it 4, routed 1. Finding and working out are nearly solved at this size; **53 of its 82 failures are the
+choice between asking and going on**, which is the hold's and the instructions' ground (steps 2 and 3). Its round
+took 195 minutes against 49 for the E4B: video memory was not the cause (10.5 of 16.3 GB in use, the card at 59 %).
 
 **One difference of the engine.** Gemma's template wraps a reply held to a schema in a ` ```json ` fence (166 of 166
 replies of the frame evaluation). The schema still holds inside it. The rounds above ran with the fence taken off in
