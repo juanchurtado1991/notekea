@@ -15,8 +15,8 @@ import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.sources.SourceSites
 import app.notekea.chat.domain.tool.ChatTool
+import app.notekea.chat.domain.tool.ModelJson
 import app.notekea.chat.domain.tool.ToolCall
-import app.notekea.chat.domain.tool.ToolCallJson
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
@@ -59,6 +59,7 @@ class RunTurnUseCase(
     private val vaultGuide: VaultGuide,
     private val proposal: ProposalCheck,
     private val clock: Clock,
+    private val modelJson: ModelJson,
     private val stepMemory: StepMemory? = null,
     private val wholeLast: Int? = null,
     private val sourceSites: SourceSites? = null,
@@ -70,7 +71,11 @@ class RunTurnUseCase(
         finalAnswer = finalAnswer,
         proposal = proposal
     )
-    private val router = TurnRouter(llmEngine = llmEngine)
+
+    private val router = TurnRouter(
+        llmEngine = llmEngine,
+        modelJson = modelJson
+    )
 
     operator fun invoke(
         task: String,
@@ -436,7 +441,9 @@ class RunTurnUseCase(
             return null
         }
 
-        return ToolCallJson.read(json = json)
+        return modelJson
+            .fields(json = json)
+            ?.let { ToolCall.of(fields = it) }
     }
 
     // No call could be read, or the steps ran out: what it found is still worth an answer; with nothing, it stopped.

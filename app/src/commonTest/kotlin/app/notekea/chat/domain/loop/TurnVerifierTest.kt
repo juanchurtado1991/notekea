@@ -9,7 +9,6 @@ import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.tool.ToolCall
-import app.notekea.chat.domain.tool.ToolCallJson
 import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.change.ChangeTools
 import app.notekea.chat.domain.tool.change.ProposeTool

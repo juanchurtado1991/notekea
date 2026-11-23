@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.domain.tool.ModelJson
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.memory.domain.MemoryLine
 
@@ -8,8 +9,14 @@ import app.notekea.core.memory.domain.MemoryLine
  * fit alike and settles those their names or the memory tell apart; the model marks each of the rest yes or no, and
  * the code counts. Then the same for the entries of an item. Null when nothing is shown or a reply is unread.
  */
-class TaskFramer(llmEngine: LlmEngine) {
-    private val asking = FrameQuestions(llmEngine = llmEngine)
+class TaskFramer(
+    llmEngine: LlmEngine,
+    modelJson: ModelJson
+) {
+    private val asking = FrameQuestions(
+        llmEngine = llmEngine,
+        modelJson = modelJson
+    )
 
     internal suspend fun frameOf(
         task: String,

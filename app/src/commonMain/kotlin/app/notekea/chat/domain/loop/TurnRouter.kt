@@ -1,7 +1,7 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.skill.Skill
-import app.notekea.chat.domain.tool.ToolCallJson
+import app.notekea.chat.domain.tool.ModelJson
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
@@ -13,14 +13,17 @@ import app.notekea.core.llm.domain.ReplyText
  * The first call of a turn, a cheap one: which kind of work the request is, so the loop is given only that work's
  * tools, and which skill fits it (`docs/agent-loop.md`). A reply that cannot be read is a question: [WorkKind.ASK].
  */
-class TurnRouter(private val llmEngine: LlmEngine) {
+class TurnRouter(
+    private val llmEngine: LlmEngine,
+    private val modelJson: ModelJson
+) {
     suspend fun route(
         task: String,
         skills: List<Skill>
     ): TurnRoute {
         // Room for the longest skill name as well: one longer than the reply's room was cut, and the reply unread.
         val longest = skills
-            .map { escaped(text = it.name) }
+            .map { modelJson.quoted(text = it.name) }
             .maxByOrNull { it.length }
             .orEmpty()
 
@@ -43,7 +46,7 @@ class TurnRouter(private val llmEngine: LlmEngine) {
             return NONE
         }
 
-        val fields = ToolCallJson.fields(json = json) ?: return NONE
+        val fields = modelJson.fields(json = json) ?: return NONE
 
         return TurnRoute(
             kind = RouteWords.kindOf(
@@ -86,27 +89,17 @@ class TurnRouter(private val llmEngine: LlmEngine) {
         )
     }
 
+    // A skill's name is the vault's own text: written bare, one holding a quote broke the schema and every turn was
+    // routed to ask (the bug hunt of 2026-11-17, E12).
     private fun schemaOf(skills: List<Skill>): String {
         val kinds = WorkKind.entries.joinToString(separator = ",") { "\"${it.written}\"" }
 
         val names = (skills.map { it.name } + NO_SKILL)
-            .joinToString(separator = ",") { "\"${escaped(text = it)}\"" }
+            .joinToString(separator = ",") { modelJson.quoted(text = it) }
 
         return "{\"type\":\"object\",\"properties\":{\"$WORK\":{\"enum\":[$kinds]}," +
             "\"$SKILL\":{\"enum\":[$names]}},\"required\":[\"$WORK\",\"$SKILL\"]}"
     }
-
-    // A name holding a quote or a backslash broke the schema, and every turn was routed to ask (the bug hunt of
-    // 2026-11-17, E12).
-    private fun escaped(text: String): String = text
-        .replace(
-            oldValue = "\\",
-            newValue = "\\\\"
-        )
-        .replace(
-            oldValue = "\"",
-            newValue = "\\\""
-        )
 
     private companion object {
         const val WORK = "work"

@@ -511,7 +511,7 @@ measured with the model in step 5, when the loop calls them.
 **The loop** (`chat/domain/loop`). `RunTurnUseCase`: a first cheap call (`TurnRouter`) names the kind of work
 (`WorkKind`: write, organize, web, ask) and the skill that fits; the loop is given that kind's tools
 (`LoopTools`, `Toolsets`), the vault's instructions and the skill (`LoopPrompt`), and calls one tool at a time
-under the registry's grammar (`ToolCallJson` reads it) until it answers, proposes or asks (`AgentStep.Asked`). The
+under the registry's grammar (`ModelJson` reads it) until it answers, proposes or asks (`AgentStep.Asked`). The
 changes are tools (`tool/change`: `ChangeTools`, each one of 3.9's actions; `ProposeTool` ends on the card, checked
 and written by `ProposalCheck`, shared with today's agent). `TurnState` holds a turn as it goes.
 

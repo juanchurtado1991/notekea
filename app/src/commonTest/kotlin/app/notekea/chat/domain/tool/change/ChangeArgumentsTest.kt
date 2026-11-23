@@ -1,7 +1,7 @@
 package app.notekea.chat.domain.tool.change
 
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.domain.tool.ToolCall
-import app.notekea.chat.domain.tool.ToolCallJson
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
@@ -51,10 +51,12 @@ class ChangeArgumentsTest {
         runTest {
             val context = contextOf(task = "set priority 3 on my Lisbon trip")
 
-            val call = ToolCallJson.read(
+            val fields = GhostModelJson().fields(
                 json = """{"tool":"set_property","notes":["Projects/Trip to Lisbon"],""" +
                     """"property":"priority","value":3}"""
             )
+
+            val call = ToolCall.of(fields = checkNotNull(value = fields))
 
             ChangeTools.setProperty.run(
                 call = checkNotNull(value = call),

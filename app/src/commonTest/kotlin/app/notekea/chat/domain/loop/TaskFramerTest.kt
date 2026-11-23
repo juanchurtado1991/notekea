@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
@@ -12,7 +13,11 @@ import kotlin.test.assertEquals
  */
 class TaskFramerTest {
     private val engine = FakeLlmEngine()
-    private val framer = TaskFramer(llmEngine = engine)
+
+    private val framer = TaskFramer(
+        llmEngine = engine,
+        modelJson = GhostModelJson()
+    )
 
     private val home = candidate(path = "Home/Budget.md")
     private val work = candidate(path = "Work/Budget.md")

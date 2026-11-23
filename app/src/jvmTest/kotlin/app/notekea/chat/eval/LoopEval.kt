@@ -1,6 +1,7 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.data.SqliteStepMemory
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
@@ -63,6 +64,7 @@ internal object LoopEval {
                 composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader(), clipper)
             ),
             clock = Clock.System,
+            modelJson = GhostModelJson(),
             stepMemory = SqliteStepMemory().takeIf {
                 System.getProperty("notekea.stepmemory") != "off"
             },
@@ -83,7 +85,10 @@ internal object LoopEval {
         trace: EvalTrace?
     ): FrameSource {
         val frames = TurnFrames(
-            framer = TaskFramer(llmEngine = engine),
+            framer = TaskFramer(
+                llmEngine = engine,
+                modelJson = GhostModelJson()
+            ),
             answerFromNotes = answerFromNotes,
             vaultGuide = vaultGuide
         )

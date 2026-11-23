@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.loop
 
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.domain.skill.Skill
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
@@ -25,7 +26,12 @@ class TurnStartTest {
 
             engine.reply = { "{\"work\":\"write\",\"skill\":$written}" }
 
-            val route = TurnRouter(llmEngine = engine).route(
+            val router = TurnRouter(
+                llmEngine = engine,
+                modelJson = GhostModelJson()
+            )
+
+            val route = router.route(
                 task = "write a note about soil",
                 skills = listOf(
                     Skill(

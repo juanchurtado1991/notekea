@@ -3,6 +3,7 @@ package app.notekea.chat.eval
 import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.domain.loop.TurnRouter
 import app.notekea.chat.domain.loop.WorkKind
 import app.notekea.core.data.JvmAppDispatchers
@@ -45,7 +46,10 @@ class RouterEvalChatModelTest {
         dispatchers = JvmAppDispatchers()
     )
 
-    private val router = TurnRouter(llmEngine = engine)
+    private val router = TurnRouter(
+        llmEngine = engine,
+        modelJson = GhostModelJson()
+    )
 
     @AfterTest
     fun tearDown() {

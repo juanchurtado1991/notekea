@@ -8,8 +8,6 @@ import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.skill.VaultGuide
-import app.notekea.chat.domain.tool.ToolCall
-import app.notekea.chat.domain.tool.ToolCallJson
 import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.change.ChangeTools
 import app.notekea.chat.domain.tool.change.ProposeTool
@@ -413,30 +411,6 @@ class RunTurnTest {
                 )
             )
         }
-
-    @Test
-    fun `a call is read from the model's JSON, lists a line an item, escapes undone, and what is no call is none`() {
-        assertEquals(
-            expected = listOf(
-                ToolCall(
-                    name = "plan",
-                    arguments = mapOf("steps" to "Read \"A\"\nWrite it", "n" to "3")
-                ),
-                ToolCall(
-                    name = "answer",
-                    arguments = mapOf("text" to "Línea uno\nlínea dos é")
-                ),
-                null,
-                null
-            ),
-            actual = listOf(
-                ToolCallJson.read(json = """{"tool": "plan", "steps": ["Read \"A\"", "Write it"], "n": 3}"""),
-                ToolCallJson.read(json = """{"tool":"answer","text":"Línea uno\nlínea dos é"}"""),
-                ToolCallJson.read(json = """{"text":"no tool named"}"""),
-                ToolCallJson.read(json = "not json")
-            )
-        )
-    }
 
     private companion object {
         const val SUMMARY = "Tags the lease."

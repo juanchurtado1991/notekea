@@ -3,6 +3,7 @@ package app.notekea.chat.eval
 import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.loop.TaskFramer
 import app.notekea.chat.domain.loop.TurnFrames
@@ -121,10 +122,17 @@ class FrameEvalChatModelTest {
         // A trace of each set's own, as the memory's sets ask the unseen tasks again.
         val trace = EvalTrace(engine = engine)
         val vaultGuide = VaultGuide(noteTextCache = cache)
-        val router = TurnRouter(llmEngine = trace.recorded)
+
+        val router = TurnRouter(
+            llmEngine = trace.recorded,
+            modelJson = GhostModelJson()
+        )
 
         val frames = TurnFrames(
-            framer = TaskFramer(llmEngine = trace.recorded),
+            framer = TaskFramer(
+                llmEngine = trace.recorded,
+                modelJson = GhostModelJson()
+            ),
             answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine),
             vaultGuide = vaultGuide
         )

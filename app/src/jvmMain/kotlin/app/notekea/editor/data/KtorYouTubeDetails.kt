@@ -4,6 +4,7 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.editor.domain.YouTubeDetails
 import co.touchlab.kermit.Logger
+import com.ghost.serialization.Ghost
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -46,13 +47,10 @@ class KtorYouTubeDetails(
                 }
 
             if (!response.status.isSuccess()) return@withContext null
-            val json = response.bodyAsText()
+            val details = Ghost.deserialize<OEmbedDto>(response.bodyAsText())
 
-            OEmbedJson
-                .stringOf(
-                    json = json,
-                    name = "thumbnail_url"
-                )
+            details
+                .thumbnailUrl
                 ?.takeIf { isYouTubePicture(url = it) }
                 ?.let {
                     keepThumbnail(
@@ -61,10 +59,7 @@ class KtorYouTubeDetails(
                     )
                 }
 
-            OEmbedJson.stringOf(
-                json = json,
-                name = "title"
-            )
+            details.title?.takeIf { it.isNotBlank() }
         } catch (exception: CancellationException) {
             throw exception
         } catch (exception: Exception) {

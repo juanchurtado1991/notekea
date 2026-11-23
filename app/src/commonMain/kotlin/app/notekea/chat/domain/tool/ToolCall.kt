@@ -14,4 +14,16 @@ data class ToolCall(
         .lines()
         .map { it.trim() }
         .filter { it.isNotEmpty() }
+
+    companion object {
+        /** The call [fields] are, the tool named in [ToolRegistry.NAMED]; null when they name none. */
+        fun of(fields: Map<String, String>): ToolCall? {
+            val name = fields[ToolRegistry.NAMED]?.takeIf { it.isNotBlank() } ?: return null
+
+            return ToolCall(
+                name = name.trim(),
+                arguments = fields - ToolRegistry.NAMED
+            )
+        }
+    }
 }

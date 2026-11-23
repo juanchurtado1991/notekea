@@ -1,6 +1,7 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.context.StepMemory
 import app.notekea.chat.domain.plan.CheckPlanUseCase
@@ -35,6 +36,7 @@ fun loopTurn(
         )
     ),
     clock = Clock.System,
+    modelJson = GhostModelJson(),
     stepMemory = stepMemory,
     wholeLast = wholeLast,
     frames = frames

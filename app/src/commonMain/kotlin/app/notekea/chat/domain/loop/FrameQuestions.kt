@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.tool.ToolCallJson
+import app.notekea.chat.domain.tool.ModelJson
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
@@ -14,7 +14,10 @@ import app.notekea.core.memory.domain.MemoryLine
  * a task means; which notes of a set, or entries of a note, it could be about, each marked; which note; which
  * several. Asked to pick one, the 4B never said "unclear": so it marks each one, and the code counts.
  */
-internal class FrameQuestions(private val llmEngine: LlmEngine) {
+internal class FrameQuestions(
+    private val llmEngine: LlmEngine,
+    private val modelJson: ModelJson
+) {
     /** How many things [task] means, its own words for them, and whether the thing is an item inside a note. */
     suspend fun countOf(
         task: String,
@@ -168,7 +171,7 @@ internal class FrameQuestions(private val llmEngine: LlmEngine) {
             return null
         }
 
-        return ToolCallJson.fields(json = json)
+        return modelJson.fields(json = json)
     }
 
     private fun remembered(memory: List<MemoryLine>): String = memory

@@ -2,6 +2,7 @@ package app.notekea.chat.di
 
 import app.notekea.chat.data.BundledHelpGuideSource
 import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostModelJson
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.agent.AgentAnswerUseCase
 import app.notekea.chat.domain.agent.AgentTaskUseCase
@@ -25,6 +26,7 @@ import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PlanRequestUseCase
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
+import app.notekea.chat.domain.tool.ModelJson
 import app.notekea.chat.presentation.viewmodel.ChatSources
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -66,6 +68,7 @@ val chatModule = module {
             vaultGuide = get(),
             proposal = get(),
             clock = get(),
+            modelJson = get(),
             // Bound on the desktop (`SqliteStepMemory`); elsewhere the loop drops what does not fit, as before.
             stepMemory = getOrNull(),
             // The vault's own web sources, trusted by definition (`docs/agent-web.md`).
@@ -81,6 +84,7 @@ val chatModule = module {
     factoryOf(::CompactChatUseCase)
     factoryOf(::AnswerFromFoundUseCase)
     factory<ActionPlanReader> { GhostActionPlanReader() }
+    factory<ModelJson> { GhostModelJson() }
     single<HelpGuideSource> { BundledHelpGuideSource(dispatchers = get()) }
 
     viewModel { parameters ->
