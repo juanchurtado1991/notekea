@@ -45,21 +45,39 @@ All on pool round 10 (`scripts/loop-eval/measure.sh <label> pool <small|medium|l
 
 Lowest risk first. Each line: what repeats → what replaces it (lines saved).
 
-**Where it stands (2026-11-22, evening).** One commit a block went in, each with `check koverVerify` green but for
-the developer's local failures: 1 `0b2bffce`, 2 `4b66642c`, 3 `f5981ee6`, 4 `05f4233c`, 5 `f7d5c857`, 6 `e7d59192`,
-7 `44cfa9c1` (the golden file) and `81fb2aae`. Done differently from the plan: `Outcome` became a sealed class, as
-the Konsist rules allow no extension on an interface (the same for `CalendarDate.today` and `ReplyText.of`, in
-place of extensions of `LocalCalendar` and `LlmEngine`). Left for the next pass:
+**Where it stands (2026-11-23).** One commit a block went in on 2026-11-22, each with `check koverVerify` green but
+for the developer's local failures: 1 `0b2bffce`, 2 `4b66642c`, 3 `f5981ee6`, 4 `05f4233c`, 5 `f7d5c857`, 6
+`e7d59192`, 7 `44cfa9c1` (the golden file) and `81fb2aae`. Done differently from the plan: `Outcome` became a sealed
+class, as the Konsist rules allow no extension on an interface (the same for `CalendarDate.today` and
+`ReplyText.of`, in place of extensions of `LocalCalendar` and `LlmEngine`).
 
-- 1: `FrameWords` on `TextFolder` (measured by the evals); the line loops beyond `TaskFinder` and `EmbedFinder`.
-- 2: `launchDebounced` (Files settings reads its jobs to save them all; the editor's go through its host).
-- 3: `LoopHarness`, `EvalModels`/`EvalReports`/`EvalProperties`, `themedScene`/`SceneClock`, `TwoComputers`, the
-  inline effect collectors.
-- 4: public `await`/`shown`/`awaitShown`, one result codec, `NotekeaRule` and `Emit`.
-- 5: the settings rows, `NotekeaFormDialog`/`NotekeaDialogButtons`, `NotekeaMediaCard`, `FieldKeys.kt`,
-  `NotekeaMenuAnchor` (each a look to compare).
-- 6: `RewriteNoteUseCase`, the Okio path helpers, `NoteMetadata.of`, the editor's edits and toolbar list,
-  `CachedSettingsStore`.
+A review of those commits on 2026-11-23 (`12745fb9`, `cc8cb471`) fixed the large-file notice (section 1) and took
+`TextFolder` out of the constructors, and a second pass did what was worth doing of the rest:
+
+- 3: `loopTurn`, `SceneClock`, `TwoComputers`, `EvalModels` and the inline effect collectors (`d2b51c71`).
+- 4: `NotekeaRule` and `Emit` for the ktlint rules.
+- 5: `FieldKeys.kt`.
+- 6: `HeldSetting` (the plan's `CachedSettingsStore`) for the three stores read once and held.
+
+Looked at and left, each for a reason:
+
+- 1: `FrameWords` keeps its own folding. The vaults of the pool hold letters the two foldings treat differently
+  (ä, ö, ø, š…), so moving it changes what the loop matches: it costs a measurement of every size to save ten
+  lines. The other readers that walk lines map them (`ReadingMarkdown`, `ReadModeLinks`), stop early
+  (`SearchPassagesUseCase`) or strip a carriage return first (`OutlineFinder`): another shape than
+  `forEachLineOutsideCode`.
+- 2: `launchDebounced`. Two sites, and Files settings reads its jobs to tell which saves are still pending: the
+  base would have to hand its jobs back.
+- 3: `themedScene`. The scenes differ in size, density, conventions and content; only the theme's line repeats.
+- 4: public `await`/`shown` in `CaseScope` (the cases wait on different things for different times: a line a site)
+  and one result codec (`RunnerEvent` is the runner's wire and `ResultStore` the file of saved results: one format
+  for both changes a file people already have).
+- 5: the settings rows, `NotekeaFormDialog`/`NotekeaDialogButtons`, `NotekeaMediaCard` and `NotekeaMenuAnchor`
+  change a look (the dialogs' button order among them): for the developer to see first.
+- 6: `RewriteNoteUseCase` (the five end differently: a Boolean, a rewrite, a `QuerySave`; six lines are shared),
+  the Okio path helpers (names, segments and files are checked, not one thing), `NoteMetadata.of` in place of
+  `GhostFrontmatterParser` (it swaps the parser every note is read with: its own change, with the vaults read
+  both ways), and the editor's edits and toolbar list (the list sets the toolbar's order: a look).
 
 1. **Core helpers.** `(x as? Outcome.Success)?.value` at 43 sites → `Outcome.valueOrNull()`, `errorOrNull()`,
    `map` (120). Hand-padded ISO dates at 10 sites → `CalendarDate.iso`, `CalendarDate.ofIso`, and

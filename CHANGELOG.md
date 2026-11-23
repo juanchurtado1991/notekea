@@ -67,6 +67,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Block 7, the blind exams: `answer`, `change`, `ask` and `exam` in `blind/BlindDsl.kt` and one `BlindExam`; the 59
   `Blind*Cases.kt` are gone. `BlindGoldenTest` checks against `blind-exams.txt`, written from the exams before, that
   every case is the same and in the same order, so the logged runs stay comparable.
+  Second pass (2026-11-23), after a review of the first: `TextFolder` is called, not injected (`noteTextCache(store)`
+  went with it); tests share `loopTurn`, `SceneClock`, `TwoComputers` and `EvalModels`; the ktlint rules share
+  `NotekeaRule` and `Emit`; the fields share `SUBMIT_KEYS` and `submitOrCancelOnKeys` (`FieldKeys.kt`); the
+  appearance, preferences and active-model stores share `HeldSetting`, which also gives the active model's saves
+  the one-at-a-time order the other two had.
 - The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
   app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
   when it says which, and works on each when it means several. It replaces the word lists that decided this
