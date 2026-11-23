@@ -52,6 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- A pop-up button's menu (Language, the folders, the date format, the sync interval) opens under the button, which
+  stays in sight; it opened over it (the developer's choice between two rendered options, 2026-11-23).
 - The buttons of Clip a web page and of a sync conflict follow the platform, as a confirmation's did: on Windows
   the primary one comes first (Clip, then Cancel; Keep mine, Keep theirs, Keep both). Cancel and Keep both are
   outlined buttons, as Cancel is when deleting a note. One component, `NotekeaDialogButtons`, lays out the three

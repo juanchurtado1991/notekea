@@ -76,8 +76,8 @@ Looked at and left, each for a reason:
   order, and Cancel outlined). `NotekeaSettingsSwitchRow` and `NotekeaSettingsChoiceRow` with the spotlight inside,
   `NotekeaFormDialog` for the five dialogs with a title and an explanation, and `NotekeaMediaCard` under the
   document and video cards: thirty renders of the settings pages, the dialogs and the cards, light and dark, are the
-  same bytes before and after. Open: where `NotekeaPopUpButton`'s menu opens (over the button, as now, or under
-  it), the only thing `NotekeaMenuAnchor` would change.
+  same bytes before and after. The pop-up button's menu opens under the button (the developer's choice; it opened
+  over it), which left nothing for a `NotekeaMenuAnchor` to share: each control passes where its menu opens.
 - 6: `RewriteNoteUseCase` (the five end differently: a Boolean, a rewrite, a `QuerySave`; six lines are shared),
   the Okio path helpers (names, segments and files are checked, not one thing), `NoteMetadata.of` in place of
   `GhostFrontmatterParser` (it swaps the parser every note is read with: its own change, with the vaults read

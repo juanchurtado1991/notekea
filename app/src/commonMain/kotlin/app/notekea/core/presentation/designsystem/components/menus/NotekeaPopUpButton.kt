@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,7 +38,8 @@ private const val PREVIEW_LABEL = "Language"
 
 /**
  * A setting with a few choices, as a macOS pop-up button: the current [choice] with its double arrow; a click opens the
- * [choices] below it, the current one checked. [label] names the setting for screen readers.
+ * [choices] under it, the current one checked, so the button stays in sight (the developer's choice of 2026-11-23:
+ * the menu opened over it). [label] names the setting for screen readers.
  */
 @Composable
 fun NotekeaPopUpButton(
@@ -48,6 +50,13 @@ fun NotekeaPopUpButton(
 ) {
     val menuState = remember { NotekeaContextMenuState() }
     val colors = MaterialTheme.colorScheme
+
+    val belowButton = with(LocalDensity.current) {
+        Offset(
+            x = 0f,
+            y = NotekeaDimensions.PushButtonHeight.toPx()
+        )
+    }
 
     NotekeaContextMenuArea(
         sections = listOf(choices),
@@ -67,7 +76,7 @@ fun NotekeaPopUpButton(
                 .clickable(
                     onClickLabel = label,
                     role = Role.DropdownList,
-                    onClick = { menuState.open(at = Offset.Zero) }
+                    onClick = { menuState.open(at = belowButton) }
                 ),
             shape = shape,
             color = colors.surface,
