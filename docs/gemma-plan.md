@@ -41,11 +41,15 @@ The 12B fails 82: asking when it must 34, asking when it should not 19, changes 
 other 1. By kind: ended the wrong way 50, never found it 11, ran out of steps 10, did the wrong thing 6, found it and
 did not say it 4, routed 1. Finding and working out are nearly solved at this size; **53 of its 82 failures are the
 choice between asking and going on**, which is the hold's and the instructions' ground (steps 2 and 3). Its round
-took 195 minutes against 49 for the E4B: video memory was not the cause (10.5 of 16.3 GB in use, the card at 59 %).
+took 195 minutes against 49 for the E4B. Neither video memory (10.5 of 16.3 GB in use) nor a fall to the CPU is the
+cause: one call alone, timed on this card, reads 1,370 tokens a second and writes 49, against 2,210 and 65 for the
+Qwen 9B and 3,760 and 101 for the E4B, the same with 1 slot as with 4 and with a schema as without. That is 1.3 to
+1.6 times the Qwen 9B a token; the rest of the 2.8 times a task is in how much a task reads and writes, not looked
+into yet.
 
 **One difference of the engine.** Gemma's template wraps a reply held to a schema in a ` ```json ` fence (166 of 166
 replies of the frame evaluation). The schema still holds inside it. The rounds above ran with the fence taken off in
-`LlamaLlmEngine` in the measuring worktree only, uncommitted: step 1 writes it in the app, with its test.
+the measuring worktree only; the app takes it off as the reply streams since `JsonFence` (`LlamaLlmEngine`).
 
 ## 2. The plan
 

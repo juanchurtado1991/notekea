@@ -87,13 +87,20 @@ class LlamaLlmEngine(
                 )
 
                 val pieces = reply.iterator()
+                val fence = options.jsonSchema?.let { JsonFence() }
 
                 try {
                     while (pieces.hasNext()) {
                         coroutineContext.ensureActive()
-                        val text = pieces.next().text
+                        val piece = pieces.next().text
+                        val text = fence?.taken(piece = piece) ?: piece
                         if (text.isNotEmpty()) send(element = text)
                     }
+
+                    fence
+                        ?.ended()
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { send(element = it) }
                 } finally {
                     // A cancelled collector stops the model instead of letting it write to the end.
                     pieces.cancel()
