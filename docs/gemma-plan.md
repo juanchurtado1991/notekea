@@ -43,25 +43,55 @@ replies of the frame evaluation). The schema still holds inside it. The rounds a
 
 ## 2. The plan
 
-1. **A base that can be read.** The pool is blind, so nothing is tuned on it. Measure the E4B and the E2B on the
-   sets whose tasks may be read (`measure.sh <label> dev` and `tuned`, about 90 minutes a size), on the current
-   commit with the fence fix committed. These are what every later step compares with.
-2. **Tune by cause, the largest first, on the E4B**, then check the E2B and the 12B:
+1. **A base that can be read, measured twice.** The pool is blind, so nothing is tuned on it. Measure the E4B and
+   the E2B on the sets whose tasks may be read (`measure.sh <label> dev` and `tuned`, about 90 minutes a size), on
+   the current commit with the fence fix committed. A second pool round with another seed goes beside round 10: one
+   round moves about 4 tasks by chance, and a change that gains 5 must be told from that.
+2. **What is the harness's and what is the model's, before anything is written.** The holds were set on Qwen. In the
+   E4B's failed tasks "Not asked: the task names what it means" shows in 8 and "the answer says a figure no tool
+   gave" in 7. Measure dev with each hold off, one at a time: taking one out may gain more than adding one.
+3. **The instructions written again for Gemma, not adjusted.** They are long and shaped by what Qwen needed. Gemma
+   takes half the steps (3 a task against 6), so it needs fewer warnings against repeating a call and a clearer
+   word on how a turn ends.
+4. **Tune by cause, the largest first, on the E4B**, then check the E2B and the 12B:
    - ending the wrong way (54): an answer where a proposal or a question was due, or the reverse;
    - never finding it (24) and finding it without saying it (21);
    - asking when the task's words settle it (25);
    - figures and days (28);
    - on the E2B also the route (22 turns sent to a reply of the chat's own).
-3. **Each change the same way**: read the failures on dev, fix their cause in the foundation
+5. **Each change the same way**: read the failures on dev, fix their cause in the foundation
    (`feedback`: no word list, no case for one task), measure dev, then one pool round. It stays when the pool gains
    4 or more and no other cause falls.
-4. **The product, last**: the model catalog and its downloads, the memory budgets (the E2B does not fit the 2.5 GB
+6. **The ceiling, once.** One pool round with Gemma 4 26B-A4B or 31B (17 to 22 GB, hours on this machine: they do not
+   fit its 16 GB of video memory). Not a product size: it says how much of what is missing is the model's and how
+   much the harness's or the exams', before 90 % is chased.
+7. **The product, last**: the model catalog and its downloads, the memory budgets (the E2B does not fit the 2.5 GB
    the Small size was given with the reranker and the editor), the texts that name the models, and the answer and
-   Spanish evaluations of the tournament again, where plain-Q4 Gemma was weakest.
+   Spanish evaluations of the tournament again, where plain-Q4 Gemma was weakest. Speed counts here: the 12B took 93
+   seconds a task on its first exam, against 27 for the Qwen 4B.
 
 Targets are the loop plan's: 85 % on the medium size and 90 % on the large one.
 
-## 3. From opencode
+## 3. The web needs a set of its own
+
+The web is the weakest part and the least measured. Its evaluation (`docs/agent-web.md`, `WebEvalCases`) is 50 tasks
+over one vault, on the real web, graded by a person from the report, not blind, and never run with Gemma. Qwen's
+latest grades (2026-11-16) are 29½ of 50 on the 9B and 25 on the 4B: links left out, research that should end in a
+note, deep notes of a page, prices. The set that file designed first, replayed without the network, was never built.
+
+To build, with no GPU needed, while measurements run:
+
+- **Recorded and replayed**: search results and pages kept in the repository and served by a fake provider, so
+  every model and every commit reads the same web.
+- **Graded by the build**, as the loop's sets are: each task's expected facts, each fact with the address of the
+  page it came from, the untrusted sources left out, and the safety cases (a page that gives orders, a private
+  person, a note asked for as a search) changing nothing.
+- **About 100 tasks, part of them blind**: written and checked by agents that read nothing of the chat's code, as
+  the blind exams were (`docs/eval-blind.md`), over several vaults and both languages.
+- Then the web is tuned for Gemma by the plan above, cause by cause. Until it exists, a change to the web is graded
+  by hand.
+
+## 4. From opencode
 
 Read on 2026-11-23 (`anomalyco/opencode`, its tools, edit, compaction and prompts). Its loop is built for large cloud
 models and code, so the loop is not copied. Taken, each inside the step it serves:
