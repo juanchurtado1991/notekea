@@ -2,7 +2,9 @@ package app.notekea.sync.data
 
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.SyncError
+import app.notekea.sync.domain.VaultCommit
 import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -53,7 +55,7 @@ class JGitCommitTest {
     private suspend fun commit(): Outcome<Boolean, SyncError> = git.commitAll(
         vaultPath = vault.path,
         message = "work"
-    )
+    ).map { it.isMade }
 
     private suspend fun started() {
         write(
@@ -119,6 +121,65 @@ class JGitCommitTest {
         assertEquals(
             expected = Outcome.Success(value = false) to before,
             actual = commit() to head()
+        )
+    }
+
+    // The code review of 2026-11-22: only new files were measured, so a synced one that grew
+    // past the limit was committed.
+    @Test
+    fun `a file already committed that grows past the limit leaves the repository and stays in the vault`() =
+        runBlocking {
+            started()
+            val film = File(vault, "Film.mp4")
+
+            write(
+                path = "Film.mp4",
+                text = "A short cut."
+            )
+
+            commit()
+            val wasCommitted = committed(path = "Film.mp4")
+
+            RandomAccessFile(film, "rw").use { it.setLength(LargeFiles.MAX_BYTES + 1) }
+
+            commit()
+
+            assertEquals(
+                expected = listOf(true, false, true, Outcome.Success(value = false)),
+                actual = listOf(
+                    wasCommitted,
+                    committed(path = "Film.mp4"),
+                    film.length() > LargeFiles.MAX_BYTES,
+                    commit()
+                )
+            )
+        }
+
+    // The dialog that tells the person (the code review of 2026-11-22) names what the commit left out.
+    @Test
+    fun `the commit names the files it left out for their size`() = runBlocking {
+        started()
+
+        write(
+            path = "Notes.md",
+            text = "A note."
+        )
+
+        RandomAccessFile(File(vault, "Film.mp4"), "rw").use {
+            it.setLength(LargeFiles.MAX_BYTES + 1)
+        }
+
+        assertEquals(
+            expected = Outcome.Success(
+                value = VaultCommit(
+                    isMade = true,
+                    leftOut = listOf(RelativePath(value = "Film.mp4"))
+                )
+            ),
+            actual = git.commitAll(
+                vaultPath = vault.path,
+                message = "work"
+            )
         )
     }
 

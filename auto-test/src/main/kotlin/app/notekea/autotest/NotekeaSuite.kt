@@ -41,6 +41,7 @@ import app.notekea.autotest.cases.m4.agentCases
 import app.notekea.autotest.cases.m4.chatMemoryCases
 import app.notekea.autotest.cases.m4.chatTalkCases
 import app.notekea.autotest.cases.m4.importCases
+import app.notekea.autotest.cases.m4.largeFileCases
 import app.notekea.autotest.cases.m4.loopCases
 import app.notekea.autotest.cases.m4.repairCases
 import app.notekea.autotest.cases.m4.sourceCases
@@ -127,6 +128,7 @@ object NotekeaSuite {
             syncCases()
             importCases()
             repairCases()
+            largeFileCases()
             loopCases()
             chatMemoryCases()
             sourceCases()

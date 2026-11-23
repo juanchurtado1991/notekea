@@ -1,12 +1,14 @@
 package app.notekea.sync.data
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.sync.domain.GitRepository
 import app.notekea.sync.domain.SyncError
 
 /**
  * One sync: commit what changed, pull, push. A push refused because the remote moved meanwhile is tried once more
- * after another pull. Returns what stopped it, or null.
+ * after another pull. Returns what stopped it, or null; the files the commit left out for their size go to
+ * [run]'s `onLeftOut`.
  */
 internal object SyncCycle {
     private const val MESSAGE = "Notekea: notes changed"
@@ -14,17 +16,24 @@ internal object SyncCycle {
     suspend fun run(
         repository: GitRepository,
         vaultPath: String,
-        token: String?
+        token: String?,
+        onLeftOut: (List<RelativePath>) -> Unit
     ): SyncError? {
-        repository
-            .commitAll(
-                vaultPath = vaultPath,
-                message = MESSAGE
-            )
-            .errorOrNull()
-            ?.let {
-                return it
-            }
+        val committed = repository.commitAll(
+            vaultPath = vaultPath,
+            message = MESSAGE
+        )
+
+        when (committed) {
+            is Outcome.Failure -> return committed.error
+
+            is Outcome.Success ->
+                committed
+                    .value
+                    .leftOut
+                    .takeIf { it.isNotEmpty() }
+                    ?.let(onLeftOut)
+        }
 
         repeat(times = 2) { attempt ->
             repository

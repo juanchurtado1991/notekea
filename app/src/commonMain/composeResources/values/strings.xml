@@ -1000,6 +1000,9 @@
     <string name="sync_repair_remote_hint">Make this vault what the repository has. The files changed here are copied to the vault’s trash first.</string>
     <string name="sync_repair_changed">Changed on this computer: %1$s</string>
     <string name="sync_repair_later">Not now</string>
+    <string name="sync_large_title">Files too large to sync</string>
+    <string name="sync_large_explain">These files are over 100 MB, more than any Git host takes. They stay on this computer and are no longer synced. One that was synced before leaves your other devices at their next sync.</string>
+    <string name="sync_large_ok">OK</string>
     <string name="sync_status_tooltip">Sync: click for Settings → Sync</string>
     <string name="sync_conflict_banner">Changed here and on another computer: %1$s</string>
     <string name="sync_conflict_review">Review</string>

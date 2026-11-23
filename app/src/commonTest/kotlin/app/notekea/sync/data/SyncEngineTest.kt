@@ -269,12 +269,34 @@ class SyncEngineTest {
         )
     }
 
+    // The code review of 2026-11-22: a file that grew past 100 MB left the repository without a word.
+    @Test
+    fun `the files a commit left out are kept until the person read them, each named once`() =
+        runTest {
+            settings.settings[VAULT] = SyncSettings(remoteUrl = URL)
+            val engine = engine()
+            repository.leftOut = listOf(FILM)
+            engine.syncNow()
+            engine.syncNow()
+            val told = engine.leftOut.value
+
+            engine.acknowledgeLeftOut()
+            repository.leftOut = emptyList()
+            engine.syncNow()
+
+            assertEquals(
+                expected = listOf(listOf(FILM), emptyList()),
+                actual = listOf(told, engine.leftOut.value)
+            )
+        }
+
     private companion object {
         const val VAULT = "/vaults/Notes"
         const val URL = "https://example.com/notes.git"
         const val TOKEN = "secret"
         const val LOCKED = "The index is locked"
         val PLAN = RelativePath(value = "Plan.md")
+        val FILM = RelativePath(value = "Film.mp4")
         val UP_TO_DATE = SyncStatus.UpToDate
     }
 }

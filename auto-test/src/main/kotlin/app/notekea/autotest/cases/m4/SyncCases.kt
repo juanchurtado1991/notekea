@@ -274,7 +274,7 @@ private fun CaseScope.openSync() {
 }
 
 /** A bare repository in the case's data folder, the remote both computers share. */
-private fun CaseScope.bareRemote(): File {
+internal fun CaseScope.bareRemote(): File {
     val remote = file(path = REMOTE).toFile()
 
     Git
@@ -289,7 +289,7 @@ private fun CaseScope.bareRemote(): File {
 }
 
 /** Opens the Playground Vault and connects it to [remote] in Settings → Sync. */
-private fun CaseScope.connect(remote: File) {
+internal fun CaseScope.connect(remote: File) {
     openSync()
     click(text = ADDRESS_HINT)
     type(text = remote.toURI().toString())
@@ -328,7 +328,7 @@ private fun CaseScope.changeOnOtherComputer(
 }
 
 /** Waits until the file at [path] on [remote]'s branch passes [check] (its text, null while it is not there). */
-private fun CaseScope.expectInRemote(
+internal fun CaseScope.expectInRemote(
     remote: File,
     path: String,
     check: (String?) -> Boolean

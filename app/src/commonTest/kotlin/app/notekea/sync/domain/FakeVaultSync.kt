@@ -7,8 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /** A [VaultSync] whose [status] the test sets, recording what it was asked. */
 class FakeVaultSync : VaultSync {
     override val status = MutableStateFlow<SyncStatus>(value = SyncStatus.NotConfigured)
+    override val leftOut = MutableStateFlow<List<RelativePath>>(value = emptyList())
     val calls = mutableListOf<String>()
     var connectFailure: SyncError? = null
+
+    override fun acknowledgeLeftOut() {
+        calls += "acknowledge"
+        leftOut.value = emptyList()
+    }
 
     override fun start() {
         calls += "start"

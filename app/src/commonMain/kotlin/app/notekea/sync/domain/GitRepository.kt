@@ -16,11 +16,11 @@ interface GitRepository {
         token: String?
     ): Outcome<PullResult, SyncError>
 
-    /** Commits every change of the vault; false when there was nothing to commit. */
+    /** Commits every change of the vault, leaving out the files too large to sync ([VaultCommit.leftOut]). */
     suspend fun commitAll(
         vaultPath: String,
         message: String
-    ): Outcome<Boolean, SyncError>
+    ): Outcome<VaultCommit, SyncError>
 
     suspend fun pull(
         vaultPath: String,

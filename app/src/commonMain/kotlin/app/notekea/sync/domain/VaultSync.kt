@@ -8,6 +8,15 @@ import kotlinx.coroutines.flow.StateFlow
 interface VaultSync {
     val status: StateFlow<SyncStatus>
 
+    /**
+     * The files a commit left out of the repository for their size (over 100 MB, which no Git host takes) that the
+     * person has not been told of yet; they stay in the vault, no longer synced.
+     */
+    val leftOut: StateFlow<List<RelativePath>>
+
+    /** The person read which files were left out: [leftOut] is empty until a commit leaves out another. */
+    fun acknowledgeLeftOut()
+
     /** Starts syncing as the vault's settings say: nothing for a vault that does not sync. */
     fun start()
 

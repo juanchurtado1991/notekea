@@ -10,6 +10,7 @@ import app.notekea.sync.domain.PullResult
 import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.UnfinishedSync
+import app.notekea.sync.domain.VaultCommit
 import kotlinx.coroutines.withContext
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
@@ -72,7 +73,7 @@ class JGitRepository(
     override suspend fun commitAll(
         vaultPath: String,
         message: String
-    ): Outcome<Boolean, SyncError> = git(vaultPath = vaultPath) {
+    ): Outcome<VaultCommit, SyncError> = git(vaultPath = vaultPath) {
         commitIn(
             git = it,
             message = message
@@ -210,7 +211,7 @@ class JGitRepository(
     private fun commitIn(
         git: Git,
         message: String
-    ): Boolean = JGitCommit.all(
+    ): VaultCommit = JGitCommit.all(
         git = git,
         message = message
     )

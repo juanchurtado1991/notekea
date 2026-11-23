@@ -22,4 +22,7 @@ sealed interface SyncStatusIntent {
     data object OnRepairDismiss : SyncStatusIntent
 
     data class OnRepair(val choice: RepairChoice) : SyncStatusIntent
+
+    /** OK on the dialog naming the files left out for their size. */
+    data object OnLeftOutDismiss : SyncStatusIntent
 }

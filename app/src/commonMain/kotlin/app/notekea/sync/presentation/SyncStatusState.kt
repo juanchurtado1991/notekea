@@ -13,5 +13,7 @@ data class SyncStatusState(
     val review: ConflictReview? = null,
     // The files changed here while the vault is left in the middle of a merge; null when it is not.
     val unfinished: List<RelativePath>? = null,
-    val isRepairShown: Boolean = false
+    val isRepairShown: Boolean = false,
+    // The files a commit left out for their size that the person has not been told of; the dialog shows while any.
+    val leftOut: List<RelativePath> = emptyList()
 )

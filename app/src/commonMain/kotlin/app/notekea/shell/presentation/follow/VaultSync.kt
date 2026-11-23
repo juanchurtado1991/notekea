@@ -15,6 +15,7 @@ import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.presentation.ConflictBanner
 import app.notekea.sync.presentation.ConflictDialog
+import app.notekea.sync.presentation.LargeFilesDialog
 import app.notekea.sync.presentation.RepairBanner
 import app.notekea.sync.presentation.RepairDialog
 import app.notekea.sync.presentation.SyncStatusEffect
@@ -85,6 +86,13 @@ internal fun SyncConflictsOf(sync: SyncStatusViewModel) {
             changedHere = state.unfinished.orEmpty(),
             onChoose = { sync.onIntent(SyncStatusIntent.OnRepair(choice = it)) },
             onDismiss = { sync.onIntent(SyncStatusIntent.OnRepairDismiss) }
+        )
+    }
+
+    if (state.leftOut.isNotEmpty()) {
+        LargeFilesDialog(
+            files = state.leftOut,
+            onDismiss = { sync.onIntent(SyncStatusIntent.OnLeftOutDismiss) }
         )
     }
 

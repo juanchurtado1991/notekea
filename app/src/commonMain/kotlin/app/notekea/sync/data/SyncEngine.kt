@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -45,10 +46,17 @@ class SyncEngine(
     private val commitAfter: Duration = 10.seconds
 ) : VaultSync {
     private val mutableStatus = MutableStateFlow<SyncStatus>(value = SyncStatus.NotConfigured)
+    private val mutableLeftOut = MutableStateFlow<List<RelativePath>>(value = emptyList())
     private val cycle = Mutex()
     private var jobs: List<Job> = emptyList()
 
     override val status: StateFlow<SyncStatus> = mutableStatus.asStateFlow()
+
+    override val leftOut: StateFlow<List<RelativePath>> = mutableLeftOut.asStateFlow()
+
+    override fun acknowledgeLeftOut() {
+        mutableLeftOut.value = emptyList()
+    }
 
     override fun start() {
         stop()
@@ -235,7 +243,10 @@ class SyncEngine(
             val error = SyncCycle.run(
                 repository = repository,
                 vaultPath = vaultPath,
-                token = token
+                token = token,
+                onLeftOut = { files ->
+                    mutableLeftOut.update { (it + files).distinct() }
+                }
             )
 
             mutableStatus.value = error?.let { statusOf(error = it) } ?: settled()

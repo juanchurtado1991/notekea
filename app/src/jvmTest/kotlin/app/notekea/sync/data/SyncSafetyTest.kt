@@ -99,7 +99,7 @@ class SyncSafetyTest {
 
                 val left = LargeFiles.leaveOut(
                     git = git,
-                    untracked = git
+                    changed = git
                         .status()
                         .call()
                         .untracked,

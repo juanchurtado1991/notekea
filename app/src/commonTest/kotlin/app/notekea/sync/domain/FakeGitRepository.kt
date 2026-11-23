@@ -15,6 +15,7 @@ class FakeGitRepository : GitRepository {
     val pushErrors = ArrayDeque<SyncError>()
     var conflictsAfterPull: List<RelativePath> = emptyList()
     var pending = 0
+    var leftOut: List<RelativePath> = emptyList()
     private var conflicts: List<RelativePath> = emptyList()
 
     override suspend fun connect(
@@ -40,11 +41,16 @@ class FakeGitRepository : GitRepository {
     override suspend fun commitAll(
         vaultPath: String,
         message: String
-    ): Outcome<Boolean, SyncError> {
+    ): Outcome<VaultCommit, SyncError> {
         delay(timeMillis = 1)
         calls += "commit"
 
-        return Outcome.Success(value = true)
+        return Outcome.Success(
+            value = VaultCommit(
+                isMade = true,
+                leftOut = leftOut
+            )
+        )
     }
 
     override suspend fun pull(

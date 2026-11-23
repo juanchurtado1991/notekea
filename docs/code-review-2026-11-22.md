@@ -8,7 +8,10 @@ Rules for all of it: `AGENTS.md`; one Gradle build or measurement at a time; com
 `BundledModelCatalogSource.kt` nor `smoke-data/vaults/Sample Vault` or `Ghost Serializer` (the developer's local
 edits: they make `SampleVaultTest`, `SmokeDataTest` and six Auto-Test index cases fail locally, and only those).
 
-## 1. A synced file that grows past 100 MB (decided by the developer)
+## 1. A synced file that grows past 100 MB (decided by the developer) — done
+
+Done: `LargeFiles` untracks and excludes, `VaultCommit.leftOut` carries the paths to `VaultSync.leftOut`, and
+`LargeFilesDialog` names them (case 4.2-08). What follows is the brief it was built from.
 
 It leaves the repository (it stays in the vault) **and a dialog tells the person**. The first half is written, not
 committed: `git apply ~/.cache/notekea-loop-runs/large-tracked-files.patch` (`LargeFiles.leaveOut(changed = …)`

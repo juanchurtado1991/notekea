@@ -42,6 +42,12 @@ class SyncStatusViewModel(
                 }
             }
         }
+
+        launchGuarded(onError = ::logError) {
+            engine.leftOut.collect { files ->
+                reduce { it.copy(leftOut = files) }
+            }
+        }
     }
 
     override fun handleIntent(intent: SyncStatusIntent) {
@@ -53,6 +59,7 @@ class SyncStatusViewModel(
             SyncStatusIntent.OnRepairShow -> reduce { it.copy(isRepairShown = true) }
             SyncStatusIntent.OnRepairDismiss -> reduce { it.copy(isRepairShown = false) }
             is SyncStatusIntent.OnRepair -> repair(choice = intent.choice)
+            SyncStatusIntent.OnLeftOutDismiss -> engine.acknowledgeLeftOut()
         }
     }
 

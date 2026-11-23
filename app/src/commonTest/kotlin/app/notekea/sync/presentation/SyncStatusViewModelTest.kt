@@ -82,8 +82,32 @@ class SyncStatusViewModelTest {
             )
         }
 
+    // The code review of 2026-11-22: the files left out of the repository for their size are named in a dialog.
+    @Test
+    fun `the files left out for their size show until OK, which tells the engine they were read`() =
+        runTest(dispatcher) {
+            val viewModel = SyncStatusViewModel(
+                vaultPath = VAULT,
+                engines = VaultSyncs { sync },
+                noteContentStore = store
+            )
+
+            sync.leftOut.value = listOf(FILM)
+            advanceUntilIdle()
+            val shown = viewModel.state.value.leftOut
+
+            viewModel.onIntent(intent = SyncStatusIntent.OnLeftOutDismiss)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(listOf(FILM), emptyList(), listOf("start", "acknowledge")),
+                actual = listOf(shown, viewModel.state.value.leftOut, sync.calls)
+            )
+        }
+
     private companion object {
         const val VAULT = "/vaults/Notes"
         val PLAN = RelativePath(value = "Plan.md")
+        val FILM = RelativePath(value = "Videos/Film.mp4")
     }
 }

@@ -1000,6 +1000,9 @@
     <string name="sync_repair_remote_hint">Deja esta bóveda como la tiene el repositorio. Los archivos cambiados aquí se copian antes a la papelera de la bóveda.</string>
     <string name="sync_repair_changed">Cambiados en esta computadora: %1$s</string>
     <string name="sync_repair_later">Ahora no</string>
+    <string name="sync_large_title">Archivos demasiado grandes para sincronizar</string>
+    <string name="sync_large_explain">Estos archivos pasan de 100 MB, más de lo que acepta cualquier servicio de Git. Se quedan en esta computadora y ya no se sincronizan. Uno que ya estaba sincronizado sale de tus otros dispositivos en su próxima sincronización.</string>
+    <string name="sync_large_ok">Entendido</string>
     <string name="sync_status_tooltip">Sincronización: haz clic para ir a Ajustes → Sincronización</string>
     <string name="sync_conflict_banner">Cambió aquí y en otra computadora: %1$s</string>
     <string name="sync_conflict_review">Revisar</string>
