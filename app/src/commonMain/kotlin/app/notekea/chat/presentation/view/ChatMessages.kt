@@ -44,6 +44,7 @@ import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.layout.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
@@ -258,7 +259,10 @@ private fun AnswerContent(
         )
 
         entry.outcome == TurnOutcome.ACTED ->
-            Quiet(text = replyString(resource = actedOf(outcome = entry.proposal?.outcome)))
+            NotekeaMutedText(
+                text = replyString(resource = actedOf(outcome = entry.proposal?.outcome)),
+                style = MaterialTheme.typography.bodyMedium
+            )
 
         entry.isAnswering &&
             !isWriting &&
@@ -324,7 +328,10 @@ private fun Written(
                 onSourceClick = onSourceClick
             )
 
-            Quiet(text = replyString(resource = Res.string.chat_small_hint))
+            NotekeaMutedText(
+                text = replyString(resource = Res.string.chat_small_hint),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         ChatAnswerText(
@@ -335,7 +342,10 @@ private fun Written(
         )
 
         if (entry.outcome == TurnOutcome.STOPPED) {
-            Quiet(text = replyString(resource = Res.string.chat_stopped))
+            NotekeaMutedText(
+                text = replyString(resource = Res.string.chat_stopped),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         if (entry.options.isNotEmpty()) {
@@ -400,15 +410,6 @@ private fun Failed(
             style = NotekeaButtonStyle.TEXT
         )
     }
-}
-
-@Composable
-private fun Quiet(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Composable

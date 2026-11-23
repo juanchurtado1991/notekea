@@ -27,6 +27,7 @@ import app.notekea.cards.domain.CardAnswer
 import app.notekea.cards.domain.CardChoices
 import app.notekea.cards.domain.StudyCard
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.readableDate
@@ -93,7 +94,10 @@ fun StudyContent(
                     onIntent = onIntent
                 )
 
-                else -> Quiet(text = emptyText(state = state))
+                else -> NotekeaMutedText(
+                    text = emptyText(state = state),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
@@ -147,15 +151,6 @@ private fun keyOf(
     onIntent(intent)
 
     return true
-}
-
-@Composable
-private fun Quiet(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Preview

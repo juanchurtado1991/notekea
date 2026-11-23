@@ -21,6 +21,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.elapsedTimeText
@@ -150,7 +151,10 @@ private fun RunProgress(
         }
         .orEmpty()
 
-    MutedText(text = counts + left)
+    NotekeaMutedText(
+        text = counts + left,
+        maxLines = 1
+    )
 }
 
 @Composable
@@ -182,11 +186,20 @@ private fun Skipped(skipped: List<SkippedNote>) {
     )
 
     skipped.take(n = SHOWN_SKIPPED).forEach {
-        MutedText(text = "${it.path.value} — ${skipReasonText(reason = it.reason)}")
+        NotekeaMutedText(
+            text = "${it.path.value} — ${skipReasonText(reason = it.reason)}",
+            maxLines = 1
+        )
     }
 
     val more = skipped.size - SHOWN_SKIPPED
-    if (more > 0) MutedText(text = pluralStringResource(Res.plurals.search_index_more, more, more))
+
+    if (more > 0) {
+        NotekeaMutedText(
+            text = pluralStringResource(Res.plurals.search_index_more, more, more),
+            maxLines = 1
+        )
+    }
 }
 
 @Composable
@@ -208,17 +221,6 @@ private fun Fact(
             color = MaterialTheme.colorScheme.onSurface
         )
     }
-}
-
-@Composable
-private fun MutedText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
 }
 
 /** How long a run took: "1 min 48 s", or "12 s" under a minute. */

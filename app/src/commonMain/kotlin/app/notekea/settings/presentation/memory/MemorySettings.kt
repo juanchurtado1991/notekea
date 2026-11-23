@@ -25,6 +25,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaSwitch
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
@@ -87,13 +88,22 @@ internal fun MemorySettings(
         Switch(state, onIntent, spotlight)
 
         if (!state.hasVault) {
-            Quiet(text = stringResource(resource = Res.string.settings_memory_no_vault))
+            NotekeaMutedText(
+                text = stringResource(resource = Res.string.settings_memory_no_vault),
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             return@NotekeaSettingsPage
         }
 
         val failed = stringResource(resource = Res.string.settings_memory_failed)
-        if (state.hasFailed) Quiet(text = failed)
+
+        if (state.hasFailed) {
+            NotekeaMutedText(
+                text = failed,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         About(state, onIntent)
         Learnt(state.lines, onIntent)
@@ -301,15 +311,6 @@ private fun LearntRow(
             }
         }
     }
-}
-
-@Composable
-private fun Quiet(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Preview

@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -67,7 +68,7 @@ fun GraphInspector(
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
         ) {
             if (preview == null) {
-                Muted(
+                NotekeaMutedText(
                     text = stringResource(resource = Res.string.graph_inspector_empty),
                     modifier = InsetModifier
                 )
@@ -120,7 +121,7 @@ private fun Summary(preview: GraphPreview) {
             maxLines = 2
         )
 
-        if (preview.folder.isNotEmpty()) Muted(text = preview.folder)
+        if (preview.folder.isNotEmpty()) NotekeaMutedText(text = preview.folder)
 
         Text(
             text = preview.snippet,
@@ -129,19 +130,6 @@ private fun Summary(preview: GraphPreview) {
             overflow = TextOverflow.Ellipsis
         )
     }
-}
-
-@Composable
-private fun Muted(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Composable
@@ -265,7 +253,7 @@ private fun LinkResult(
             modifier = InsetModifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Muted(
+            NotekeaMutedText(
                 text = stringResource(Res.string.graph_linked, linked.nameWithoutExtension),
                 modifier = Modifier.weight(weight = 1f)
             )

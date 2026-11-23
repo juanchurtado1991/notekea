@@ -15,6 +15,7 @@ import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.NotekeaOptionRow
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
@@ -46,7 +47,7 @@ internal fun ChatNotFound(
     val pages = entry.sitePages
 
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        Quiet(text = replyString(resource = Res.string.chat_not_found))
+        NotekeaMutedText(text = replyString(resource = Res.string.chat_not_found))
 
         when {
             entry.isLookingInSites -> Looking(found = entry.progress?.found ?: 0)
@@ -57,7 +58,7 @@ internal fun ChatNotFound(
                 supportingText = replyString(resource = Res.string.chat_site_search_hint)
             )
 
-            pages != null && pages.isEmpty() -> Quiet(
+            pages != null && pages.isEmpty() -> NotekeaMutedText(
                 text = replyString(Res.string.chat_site_none, siteOf(sites = entry.sites))
             )
 
@@ -126,17 +127,8 @@ private fun Looking(found: Int) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         NotekeaStatusRing(fraction = null)
-        Quiet(text = replyString(Res.string.chat_site_looking, found))
+        NotekeaMutedText(text = replyString(Res.string.chat_site_looking, found))
     }
-}
-
-@Composable
-private fun Quiet(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 // "wordpress.org", or "your web sources" when they come from several sites.

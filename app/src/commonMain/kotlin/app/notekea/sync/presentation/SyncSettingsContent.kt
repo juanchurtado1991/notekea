@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
@@ -91,7 +92,10 @@ fun SyncSettingsContent(
                 spotlight = spotlight
             )
         } else {
-            Quiet(text = stringResource(resource = Res.string.sync_no_vault))
+            NotekeaMutedText(
+                text = stringResource(resource = Res.string.sync_no_vault),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -294,15 +298,6 @@ private fun Actions(
             )
         }
     }
-}
-
-@Composable
-private fun Quiet(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Composable

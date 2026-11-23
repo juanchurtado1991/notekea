@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.LocalMoment
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -147,7 +148,12 @@ private fun RowScope.NoteHead(group: TaskGroup.OfNote) {
             overflow = TextOverflow.Ellipsis
         )
 
-        if (!folder.isNullOrEmpty()) HeadDetail(text = folder)
+        if (!folder.isNullOrEmpty()) {
+            NotekeaMutedText(
+                text = folder,
+                maxLines = 1
+            )
+        }
     }
 
     NotekeaProgressBar(
@@ -156,7 +162,10 @@ private fun RowScope.NoteHead(group: TaskGroup.OfNote) {
         modifier = Modifier.width(width = PROGRESS_WIDTH_DP.dp)
     )
 
-    HeadDetail(text = progress)
+    NotekeaMutedText(
+        text = progress,
+        maxLines = 1
+    )
 }
 
 @Composable
@@ -182,26 +191,12 @@ private fun RowScope.DateHead(group: TaskGroup.OfDate) {
         overflow = TextOverflow.Ellipsis
     )
 
-    HeadDetail(
+    NotekeaMutedText(
         text = group
             .rows
             .size
-            .toString()
-    )
-}
-
-@Composable
-private fun HeadDetail(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
+            .toString(),
+        maxLines = 1
     )
 }
 
@@ -276,7 +271,12 @@ internal fun TaskCardRow(
             )
         }
 
-        place?.let { HeadDetail(text = it) }
+        place?.let {
+            NotekeaMutedText(
+                text = it,
+                maxLines = 1
+            )
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.chat.domain.plan.ClipWords
 import app.notekea.chat.domain.plan.SectionAsked
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.components.NotekeaOptionRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -75,8 +76,11 @@ private fun Found(
 ) {
     Heading(text = replyString(Res.string.chat_section_found, section.count + section.more))
 
-    section.summary?.let { Quiet(text = it) }
-    if (section.isIndex) Quiet(text = replyString(resource = Res.string.chat_section_index))
+    section.summary?.let { NotekeaMutedText(text = it) }
+
+    if (section.isIndex) {
+        NotekeaMutedText(text = replyString(resource = Res.string.chat_section_index))
+    }
 
     val recommended = replyString(resource = Res.string.chat_section_recommended)
     val isDeepSuggested = section.isIndex && section.canGoDeeper
@@ -148,10 +152,13 @@ private fun Counted(
     }
 
     Heading(text = found)
-    if (section.more > 0) Quiet(text = replyString(Res.string.chat_section_left_out, section.more))
+
+    if (section.more > 0) {
+        NotekeaMutedText(text = replyString(Res.string.chat_section_left_out, section.more))
+    }
 
     if (section.count > SUMMARIZED_PAGES) {
-        Quiet(text = replyString(resource = Res.string.chat_section_no_summaries))
+        NotekeaMutedText(text = replyString(resource = Res.string.chat_section_no_summaries))
     }
 
     val minutes = (pages * SECONDS_A_PAGE / MINUTE).coerceAtLeast(minimumValue = 1)
@@ -182,15 +189,6 @@ private fun Heading(text: String) {
             .bodyMedium
             .copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurface
-    )
-}
-
-@Composable
-private fun Quiet(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 

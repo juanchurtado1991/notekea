@@ -31,6 +31,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.designsystem.components.NotekeaMutedText
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
@@ -102,7 +103,13 @@ fun NotekeaPropertyField(
                 isError = isError,
                 interactions = interactions
             ) {
-                if (text.isEmpty() && placeholder != null) PlaceholderText(text = placeholder)
+                if (text.isEmpty() && placeholder != null) {
+                    NotekeaMutedText(
+                        text = placeholder,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
                 field()
             }
         }
@@ -162,15 +169,6 @@ private fun FieldFrame(
                 vertical = FIELD_VERTICAL_PADDING_DP.dp
             )
     ) { content() }
-}
-
-@Composable
-private fun PlaceholderText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
 }
 
 @Preview
