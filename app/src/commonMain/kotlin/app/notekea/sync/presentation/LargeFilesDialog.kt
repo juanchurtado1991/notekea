@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
-import app.notekea.core.presentation.designsystem.components.NotekeaDialog
+import app.notekea.core.presentation.designsystem.components.NotekeaFormDialog
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
@@ -41,48 +41,34 @@ fun LargeFilesDialog(
     files: List<RelativePath>,
     onDismiss: () -> Unit
 ) {
-    NotekeaDialog(
+    NotekeaFormDialog(
+        title = stringResource(resource = Res.string.sync_large_title),
         onDismiss = onDismiss,
-        modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp)
+        modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp),
+        explanation = stringResource(resource = Res.string.sync_large_explain)
     ) {
         Column(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
+            modifier = Modifier
+                .heightIn(max = LIST_MAX_HEIGHT_DP.dp)
+                .verticalScroll(state = rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
         ) {
-            Text(
-                text = stringResource(resource = Res.string.sync_large_title),
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Text(
-                text = stringResource(resource = Res.string.sync_large_explain),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Column(
-                modifier = Modifier
-                    .heightIn(max = LIST_MAX_HEIGHT_DP.dp)
-                    .verticalScroll(state = rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-            ) {
-                files.forEach {
-                    Text(
-                        text = it.value,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                NotekeaButton(
-                    text = stringResource(resource = Res.string.sync_large_ok),
-                    onClick = onDismiss
+            files.forEach {
+                Text(
+                    text = it.value,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            NotekeaButton(
+                text = stringResource(resource = Res.string.sync_large_ok),
+                onClick = onDismiss
+            )
         }
     }
 }

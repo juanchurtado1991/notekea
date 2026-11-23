@@ -26,6 +26,7 @@ import app.notekea.core.presentation.designsystem.components.layout.NotekeaScrol
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsSwitchRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaThemeCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.ColorThemeSchemes
@@ -172,16 +173,12 @@ private fun ReduceMotionChoice(
 ) {
     val label = stringResource(resource = Res.string.appearance_reduce_motion)
 
-    NotekeaSettingsRow(
+    NotekeaSettingsSwitchRow(
         label = label,
+        isOn = isOn,
+        onToggle = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
         detail = stringResource(resource = Res.string.appearance_reduce_motion_hint)
-    ) {
-        NotekeaSwitch(
-            isOn = isOn,
-            onToggle = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
-            label = label
-        )
-    }
+    )
 }
 
 @Composable
@@ -191,13 +188,11 @@ private fun SystemAccentChoice(
 ) {
     val label = stringResource(resource = Res.string.appearance_system_accent)
 
-    NotekeaSettingsRow(label = label) {
-        NotekeaSwitch(
-            isOn = isOn,
-            onToggle = { onIntent(AppearanceIntent.OnSystemAccentToggle) },
-            label = label
-        )
-    }
+    NotekeaSettingsSwitchRow(
+        label = label,
+        isOn = isOn,
+        onToggle = { onIntent(AppearanceIntent.OnSystemAccentToggle) }
+    )
 }
 
 @Composable

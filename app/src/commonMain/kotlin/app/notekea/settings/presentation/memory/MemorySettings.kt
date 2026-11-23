@@ -32,9 +32,11 @@ import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextF
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopUpButton
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsChoiceRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsSwitchRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
@@ -144,16 +146,12 @@ private fun Switch(
     NotekeaSpotlight(shownAt = spotlight?.serialFor(place = SettingsPlace.CHAT_MEMORY_ON)) {
         NotekeaSettingsGroup(
             rows = listOf {
-                NotekeaSettingsRow(
+                NotekeaSettingsSwitchRow(
                     label = label,
+                    isOn = state.isOn,
+                    onToggle = { onIntent(MemorySettingsIntent.OnToggle) },
                     detail = stringResource(resource = Res.string.settings_memory_on_detail)
-                ) {
-                    NotekeaSwitch(
-                        isOn = state.isOn,
-                        onToggle = { onIntent(MemorySettingsIntent.OnToggle) },
-                        label = label
-                    )
-                }
+                )
             }
         )
     }
@@ -224,13 +222,11 @@ private fun NewNotesRow(
         )
     }
 
-    NotekeaSettingsRow(label = label) {
-        NotekeaPopUpButton(
-            choice = current.ifEmpty { root },
-            choices = choices,
-            label = label
-        )
-    }
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = current.ifEmpty { root },
+        choices = choices
+    )
 }
 
 // What the chat learnt, a row a line with where it came from; empty, what it can learn.

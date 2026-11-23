@@ -18,7 +18,7 @@ import app.notekea.clips.domain.UpdateStep
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaDialog
+import app.notekea.core.presentation.designsystem.components.NotekeaFormDialog
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -49,41 +49,32 @@ fun ClipUpdateDialog(
     val dismiss = { onIntent(ClipIntent.OnUpdateDismiss) }
     val done = state.update as? UpdateStep.Done
 
-    NotekeaDialog(
+    NotekeaFormDialog(
+        title = stringResource(resource = Res.string.clip_update_title),
         onDismiss = dismiss,
         modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
+        val reading = state.update as? UpdateStep.Reading
+
+        when {
+            done != null -> Summary(done = done)
+            state.hasUpdateFailed -> Failure()
+            else -> Progress(reading = reading)
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
-            Text(
-                text = stringResource(resource = Res.string.clip_update_title),
-                style = MaterialTheme.typography.titleMedium
+            val isOver = done != null || state.hasUpdateFailed
+            val close = if (isOver) Res.string.clip_update_close else Res.string.clip_cancel
+            val style = if (isOver) NotekeaButtonStyle.PRIMARY else NotekeaButtonStyle.TEXT
+
+            NotekeaButton(
+                text = stringResource(resource = close),
+                onClick = dismiss,
+                style = style
             )
-
-            val reading = state.update as? UpdateStep.Reading
-
-            when {
-                done != null -> Summary(done = done)
-                state.hasUpdateFailed -> Failure()
-                else -> Progress(reading = reading)
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                val isOver = done != null || state.hasUpdateFailed
-                val close = if (isOver) Res.string.clip_update_close else Res.string.clip_cancel
-                val style = if (isOver) NotekeaButtonStyle.PRIMARY else NotekeaButtonStyle.TEXT
-
-                NotekeaButton(
-                    text = stringResource(resource = close),
-                    onClick = dismiss,
-                    style = style
-                )
-            }
         }
     }
 }

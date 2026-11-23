@@ -8,6 +8,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopUpButton
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsChoiceRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -53,19 +54,17 @@ internal fun WebUpdateSetting(
     val updateNow = sources.updateNow
 
     val frequency: @Composable () -> Unit = {
-        NotekeaSettingsRow(label = label) {
-            NotekeaPopUpButton(
-                choice = stringResource(resource = NAMES.getValue(preferences.webUpdate)),
-                choices = WebUpdateEvery.entries.map { every ->
-                    NotekeaMenuItem(
-                        label = stringResource(resource = NAMES.getValue(every)),
-                        onClick = { onIntent(PreferencesIntent.OnWebUpdateChoose(every = every)) },
-                        isChecked = every == preferences.webUpdate
-                    )
-                },
-                label = label
-            )
-        }
+        NotekeaSettingsChoiceRow(
+            label = label,
+            choice = stringResource(resource = NAMES.getValue(preferences.webUpdate)),
+            choices = WebUpdateEvery.entries.map { every ->
+                NotekeaMenuItem(
+                    label = stringResource(resource = NAMES.getValue(every)),
+                    onClick = { onIntent(PreferencesIntent.OnWebUpdateChoose(every = every)) },
+                    isChecked = every == preferences.webUpdate
+                )
+            }
+        )
     }
 
     val last: (@Composable () -> Unit)? = updateNow?.let { update ->

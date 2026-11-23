@@ -53,54 +53,13 @@ fun NotekeaVideoCard(
     modifier: Modifier = Modifier,
     thumbnail: ImageBitmap? = null
 ) {
-    val colors = MaterialTheme.colorScheme
-
-    Surface(
+    NotekeaMediaCard(
+        title = title,
+        subtitle = subtitle,
+        clickLabel = playLabel,
+        onClick = onPlay,
         modifier = modifier
-            .focusBorder(
-                color = colors.primary,
-                shape = MaterialTheme.shapes.small
-            )
-            .clip(shape = MaterialTheme.shapes.small)
-            .clickable(
-                onClickLabel = playLabel,
-                role = Role.Button,
-                onClick = onPlay
-            ),
-        shape = MaterialTheme.shapes.small,
-        color = colors.surface,
-        border = BorderStroke(
-            width = NotekeaDimensions.BorderWidth,
-            color = colors.outline
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingS),
-            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Thumbnail(thumbnail = thumbnail)
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-        }
-    }
+    ) { Thumbnail(thumbnail = thumbnail) }
 }
 
 // The video's picture, or a dark frame, with a play mark over it.

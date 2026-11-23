@@ -11,9 +11,11 @@ import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpo
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaSwitch
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopUpButton
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsChoiceRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsSwitchRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.settings.SettingsSpotlight
 import app.notekea.core.settings.domain.SettingsPlace
@@ -101,23 +103,18 @@ private fun Language(
 ) {
     val label = stringResource(resource = Res.string.settings_language)
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.GENERAL_LANGUAGE)
-    ) {
-        NotekeaSettingsRow(label = label) {
-            NotekeaPopUpButton(
-                choice = stringResource(resource = nameOf(language = preferences.language)),
-                choices = AppLanguage.entries.map {
-                    NotekeaMenuItem(
-                        label = stringResource(resource = nameOf(language = it)),
-                        onClick = { onIntent(PreferencesIntent.OnLanguageChoose(language = it)) },
-                        isChecked = it == preferences.language
-                    )
-                },
-                label = label
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = stringResource(resource = nameOf(language = preferences.language)),
+        choices = AppLanguage.entries.map {
+            NotekeaMenuItem(
+                label = stringResource(resource = nameOf(language = it)),
+                onClick = { onIntent(PreferencesIntent.OnLanguageChoose(language = it)) },
+                isChecked = it == preferences.language
             )
-        }
-    }
+        },
+        spotlitAt = spotlight?.serialFor(place = SettingsPlace.GENERAL_LANGUAGE)
+    )
 }
 
 @Composable
@@ -128,20 +125,13 @@ private fun OpenLastVault(
 ) {
     val label = stringResource(resource = Res.string.settings_open_last_vault)
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.GENERAL_OPEN_LAST_VAULT)
-    ) {
-        NotekeaSettingsRow(
-            label = label,
-            detail = stringResource(resource = Res.string.settings_open_last_vault_hint)
-        ) {
-            NotekeaSwitch(
-                isOn = preferences.opensLastVault,
-                onToggle = { onIntent(PreferencesIntent.OnOpenLastVaultToggle) },
-                label = label
-            )
-        }
-    }
+    NotekeaSettingsSwitchRow(
+        label = label,
+        isOn = preferences.opensLastVault,
+        onToggle = { onIntent(PreferencesIntent.OnOpenLastVaultToggle) },
+        detail = stringResource(resource = Res.string.settings_open_last_vault_hint),
+        spotlitAt = spotlight?.serialFor(place = SettingsPlace.GENERAL_OPEN_LAST_VAULT)
+    )
 }
 
 // Agent mode with the one loop: a preview, beside today's agent, until the loop replaces it (`docs/agent-loop.md`).
@@ -152,13 +142,11 @@ private fun ChatLoop(
 ) {
     val label = stringResource(resource = Res.string.settings_chat_loop)
 
-    NotekeaSettingsRow(label = label) {
-        NotekeaSwitch(
-            isOn = preferences.chatLoop,
-            onToggle = { onIntent(PreferencesIntent.OnChatLoopToggle) },
-            label = label
-        )
-    }
+    NotekeaSettingsSwitchRow(
+        label = label,
+        isOn = preferences.chatLoop,
+        onToggle = { onIntent(PreferencesIntent.OnChatLoopToggle) }
+    )
 }
 
 @Composable

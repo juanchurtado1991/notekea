@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaDialog
+import app.notekea.core.presentation.designsystem.components.NotekeaFormDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaOptionRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -46,50 +46,36 @@ fun RepairDialog(
     onChoose: (RepairChoice) -> Unit,
     onDismiss: () -> Unit
 ) {
-    NotekeaDialog(
+    NotekeaFormDialog(
+        title = stringResource(resource = Res.string.sync_repair_title),
         onDismiss = onDismiss,
-        modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp)
+        modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp),
+        explanation = stringResource(resource = Res.string.sync_repair_explain)
     ) {
-        Column(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
+        NotekeaOptionRow(
+            title = stringResource(resource = Res.string.sync_repair_keep),
+            onClick = { onChoose(RepairChoice.KEEP_MINE) },
+            supportingText = stringResource(resource = Res.string.sync_repair_keep_hint),
+            isSuggested = true
+        )
+
+        NotekeaOptionRow(
+            title = stringResource(resource = Res.string.sync_repair_remote),
+            onClick = { onChoose(RepairChoice.TAKE_REMOTE) },
+            supportingText = stringResource(resource = Res.string.sync_repair_remote_hint)
+        )
+
+        ChangedHere(changedHere = changedHere)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
-            Text(
-                text = stringResource(resource = Res.string.sync_repair_title),
-                style = MaterialTheme.typography.titleMedium
+            NotekeaButton(
+                text = stringResource(resource = Res.string.sync_repair_later),
+                onClick = onDismiss,
+                style = NotekeaButtonStyle.SECONDARY
             )
-
-            Text(
-                text = stringResource(resource = Res.string.sync_repair_explain),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            NotekeaOptionRow(
-                title = stringResource(resource = Res.string.sync_repair_keep),
-                onClick = { onChoose(RepairChoice.KEEP_MINE) },
-                supportingText = stringResource(resource = Res.string.sync_repair_keep_hint),
-                isSuggested = true
-            )
-
-            NotekeaOptionRow(
-                title = stringResource(resource = Res.string.sync_repair_remote),
-                onClick = { onChoose(RepairChoice.TAKE_REMOTE) },
-                supportingText = stringResource(resource = Res.string.sync_repair_remote_hint)
-            )
-
-            ChangedHere(changedHere = changedHere)
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                NotekeaButton(
-                    text = stringResource(resource = Res.string.sync_repair_later),
-                    onClick = onDismiss,
-                    style = NotekeaButtonStyle.SECONDARY
-                )
-            }
         }
     }
 }

@@ -76,6 +76,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `NotekeaRule` and `Emit`; the fields share `SUBMIT_KEYS` and `submitOrCancelOnKeys` (`FieldKeys.kt`); the
   appearance, preferences and active-model stores share `HeldSetting`, which also gives the active model's saves
   the one-at-a-time order the other two had.
+  The design system gains `NotekeaSettingsSwitchRow` and `NotekeaSettingsChoiceRow` (a settings row with its
+  switch or pop-up button and its spotlight), `NotekeaFormDialog` (title, explanation, content) under five dialogs,
+  and `NotekeaMediaCard` under the document and video cards; every screen renders the same pixels as before.
 - The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
   app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
   when it says which, and works on each when it means several. It replaces the word lists that decided this

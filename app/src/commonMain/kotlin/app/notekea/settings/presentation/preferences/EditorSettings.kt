@@ -8,6 +8,7 @@ import app.notekea.core.preferences.domain.LineWidth
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopUpButton
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsChoiceRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
@@ -68,26 +69,21 @@ private fun TextSize(
 ) {
     val label = stringResource(resource = Res.string.settings_text_size)
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.EDITOR_TEXT_SIZE)
-    ) {
-        NotekeaSettingsRow(label = label) {
-            NotekeaPopUpButton(
-                choice = stringResource(
-                    resource = Res.string.settings_text_size_points,
-                    preferences.textSize
-                ),
-                choices = AppPreferences.TEXT_SIZES.map {
-                    NotekeaMenuItem(
-                        label = stringResource(resource = Res.string.settings_text_size_points, it),
-                        onClick = { onIntent(PreferencesIntent.OnTextSizeChoose(size = it)) },
-                        isChecked = it == preferences.textSize
-                    )
-                },
-                label = label
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = stringResource(
+            resource = Res.string.settings_text_size_points,
+            preferences.textSize
+        ),
+        choices = AppPreferences.TEXT_SIZES.map {
+            NotekeaMenuItem(
+                label = stringResource(resource = Res.string.settings_text_size_points, it),
+                onClick = { onIntent(PreferencesIntent.OnTextSizeChoose(size = it)) },
+                isChecked = it == preferences.textSize
             )
-        }
-    }
+        },
+        spotlitAt = spotlight?.serialFor(place = SettingsPlace.EDITOR_TEXT_SIZE)
+    )
 }
 
 @Composable
@@ -98,23 +94,18 @@ private fun Width(
 ) {
     val label = stringResource(resource = Res.string.settings_line_width)
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.EDITOR_LINE_WIDTH)
-    ) {
-        NotekeaSettingsRow(label = label) {
-            NotekeaPopUpButton(
-                choice = stringResource(resource = nameOf(width = preferences.lineWidth)),
-                choices = LineWidth.entries.map {
-                    NotekeaMenuItem(
-                        label = stringResource(resource = nameOf(width = it)),
-                        onClick = { onIntent(PreferencesIntent.OnLineWidthChoose(width = it)) },
-                        isChecked = it == preferences.lineWidth
-                    )
-                },
-                label = label
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = stringResource(resource = nameOf(width = preferences.lineWidth)),
+        choices = LineWidth.entries.map {
+            NotekeaMenuItem(
+                label = stringResource(resource = nameOf(width = it)),
+                onClick = { onIntent(PreferencesIntent.OnLineWidthChoose(width = it)) },
+                isChecked = it == preferences.lineWidth
             )
-        }
-    }
+        },
+        spotlitAt = spotlight?.serialFor(place = SettingsPlace.EDITOR_LINE_WIDTH)
+    )
 }
 
 private fun nameOf(width: LineWidth): StringResource = when (width) {

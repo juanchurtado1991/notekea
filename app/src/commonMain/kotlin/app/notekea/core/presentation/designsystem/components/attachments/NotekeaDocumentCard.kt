@@ -45,63 +45,24 @@ fun NotekeaDocumentCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = MaterialTheme.colorScheme
-
-    Surface(
+    NotekeaMediaCard(
+        title = name,
+        subtitle = hint,
+        clickLabel = hint,
+        onClick = onOpen,
         modifier = modifier
-            .focusBorder(
-                color = colors.primary,
-                shape = MaterialTheme.shapes.small
-            )
-            .clip(shape = MaterialTheme.shapes.small)
-            .clickable(
-                onClickLabel = hint,
-                role = Role.Button,
-                onClick = onOpen
-            ),
-        shape = MaterialTheme.shapes.small,
-        color = colors.surface,
-        border = BorderStroke(
-            width = NotekeaDimensions.BorderWidth,
-            color = colors.outline
-        )
     ) {
-        Row(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingS),
-            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                bitmap = page,
-                contentDescription = null,
-                modifier = Modifier
-                    .width(width = PAGE_WIDTH_DP.dp)
-                    .aspectRatio(ratio = PAGE_RATIO)
-                    .clip(shape = MaterialTheme.shapes.extraSmall)
-                    .background(color = colors.surfaceVariant),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-            ) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = hint,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-        }
+        Image(
+            bitmap = page,
+            contentDescription = null,
+            modifier = Modifier
+                .width(width = PAGE_WIDTH_DP.dp)
+                .aspectRatio(ratio = PAGE_RATIO)
+                .clip(shape = MaterialTheme.shapes.extraSmall)
+                .background(color = MaterialTheme.colorScheme.surfaceVariant),
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter
+        )
     }
 }
 

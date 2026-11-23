@@ -29,9 +29,11 @@ import app.notekea.core.presentation.designsystem.components.layout.NotekeaScrol
 import app.notekea.core.presentation.designsystem.components.markdown.NotekeaCallout
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopUpButton
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsChoiceRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsSwitchRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -225,16 +227,12 @@ private fun AutoSync(
 ) {
     val label = stringResource(resource = Res.string.sync_auto)
 
-    NotekeaSettingsRow(
+    NotekeaSettingsSwitchRow(
         label = label,
+        isOn = isAuto,
+        onToggle = { onToggle() },
         detail = stringResource(resource = Res.string.sync_auto_explain)
-    ) {
-        NotekeaSwitch(
-            isOn = isAuto,
-            onToggle = { onToggle() },
-            label = label
-        )
-    }
+    )
 }
 
 @Composable
@@ -244,23 +242,21 @@ private fun Interval(
 ) {
     val label = stringResource(resource = Res.string.sync_interval)
 
-    NotekeaSettingsRow(label = label) {
-        NotekeaPopUpButton(
-            choice = pluralStringResource(
-                Res.plurals.sync_minutes,
-                state.intervalMinutes,
-                state.intervalMinutes
-            ),
-            choices = SyncSettings.INTERVALS.map {
-                NotekeaMenuItem(
-                    label = pluralStringResource(Res.plurals.sync_minutes, it, it),
-                    onClick = { onIntent(SyncSettingsIntent.OnIntervalChoose(minutes = it)) },
-                    isChecked = it == state.intervalMinutes
-                )
-            },
-            label = label
-        )
-    }
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = pluralStringResource(
+            Res.plurals.sync_minutes,
+            state.intervalMinutes,
+            state.intervalMinutes
+        ),
+        choices = SyncSettings.INTERVALS.map {
+            NotekeaMenuItem(
+                label = pluralStringResource(Res.plurals.sync_minutes, it, it),
+                onClick = { onIntent(SyncSettingsIntent.OnIntervalChoose(minutes = it)) },
+                isChecked = it == state.intervalMinutes
+            )
+        }
+    )
 }
 
 @Composable

@@ -23,8 +23,8 @@ import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
-import app.notekea.core.presentation.designsystem.components.NotekeaDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaDialogButtons
+import app.notekea.core.presentation.designsystem.components.NotekeaFormDialog
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
@@ -52,51 +52,37 @@ fun ConflictDialog(
     onChoose: (ConflictChoice) -> Unit,
     onDismiss: () -> Unit
 ) {
-    NotekeaDialog(
+    NotekeaFormDialog(
+        title = stringResource(
+            resource = Res.string.sync_conflict_title,
+            review.note.nameWithoutExtension
+        ),
         onDismiss = onDismiss,
         modifier = Modifier.size(
             width = DIALOG_WIDTH_DP.dp,
             height = DIALOG_HEIGHT_DP.dp
-        )
+        ),
+        explanation = stringResource(resource = Res.string.sync_conflict_explain)
     ) {
-        Column(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
+        Row(
+            modifier = Modifier.weight(weight = 1f),
+            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
         ) {
-            Text(
-                text = stringResource(
-                    resource = Res.string.sync_conflict_title,
-                    review.note.nameWithoutExtension
-                ),
-                style = MaterialTheme.typography.titleMedium
+            Version(
+                title = stringResource(resource = Res.string.sync_conflict_mine),
+                text = review.mine
             )
 
-            Text(
-                text = stringResource(resource = Res.string.sync_conflict_explain),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Row(
-                modifier = Modifier.weight(weight = 1f),
-                horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
-            ) {
-                Version(
-                    title = stringResource(resource = Res.string.sync_conflict_mine),
-                    text = review.mine
-                )
-
-                Version(
-                    title = stringResource(resource = Res.string.sync_conflict_theirs),
-                    text = review.theirs
-                )
-            }
-
-            Choices(
-                buttonOrder = buttonOrder,
-                onChoose = onChoose
+            Version(
+                title = stringResource(resource = Res.string.sync_conflict_theirs),
+                text = review.theirs
             )
         }
+
+        Choices(
+            buttonOrder = buttonOrder,
+            onChoose = onChoose
+        )
     }
 }
 

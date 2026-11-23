@@ -20,8 +20,8 @@ import app.notekea.clips.domain.SectionLinks
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaDialogButtons
+import app.notekea.core.presentation.designsystem.components.NotekeaFormDialog
 import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
 import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusProgress
@@ -76,75 +76,61 @@ fun ClipDialog(
         )
     }
 
-    NotekeaDialog(
+    NotekeaFormDialog(
+        title = stringResource(resource = Res.string.clip_title),
         onDismiss = { onIntent(ClipIntent.OnDismiss) },
-        modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp)
+        modifier = Modifier.width(width = DIALOG_WIDTH_DP.dp),
+        explanation = stringResource(resource = Res.string.clip_explain)
     ) {
-        Column(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
-        ) {
-            Text(
-                text = stringResource(resource = Res.string.clip_title),
-                style = MaterialTheme.typography.titleMedium
+        NotekeaTextField(
+            value = state.url,
+            onValueChange = { onIntent(ClipIntent.OnUrlChange(url = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = stringResource(resource = Res.string.clip_url_hint),
+            onSubmit = { onIntent(ClipIntent.OnClip) }
+        )
+
+        state.error?.let { ErrorBanner(message = messageOf(error = it)) }
+
+        if (state.hasWriteFailed) {
+            ErrorBanner(message = stringResource(resource = Res.string.clip_error_write))
+        }
+
+        progressOf(step = state.step)?.let { NotekeaStatusProgress(label = it) }
+
+        state.progress?.let {
+            NotekeaStatusProgress(
+                label = stringResource(Res.string.clip_section_progress, it.done + 1, it.total)
             )
+        }
 
-            Text(
-                text = stringResource(resource = Res.string.clip_explain),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            NotekeaTextField(
-                value = state.url,
-                onValueChange = { onIntent(ClipIntent.OnUrlChange(url = it)) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = stringResource(resource = Res.string.clip_url_hint),
-                onSubmit = { onIntent(ClipIntent.OnClip) }
-            )
-
-            state.error?.let { ErrorBanner(message = messageOf(error = it)) }
-
-            if (state.hasWriteFailed) {
-                ErrorBanner(message = stringResource(resource = Res.string.clip_error_write))
-            }
-
-            progressOf(step = state.step)?.let { NotekeaStatusProgress(label = it) }
-
-            state.progress?.let {
-                NotekeaStatusProgress(
-                    label = stringResource(Res.string.clip_section_progress, it.done + 1, it.total)
+        state
+            .section
+            ?.takeIf { state.isAsking }
+            ?.let {
+                SectionQuestion(
+                    links = it,
+                    summary = state.sectionSummary,
+                    onIntent = onIntent
                 )
             }
 
-            state
-                .section
-                ?.takeIf { state.isAsking }
-                ?.let {
-                    SectionQuestion(
-                        links = it,
-                        summary = state.sectionSummary,
-                        onIntent = onIntent
+        NotekeaDialogButtons(
+            buttonOrder = buttonOrder,
+            buttons = listOfNotNull(
+                {
+                    NotekeaButton(
+                        text = stringResource(resource = Res.string.clip_cancel),
+                        onClick = { onIntent(ClipIntent.OnDismiss) },
+                        style = NotekeaButtonStyle.SECONDARY
                     )
+                },
+                clip.takeIf {
+                    !state.isAsking
                 }
-
-            NotekeaDialogButtons(
-                buttonOrder = buttonOrder,
-                buttons = listOfNotNull(
-                    {
-                        NotekeaButton(
-                            text = stringResource(resource = Res.string.clip_cancel),
-                            onClick = { onIntent(ClipIntent.OnDismiss) },
-                            style = NotekeaButtonStyle.SECONDARY
-                        )
-                    },
-                    clip.takeIf {
-                        !state.isAsking
-                    }
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

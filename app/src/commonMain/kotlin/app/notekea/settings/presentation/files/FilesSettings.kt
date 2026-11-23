@@ -10,6 +10,7 @@ import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanne
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopUpButton
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsChoiceRow
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
 import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
@@ -119,15 +120,12 @@ private fun FolderChoice(
         )
     }
 
-    NotekeaSpotlight(shownAt = shownAt) {
-        NotekeaSettingsRow(label = label) {
-            NotekeaPopUpButton(
-                choice = folder.ifEmpty { root },
-                choices = choices,
-                label = label
-            )
-        }
-    }
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = folder.ifEmpty { root },
+        choices = choices,
+        spotlitAt = shownAt
+    )
 }
 
 // The daily note's name as today is written in each format ("13-11-2026"), not as the format's letters.
@@ -156,15 +154,12 @@ private fun FormatChoice(
         ?.example
         ?: current
 
-    NotekeaSpotlight(shownAt = shownAt) {
-        NotekeaSettingsRow(label = label) {
-            NotekeaPopUpButton(
-                choice = shown,
-                choices = choices,
-                label = label
-            )
-        }
-    }
+    NotekeaSettingsChoiceRow(
+        label = label,
+        choice = shown,
+        choices = choices,
+        spotlitAt = shownAt
+    )
 }
 
 @Preview
