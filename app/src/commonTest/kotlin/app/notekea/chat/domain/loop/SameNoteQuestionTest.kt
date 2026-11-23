@@ -30,8 +30,9 @@ class SameNoteQuestionTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(contentStore = store)
 
-    private val runTurn = RunTurnUseCase(
-        llmEngine = engine,
+    private val runTurn = loopTurn(
+        engine = engine,
+        cache = cache,
         toolsets = Toolsets(
             byKind = mapOf(
                 WorkKind.ASK to listOf(
@@ -40,17 +41,7 @@ class SameNoteQuestionTest {
                     AnswerTool()
                 )
             )
-        ),
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(
-                llmEngine = engine,
-                noteTextCache = cache,
-                planReader = GhostActionPlanReader()
-            )
-        ),
-        clock = Clock.System
+        )
     )
 
     // The model asks which of the options, until it is told they are one note; then it answers.

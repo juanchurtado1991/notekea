@@ -38,8 +38,9 @@ class LoopBugsTest {
         entry(path = it)
     }
 
-    private val runTurn = RunTurnUseCase(
-        llmEngine = engine,
+    private val runTurn = loopTurn(
+        engine = engine,
+        cache = cache,
         toolsets = Toolsets(
             byKind = mapOf(
                 WorkKind.ORGANIZE to listOf(
@@ -49,17 +50,7 @@ class LoopBugsTest {
                     AnswerTool()
                 )
             )
-        ),
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(
-                llmEngine = engine,
-                noteTextCache = cache,
-                planReader = GhostActionPlanReader()
-            )
-        ),
-        clock = Clock.System
+        )
     )
 
     private suspend fun steps(

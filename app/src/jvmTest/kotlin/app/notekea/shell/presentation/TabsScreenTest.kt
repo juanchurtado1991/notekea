@@ -13,6 +13,7 @@ import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
@@ -44,7 +45,7 @@ class TabsScreenTest {
         }
     private val single = notes
         .fold(initial = Workspace.EMPTY) { workspace, path -> workspace.open(path = path) }
-    private var frame = 0L
+    private val clock = SceneClock(frames = 10)
 
     @Test
     fun `a click selects a tab, its close and middle buttons close it, and its menu splits right`() {
@@ -199,7 +200,7 @@ class TabsScreenTest {
                     ) { _, path, _ -> Text(text = path.value) }
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 actions(scene)
             }
         }
@@ -230,7 +231,7 @@ class TabsScreenTest {
             button = button
         )
 
-        settle(scene = scene)
+        clock.settle(scene = scene)
 
         scene.sendPointerEvent(
             eventType = PointerEventType.Release,
@@ -239,7 +240,7 @@ class TabsScreenTest {
             button = button
         )
 
-        settle(scene = scene)
+        clock.settle(scene = scene)
     }
 
     private fun drag(
@@ -270,7 +271,7 @@ class TabsScreenTest {
                 buttons = pressed
             )
 
-            settle(scene = scene)
+            clock.settle(scene = scene)
         }
 
         scene.sendPointerEvent(
@@ -281,19 +282,13 @@ class TabsScreenTest {
         )
 
         // A tab let go on its row glides into its place before it moves there.
-        repeat(times = GLIDE_SETTLES) { settle(scene = scene) }
-    }
-
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
+        repeat(times = GLIDE_SETTLES) { clock.settle(scene = scene) }
     }
 
     companion object {
         private const val DRAG_STEPS = 10
-        private const val FRAME_NANOS = 16_000_000L
         private const val GLIDE_SETTLES = 2
         private const val HEIGHT = 400
-        private const val SETTLE_FRAMES = 10
         private const val WIDTH = 900
         private val AREPAS_CLOSE = Offset(
             x = 91f,

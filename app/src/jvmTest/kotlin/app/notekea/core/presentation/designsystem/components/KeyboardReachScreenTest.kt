@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaSegmentedControl
@@ -27,7 +28,7 @@ import kotlin.test.assertEquals
  * row, each showing it has the keyboard. The rail's daily buttons and the tree's rows stay out of the way.
  */
 class KeyboardReachScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock()
 
     @Test
     fun `tab reaches the rail's bottom buttons, section headers, segments and bookmark rows`() {
@@ -35,11 +36,11 @@ class KeyboardReachScreenTest {
 
         UiThread.run {
             scene().use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 repeat(times = STOPS.size) {
                     scene.sendKeyEvent(event = keyDown(key = Key.Tab))
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
 
                     reached += scene
                         .nodes()
@@ -74,12 +75,12 @@ class KeyboardReachScreenTest {
                     )
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 scene.sendKeyEvent(event = keyDown(key = Key.Tab))
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 scene.sendKeyEvent(event = keyDown(key = Key.Enter))
                 scene.sendKeyEvent(event = keyUp(key = Key.Enter))
-                settle(scene = scene)
+                clock.settle(scene = scene)
             }
         }
 
@@ -164,20 +165,14 @@ class KeyboardReachScreenTest {
         return own ?: children.firstNotNullOfOrNull { it.name() }
     }
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
         private const val BOOKMARK = "Roadmap"
         private const val BOTTOM = "Settings"
         private const val DAILY = "Search"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEADER = "Bookmarks"
         private const val HEIGHT = 400
         private const val RAIL = "Tools"
         private const val SEGMENT = "Chat"
-        private const val SETTLE_FRAMES = 4
         private const val TREE_ROW = "Tree row"
         private const val WIDTH = 500
         private val STOPS = listOf(BOTTOM, HEADER, SEGMENT, BOOKMARK)

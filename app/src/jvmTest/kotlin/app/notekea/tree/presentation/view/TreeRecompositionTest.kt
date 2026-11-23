@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
@@ -31,7 +32,7 @@ import kotlin.test.assertTrue
  */
 @OptIn(InternalComposeTracingApi::class)
 class TreeRecompositionTest {
-    private var frame = 0L
+    private val clock = SceneClock()
 
     @Test
     fun `moving the selection recomposes only the two rows it leaves and reaches`() {
@@ -56,11 +57,11 @@ class TreeRecompositionTest {
                     )
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 tracing(into = traced) {
                     state = state.copy(selectedPath = rows.last().path)
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                 }
             }
         }
@@ -106,11 +107,11 @@ class TreeRecompositionTest {
                     }
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 tracing(into = traced) {
                     current = 1
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                 }
             }
         }
@@ -164,15 +165,9 @@ class TreeRecompositionTest {
         }
     }
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
         private const val BODY = "# One\n\n## Two\n\n## Three\n"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 480
-        private const val SETTLE_FRAMES = 4
         private const val WIDTH = 340
     }
 }

@@ -80,19 +80,10 @@ class WebChecksTest {
         )
     )
 
-    private val runTurn = RunTurnUseCase(
-        llmEngine = engine,
-        toolsets = toolsets,
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(
-                llmEngine = engine,
-                noteTextCache = cache,
-                planReader = GhostActionPlanReader()
-            )
-        ),
-        clock = Clock.System
+    private val runTurn = loopTurn(
+        engine = engine,
+        cache = cache,
+        toolsets = toolsets
     )
 
     // The model makes [first] until it is told [told]; then [then]; then it answers.

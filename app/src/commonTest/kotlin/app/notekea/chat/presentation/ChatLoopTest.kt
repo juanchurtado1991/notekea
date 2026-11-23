@@ -9,6 +9,7 @@ import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.loop.ChatLoop
 import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
+import app.notekea.chat.domain.loop.loopTurn
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
@@ -95,15 +96,10 @@ class ChatLoopTest : ViewModelTestBase() {
             webSearch = { _, _ -> Outcome.Failure(error = WebSearchProblem.OFFLINE) }
         )
 
-        val runTurn = RunTurnUseCase(
-            llmEngine = engine,
-            toolsets = tools.toolsets(),
-            vaultGuide = VaultGuide(noteTextCache = cache),
-            proposal = ProposalCheck(
-                checkPlan = CheckPlanUseCase(),
-                composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader())
-            ),
-            clock = Clock.System
+        val runTurn = loopTurn(
+            engine = engine,
+            cache = cache,
+            toolsets = tools.toolsets()
         )
 
         return ChatLoop(

@@ -10,6 +10,7 @@ import app.notekea.core.notes.domain.links.LinkKind
 import app.notekea.core.notes.domain.templates.DailyNoteSettings
 import app.notekea.core.notes.domain.templates.DayNeighbors
 import app.notekea.core.notes.domain.templates.TemplateSettings
+import app.notekea.core.presentation.effectsOf
 import app.notekea.tree.presentation.model.BookmarkIntent
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
@@ -66,11 +67,7 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
     fun `a clicked bookmark is selected in the tree with its folders open and opens in a tab`() =
         runTreeTest {
             val viewModel = startedViewModel()
-            val effects = mutableListOf<VaultTreeEffect>()
-
-            backgroundScope.launch {
-                viewModel.effects.collect { effects += it }
-            }
+            val effects = effectsOf(viewModel = viewModel)
 
             viewModel.onIntent(intent = BookmarkIntent.OnClick(path = path(ROADMAP)))
             advanceUntilIdle()
@@ -128,11 +125,7 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
     fun `a folder clicked in the status bar shows in a hidden sidebar, without opening a tab`() =
         runTreeTest {
             val viewModel = startedViewModel()
-            val effects = mutableListOf<VaultTreeEffect>()
-
-            backgroundScope.launch {
-                viewModel.effects.collect { effects += it }
-            }
+            val effects = effectsOf(viewModel = viewModel)
 
             viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
             runCurrent()

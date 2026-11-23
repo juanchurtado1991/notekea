@@ -25,7 +25,7 @@ import kotlin.test.assertEquals
 
 /** About and Settings over the window, rendered headless: each closes with its ✕. */
 class AboutAndSettingsScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock()
 
     @Test
     fun `About and Settings close with their close buttons`() {
@@ -62,7 +62,7 @@ class AboutAndSettingsScreenTest {
                 ) {
                     NotekeaTheme(darkTheme = false) { dialog() }
                 }.use { scene ->
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
 
                     scene.sendPointerEvent(
                         eventType = PointerEventType.Move,
@@ -79,7 +79,7 @@ class AboutAndSettingsScreenTest {
                         position = close
                     )
 
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                 }
             }
         }
@@ -101,14 +101,8 @@ class AboutAndSettingsScreenTest {
         clipboard = FakeTextClipboard()
     )
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 640
-        private const val SETTLE_FRAMES = 4
         private const val WIDTH = 1000
         private val ABOUT_CLOSE = Offset(
             x = 852f,

@@ -1,5 +1,6 @@
 package app.notekea.graph.presentation
 
+import app.notekea.core.presentation.effectsOf
 import app.notekea.graph.presentation.model.GraphEffect
 import app.notekea.graph.presentation.model.GraphIntent
 import app.notekea.graph.presentation.model.GraphScope
@@ -13,11 +14,7 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
     // Review: a note open in an editor went on with its old text, and the next save was a conflict.
     @Test
     fun `Link and Undo tell the editors the note changed`() = runGraphTest {
-        val effects = mutableListOf<GraphEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         send(GraphIntent.OnOpen(note = AREPAS))
         val text = store.texts.getValue(key = AREPAS)

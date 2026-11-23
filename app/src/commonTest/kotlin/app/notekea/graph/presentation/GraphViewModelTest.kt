@@ -1,6 +1,7 @@
 package app.notekea.graph.presentation
 
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.presentation.effectsOf
 import app.notekea.graph.presentation.model.GraphDirection
 import app.notekea.graph.presentation.model.GraphEffect
 import app.notekea.graph.presentation.model.GraphIntent
@@ -138,11 +139,7 @@ class GraphViewModelTest : GraphViewModelFixture() {
 
     @Test
     fun `an arrow key walks to a connected note, and Enter and Esc open a note`() = runGraphTest {
-        val effects = mutableListOf<GraphEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         send(GraphIntent.OnOpen(note = AREPAS))
 
@@ -171,11 +168,7 @@ class GraphViewModelTest : GraphViewModelFixture() {
 
     @Test
     fun `Space asks for the side panel, where the inspector lives`() = runGraphTest {
-        val effects = mutableListOf<GraphEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         send(GraphIntent.OnInspectorToggle)
 
@@ -188,11 +181,7 @@ class GraphViewModelTest : GraphViewModelFixture() {
     // Review: a double click opened the note selected before it, as a double tap never selects.
     @Test
     fun `a double click opens the note clicked, not the one selected`() = runGraphTest {
-        val effects = mutableListOf<GraphEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         send(GraphIntent.OnOpen(note = AREPAS))
 

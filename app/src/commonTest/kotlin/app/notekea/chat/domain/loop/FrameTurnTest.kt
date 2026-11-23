@@ -34,19 +34,14 @@ class FrameTurnTest {
     private val home = RelativePath(value = "Home/Budget.md")
     private val work = RelativePath(value = "Work/Budget.md")
 
-    private fun runTurn(frame: TaskFrame) = RunTurnUseCase(
-        llmEngine = engine,
+    private fun runTurn(frame: TaskFrame) = loopTurn(
+        engine = engine,
+        cache = cache,
         toolsets = Toolsets(
             byKind = mapOf(
                 WorkKind.ASK to listOf(ReadTool(noteTextCache = cache), AskUserTool(), AnswerTool())
             )
         ),
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader())
-        ),
-        clock = Clock.System,
         frames = FrameSource { _, _, _, _, _, _ -> frame }
     )
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.effectsOf
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import kotlinx.coroutines.Dispatchers
@@ -106,11 +107,7 @@ abstract class EditorViewModelTestBase {
     }
 
     protected fun TestScope.collectEffects(): List<EditorEffect> {
-        val effects = mutableListOf<EditorEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         return effects
     }

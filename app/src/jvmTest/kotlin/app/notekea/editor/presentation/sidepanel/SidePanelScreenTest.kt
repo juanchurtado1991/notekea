@@ -30,6 +30,7 @@ import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
 import app.notekea.core.notes.domain.sidepanel.SidePanelMode
 import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 import app.notekea.core.notes.domain.sidepanel.SidePanelSection
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
@@ -45,7 +46,7 @@ import kotlin.test.assertTrue
  * the height Note info leaves.
  */
 class SidePanelScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock()
 
     @Test
     fun `the headers fold their sections, a heading and Chat are chosen, and the panel is minimized`() {
@@ -53,7 +54,7 @@ class SidePanelScreenTest {
 
         UiThread.run {
             scene(actions = actions).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 listOf(STEPS_ROW, NOTE_INFO_HEADER, OUTLINE_HEADER, CHAT, HIDE).forEach {
                     click(
@@ -85,7 +86,7 @@ class SidePanelScreenTest {
                 actions = mutableListOf(),
                 mode = SidePanelMode.CHAT
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 texts = scene.texts()
             }
         }
@@ -152,7 +153,7 @@ class SidePanelScreenTest {
                     )
                 }
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 rows = scene.texts().count {
                     it.startsWith(prefix = "Note ") && it != "Note info"
@@ -237,7 +238,7 @@ class SidePanelScreenTest {
                     ) { Box(modifier = Modifier.fillMaxWidth().height(height = relatedHeight.dp)) }
                 }
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 val nodes = scene.semanticsOwners.flatMap {
                     it.getAllSemanticsNodes(mergingEnabled = false)
@@ -313,18 +314,13 @@ class SidePanelScreenTest {
             position = position
         )
 
-        settle(scene = scene)
-    }
-
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
+        clock.settle(scene = scene)
     }
 
     companion object {
         private const val CHAT_TEXT = "The chat"
         private const val BODY =
             "# Arepas guide\n\n## Ingredients\n\n### For the filling\n\n## Steps\n\n### Cooking\n\n## Serving\n"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 560
         private const val HIDDEN = "hidden"
         private const val LONG_OUTLINE = 40
@@ -335,7 +331,6 @@ class SidePanelScreenTest {
         private const val SHORT = 40
         private const val SHORT_BODY = "# Arepas guide\n"
         private const val TALL = 2000
-        private const val SETTLE_FRAMES = 4
         private const val WIDTH = 340
         private val CHAT = Offset(
             x = 137f,

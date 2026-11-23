@@ -34,8 +34,9 @@ class SettledTurnTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(contentStore = store)
 
-    private fun runTurn(frame: TaskFrame?) = RunTurnUseCase(
-        llmEngine = engine,
+    private fun runTurn(frame: TaskFrame?) = loopTurn(
+        engine = engine,
+        cache = cache,
         toolsets = Toolsets(
             byKind = mapOf(
                 WorkKind.ASK to listOf(
@@ -45,16 +46,6 @@ class SettledTurnTest {
                 )
             )
         ),
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(
-                llmEngine = engine,
-                noteTextCache = cache,
-                planReader = GhostActionPlanReader()
-            )
-        ),
-        clock = Clock.System,
         frames = frame?.let {
             FrameSource { _, _, _, _, _, _ -> it }
         }

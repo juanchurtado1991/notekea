@@ -15,6 +15,7 @@ import app.notekea.ai.domain.ModelCatalogs
 import app.notekea.ai.domain.ModelSize
 import app.notekea.ai.domain.RecommendModelUseCase
 import app.notekea.core.appearance.domain.FakeAppearanceStore
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
@@ -35,7 +36,7 @@ import kotlin.test.assertTrue
  */
 @OptIn(InternalComposeUiApi::class)
 class ModelManagerScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock(frames = 8)
     private val storage = FakeModelStorage()
     private val activeModelStore = FakeActiveModelStore()
     private val installer = FakeModelInstaller()
@@ -75,8 +76,8 @@ class ModelManagerScreenTest {
                     )
                 }
             }.use { scene ->
-                settle(scene = scene)
-                scene.clickText(text = SECTION) { settle(scene = scene) }
+                clock.settle(scene = scene)
+                scene.clickText(text = SECTION) { clock.settle(scene = scene) }
                 check(scene)
             }
         }
@@ -88,7 +89,7 @@ class ModelManagerScreenTest {
 
         render { scene ->
             texts += scene.texts()
-            scene.clickText(text = DOWNLOAD) { settle(scene = scene) }
+            scene.clickText(text = DOWNLOAD) { clock.settle(scene = scene) }
 
             installer.current.value = InstallSession(
                 size = ModelSize.MEDIUM,
@@ -98,7 +99,7 @@ class ModelManagerScreenTest {
                 )
             )
 
-            settle(scene = scene)
+            clock.settle(scene = scene)
             texts += scene.texts()
 
             installer.current.value = InstallSession(
@@ -110,17 +111,17 @@ class ModelManagerScreenTest {
                 )
             )
 
-            settle(scene = scene)
+            clock.settle(scene = scene)
             texts += scene.texts()
-            scene.clickText(text = PAUSE) { settle(scene = scene) }
+            scene.clickText(text = PAUSE) { clock.settle(scene = scene) }
 
             installer.current.value = installer
                 .current
                 .value
                 ?.copy(isPaused = true)
 
-            settle(scene = scene)
-            scene.clickText(text = RESUME) { settle(scene = scene) }
+            clock.settle(scene = scene)
+            scene.clickText(text = RESUME) { clock.settle(scene = scene) }
         }
 
         assertTrue(actual = "Medium · Model medium" in texts[0] && "Recommended" in texts[0])
@@ -144,7 +145,7 @@ class ModelManagerScreenTest {
         var texts = emptyList<String>()
 
         render { scene ->
-            scene.clickText(text = OTHER_SIZES) { settle(scene = scene) }
+            scene.clickText(text = OTHER_SIZES) { clock.settle(scene = scene) }
             texts = scene.texts()
         }
 
@@ -159,14 +160,14 @@ class ModelManagerScreenTest {
         var asked = emptyList<String>()
 
         render { scene ->
-            scene.clickText(text = DELETE) { settle(scene = scene) }
+            scene.clickText(text = DELETE) { clock.settle(scene = scene) }
             asked = scene.texts()
 
             scene
                 .clickText(
                     text = DELETE,
                     occurrence = 1
-                ) { settle(scene = scene) }
+                ) { clock.settle(scene = scene) }
         }
 
         assertTrue(actual = "Delete Medium?" in asked)
@@ -182,20 +183,14 @@ class ModelManagerScreenTest {
         )
     }
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
         private const val DELETE = "Delete"
         private const val DOWNLOAD = "Download"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 700
         private const val OTHER_SIZES = "Other sizes"
         private const val PAUSE = "Pause"
         private const val RESUME = "Resume"
         private const val SECTION = "AI model"
-        private const val SETTLE_FRAMES = 8
         private const val WIDTH = 1000
     }
 }

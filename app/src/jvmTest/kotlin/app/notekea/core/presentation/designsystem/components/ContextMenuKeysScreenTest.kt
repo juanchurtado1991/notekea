@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.use
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuState
@@ -33,7 +34,7 @@ import kotlin.test.assertEquals
  * them; Right goes into a submenu, its rows take Enter, and Left comes back.
  */
 class ContextMenuKeysScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock(frames = 6)
 
     @Test
     fun `the Menu key and Shift+F10 open the menu of what has the keyboard`() {
@@ -48,11 +49,11 @@ class ContextMenuKeysScreenTest {
 
             UiThread.run {
                 menuScene().use { scene ->
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                     scene.sendKeyEvent(event = keyDown(key = Key.Tab))
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                     scene.sendKeyEvent(event = key)
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                     isShown = PARENT in scene.texts()
                 }
             }
@@ -107,11 +108,11 @@ class ContextMenuKeysScreenTest {
                     )
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 scene.sendKeyEvent(event = keyDown(key = Key.Tab))
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 scene.sendKeyEvent(event = keyDown(key = Key.Menu))
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 isShown = PARENT in scene.texts()
 
                 press(
@@ -145,7 +146,7 @@ class ContextMenuKeysScreenTest {
                     chosen++
                 }
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 press(
                     scene = scene,
@@ -194,7 +195,7 @@ class ContextMenuKeysScreenTest {
                 isOpen = true,
                 onChild = {}
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 val rows = scene.textCenters()
 
                 scene.sendPointerEvent(
@@ -202,7 +203,7 @@ class ContextMenuKeysScreenTest {
                     position = rows.getValue(PARENT)
                 )
 
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 opened = CHILD in scene.texts()
 
                 scene.sendPointerEvent(
@@ -210,7 +211,7 @@ class ContextMenuKeysScreenTest {
                     position = rows.getValue(SIBLING)
                 )
 
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 moved = CHILD in scene.texts()
             }
         }
@@ -285,20 +286,14 @@ class ContextMenuKeysScreenTest {
     ) {
         scene.sendKeyEvent(event = keyDown(key = key))
         scene.sendKeyEvent(event = keyUp(key = key))
-        settle(scene = scene)
-    }
-
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
+        clock.settle(scene = scene)
     }
 
     companion object {
         private const val ANCHOR_DP = 40
         private const val CHILD = "Plain text"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 500
         private const val PARENT = "Code block"
-        private const val SETTLE_FRAMES = 6
         private const val SIBLING = "Quote"
         private const val TAB = "Arepas"
         private const val WIDTH = 700

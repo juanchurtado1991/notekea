@@ -72,7 +72,7 @@ class AgentEvalChatModelTest {
 
     private val setup = ModelSetup(
         size = size,
-        modelPath = folder.resolve(FILES.getValue(size)).toString(),
+        modelPath = folder.resolve(EvalModels.FILES.getValue(size)).toString(),
         rerankerPath = folder.resolve("bge-reranker-v2-m3-Q4_K_M.gguf").toString(),
         slots = GPU_SLOTS,
         contextTokens = ModelSetup.CONTEXT_TOKENS,
@@ -415,11 +415,5 @@ class AgentEvalChatModelTest {
 
         // A size is offered agent mode when four tasks in five come out right.
         const val OFFER_BAR = 0.8
-
-        val FILES = mapOf(
-            ModelSize.SMALL to "Qwen3.5-2B-Q4_K_M.gguf",
-            ModelSize.MEDIUM to "Qwen3.5-4B-Q4_K_M.gguf",
-            ModelSize.LARGE to "Qwen3.5-9B-Q4_K_M.gguf"
-        )
     }
 }

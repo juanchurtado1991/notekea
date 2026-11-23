@@ -12,6 +12,7 @@ import androidx.compose.ui.use
 import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
@@ -36,7 +37,7 @@ import kotlin.test.assertTrue
  * heading, and a recent vault Open and Remove.
  */
 class EntryMenusScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock(frames = 5)
 
     @Test
     fun `a folder card's menu is the tree's, without New note, and its actions name the card`() {
@@ -68,9 +69,9 @@ class EntryMenusScreenTest {
                 }
             )
         }) { scene ->
-            scene.rightClickText(text = CARD.nameWithoutExtension) { settle(scene = scene) }
+            scene.rightClickText(text = CARD.nameWithoutExtension) { clock.settle(scene = scene) }
             shown = scene.texts()
-            scene.clickText(text = "Rename") { settle(scene = scene) }
+            scene.clickText(text = "Rename") { clock.settle(scene = scene) }
         }
 
         assertEquals(
@@ -102,8 +103,8 @@ class EntryMenusScreenTest {
                 )
             )
         }) { scene ->
-            scene.rightClickText(text = "Second") { settle(scene = scene) }
-            scene.clickText(text = "Go to heading") { settle(scene = scene) }
+            scene.rightClickText(text = "Second") { clock.settle(scene = scene) }
+            scene.clickText(text = "Go to heading") { clock.settle(scene = scene) }
         }
 
         assertEquals(
@@ -123,15 +124,15 @@ class EntryMenusScreenTest {
                 sent = sent
             )
         }) { scene ->
-            scene.rightClickText(text = VAULT) { settle(scene = scene) }
+            scene.rightClickText(text = VAULT) { clock.settle(scene = scene) }
 
             scene
                 .clickText(text = "Remove") {
-                    repeat(times = MENU_CLOSE_SETTLES) { settle(scene = scene) }
+                    repeat(times = MENU_CLOSE_SETTLES) { clock.settle(scene = scene) }
                 }
 
-            scene.rightClickText(text = VAULT) { settle(scene = scene) }
-            scene.clickText(text = "Open vault") { settle(scene = scene) }
+            scene.rightClickText(text = VAULT) { clock.settle(scene = scene) }
+            scene.clickText(text = "Open vault") { clock.settle(scene = scene) }
         }
 
         scene(content = {
@@ -140,7 +141,7 @@ class EntryMenusScreenTest {
                 sent = mutableListOf()
             )
         }) { scene ->
-            scene.rightClickText(text = VAULT) { settle(scene = scene) }
+            scene.rightClickText(text = VAULT) { clock.settle(scene = scene) }
 
             locate = scene.texts()
         }
@@ -190,22 +191,16 @@ class EntryMenusScreenTest {
                     Box(modifier = Modifier.fillMaxSize()) { content() }
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 drive(scene)
             }
         }
     }
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
         private const val FOLDER = "Recipes"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 700
         private const val MENU_CLOSE_SETTLES = 10
-        private const val SETTLE_FRAMES = 5
         private const val VAULT = "Notes"
         private const val WIDTH = 800
         private val CARD = RelativePath(value = "Recipes/Arepas.md")

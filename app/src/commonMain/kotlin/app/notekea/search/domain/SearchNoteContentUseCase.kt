@@ -2,6 +2,7 @@ package app.notekea.search.domain
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.forEachLineOutsideCode
 import app.notekea.core.domain.lineEndAt
 import app.notekea.core.domain.lineStartAt
 import app.notekea.core.domain.markdown.FenceTracker
@@ -215,22 +216,19 @@ class SearchNoteContentUseCase(
     /** `#tags` written in the body ([TextTagFinder]), with their folded names and places. */
     private fun inlineTagsOf(body: String): List<InlineTag> {
         val tags = mutableListOf<InlineTag>()
-        val fences = FenceTracker()
-        var lineStart = 0
 
-        body.split(NEW_LINE_CHAR).forEach { line ->
-            if (!fences.read(text = line)) {
-                textTagFinder.tagsIn(line = line).forEach { match ->
-                    val range = match.range.first + lineStart..match.range.last + lineStart
+        body.forEachLineOutsideCode { start, end ->
+            val line = body.substring(
+                startIndex = start,
+                endIndex = end
+            )
 
-                    tags += InlineTag(
-                        name = TextFolder.fold(text = match.groupValues[1]),
-                        range = range
-                    )
-                }
+            textTagFinder.tagsIn(line = line).forEach { match ->
+                tags += InlineTag(
+                    name = TextFolder.fold(text = match.groupValues[1]),
+                    range = match.range.first + start..match.range.last + start
+                )
             }
-
-            lineStart += line.length + 1
         }
 
         return tags

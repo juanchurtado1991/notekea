@@ -25,42 +25,7 @@ import kotlin.time.Clock
  * Sync on real repositories: two vaults of one remote, a bare repository on disk (`file://`, no network), through
  * [JGitRepository] as the app uses it.
  */
-class JGitRepositoryTest {
-    private val root = Files.createTempDirectory("notekea-sync").toFile()
-    private val remote = File(root, "remote.git")
-    private val laptop = File(root, "Laptop")
-    private val desktop = File(root, "Desktop")
-    private val git = JGitRepository(
-        dispatchers = JvmAppDispatchers(),
-        clock = Clock.System
-    )
-    private val url = remote.toURI().toString()
-
-    init {
-        Git
-            .init()
-            .setBare(true)
-            .setDirectory(remote)
-            .setInitialBranch("main")
-            .call()
-            .close()
-
-        laptop.mkdirs()
-        desktop.mkdirs()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        root.deleteRecursively()
-    }
-
-    private fun File.write(
-        path: String,
-        text: String
-    ) = File(this, path).apply { parentFile.mkdirs() }.writeText(text)
-
-    private fun File.read(path: String): String? = File(this, path).takeIf { it.isFile }?.readText()
-
+class JGitRepositoryTest : TwoComputers(name = "notekea-sync") {
     private fun sync(vault: File): Outcome<PullResult, SyncError> = runBlocking {
         git.commitAll(
             vaultPath = vault.path,

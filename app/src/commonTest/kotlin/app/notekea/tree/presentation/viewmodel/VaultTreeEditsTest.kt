@@ -4,6 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.links.LinkUpdateResult
+import app.notekea.core.presentation.effectsOf
 import app.notekea.tree.domain.TrashLocation
 import app.notekea.tree.domain.VaultChange
 import app.notekea.tree.presentation.model.RenameDraft
@@ -187,11 +188,7 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     fun `a rename says which notes its link update rewrote`() = runTreeTest {
         contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
         val viewModel = startedViewModel()
-        val effects = mutableListOf<VaultTreeEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         rename(
             viewModel = viewModel,
@@ -291,13 +288,7 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     @Test
     fun `a rename in the tree tells the editor where the note went`() = runTreeTest {
         val viewModel = startedViewModel()
-        val effects = mutableListOf<VaultTreeEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
-
-        runCurrent()
+        val effects = effectsOf(viewModel = viewModel)
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
 
@@ -450,13 +441,7 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             scanner.addAttachment(file = file(path = PLATE))
             scanner.addAttachment(file = file(path = MENU))
             val viewModel = startedViewModel()
-            val effects = mutableListOf<VaultTreeEffect>()
-
-            backgroundScope.launch {
-                viewModel.effects.collect { effects += it }
-            }
-
-            runCurrent()
+            val effects = effectsOf(viewModel = viewModel)
 
             viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen(path = path(MENU)))
             advanceUntilIdle()

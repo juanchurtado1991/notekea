@@ -15,6 +15,7 @@ import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.notes.domain.index.PassageSnippet
 import app.notekea.core.notes.domain.index.RelatedNote
 import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription
@@ -32,7 +33,7 @@ import kotlin.test.assertTrue
  * each tab says when it lists nothing, its rows, and what their clicks and hover actions send.
  */
 class ConnectionsSectionScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock(frames = 5)
     private val sent = mutableListOf<String>()
     private val actions = ConnectionActions(
         onOpen = { sent += "open ${it.value}" },
@@ -297,19 +298,19 @@ class ConnectionsSectionScreenTest {
     }
 
     private fun openThenOpenBeside(scene: ImageComposeScene) {
-        scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+        scene.rightClickText(text = "Weekly menu") { clock.settle(scene = scene) }
 
         scene
             .clickText(text = "Open") {
-                repeat(times = MENU_CLOSE_SETTLES) { settle(scene = scene) }
+                repeat(times = MENU_CLOSE_SETTLES) { clock.settle(scene = scene) }
             }
 
         openBeside(scene = scene)
     }
 
     private fun openBeside(scene: ImageComposeScene) {
-        scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
-        scene.clickText(text = "Open to the side") { settle(scene = scene) }
+        scene.rightClickText(text = "Weekly menu") { clock.settle(scene = scene) }
+        scene.clickText(text = "Open to the side") { clock.settle(scene = scene) }
     }
 
     private fun render(
@@ -347,7 +348,7 @@ class ConnectionsSectionScreenTest {
                     }
                 }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 hoverText?.let {
                     hover(
@@ -360,11 +361,11 @@ class ConnectionsSectionScreenTest {
                 onScene(scene)
 
                 clicks.forEach {
-                    scene.clickDescription(description = it) { settle(scene = scene) }
+                    scene.clickDescription(description = it) { clock.settle(scene = scene) }
                 }
 
                 textClicks.forEach {
-                    scene.clickText(text = it) { settle(scene = scene) }
+                    scene.clickText(text = it) { clock.settle(scene = scene) }
                 }
             }
         }
@@ -390,11 +391,7 @@ class ConnectionsSectionScreenTest {
             position = node.boundsInRoot.center
         )
 
-        settle(scene = scene)
-    }
-
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
+        clock.settle(scene = scene)
     }
 
     private companion object {
@@ -402,9 +399,7 @@ class ConnectionsSectionScreenTest {
         const val MENU = "Recipes/Weekly menu.md"
         const val SOUP = "Recipes/Tomato soup.md"
         const val PASSAGE = "Summer tomatoes from the beds make it sweeter."
-        const val FRAME_NANOS = 16_000_000L
         const val MENU_CLOSE_SETTLES = 10
-        const val SETTLE_FRAMES = 5
         const val WIDTH = 320
         const val HEIGHT = 600
         val RELATED = RelatedNotesState(

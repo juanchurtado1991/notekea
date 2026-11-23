@@ -48,8 +48,9 @@ class BugHuntTurnTest {
         Outcome.Success(value = emptyList())
     }
 
-    private val runTurn = RunTurnUseCase(
-        llmEngine = engine,
+    private val runTurn = loopTurn(
+        engine = engine,
+        cache = cache,
         toolsets = Toolsets(
             byKind = mapOf(
                 WorkKind.ASK to listOf(
@@ -64,16 +65,6 @@ class BugHuntTurnTest {
                 )
             )
         ),
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(
-                llmEngine = engine,
-                noteTextCache = cache,
-                planReader = GhostActionPlanReader()
-            )
-        ),
-        clock = Clock.System,
         frames = FrameSource { _, _, _, _, _, _ -> frames.lastOrNull() }
     )
 

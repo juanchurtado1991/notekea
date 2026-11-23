@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
@@ -27,7 +28,7 @@ import kotlin.time.Duration.Companion.minutes
  * and what a click on the status, Rebuild index and Dismiss send.
  */
 class SearchIndexScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock(frames = 5)
 
     @Test
     fun `the status says how far a run is, how many notes are ready, or that search is unavailable`() {
@@ -176,10 +177,10 @@ class SearchIndexScreenTest {
             ) {
                 NotekeaTheme(darkTheme = false) { content() }
             }.use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 clicks.forEach {
-                    scene.clickText(text = it) { settle(scene = scene) }
+                    scene.clickText(text = it) { clock.settle(scene = scene) }
                 }
 
                 texts = scene.texts()
@@ -189,15 +190,9 @@ class SearchIndexScreenTest {
         return Rendered(texts = texts)
     }
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     private companion object {
         val HUGE = RelativePath(value = "Huge export.md")
         const val STATUS = "Indexing · 28 %"
-        const val FRAME_NANOS = 16_000_000L
-        const val SETTLE_FRAMES = 5
         const val WIDTH = 900
         const val HEIGHT = 600
     }

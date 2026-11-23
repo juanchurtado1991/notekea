@@ -16,6 +16,7 @@ import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.appearance.domain.ThemeMode
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
@@ -35,7 +36,7 @@ import kotlin.test.assertEquals
  */
 @OptIn(InternalComposeUiApi::class)
 class AppearanceSettingsScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock(frames = 5)
 
     @Test
     fun `a theme is chosen with the mouse or the keyboard, and the mode with its segment`() {
@@ -60,8 +61,8 @@ class AppearanceSettingsScreenTest {
                     )
                 }
             }.use { scene ->
-                settle(scene = scene)
-                scene.clickText(text = "Forest") { settle(scene = scene) }
+                clock.settle(scene = scene)
+                scene.clickText(text = "Forest") { clock.settle(scene = scene) }
                 kept += store.kept
 
                 focusCard(
@@ -83,9 +84,9 @@ class AppearanceSettingsScreenTest {
                     )
                 )
 
-                settle(scene = scene)
+                clock.settle(scene = scene)
                 kept += store.kept
-                scene.clickText(text = "Dark") { settle(scene = scene) }
+                scene.clickText(text = "Dark") { clock.settle(scene = scene) }
                 kept += store.kept
             }
         }
@@ -118,7 +119,7 @@ class AppearanceSettingsScreenTest {
             .action
             ?.invoke()
 
-        settle(scene = scene)
+        clock.settle(scene = scene)
     }
 
     private fun textsUnder(node: SemanticsNode): List<String> = node.children.flatMap { child ->
@@ -129,14 +130,8 @@ class AppearanceSettingsScreenTest {
             .map { it.text } + textsUnder(node = child)
     }
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 700
-        private const val SETTLE_FRAMES = 5
         private const val WIDTH = 1000
     }
 }

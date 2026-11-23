@@ -15,6 +15,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
 import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
@@ -33,7 +34,7 @@ import java.awt.event.KeyEvent as AwtKeyEvent
  * calendar (above the date when there is no room below) picks a day, today, or a day of another month.
  */
 class PropertiesScreenTest {
-    private var frame = 0L
+    private val clock = SceneClock()
 
     @Test
     fun `the form folds, edits a checkbox, a list, a text and removes a property, and shows its source`() {
@@ -41,7 +42,7 @@ class PropertiesScreenTest {
 
         UiThread.run {
             scene(intents = intents).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 listOf(FAVORITE_BOX, RECIPE_REMOVE, STATUS_REMOVE, STATUS_FIELD_END).forEach {
                     click(scene, it)
@@ -53,7 +54,7 @@ class PropertiesScreenTest {
                 )
 
                 scene.sendKeyEvent(event = keyDown(key = Key.Enter))
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 listOf(SOURCE_TOGGLE, HEADER).forEach { click(scene, it) }
             }
@@ -87,7 +88,7 @@ class PropertiesScreenTest {
 
         UiThread.run {
             scene(intents = intents).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 listOf(
                     CALENDAR,
@@ -139,7 +140,7 @@ class PropertiesScreenTest {
                 intents = intents,
                 state = state
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 click(
                     scene = scene,
@@ -214,7 +215,7 @@ class PropertiesScreenTest {
             position = position
         )
 
-        settle(scene = scene)
+        clock.settle(scene = scene)
     }
 
     @OptIn(InternalComposeUiApi::class)
@@ -235,7 +236,7 @@ class PropertiesScreenTest {
                 )
             )
 
-            settle(scene = scene)
+            clock.settle(scene = scene)
         }
     }
 
@@ -245,20 +246,14 @@ class PropertiesScreenTest {
         type = KeyEventType.KeyDown
     )
 
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
-    }
-
     companion object {
         private const val BODY = "# Arepas\n\nMix the flour.\n"
         private const val BROKEN_SOURCE = "title: Broken on purpose\nthis line is not a property"
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEADER_TEXT =
             "---\ntags: [recipe, venezuelan]\nstatus: Tested\nservings: 4\nfavorite: true\n" +
                 "cooked: 2026-10-27\nsource:\n  book: Abuela\n---\n"
         private const val HEIGHT = 520
         private const val NOTE = "Recipes/Arepas.md"
-        private const val SETTLE_FRAMES = 4
         private const val TYPED = "!"
         private const val WIDTH = 900
         private val BODY_TEXT = Offset(

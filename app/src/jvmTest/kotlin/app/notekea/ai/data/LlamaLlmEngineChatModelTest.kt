@@ -2,6 +2,7 @@ package app.notekea.ai.data
 
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
+import app.notekea.chat.eval.EvalModels
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.ChatMessage
@@ -169,7 +170,7 @@ class LlamaLlmEngineChatModelTest {
         idleMillis: Long = LlamaLlmEngine.IDLE_MILLIS
     ): LlamaLlmEngine {
         val model = folder.resolve(modelFile)
-        val reranker = folder.resolve(RERANKER_FILE)
+        val reranker = folder.resolve(EvalModels.RERANKER_FILE)
         assumeTrue(Files.isRegularFile(folder.resolve(SMALL_FILE)) && Files.isRegularFile(reranker))
 
         val setup = ModelSetup(
@@ -202,7 +203,6 @@ class LlamaLlmEngineChatModelTest {
     private companion object {
         const val MODELS_PROPERTY = "notekea.chat.models"
         const val SMALL_FILE = "Qwen3.5-2B-Q4_K_M.gguf"
-        const val RERANKER_FILE = "bge-reranker-v2-m3-Q4_K_M.gguf"
         const val WAIT_MILLIS = 120_000L
         const val QUESTION = "¿Cuánta agua lleva la masa de las arepas? Responde en una frase."
         const val RECIPE =

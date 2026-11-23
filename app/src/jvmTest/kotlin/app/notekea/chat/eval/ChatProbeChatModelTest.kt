@@ -121,7 +121,7 @@ class ChatProbeChatModelTest {
 
     private val setup = ModelSetup(
         size = size,
-        modelPath = folder.resolve(FILES.getValue(size)).toString(),
+        modelPath = folder.resolve(EvalModels.FILES.getValue(size)).toString(),
         rerankerPath = folder.resolve("bge-reranker-v2-m3-Q4_K_M.gguf").toString(),
         slots = GPU_SLOTS,
         contextTokens = ModelSetup.CONTEXT_TOKENS,
@@ -430,11 +430,5 @@ class ChatProbeChatModelTest {
         const val PROBES_PROPERTY = "notekea.chat.probes"
         const val DEFAULT_PROBES = "../smoke-data/eval/chat-probes.txt"
         const val GUIDE = "src/commonMain/composeResources/files/guide/guide.md"
-
-        val FILES = mapOf(
-            ModelSize.SMALL to "Qwen3.5-2B-Q4_K_M.gguf",
-            ModelSize.MEDIUM to "Qwen3.5-4B-Q4_K_M.gguf",
-            ModelSize.LARGE to "Qwen3.5-9B-Q4_K_M.gguf"
-        )
     }
 }

@@ -15,6 +15,7 @@ import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
 import app.notekea.core.notes.domain.sidepanel.SidePanelMode
 import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 import app.notekea.core.notes.domain.sidepanel.SidePanelSection
+import app.notekea.core.presentation.effectsOf
 import app.notekea.editor.domain.FakeEditorPreferencesStore
 import app.notekea.shell.domain.EditorPane
 import app.notekea.shell.domain.FakeWorkspaceStore
@@ -253,13 +254,7 @@ class WorkspaceViewModelTest : WorkspaceViewModelTestBase() {
     fun `the side panel is shown at first, hides, and the outline shortcut shows it again and focuses it`() =
         runWorkspaceTest {
             val viewModel = started()
-            val effects = mutableListOf<WorkspaceEffect>()
-
-            backgroundScope.launch {
-                viewModel.effects.collect { effects += it }
-            }
-
-            runCurrent()
+            val effects = effectsOf(viewModel = viewModel)
             val first = viewModel.state.value.sidePanel
 
             viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelToggle)
@@ -341,13 +336,7 @@ class WorkspaceViewModelTest : WorkspaceViewModelTestBase() {
     fun `the chat shortcut shows the hidden panel on the chat and gives its field the keyboard`() =
         runWorkspaceTest {
             val viewModel = started()
-            val effects = mutableListOf<WorkspaceEffect>()
-
-            backgroundScope.launch {
-                viewModel.effects.collect { effects += it }
-            }
-
-            runCurrent()
+            val effects = effectsOf(viewModel = viewModel)
             viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelToggle)
             advanceUntilIdle()
             viewModel.onIntent(intent = WorkspaceIntent.OnChatFocusRequest)

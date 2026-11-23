@@ -19,44 +19,7 @@ import kotlin.time.Clock
  * The bug hunt of 2026-11-17, on real repositories: a rebase cut short listed the whole vault as changed here and
  * "take remote" lost the commits not replayed yet; connecting or settling a conflict mid-merge committed its marks.
  */
-class JGitRebaseRepairTest {
-    private val root = Files.createTempDirectory("notekea-rebase-repair").toFile()
-    private val remote = File(root, "remote.git")
-    private val laptop = File(root, "Laptop")
-    private val desktop = File(root, "Desktop")
-    private val git = JGitRepository(
-        dispatchers = JvmAppDispatchers(),
-        clock = Clock.System
-    )
-    private val url = remote.toURI().toString()
-
-    init {
-        Git
-            .init()
-            .setBare(true)
-            .setDirectory(remote)
-            .setInitialBranch("main")
-            .call()
-            .close()
-
-        laptop.mkdirs()
-        desktop.mkdirs()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        root.deleteRecursively()
-    }
-
-    private fun File.write(
-        path: String,
-        text: String
-    ) = File(this, path).apply { parentFile.mkdirs() }.writeText(text)
-
-    private fun File.read(path: String): String? = File(this, path).takeIf { it.isFile }?.readText()
-
-    private fun File.state(): RepositoryState = Git.open(this).use { it.repository.repositoryState }
-
+class JGitRebaseRepairTest : TwoComputers(name = "notekea-rebase-repair") {
     private fun trashed(): Map<String, String> {
         val trash = File(desktop, ".trash/Sync repair")
 

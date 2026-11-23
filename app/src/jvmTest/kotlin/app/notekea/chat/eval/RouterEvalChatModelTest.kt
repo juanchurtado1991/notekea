@@ -32,8 +32,8 @@ class RouterEvalChatModelTest {
 
     private val setup = ModelSetup(
         size = size,
-        modelPath = folder.resolve(FILES.getValue(size)).toString(),
-        rerankerPath = folder.resolve(RERANKER_FILE).toString(),
+        modelPath = folder.resolve(EvalModels.FILES.getValue(size)).toString(),
+        rerankerPath = folder.resolve(EvalModels.RERANKER_FILE).toString(),
         slots = SLOTS,
         contextTokens = ModelSetup.CONTEXT_TOKENS,
         onGpu = true
@@ -127,15 +127,8 @@ class RouterEvalChatModelTest {
         const val SET_FILE = "../smoke-data/eval/actions.json"
         const val MODELS_PROPERTY = "notekea.chat.models"
         const val SIZE_PROPERTY = "notekea.chat.size"
-        const val RERANKER_FILE = "bge-reranker-v2-m3-Q4_K_M.gguf"
         const val REPORTS = "build/reports"
         const val SLOTS = 4
-
-        val FILES = mapOf(
-            ModelSize.SMALL to "Qwen3.5-2B-Q4_K_M.gguf",
-            ModelSize.MEDIUM to "Qwen3.5-4B-Q4_K_M.gguf",
-            ModelSize.LARGE to "Qwen3.5-9B-Q4_K_M.gguf"
-        )
 
         private val WRITES = setOf(WorkKind.WRITE, WorkKind.ORGANIZE)
         private val ORGANIZES = setOf(WorkKind.ORGANIZE)

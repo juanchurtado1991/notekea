@@ -5,6 +5,7 @@ import app.notekea.ai.domain.InstallProgress
 import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelSize
 import app.notekea.core.presentation.ViewModelTestBase
+import app.notekea.core.presentation.effectsOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -23,11 +24,7 @@ class ModelDownloadViewModelTest : ViewModelTestBase() {
         context = testDispatcher
     ) {
         val viewModel = ModelDownloadViewModel(installer = installer)
-        val effects = mutableListOf<ModelDownloadEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         advanceUntilIdle()
         val idle = viewModel.state.value.fraction

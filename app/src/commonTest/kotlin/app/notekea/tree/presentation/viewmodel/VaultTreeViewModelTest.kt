@@ -4,6 +4,7 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.effectsOf
 import app.notekea.tree.domain.TreePreferences
 import app.notekea.tree.domain.TreeRow
 import app.notekea.tree.domain.TreeSort
@@ -228,13 +229,7 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
             scanner.addAttachment(file = file(path = PLATE))
             scanner.addNote(file = file(path = WELCOME))
             val viewModel = startedViewModel()
-            val effects = mutableListOf<VaultTreeEffect>()
-
-            backgroundScope.launch {
-                viewModel.effects.collect { effects += it }
-            }
-
-            runCurrent()
+            val effects = effectsOf(viewModel = viewModel)
 
             viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(PLATE)))
             viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path("attachments")))

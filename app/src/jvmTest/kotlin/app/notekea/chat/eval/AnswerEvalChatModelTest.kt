@@ -44,8 +44,8 @@ class AnswerEvalChatModelTest {
     )
     private val setup = ModelSetup(
         size = size,
-        modelPath = folder.resolve(FILES.getValue(size)).toString(),
-        rerankerPath = folder.resolve(RERANKER_FILE).toString(),
+        modelPath = folder.resolve(EvalModels.FILES.getValue(size)).toString(),
+        rerankerPath = folder.resolve(EvalModels.RERANKER_FILE).toString(),
         slots = if (onGpu) GPU_SLOTS else 1,
         contextTokens = ModelSetup.CONTEXT_TOKENS,
         onGpu = onGpu
@@ -215,16 +215,10 @@ class AnswerEvalChatModelTest {
         const val DRAFTS_PROPERTY = "notekea.chat.drafts"
         const val AGENT_PROPERTY = "notekea.chat.agent"
         const val EMBEDDING_PROPERTY = "notekea.embedding.model"
-        const val RERANKER_FILE = "bge-reranker-v2-m3-Q4_K_M.gguf"
         const val REPORTS = "build/reports"
         const val NOT_FOUND = "NOT_FOUND"
         const val GPU_SLOTS = 4
         const val NANOS_PER_MILLI = 1_000_000L
-        val FILES = mapOf(
-            ModelSize.SMALL to "Qwen3.5-2B-Q4_K_M.gguf",
-            ModelSize.MEDIUM to "Qwen3.5-4B-Q4_K_M.gguf",
-            ModelSize.LARGE to "Qwen3.5-9B-Q4_K_M.gguf"
-        )
 
         // Three points under the first run of 3.4, 80 / 89 / 85 % (docs/answer-quality.md): batching on the GPU moves
         // an answer now and then.

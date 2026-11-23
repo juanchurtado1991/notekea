@@ -35,8 +35,8 @@ class ActionEvalChatModelTest {
 
     private val setup = ModelSetup(
         size = size,
-        modelPath = folder.resolve(FILES.getValue(size)).toString(),
-        rerankerPath = folder.resolve(RERANKER_FILE).toString(),
+        modelPath = folder.resolve(EvalModels.FILES.getValue(size)).toString(),
+        rerankerPath = folder.resolve(EvalModels.RERANKER_FILE).toString(),
         slots = if (onGpu) GPU_SLOTS else 1,
         contextTokens = ModelSetup.CONTEXT_TOKENS,
         onGpu = onGpu
@@ -143,16 +143,10 @@ class ActionEvalChatModelTest {
         const val MODELS_PROPERTY = "notekea.chat.models"
         const val SIZE_PROPERTY = "notekea.chat.size"
         const val GPU_PROPERTY = "notekea.chat.gpu"
-        const val RERANKER_FILE = "bge-reranker-v2-m3-Q4_K_M.gguf"
         const val REPORTS = "build/reports"
         const val GPU_SLOTS = 4
         const val PERCENT = 100
         const val NANOS_PER_MILLI = 1_000_000L
-        val FILES = mapOf(
-            ModelSize.SMALL to "Qwen3.5-2B-Q4_K_M.gguf",
-            ModelSize.MEDIUM to "Qwen3.5-4B-Q4_K_M.gguf",
-            ModelSize.LARGE to "Qwen3.5-9B-Q4_K_M.gguf"
-        )
 
         // Three points under the first runs, 75 / 92 / 91 % (docs/answer-quality.md, 3.9).
         val BASELINES = mapOf(

@@ -31,8 +31,9 @@ class UnchangedEndTest {
         contentStore = FakeNoteContentStore()
     )
 
-    private val runTurn = RunTurnUseCase(
-        llmEngine = engine,
+    private val runTurn = loopTurn(
+        engine = engine,
+        cache = cache,
         toolsets = Toolsets(
             byKind = mapOf(
                 WorkKind.ORGANIZE to listOf(
@@ -40,17 +41,7 @@ class UnchangedEndTest {
                     ProposeTool()
                 )
             )
-        ),
-        vaultGuide = VaultGuide(noteTextCache = cache),
-        proposal = ProposalCheck(
-            checkPlan = CheckPlanUseCase(),
-            composeNotes = ComposeNotesUseCase(
-                llmEngine = engine,
-                noteTextCache = cache,
-                planReader = GhostActionPlanReader()
-            )
-        ),
-        clock = Clock.System
+        )
     )
 
     @Test

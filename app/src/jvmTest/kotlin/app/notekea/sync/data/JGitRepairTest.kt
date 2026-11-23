@@ -16,44 +16,7 @@ import kotlin.time.Clock
  * A vault left in the middle of a merge or a rebase (the app killed half way), on real repositories: nothing is
  * repaired by itself, and either repair keeps what the person wrote (left open on 2026-11-13, done on 2026-11-14).
  */
-class JGitRepairTest {
-    private val root = Files.createTempDirectory("notekea-repair").toFile()
-    private val remote = File(root, "remote.git")
-    private val laptop = File(root, "Laptop")
-    private val desktop = File(root, "Desktop")
-    private val git = JGitRepository(
-        dispatchers = JvmAppDispatchers(),
-        clock = Clock.System
-    )
-    private val url = remote.toURI().toString()
-
-    init {
-        Git
-            .init()
-            .setBare(true)
-            .setDirectory(remote)
-            .setInitialBranch("main")
-            .call()
-            .close()
-
-        laptop.mkdirs()
-        desktop.mkdirs()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        root.deleteRecursively()
-    }
-
-    private fun File.write(
-        path: String,
-        text: String
-    ) = File(this, path).apply { parentFile.mkdirs() }.writeText(text)
-
-    private fun File.read(path: String): String? = File(this, path).takeIf { it.isFile }?.readText()
-
-    private fun File.state(): RepositoryState = Git.open(this).use { it.repository.repositoryState }
-
+class JGitRepairTest : TwoComputers(name = "notekea-repair") {
     /**
      * Both computers have Plan and Ideas; each changes Plan its own way, the laptop's reaches the remote, and the
      * desktop is left as a crash leaves it: in the middle of bringing the laptop's side, Plan full of Git's marks.

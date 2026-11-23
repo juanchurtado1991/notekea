@@ -2,6 +2,7 @@ package app.notekea.graph.presentation
 
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.effectsOf
 import app.notekea.graph.presentation.model.GraphEffect
 import app.notekea.graph.presentation.model.GraphIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,11 +46,7 @@ class GraphCenterTest : GraphViewModelFixture() {
     @Test
     fun `Esc after a rename opens the note under its new name`() = runGraphTest {
         send(GraphIntent.OnOpen(note = AREPAS))
-        val effects = mutableListOf<GraphEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
+        val effects = effectsOf(viewModel = viewModel)
 
         send(
             GraphIntent.OnRenamed(

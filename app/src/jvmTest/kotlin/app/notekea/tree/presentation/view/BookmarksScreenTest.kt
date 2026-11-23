@@ -9,6 +9,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.SceneClock
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
@@ -29,7 +30,7 @@ import kotlin.test.assertEquals
 class BookmarksScreenTest {
     private val base = TreePreviewData.state()
     private val missing = RelativePath(value = "Old plan.md")
-    private var frame = 0L
+    private val clock = SceneClock()
 
     @Test
     fun `the section folds, a bookmark opens, moves when dragged and goes with its cross, and the star toggles`() {
@@ -41,7 +42,7 @@ class BookmarksScreenTest {
                 treeIntents = treeIntents,
                 editorIntents = editorIntents
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 listOf(HEADER, FIRST_BOOKMARK, MISSING_REMOVE, STAR).forEach {
                     click(
@@ -85,14 +86,14 @@ class BookmarksScreenTest {
                 treeIntents = treeIntents,
                 editorIntents = mutableListOf()
             ).use { scene ->
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 scene.sendPointerEvent(
                     eventType = PointerEventType.Move,
                     position = IDEAS_ROW
                 )
 
-                settle(scene = scene)
+                clock.settle(scene = scene)
 
                 listOf(PointerEventType.Press, PointerEventType.Release).forEach { type ->
                     scene.sendPointerEvent(
@@ -104,7 +105,7 @@ class BookmarksScreenTest {
                         button = PointerButton.Secondary
                     )
 
-                    settle(scene = scene)
+                    clock.settle(scene = scene)
                 }
 
                 click(
@@ -169,7 +170,7 @@ class BookmarksScreenTest {
             position = position
         )
 
-        settle(scene = scene)
+        clock.settle(scene = scene)
     }
 
     private fun drag(
@@ -199,7 +200,7 @@ class BookmarksScreenTest {
                 buttons = pressed
             )
 
-            settle(scene = scene)
+            clock.settle(scene = scene)
         }
 
         scene.sendPointerEvent(
@@ -208,20 +209,14 @@ class BookmarksScreenTest {
             buttons = PointerButtons()
         )
 
-        settle(scene = scene)
-    }
-
-    private fun settle(scene: ImageComposeScene) {
-        repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
+        clock.settle(scene = scene)
     }
 
     companion object {
         private const val BODY = "Plant in March.\n"
         private const val DRAG_STEPS = 8
-        private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 520
         private const val NOTE = "Projects/Garden/Tomato plan.md"
-        private const val SETTLE_FRAMES = 4
         private const val WIDTH = 1100
         private val FIRST_BOOKMARK = Offset(
             x = 140f,
