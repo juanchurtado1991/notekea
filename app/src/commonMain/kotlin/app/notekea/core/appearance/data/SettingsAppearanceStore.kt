@@ -5,6 +5,7 @@ import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.preferences.data.HeldSetting
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,63 +24,50 @@ class SettingsAppearanceStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
 ) : AppearanceStore {
-    private val current = MutableStateFlow<Appearance?>(value = null)
+    private val held = HeldSetting(
+        dispatchers = dispatchers,
+        read = ::read,
+        write = ::write
+    )
 
-    override fun observe(): Flow<Appearance> = flow {
-        if (current.value == null) {
-            current.compareAndSet(
-                expect = null,
-                update = read()
-            )
-        }
+    override fun observe(): Flow<Appearance> = held.observe()
 
-        emitAll(current.filterNotNull())
-    }
+    override suspend fun save(appearance: Appearance) = held.save(value = appearance)
 
-    override suspend fun save(appearance: Appearance) = saving.withLock {
-        withContext(context = dispatchers.io) {
-            settings.putString(
-                key = THEME_KEY,
-                value = appearance.theme.id
-            )
+    private fun write(appearance: Appearance) {
+        settings.putString(
+            key = THEME_KEY,
+            value = appearance.theme.id
+        )
 
-            settings.putString(
-                key = MODE_KEY,
-                value = appearance.mode.id
-            )
+        settings.putString(
+            key = MODE_KEY,
+            value = appearance.mode.id
+        )
 
-            settings.putBoolean(
-                key = REDUCE_MOTION_KEY,
-                value = appearance.reduceMotion
-            )
+        settings.putBoolean(
+            key = REDUCE_MOTION_KEY,
+            value = appearance.reduceMotion
+        )
 
-            settings.putBoolean(
-                key = SYSTEM_ACCENT_KEY,
-                value = appearance.usesSystemAccent
-            )
-        }
-
-        current.value = appearance
-    }
-
-    // One save at a time, in the order asked: two quick changes left the file on one and the
-    // windows on the other (the code review of 2026-11-22).
-    private val saving = Mutex()
-
-    private suspend fun read(): Appearance = withContext(context = dispatchers.io) {
-        Appearance(
-            theme = ColorTheme.fromId(id = settings.getStringOrNull(key = THEME_KEY)),
-            mode = ThemeMode.fromId(id = settings.getStringOrNull(key = MODE_KEY)),
-            reduceMotion = settings.getBoolean(
-                key = REDUCE_MOTION_KEY,
-                defaultValue = false
-            ),
-            usesSystemAccent = settings.getBoolean(
-                key = SYSTEM_ACCENT_KEY,
-                defaultValue = false
-            )
+        settings.putBoolean(
+            key = SYSTEM_ACCENT_KEY,
+            value = appearance.usesSystemAccent
         )
     }
+
+    private fun read(): Appearance = Appearance(
+        theme = ColorTheme.fromId(id = settings.getStringOrNull(key = THEME_KEY)),
+        mode = ThemeMode.fromId(id = settings.getStringOrNull(key = MODE_KEY)),
+        reduceMotion = settings.getBoolean(
+            key = REDUCE_MOTION_KEY,
+            defaultValue = false
+        ),
+        usesSystemAccent = settings.getBoolean(
+            key = SYSTEM_ACCENT_KEY,
+            defaultValue = false
+        )
+    )
 
     private companion object {
         const val MODE_KEY = "app.theme_mode"

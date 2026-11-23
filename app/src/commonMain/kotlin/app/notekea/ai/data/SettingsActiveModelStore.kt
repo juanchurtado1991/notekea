@@ -3,6 +3,7 @@ package app.notekea.ai.data
 import app.notekea.ai.domain.ActiveModelStore
 import app.notekea.ai.domain.ModelSize
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.preferences.data.HeldSetting
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,38 +18,30 @@ class SettingsActiveModelStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
 ) : ActiveModelStore {
-    private val current = MutableStateFlow<Kept?>(value = null)
+    private val held = HeldSetting(
+        dispatchers = dispatchers,
+        read = { Kept(size = ModelSize.fromId(id = settings.getStringOrNull(key = ACTIVE_KEY))) },
+        write = ::write
+    )
 
-    override fun observe(): Flow<ModelSize?> = flow {
-        if (current.value == null) {
-            val kept =
-                withContext(context = dispatchers.io) { settings.getStringOrNull(key = ACTIVE_KEY) }
+    override fun observe(): Flow<ModelSize?> = held
+        .observe()
+        .map { it.size }
 
-            current.compareAndSet(
-                expect = null,
-                update = Kept(size = ModelSize.fromId(id = kept))
+    override suspend fun save(size: ModelSize?) = held.save(value = Kept(size = size))
+
+    private fun write(kept: Kept) {
+        if (kept.size == null) {
+            settings.remove(key = ACTIVE_KEY)
+        } else {
+            settings.putString(
+                key = ACTIVE_KEY,
+                value = kept.size.id
             )
         }
-
-        emitAll(current.filterNotNull().map { it.size })
     }
 
-    override suspend fun save(size: ModelSize?) {
-        withContext(context = dispatchers.io) {
-            if (size == null) {
-                settings.remove(key = ACTIVE_KEY)
-            } else {
-                settings.putString(
-                    key = ACTIVE_KEY,
-                    value = size.id
-                )
-            }
-        }
-
-        current.value = Kept(size = size)
-    }
-
-    /** A size read or saved; null means not read yet, while [size] null means none was kept. */
+    /** A size read or saved: [size] null means none was kept. */
     private data class Kept(val size: ModelSize?)
 
     private companion object {

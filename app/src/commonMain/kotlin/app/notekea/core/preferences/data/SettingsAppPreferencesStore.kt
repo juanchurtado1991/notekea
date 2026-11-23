@@ -24,95 +24,83 @@ class SettingsAppPreferencesStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
 ) : AppPreferencesStore {
-    private val current = MutableStateFlow<AppPreferences?>(value = null)
+    private val held = HeldSetting(
+        dispatchers = dispatchers,
+        read = ::read,
+        write = ::write
+    )
 
-    override fun observe(): Flow<AppPreferences> = flow {
-        if (current.value == null) {
-            current.compareAndSet(
-                expect = null,
-                update = read()
-            )
-        }
+    override fun observe(): Flow<AppPreferences> = held.observe()
 
-        emitAll(current.filterNotNull())
-    }
+    override suspend fun save(preferences: AppPreferences) = held.save(value = preferences)
 
-    override suspend fun save(preferences: AppPreferences) = saving.withLock {
-        withContext(context = dispatchers.io) {
-            settings.putString(
-                key = LANGUAGE_KEY,
-                value = preferences.language.id
-            )
+    private fun write(preferences: AppPreferences) {
+        settings.putString(
+            key = LANGUAGE_KEY,
+            value = preferences.language.id
+        )
 
-            settings.putBoolean(
-                key = OPENS_LAST_VAULT_KEY,
-                value = preferences.opensLastVault
-            )
+        settings.putBoolean(
+            key = OPENS_LAST_VAULT_KEY,
+            value = preferences.opensLastVault
+        )
 
-            settings.putInt(
-                key = TEXT_SIZE_KEY,
-                value = preferences.textSize
-            )
+        settings.putInt(
+            key = TEXT_SIZE_KEY,
+            value = preferences.textSize
+        )
 
-            settings.putString(
-                key = LINE_WIDTH_KEY,
-                value = preferences.lineWidth.id
-            )
+        settings.putString(
+            key = LINE_WIDTH_KEY,
+            value = preferences.lineWidth.id
+        )
 
-            settings.putBoolean(
-                key = SEEN_WELCOME_KEY,
-                value = preferences.hasSeenWelcome
-            )
+        settings.putBoolean(
+            key = SEEN_WELCOME_KEY,
+            value = preferences.hasSeenWelcome
+        )
 
-            settings.putString(
-                key = WEB_UPDATE_KEY,
-                value = preferences.webUpdate.id
-            )
+        settings.putString(
+            key = WEB_UPDATE_KEY,
+            value = preferences.webUpdate.id
+        )
 
-            settings.putBoolean(
-                key = CHAT_LOOP_KEY,
-                value = preferences.chatLoop
-            )
+        settings.putBoolean(
+            key = CHAT_LOOP_KEY,
+            value = preferences.chatLoop
+        )
 
-            settings.putBoolean(
-                key = CHAT_MEMORY_KEY,
-                value = preferences.chatMemory
-            )
-        }
-
-        current.value = preferences
-    }
-
-    // One save at a time, in the order asked: two quick changes could end with the older one kept.
-    private val saving = Mutex()
-
-    private suspend fun read(): AppPreferences = withContext(context = dispatchers.io) {
-        AppPreferences(
-            language = AppLanguage.fromId(id = settings.getStringOrNull(key = LANGUAGE_KEY)),
-            opensLastVault = settings.getBoolean(
-                key = OPENS_LAST_VAULT_KEY,
-                defaultValue = true
-            ),
-            textSize = settings.getInt(
-                key = TEXT_SIZE_KEY,
-                defaultValue = AppPreferences.DEFAULT_TEXT_SIZE
-            ),
-            lineWidth = LineWidth.fromId(id = settings.getStringOrNull(key = LINE_WIDTH_KEY)),
-            hasSeenWelcome = settings.getBoolean(
-                key = SEEN_WELCOME_KEY,
-                defaultValue = false
-            ),
-            webUpdate = WebUpdateEvery.fromId(id = settings.getStringOrNull(key = WEB_UPDATE_KEY)),
-            chatLoop = settings.getBoolean(
-                key = CHAT_LOOP_KEY,
-                defaultValue = false
-            ),
-            chatMemory = settings.getBoolean(
-                key = CHAT_MEMORY_KEY,
-                defaultValue = true
-            )
+        settings.putBoolean(
+            key = CHAT_MEMORY_KEY,
+            value = preferences.chatMemory
         )
     }
+
+    private fun read(): AppPreferences = AppPreferences(
+        language = AppLanguage.fromId(id = settings.getStringOrNull(key = LANGUAGE_KEY)),
+        opensLastVault = settings.getBoolean(
+            key = OPENS_LAST_VAULT_KEY,
+            defaultValue = true
+        ),
+        textSize = settings.getInt(
+            key = TEXT_SIZE_KEY,
+            defaultValue = AppPreferences.DEFAULT_TEXT_SIZE
+        ),
+        lineWidth = LineWidth.fromId(id = settings.getStringOrNull(key = LINE_WIDTH_KEY)),
+        hasSeenWelcome = settings.getBoolean(
+            key = SEEN_WELCOME_KEY,
+            defaultValue = false
+        ),
+        webUpdate = WebUpdateEvery.fromId(id = settings.getStringOrNull(key = WEB_UPDATE_KEY)),
+        chatLoop = settings.getBoolean(
+            key = CHAT_LOOP_KEY,
+            defaultValue = false
+        ),
+        chatMemory = settings.getBoolean(
+            key = CHAT_MEMORY_KEY,
+            defaultValue = true
+        )
+    )
 
     private companion object {
         const val LANGUAGE_KEY = "app.language"
