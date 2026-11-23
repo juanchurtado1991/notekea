@@ -1,15 +1,10 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.BLOCK
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.FUNCTION_LITERAL
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.LBRACE
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.RBRACE
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.EditorConfig
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PROPERTY
 import com.pinterest.ktlint.rule.engine.core.api.ifAutocorrectAllowed
@@ -22,12 +17,10 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
  * condition or a string stays as it is.
  */
 class LambdaBodyLineRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER),
-        usesEditorConfigProperties = setOf(MAX_LINE_LENGTH_PROPERTY)
-    ),
-    RuleAutocorrectApproveHandler {
+    NotekeaRule(
+        id = RULE_ID,
+        properties = setOf(MAX_LINE_LENGTH_PROPERTY)
+    ) {
     private val lineBreaks = Regex(pattern = "\\s*\\n\\s*")
     private var maxLineLength = Int.MAX_VALUE
 
@@ -37,11 +30,7 @@ class LambdaBodyLineRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         val block = node.takeIf { it.elementType == FUNCTION_LITERAL }?.findChildByType(BLOCK)
         val statements = block?.codeChildren().orEmpty()

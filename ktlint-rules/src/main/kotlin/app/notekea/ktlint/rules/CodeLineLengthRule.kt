@@ -1,8 +1,6 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.BLOCK_COMMENT
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EOL_COMMENT
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.FILE
@@ -11,9 +9,6 @@ import com.pinterest.ktlint.rule.engine.core.api.ElementType.IMPORT_DIRECTIVE
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.KDOC
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.PACKAGE_DIRECTIVE
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.STRING_TEMPLATE
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.EditorConfig
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PROPERTY
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -23,12 +18,10 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
  * limit: a string, a test's name in backticks, an import; a comment has up to [MAX_COMMENT_LENGTH] characters.
  */
 class CodeLineLengthRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER),
-        usesEditorConfigProperties = setOf(MAX_LINE_LENGTH_PROPERTY)
-    ),
-    RuleAutocorrectApproveHandler {
+    NotekeaRule(
+        id = RULE_ID,
+        properties = setOf(MAX_LINE_LENGTH_PROPERTY)
+    ) {
     private val comments = setOf(
         KDOC,
         EOL_COMMENT,
@@ -47,11 +40,7 @@ class CodeLineLengthRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         if (node.elementType != FILE) return
         var lineStart = 0

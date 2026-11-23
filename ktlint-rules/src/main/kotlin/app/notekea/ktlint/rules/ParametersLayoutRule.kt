@@ -1,8 +1,6 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EQ
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.FUN
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.LPAR
@@ -11,9 +9,6 @@ import com.pinterest.ktlint.rule.engine.core.api.ElementType.RPAR
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.SECONDARY_CONSTRUCTOR
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_PARAMETER
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_PARAMETER_LIST
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.EditorConfig
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PROPERTY
 import com.pinterest.ktlint.rule.engine.core.api.ifAutocorrectAllowed
@@ -24,12 +19,10 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
  * the declaration's line when the signature fits; two go either way, all on that line or one per line.
  */
 class ParametersLayoutRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER),
-        usesEditorConfigProperties = setOf(MAX_LINE_LENGTH_PROPERTY)
-    ),
-    RuleAutocorrectApproveHandler {
+    NotekeaRule(
+        id = RULE_ID,
+        properties = setOf(MAX_LINE_LENGTH_PROPERTY)
+    ) {
     private val owners = setOf(
         FUN,
         PRIMARY_CONSTRUCTOR,
@@ -43,11 +36,7 @@ class ParametersLayoutRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         val isDeclared =
             node.elementType == VALUE_PARAMETER_LIST && node.treeParent?.elementType in owners
@@ -80,11 +69,7 @@ class ParametersLayoutRule :
     private fun spread(
         list: ASTNode,
         parameters: List<ASTNode>,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         val indent = list.lineIndent()
         parameters.filterNot { it.startsLine() }.forEach { parameter ->

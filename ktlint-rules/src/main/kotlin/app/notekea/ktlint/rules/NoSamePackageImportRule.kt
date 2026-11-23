@@ -1,32 +1,18 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.IMPORT_ALIAS
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.IMPORT_DIRECTIVE
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.PACKAGE_DIRECTIVE
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.WHITE_SPACE
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.ifAutocorrectAllowed
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 /** A file does not import what its own package declares: the name is already in scope. */
-class NoSamePackageImportRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER)
-    ),
-    RuleAutocorrectApproveHandler {
+class NoSamePackageImportRule : NotekeaRule(id = RULE_ID) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         if (node.elementType != IMPORT_DIRECTIVE || node.findChildByType(IMPORT_ALIAS) != null) {
             return

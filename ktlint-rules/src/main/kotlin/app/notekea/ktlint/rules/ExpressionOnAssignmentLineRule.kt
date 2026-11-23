@@ -2,7 +2,6 @@ package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EQ
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.FUN
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.PROPERTY
@@ -49,11 +48,7 @@ class ExpressionOnAssignmentLineRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         val isDeclarationAssignment =
             node.elementType == EQ && node.treeParent?.elementType in assignmentOwners

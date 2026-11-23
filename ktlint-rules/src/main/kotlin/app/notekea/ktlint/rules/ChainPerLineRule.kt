@@ -1,8 +1,6 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.ANNOTATION_ENTRY
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.ARRAY_ACCESS_EXPRESSION
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.CALL_EXPRESSION
@@ -15,9 +13,6 @@ import com.pinterest.ktlint.rule.engine.core.api.ElementType.REFERENCE_EXPRESSIO
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.SAFE_ACCESS
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_ARGUMENT
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_ARGUMENT_LIST
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.ifAutocorrectAllowed
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
@@ -27,12 +22,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
  * (`logger.e(throwable = throwable) { MESSAGE }` stays on its line). A qualified name
  * (`Clock.System`) is one receiver, and a chain inside a condition or a string stays as it is.
  */
-class ChainPerLineRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER)
-    ),
-    RuleAutocorrectApproveHandler {
+class ChainPerLineRule : NotekeaRule(id = RULE_ID) {
     private val receiverWrappers = setOf(
         ARRAY_ACCESS_EXPRESSION,
         POSTFIX_EXPRESSION
@@ -49,11 +39,7 @@ class ChainPerLineRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         if (!isCheckedChain(node = node)) {
             return

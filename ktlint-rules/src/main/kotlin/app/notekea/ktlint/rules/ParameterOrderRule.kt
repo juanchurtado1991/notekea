@@ -1,8 +1,6 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.ACTUAL_KEYWORD
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EQ
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.FUN
@@ -15,9 +13,6 @@ import com.pinterest.ktlint.rule.engine.core.api.ElementType.SECONDARY_CONSTRUCT
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.TYPE_REFERENCE
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_PARAMETER
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_PARAMETER_LIST
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 /**
@@ -26,12 +21,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
  * `actual` declarations are skipped because their signature is dictated by another declaration.
  * No autocorrect: reordering parameters would break positional call sites.
  */
-class ParameterOrderRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER)
-    ),
-    RuleAutocorrectApproveHandler {
+class ParameterOrderRule : NotekeaRule(id = RULE_ID) {
     private val checkedOwners = setOf(
         FUN,
         PRIMARY_CONSTRUCTOR,
@@ -44,11 +34,7 @@ class ParameterOrderRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         val owner = node.treeParent
         val isCheckedParameterList = node.elementType == VALUE_PARAMETER_LIST &&

@@ -1,8 +1,6 @@
 package app.notekea.ktlint.rules
 
 import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
-import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
-import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.CALL_EXPRESSION
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.CONDITION
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.FUNCTION_LITERAL
@@ -14,9 +12,6 @@ import com.pinterest.ktlint.rule.engine.core.api.ElementType.PARENTHESIZED
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_ARGUMENT
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.VALUE_ARGUMENT_NAME
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.WHEN
-import com.pinterest.ktlint.rule.engine.core.api.Rule
-import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
-import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 /**
@@ -25,12 +20,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
  * needs those in place), goes to a `val` of its own. So does an `if` or a `when` written as a named argument, unless
  * it fits on one line, calls nothing and nothing is called on it (`color = if (isSelected) primary else outline`).
  */
-class NameCompoundExpressionRule :
-    Rule(
-        ruleId = RuleId(RULE_ID),
-        about = About(maintainer = RULE_SET_MAINTAINER)
-    ),
-    RuleAutocorrectApproveHandler {
+class NameCompoundExpressionRule : NotekeaRule(id = RULE_ID) {
     private val castChecks = setOf(
         IS_EXPRESSION,
         NULL
@@ -39,11 +29,7 @@ class NameCompoundExpressionRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         when (node.elementType) {
             CONDITION -> visitCondition(condition = node, emit = emit)
@@ -53,11 +39,7 @@ class NameCompoundExpressionRule :
 
     private fun visitCondition(
         condition: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         val expression = condition.codeChildren().singleOrNull() ?: return
         val length = expression.text.replace(regex = whitespace, replacement = " ").length
@@ -71,11 +53,7 @@ class NameCompoundExpressionRule :
 
     private fun visitArgument(
         argument: ASTNode,
-        emit: (
-            offset: Int,
-            errorMessage: String,
-            canBeAutoCorrected: Boolean
-        ) -> AutocorrectDecision
+        emit: Emit
     ) {
         if (argument.findChildByType(VALUE_ARGUMENT_NAME) == null) {
             return
