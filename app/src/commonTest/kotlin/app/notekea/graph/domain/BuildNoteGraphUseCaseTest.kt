@@ -5,8 +5,8 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -26,7 +26,7 @@ class BuildNoteGraphUseCaseTest {
         store.texts[LONE] = "No links."
 
         val build = BuildNoteGraphUseCase(
-            noteTextCache = noteTextCache(store = store),
+            noteTextCache = NoteTextCache(contentStore = store),
             linkFinder = JetBrainsMarkdownLinkFinder(),
             dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
         )

@@ -5,8 +5,8 @@ import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,7 +21,7 @@ class LongNoteTest {
     private val path = RelativePath(value = "Contracts/Service agreement.md")
 
     private val read = ReadTool(
-        noteTextCache = noteTextCache(store = store)
+        noteTextCache = NoteTextCache(contentStore = store)
     )
 
     @Test

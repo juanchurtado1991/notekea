@@ -8,9 +8,9 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -36,7 +36,7 @@ class NoteMentionsViewModelTest : ViewModelTestBase() {
             noteContentStore = contents,
             applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
         ),
-        noteTextCache = noteTextCache(store = contents),
+        noteTextCache = NoteTextCache(contentStore = contents),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
 

@@ -23,7 +23,6 @@ class SearchPassagesUseCase(
     private val textEmbedder: TextEmbedder,
     private val vectorIndex: VectorIndex,
     private val noteTextCache: NoteTextCache,
-    private val textFolder: TextFolder,
     private val markdownLineStripper: MarkdownLineStripper,
     private val searchNoteContent: SearchNoteContentUseCase
 ) {
@@ -71,7 +70,7 @@ class SearchPassagesUseCase(
             notes = allowed.values
         )
 
-        val folded = words.map { textFolder.fold(text = it) }
+        val folded = words.map { TextFolder.fold(text = it) }
 
         val results = hits
             .asSequence()
@@ -240,7 +239,7 @@ class SearchPassagesUseCase(
     private fun sharedWords(
         line: String,
         words: List<String>
-    ): Int = textFolder.fold(text = line).let { folded ->
+    ): Int = TextFolder.fold(text = line).let { folded ->
         words.count {
             foundPart(
                 folded = folded,
@@ -281,7 +280,7 @@ class SearchPassagesUseCase(
         val found = PassageSnippet.of(
             passage = plain,
             words = words.toSet(),
-            normalized = textFolder::fold,
+            normalized = TextFolder::fold,
             scores = {
                 sharedWords(
                     line = it,
@@ -301,7 +300,7 @@ class SearchPassagesUseCase(
             cut
         }
 
-        val folded = textFolder.fold(text = snippet)
+        val folded = TextFolder.fold(text = snippet)
 
         val parts = words.mapNotNull {
             foundPart(

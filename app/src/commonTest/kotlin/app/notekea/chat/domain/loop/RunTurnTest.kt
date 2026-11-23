@@ -23,10 +23,10 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
-import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -40,7 +40,7 @@ import kotlin.time.Clock
 class RunTurnTest {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = noteTextCache(store = store)
+    private val cache = NoteTextCache(contentStore = store)
 
     private val lease = RelativePath(value = "Home/Lease.md")
     private val instructions = RelativePath(value = "Notekea/Notekea.md")

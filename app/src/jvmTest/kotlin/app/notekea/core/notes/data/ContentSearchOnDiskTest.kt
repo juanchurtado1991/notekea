@@ -7,7 +7,6 @@ import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.tree.data.OkioNoteMetadataReader
@@ -45,13 +44,10 @@ class ContentSearchOnDiskTest {
             attributes = NioNoteFileAttributes()
         )
     )
-    private val folder = TextFolder
     private val search = SearchNoteContentUseCase(
         noteTextCache = NoteTextCache(
-            contentStore = store,
-            textFolder = folder
+            contentStore = store
         ),
-        textFolder = folder,
         naturalNameComparator = NaturalNameComparator(),
         markdownLineStripper = MarkdownLineStripper(),
         dispatchers = dispatchers

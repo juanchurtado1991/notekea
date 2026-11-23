@@ -23,8 +23,8 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -38,7 +38,7 @@ import kotlin.time.Clock
 class GroundedWorkTest {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = noteTextCache(store = store)
+    private val cache = NoteTextCache(contentStore = store)
     private val note = RelativePath(value = "Contract/contract.md")
     private val document = RelativePath(value = "Contract/terms.docx")
 

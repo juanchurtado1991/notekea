@@ -81,9 +81,13 @@ type's subtypes stay in its package (Kotlin requires it), so `PropertyIntent` li
 Expected failures are **values**, not exceptions.
 
 ```kotlin
-sealed interface Outcome<out T, out E> {
-    data class Success<T>(val value: T) : Outcome<T, Nothing>
-    data class Failure<E>(val error: E) : Outcome<Nothing, E>
+sealed class Outcome<out T, out E> {
+    data class Success<T>(val value: T) : Outcome<T, Nothing>()
+    data class Failure<E>(val error: E) : Outcome<Nothing, E>()
+
+    fun valueOrNull(): T?                       // for a caller that treats every failure alike
+    fun errorOrNull(): E?
+    inline fun <R> map(transform: (T) -> R): Outcome<R, E>
 }
 
 sealed interface VaultError {
@@ -123,8 +127,21 @@ abstract class BaseViewModel<S, I, E>(
         onError: (Throwable) -> Unit,
         block: suspend () -> Unit
     )
+
+    protected val logger: Logger               // tagged with the ViewModel's class name
+    protected fun launchLogged(                // launchGuarded for a failure that is only logged
+        message: String,
+        severity: Severity = Severity.Error,
+        block: suspend () -> Unit
+    )
+    protected fun hostOf(onError: (Throwable) -> Unit): ViewModelHost<S, E>
 }
 ```
+
+- A ViewModel never declares a logger or a log tag of its own, and work whose failure is only logged goes through
+  `launchLogged`; `launchGuarded` is for a failure the screen shows.
+- `Outcome` is read with `when` where each failure matters, and with `valueOrNull()`, `errorOrNull()` and `map`
+  where they are all alike: never `(x as? Outcome.Success)?.value`.
 
 - Each screen has `<Screen>State.kt` (immutable `data class` with defaults for the initial state),
   `<Screen>Intent.kt` (`sealed interface`) and `<Screen>Effect.kt` (`sealed interface`), one file each.
@@ -134,8 +151,8 @@ abstract class BaseViewModel<S, I, E>(
 - **A ViewModel that grows is split by sub-feature, never into one long helper** (`GUIDELINES.md` §6, files under
   350 lines). It keeps routing its intents and coordinating what spans the parts (open, save, rename); each part is an
   `internal` class of its own (`EditorFind`, `EditorFiles`, `TreeBookmarks`…) that shares the state through a small
-  `internal` host interface the ViewModel implements with a private object (`EditorHost`, `TreeHost`: the state,
-  `reduce`, `emit`, `launch`). Parts never hold another copy of the state. A screen is split the same way: one
+  `internal` host interface that extends `ViewModelHost` (the state, `reduce`, `emit`, `launch`) and the ViewModel
+  implements with a private object delegating to `hostOf` (`EditorHost`, `TreeHost`). Parts never hold another copy of the state. A screen is split the same way: one
   `internal` composable per section, each with its preview.
 - Long editable text is the one exception to "everything in `State`": the note editor's body lives in a
   `TextFieldState` owned by the ViewModel (`EditorViewModel.buffer`), which the text field edits directly and the

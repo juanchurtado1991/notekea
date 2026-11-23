@@ -2,7 +2,6 @@ package app.notekea.graph.presentation
 
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.graph.domain.GraphNode
 import app.notekea.graph.domain.GraphPoint
 import app.notekea.graph.domain.NoteGraph
@@ -14,7 +13,7 @@ import kotlin.test.assertTrue
 
 /** What the graph tab draws. */
 class GraphReducersTest {
-    private val matcher = FuzzyMatcher(textFolder = TextFolder)
+    private val matcher = FuzzyMatcher()
 
     @Test
     fun `notes with as many links are smaller on a farther ring`() {

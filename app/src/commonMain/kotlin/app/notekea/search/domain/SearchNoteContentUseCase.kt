@@ -22,7 +22,6 @@ import kotlinx.coroutines.withContext
  */
 class SearchNoteContentUseCase(
     private val noteTextCache: NoteTextCache,
-    private val textFolder: TextFolder,
     private val naturalNameComparator: NaturalNameComparator,
     private val markdownLineStripper: MarkdownLineStripper,
     private val dispatchers: AppDispatchers
@@ -76,8 +75,8 @@ class SearchNoteContentUseCase(
         if (hasNoTerms) return null
 
         return Terms(
-            words = words.map { textFolder.fold(text = it) },
-            tags = tags.map { textFolder.fold(text = it.removePrefix(prefix = TAG_MARK)) }
+            words = words.map { TextFolder.fold(text = it) },
+            tags = tags.map { TextFolder.fold(text = it.removePrefix(prefix = TAG_MARK)) }
         )
     }
 
@@ -99,7 +98,7 @@ class SearchNoteContentUseCase(
         val frontmatterTags = note
             .metadata
             .tags
-            .map { textFolder.fold(text = it) }
+            .map { TextFolder.fold(text = it) }
 
         val tagHits = terms.tags.map { tag ->
             inlineTags.filter {
@@ -225,7 +224,7 @@ class SearchNoteContentUseCase(
                     val range = match.range.first + lineStart..match.range.last + lineStart
 
                     tags += InlineTag(
-                        name = textFolder.fold(text = match.groupValues[1]),
+                        name = TextFolder.fold(text = match.groupValues[1]),
                         range = range
                     )
                 }

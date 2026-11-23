@@ -11,10 +11,7 @@ import kotlinx.coroutines.sync.withLock
  * again when its size or modification date differs or cannot be told, and notes that left the vault are dropped.
  * Missing notes are read a batch at a time, in parallel.
  */
-class NoteTextCache(
-    private val contentStore: NoteContentStore,
-    private val textFolder: TextFolder
-) {
+class NoteTextCache(private val contentStore: NoteContentStore) {
     private val lock = Mutex()
     private val entries = mutableMapOf<RelativePath, Entry>()
 
@@ -74,7 +71,7 @@ class NoteTextCache(
 
         NoteText(
             body = body,
-            folded = textFolder.fold(text = body)
+            folded = TextFolder.fold(text = body)
         )
     }
 

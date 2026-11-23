@@ -10,7 +10,7 @@ import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
-import app.notekea.core.notes.domain.noteTextCache
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.search.eval.EvalVault
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -125,7 +125,7 @@ class AnswerEvalChatModelTest {
         val answer = AnswerFromNotesUseCase(
             textEmbedder = embedder,
             vectorIndex = indexed.index,
-            noteTextCache = noteTextCache(store = indexed.store),
+            noteTextCache = NoteTextCache(contentStore = indexed.store),
             llmEngine = engine
         )
 
@@ -201,7 +201,7 @@ class AnswerEvalChatModelTest {
         indexed: EvalVault
     ): AgentAnswerUseCase? = AgentAnswerUseCase(
         answerFromNotes = answer,
-        noteTextCache = noteTextCache(store = indexed.store),
+        noteTextCache = NoteTextCache(contentStore = indexed.store),
         llmEngine = engine,
         planReader = GhostActionPlanReader()
     ).takeIf { isAgent }

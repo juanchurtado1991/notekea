@@ -10,7 +10,6 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -232,14 +231,10 @@ class SearchNoteContentUseCaseTest {
     }
 
     private fun TestScope.search(): SearchNoteContentUseCase {
-        val folder = TextFolder
-
         return SearchNoteContentUseCase(
             noteTextCache = NoteTextCache(
-                contentStore = store,
-                textFolder = folder
+                contentStore = store
             ),
-            textFolder = folder,
             naturalNameComparator = NaturalNameComparator(),
             markdownLineStripper = MarkdownLineStripper(),
             dispatchers = FakeAppDispatchers(

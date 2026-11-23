@@ -14,7 +14,6 @@ import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.core.presentation.effectsOf
 import app.notekea.search.domain.SearchNoteContentUseCase
@@ -59,18 +58,15 @@ class QuickSwitcherViewModelTest : ViewModelTestBase() {
         )
     )
     private val viewModel by lazy {
-        val folder = TextFolder
         val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
         val naturalNames = NaturalNameComparator()
 
         val cache = NoteTextCache(
-            contentStore = store,
-            textFolder = folder
+            contentStore = store
         )
 
         val content = SearchNoteContentUseCase(
             noteTextCache = cache,
-            textFolder = folder,
             naturalNameComparator = naturalNames,
             markdownLineStripper = MarkdownLineStripper(),
             dispatchers = dispatchers
@@ -79,7 +75,7 @@ class QuickSwitcherViewModelTest : ViewModelTestBase() {
         QuickSwitcherViewModel(
             vaultPath = VAULT,
             searchNotes = SearchNotesUseCase(
-                fuzzyMatcher = FuzzyMatcher(textFolder = folder),
+                fuzzyMatcher = FuzzyMatcher(),
                 naturalNameComparator = naturalNames
             ),
             searchNoteContent = content,
@@ -87,7 +83,6 @@ class QuickSwitcherViewModelTest : ViewModelTestBase() {
                 textEmbedder = embedder,
                 vectorIndex = FakeVectorIndex(),
                 noteTextCache = cache,
-                textFolder = folder,
                 markdownLineStripper = MarkdownLineStripper(),
                 searchNoteContent = content
             ),

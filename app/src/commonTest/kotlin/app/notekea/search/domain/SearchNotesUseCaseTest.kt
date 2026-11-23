@@ -4,13 +4,12 @@ import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.TextFolder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SearchNotesUseCaseTest {
     private val search = SearchNotesUseCase(
-        fuzzyMatcher = FuzzyMatcher(textFolder = TextFolder),
+        fuzzyMatcher = FuzzyMatcher(),
         naturalNameComparator = NaturalNameComparator()
     )
     private val notes = listOf(

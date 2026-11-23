@@ -10,7 +10,6 @@ import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RenameEntryUseCase
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.index.ChunkNoteUseCase
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.links.LinkFinder
@@ -40,5 +39,4 @@ val coreNotesModule = module {
     factoryOf(::UpdateLinksAfterRenameUseCase)
     factoryOf(::RenameEntryUseCase)
     factoryOf(::NewNoteDefaults)
-    factory { TextFolder }
 }

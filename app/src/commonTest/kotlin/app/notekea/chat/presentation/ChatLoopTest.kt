@@ -28,7 +28,7 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.noteTextCache
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
 import app.notekea.core.presentation.ViewModelTestBase
@@ -51,7 +51,7 @@ import kotlin.time.Clock
 class ChatLoopTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = noteTextCache(store = store)
+    private val cache = NoteTextCache(contentStore = store)
 
     private var route = ROUTE
     private var call = ASK

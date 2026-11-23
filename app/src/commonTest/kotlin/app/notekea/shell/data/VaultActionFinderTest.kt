@@ -12,9 +12,9 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.core.notes.domain.tasks.NoteTask
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
@@ -57,7 +57,7 @@ class VaultActionFinderTest {
             noteContentStore = store,
             applyLinkUpdates = apply
         ),
-        noteTextCache = noteTextCache(store = store),
+        noteTextCache = NoteTextCache(contentStore = store),
         linkFinder = JetBrainsMarkdownLinkFinder(),
         localCalendar = FakeLocalCalendar(),
         clock = FakeClock(currentTime = Instant.parse(input = "2026-11-17T09:00:00Z"))

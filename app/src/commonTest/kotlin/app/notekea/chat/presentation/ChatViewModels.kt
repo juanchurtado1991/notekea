@@ -31,7 +31,7 @@ import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
-import app.notekea.core.notes.domain.noteTextCache
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import kotlin.time.Clock
 
@@ -50,7 +50,7 @@ internal fun chatViewModel(
     sourceSites: SourceSites? = null,
     loop: ChatLoop? = null
 ): ChatViewModel {
-    val cache = noteTextCache(store = store)
+    val cache = NoteTextCache(contentStore = store)
 
     val answer = AnswerFromNotesUseCase(
         textEmbedder = embedder,

@@ -92,13 +92,11 @@ class WebSourceSearch(
 
         val levels = WebSourceNote.levelsOf(text = index.text) + 1
 
-        val found = findSection(
+        val links = findSection(
             url = index.source,
             depth = levels.coerceAtMost(maximumValue = SectionLinks.MAX_DEPTH),
             most = MOST_WEIGHED
         ).valueOrNull() ?: return emptyList()
-
-        val links = found
 
         return (links.urls + links.rest)
             .filter {

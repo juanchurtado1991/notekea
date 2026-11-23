@@ -21,7 +21,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.noteTextCache
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.web.domain.WebSearchProblem
 import app.notekea.core.web.domain.WebSearchProvider
 import app.notekea.search.eval.EvalVault
@@ -39,7 +39,7 @@ internal object LoopEval {
         clipper: WebPageClipper? = null,
         trace: EvalTrace? = null
     ): RunTurnUseCase {
-        val cache = noteTextCache(store = indexed.store)
+        val cache = NoteTextCache(contentStore = indexed.store)
 
         val answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)
         val vaultGuide = VaultGuide(noteTextCache = cache)

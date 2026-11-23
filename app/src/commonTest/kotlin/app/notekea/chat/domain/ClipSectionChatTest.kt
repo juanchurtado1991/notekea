@@ -16,7 +16,6 @@ import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -82,8 +81,7 @@ class ClipSectionChatTest {
     private val compose = ComposeNotesUseCase(
         llmEngine = FakeLlmEngine(),
         noteTextCache = NoteTextCache(
-            contentStore = FakeNoteContentStore(),
-            textFolder = TextFolder
+            contentStore = FakeNoteContentStore()
         ),
         planReader = GhostActionPlanReader(),
         clipper = clipper

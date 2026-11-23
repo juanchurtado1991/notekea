@@ -188,27 +188,23 @@ class AnswerFromNotesUseCase(
         read: List<AnswerSource>,
         seed: Int,
         language: String?
-    ): String {
-        val draft = ReplyText.of(
-            llmEngine = llmEngine,
-            messages = AnswerPrompt
-                .messages(
-                    question = question,
-                    excerpts = read.map { it.text }
-                )
-                .inLanguage(
-                    language = language,
-                    kept = AnswerPrompt.NOT_FOUND
-                ),
-            options = GenerationOptions(
-                maxTokens = MAX_TOKENS,
-                temperature = DRAFT_TEMPERATURE,
-                seed = seed
+    ): String = ReplyText.of(
+        llmEngine = llmEngine,
+        messages = AnswerPrompt
+            .messages(
+                question = question,
+                excerpts = read.map { it.text }
             )
+            .inLanguage(
+                language = language,
+                kept = AnswerPrompt.NOT_FOUND
+            ),
+        options = GenerationOptions(
+            maxTokens = MAX_TOKENS,
+            temperature = DRAFT_TEMPERATURE,
+            seed = seed
         )
-
-        return draft
-    }
+    )
 
     /**
      * The passages the reranker scores best for [query], as the answer would read them (none under [GATE]): what the

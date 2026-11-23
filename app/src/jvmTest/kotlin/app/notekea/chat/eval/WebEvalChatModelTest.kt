@@ -20,7 +20,6 @@ import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.web.domain.SourceTrust
 import app.notekea.search.eval.EvalVault
 import app.notekea.shell.data.chat.ClipsForChat
@@ -181,7 +180,7 @@ class WebEvalChatModelTest {
                 .orEmpty()
         )
 
-        val cache = NoteTextCache(indexed.store, TextFolder)
+        val cache = NoteTextCache(contentStore = indexed.store)
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
         val loop = LoopEval.loopOf(trace.recorded, embedder, indexed, runner, clips, search, clips)

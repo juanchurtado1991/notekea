@@ -15,7 +15,6 @@ import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.index.ChunkNoteUseCase
 import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.index.embedChunks
@@ -53,13 +52,11 @@ abstract class GraphViewModelFixture {
         ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
     protected val preferences = KeptPreferences()
     protected val viewModel by lazy {
-        val folder = TextFolder
         val dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
         val finder = JetBrainsMarkdownLinkFinder()
 
         val cache = NoteTextCache(
-            contentStore = store,
-            textFolder = folder
+            contentStore = store
         )
 
         GraphViewModel(
@@ -74,7 +71,7 @@ abstract class GraphViewModelFixture {
             ),
             linkNotes = LinkNotesUseCase(store, ApplyLinkUpdatesUseCase(noteContentStore = store)),
             applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store),
-            fuzzyMatcher = FuzzyMatcher(textFolder = folder),
+            fuzzyMatcher = FuzzyMatcher(),
             noteTextCache = cache,
             markdownLineStripper = MarkdownLineStripper(),
             preferencesStore = preferences,

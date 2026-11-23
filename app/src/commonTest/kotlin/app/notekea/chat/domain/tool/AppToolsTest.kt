@@ -12,10 +12,10 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
-import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.core.notes.domain.tasks.NoteTask
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -149,7 +149,7 @@ class AppToolsTest {
         store.texts[arepas] = "Corn flour and warm water."
 
         val count = CountTool(
-            noteTextCache = noteTextCache(store = store)
+            noteTextCache = NoteTextCache(contentStore = store)
         )
 
         assertEquals(
@@ -188,7 +188,7 @@ class AppToolsTest {
             ).joinToString(separator = "\n")
 
             val tally = TallyTool(
-                noteTextCache = noteTextCache(store = store)
+                noteTextCache = NoteTextCache(contentStore = store)
             )
 
             val said = tally.run(
@@ -288,7 +288,7 @@ class AppToolsTest {
     @Test
     fun `two tallies of as many lines are two calls, and the same tally twice is one`() {
         val tally = TallyTool(
-            noteTextCache = noteTextCache(store = store)
+            noteTextCache = NoteTextCache(contentStore = store)
         )
 
         val registry = ToolRegistry(tools = listOf(tally))

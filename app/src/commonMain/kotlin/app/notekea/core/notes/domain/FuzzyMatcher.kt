@@ -5,15 +5,15 @@ package app.notekea.core.notes.domain
  * together (`pfag` matches "Pasta e fagioli"), ignoring letter case, accents and spaces. The best way to match wins:
  * letters at the start of a word and letters together score higher, skipped characters lower.
  */
-class FuzzyMatcher(private val textFolder: TextFolder) {
+class FuzzyMatcher {
     fun match(
         query: String,
         text: String
     ): FuzzyMatch? {
-        val pattern = textFolder.fold(text = query).filterNot { it.isWhitespace() }
+        val pattern = TextFolder.fold(text = query).filterNot { it.isWhitespace() }
 
         if (pattern.isEmpty()) return FuzzyMatch.EVERYTHING
-        val target = textFolder.fold(text = text)
+        val target = TextFolder.fold(text = text)
         if (!isSubsequence(pattern = pattern, target = target)) return null
 
         return bestMatch(

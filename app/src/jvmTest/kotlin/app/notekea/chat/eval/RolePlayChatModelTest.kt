@@ -20,7 +20,6 @@ import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.search.eval.EvalVault
 import app.notekea.shell.data.chat.ClipsForChat
 import kotlinx.coroutines.delay
@@ -123,7 +122,7 @@ class RolePlayChatModelTest {
             written = mapOf(VaultGuide.MEMORY.value to WebEvalCases.COSTA_RICA)
         )
 
-        val cache = NoteTextCache(indexed.store, TextFolder)
+        val cache = NoteTextCache(contentStore = indexed.store)
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
         val search = DuckDuckGoSearch(fetcher = pages)
         val loop = LoopEval.loopOf(engine, embedder, indexed, runner, clips, search, clips)

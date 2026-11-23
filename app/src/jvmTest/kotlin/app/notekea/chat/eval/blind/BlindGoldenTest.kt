@@ -15,16 +15,7 @@ class BlindGoldenTest {
     private val golden = File("src/jvmTest/resources/eval/blind-exams.txt")
 
     private fun written(): String = buildString {
-        BlindExams.all.forEach {
-            exam(
-                id = it.id,
-                vault = it.vault,
-                isSealed = false,
-                cases = it.cases
-            )
-        }
-
-        BlindPool.all.forEach {
+        (BlindExams.all + BlindPool.all).forEach {
             exam(
                 id = it.id,
                 vault = it.vault,

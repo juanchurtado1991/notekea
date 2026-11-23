@@ -14,7 +14,6 @@ import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.index.ChunkNoteUseCase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
@@ -86,11 +85,8 @@ class RetrievalEvalRealModelTest {
             dispatchers = dispatchers
         )
 
-        val textFolder = TextFolder
-
         val cache = NoteTextCache(
-            contentStore = indexed.store,
-            textFolder = textFolder
+            contentStore = indexed.store
         )
 
         val stripper = MarkdownLineStripper()
@@ -99,11 +95,9 @@ class RetrievalEvalRealModelTest {
             textEmbedder = embedder,
             vectorIndex = indexed.index,
             noteTextCache = cache,
-            textFolder = textFolder,
             markdownLineStripper = stripper,
             searchNoteContent = SearchNoteContentUseCase(
                 noteTextCache = cache,
-                textFolder = textFolder,
                 naturalNameComparator = NaturalNameComparator(),
                 markdownLineStripper = stripper,
                 dispatchers = dispatchers

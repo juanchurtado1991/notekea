@@ -29,7 +29,6 @@ import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlinx.coroutines.flow.toList
@@ -44,8 +43,7 @@ class CodeReviewChatTest {
     private val clipped = mutableListOf<String>()
 
     private val cache = NoteTextCache(
-        contentStore = FakeNoteContentStore(),
-        textFolder = TextFolder
+        contentStore = FakeNoteContentStore()
     )
 
     private val clipper = object : WebPageClipper {

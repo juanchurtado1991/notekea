@@ -7,7 +7,6 @@ import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.search.domain.NoteMatchField
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
@@ -31,10 +30,9 @@ import kotlin.test.assertEquals
 class SmokeQuickSwitcherTest {
     private val testDispatcher = StandardTestDispatcher()
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
-    private val folder = TextFolder
     private val naturalNames = NaturalNameComparator()
     private val searchNotes = SearchNotesUseCase(
-        fuzzyMatcher = FuzzyMatcher(textFolder = folder),
+        fuzzyMatcher = FuzzyMatcher(),
         naturalNameComparator = naturalNames
     )
     private val searchContent = SearchNoteContentUseCase(
@@ -43,10 +41,8 @@ class SmokeQuickSwitcherTest {
                 fileSystem = FileSystem.SYSTEM,
                 dispatchers = dispatchers,
                 attributes = NioNoteFileAttributes()
-            ),
-            textFolder = folder
+            )
         ),
-        textFolder = folder,
         naturalNameComparator = naturalNames,
         markdownLineStripper = MarkdownLineStripper(),
         dispatchers = dispatchers

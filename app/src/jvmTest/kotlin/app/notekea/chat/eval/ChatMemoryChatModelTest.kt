@@ -9,7 +9,6 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.search.eval.EvalVault
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -64,7 +63,7 @@ class ChatMemoryChatModelTest {
                 dispatchers = dispatchers
             )
 
-            val cache = NoteTextCache(indexed.store, TextFolder)
+            val cache = NoteTextCache(contentStore = indexed.store)
             val answer = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)
 
             val before = residentMb()

@@ -14,7 +14,7 @@ import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.noteTextCache
+import app.notekea.core.notes.domain.NoteTextCache
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -28,7 +28,7 @@ import kotlin.time.Clock
 class SameNoteQuestionTest {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = noteTextCache(store = store)
+    private val cache = NoteTextCache(contentStore = store)
 
     private val runTurn = RunTurnUseCase(
         llmEngine = engine,

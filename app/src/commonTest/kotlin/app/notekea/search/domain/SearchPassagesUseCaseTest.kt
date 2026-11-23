@@ -13,7 +13,6 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.notes.domain.index.NoteChunk
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -27,20 +26,16 @@ class SearchPassagesUseCaseTest {
     private val store = FakeNoteContentStore()
     private val index = FakeVectorIndex()
     private val embedder = FakeTextEmbedder()
-    private val folder = TextFolder
     private val cache = NoteTextCache(
-        contentStore = store,
-        textFolder = folder
+        contentStore = store
     )
     private val search = SearchPassagesUseCase(
         textEmbedder = embedder,
         vectorIndex = index,
         noteTextCache = cache,
-        textFolder = folder,
         markdownLineStripper = MarkdownLineStripper(),
         searchNoteContent = SearchNoteContentUseCase(
             noteTextCache = cache,
-            textFolder = folder,
             naturalNameComparator = NaturalNameComparator(),
             markdownLineStripper = MarkdownLineStripper(),
             dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
