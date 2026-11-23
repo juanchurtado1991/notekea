@@ -3,7 +3,7 @@ package app.notekea.settings.presentation.preferences
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 
 /**
  * Settings → General and Editor (5.2) on the app's [store]: each change is saved at once, and every screen that reads
@@ -12,10 +12,12 @@ import co.touchlab.kermit.Logger
 class PreferencesViewModel(
     private val store: AppPreferencesStore
 ) : BaseViewModel<AppPreferences, PreferencesIntent, Nothing>(initialState = AppPreferences()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             store.observe().collect { saved ->
                 reduce { saved }
             }
@@ -45,15 +47,14 @@ class PreferencesViewModel(
     private fun save(change: (AppPreferences) -> AppPreferences) {
         val changed = change(state.value)
         reduce { changed }
-        launchGuarded(onError = ::logError) { store.save(preferences = changed) }
-    }
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) { store.save(preferences = changed) }
     }
 
     private companion object {
-        const val LOG_TAG = "PreferencesViewModel"
         const val FAILED_MESSAGE = "Preferences could not be saved"
     }
 }

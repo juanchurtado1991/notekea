@@ -9,6 +9,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.core.presentation.ViewModelHost
 import app.notekea.graph.domain.BuildNoteGraphUseCase
 import app.notekea.graph.domain.GraphLayout
 import app.notekea.graph.domain.GraphPreferences
@@ -22,7 +23,6 @@ import app.notekea.graph.presentation.model.GraphIntent
 import app.notekea.graph.presentation.model.GraphLine
 import app.notekea.graph.presentation.model.GraphScope
 import app.notekea.graph.presentation.model.GraphState
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -45,13 +45,13 @@ class GraphViewModel(
     private val preferencesStore: GraphPreferencesStore,
     private val dispatchers: AppDispatchers
 ) : BaseViewModel<GraphState, GraphIntent, GraphEffect>(initialState = GraphState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private val layout = GraphLayout()
     private var notes: Map<RelativePath, NoteEntry> = emptyMap()
     private var graph: NoteGraph? = null
 
-    private val host = object : GraphHost {
-        override val state get() = this@GraphViewModel.state
+    private val host = object :
+        GraphHost,
+        ViewModelHost<GraphState, GraphEffect> by hostOf(onError = ::logUnexpectedError) {
         override val notes: Map<RelativePath, NoteEntry> get() = this@GraphViewModel.notes
 
         override var graph: NoteGraph?
@@ -59,16 +59,6 @@ class GraphViewModel(
             set(value) {
                 this@GraphViewModel.graph = value
             }
-
-        override fun reduce(transform: (GraphState) -> GraphState) =
-            this@GraphViewModel.reduce(transform = transform)
-
-        override fun emit(effect: GraphEffect) = this@GraphViewModel.emit(effect = effect)
-
-        override fun launch(block: suspend () -> Unit): Job = launchGuarded(
-            onError = ::logUnexpectedError,
-            block = block
-        )
 
         override fun change(transform: (GraphState) -> GraphState) =
             this@GraphViewModel.change(transform = transform)
@@ -460,7 +450,6 @@ class GraphViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "GraphViewModel"
         const val MAX_VAULT_NOTES = 2_000
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the graph"
     }

@@ -12,6 +12,7 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.core.presentation.designsystem.images.decodedImage
 import app.notekea.documents.domain.PdfPages
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 
 /**
  * A document of the vault at [vaultPath] in a read-only tab (4.5): a PDF as its real pages, drawn as they come into
@@ -31,7 +32,6 @@ class DocumentViewerViewModel(
         format = DocumentFormat.of(path = path)
     )
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var text: DocumentText? = null
     private val drawing = mutableSetOf<Int>()
 
@@ -41,7 +41,10 @@ class DocumentViewerViewModel(
 
     override fun handleIntent(intent: DocumentViewerIntent) {
         when (intent) {
-            is DocumentViewerIntent.OnReveal -> launchGuarded(onError = ::logError) {
+            is DocumentViewerIntent.OnReveal -> launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) {
                 reveal(
                     range = intent.range,
                     count = intent.count
@@ -59,7 +62,10 @@ class DocumentViewerViewModel(
                 )
             }
 
-            DocumentViewerIntent.OnOpenInApp -> launchGuarded(onError = ::logError) {
+            DocumentViewerIntent.OnOpenInApp -> launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) {
                 fileOpener.open(
                     vaultPath = vaultPath,
                     path = path
@@ -171,7 +177,10 @@ class DocumentViewerViewModel(
         val isDrawn = page in state.value.pages || !drawing.add(page)
         if (isDrawn) return
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             // The code review of 2026-11-22: a page whose drawing threw stayed in [drawing], never drawn again.
             try {
                 render(page = page)
@@ -210,13 +219,9 @@ class DocumentViewerViewModel(
         }
     }
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
-    }
-
     // The code review of 2026-11-22: a document whose reading threw left its tab on the spinner for good.
     private fun showLoadFailure(throwable: Throwable) {
-        logError(throwable = throwable)
+        logger.w(throwable = throwable) { FAILED_MESSAGE }
 
         reduce {
             it.copy(
@@ -237,7 +242,6 @@ class DocumentViewerViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "DocumentViewerViewModel"
         const val FAILED_MESSAGE = "The document could not be shown"
         const val PAGE_SCALE = 1.5f
         const val KEPT_PAGES = 6

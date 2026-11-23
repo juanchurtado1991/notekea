@@ -11,6 +11,7 @@ import app.notekea.sync.domain.VaultSizes
 import app.notekea.sync.domain.VaultSync
 import app.notekea.sync.domain.VaultSyncs
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 
 /**
  * Settings → Sync (4.2) for the vault at [vaultPath], or none when no vault is open: the address and token connect it
@@ -26,7 +27,6 @@ class SyncSettingsViewModel(
 ) : BaseViewModel<SyncSettingsState, SyncSettingsIntent, Nothing>(
     initialState = SyncSettingsState(hasVault = vaultPath != null)
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private val vault = vaultPath
     private val engine: VaultSync? = vaultPath?.let { engines.of(vaultPath = it) }
 
@@ -34,14 +34,23 @@ class SyncSettingsViewModel(
         val engine = engine
 
         if (vault != null && engine != null) {
-            launchGuarded(onError = ::logError) { load(vaultPath = vault) }
+            launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) { load(vaultPath = vault) }
 
-            launchGuarded(onError = ::logError) {
+            launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) {
                 val bytes = sizes.bytesOf(vaultPath = vault)
                 reduce { it.copy(vaultBytes = bytes) }
             }
 
-            launchGuarded(onError = ::logError) {
+            launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) {
                 engine.status.collect { s ->
                     reduce { it.copy(status = s) }
                 }
@@ -74,7 +83,10 @@ class SyncSettingsViewModel(
             SyncSettingsIntent.OnConnect -> connect()
 
             SyncSettingsIntent.OnSyncNow -> engine?.let {
-                launchGuarded(onError = ::logError) { it.syncNow() }
+                launchLogged(
+                    message = FAILED_MESSAGE,
+                    severity = Severity.Warn
+                ) { it.syncNow() }
             }
 
             SyncSettingsIntent.OnDisconnect -> disconnect()
@@ -112,7 +124,10 @@ class SyncSettingsViewModel(
             )
         }
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val settings = SyncSettings(
                 remoteUrl = url,
                 isAuto = current.isAuto,
@@ -144,9 +159,12 @@ class SyncSettingsViewModel(
         val current = state.value
         if (!current.isConnected) return
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             // The address it is connected to: one typed in the field counts only once Connect is clicked.
-            val saved = vault?.let { settingsStore.read(vaultPath = it) } ?: return@launchGuarded
+            val saved = vault?.let { settingsStore.read(vaultPath = it) } ?: return@launchLogged
 
             engine.change(
                 settings = saved.copy(
@@ -160,18 +178,16 @@ class SyncSettingsViewModel(
     private fun disconnect() {
         val engine = engine ?: return
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             engine.disconnect()
             reduce { SyncSettingsState(hasVault = true) }
         }
     }
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
-    }
-
     private companion object {
-        const val LOG_TAG = "SyncSettingsViewModel"
         const val FAILED_MESSAGE = "Sync settings failed"
     }
 }

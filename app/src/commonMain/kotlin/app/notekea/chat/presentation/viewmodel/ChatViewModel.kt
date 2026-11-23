@@ -37,7 +37,7 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
+import app.notekea.core.presentation.ViewModelHost
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,23 +71,17 @@ class ChatViewModel(
     sources: ChatSources,
     loop: ChatLoop? = null
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
-    private val host = object : ChatHost {
-        override val state: StateFlow<ChatState> get() = this@ChatViewModel.state
+    private val host = object :
+        ChatHost,
+        ViewModelHost<ChatState, ChatEffect> by hostOf(
+            onError = {
+                logger.e(throwable = it) { UNEXPECTED_ERROR_MESSAGE }
+            }
+        ) {
         override val notes: Collection<NoteEntry> get() = this@ChatViewModel.notes
         override val activeNote: RelativePath? get() = this@ChatViewModel.activeNote
         override val working: WorkContext? get() = state.value.shared
-
-        override fun reduce(transform: (ChatState) -> ChatState) =
-            this@ChatViewModel.reduce(transform = transform)
-
-        override fun emit(effect: ChatEffect) = this@ChatViewModel.emit(effect = effect)
-
-        override fun launch(block: suspend () -> Unit): Job = launchGuarded(
-            onError = ::logError,
-            block = block
-        )
 
         override fun update(
             id: Long,
@@ -174,7 +168,7 @@ class ChatViewModel(
     private var nextId = 0L
 
     init {
-        launchGuarded(onError = ::logError) {
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
             val entries = keeping.load {
                 nextId++
             }
@@ -229,7 +223,7 @@ class ChatViewModel(
             is ChatIntent.OnWorkRemove -> reduce { it.without(part = intent.part) }
 
             is ChatIntent.OnActionConfirm -> entryOf(id = intent.id)?.let {
-                launchGuarded(onError = ::logError) {
+                launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
                     actions.confirm(
                         entry = it,
                         notes = notes
@@ -244,7 +238,7 @@ class ChatViewModel(
             }
 
             is ChatIntent.OnActionUndo -> entryOf(id = intent.id)?.let {
-                launchGuarded(onError = ::logError) {
+                launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
                     actions.undo(entry = it)
                     keeping.save()
                 }
@@ -425,7 +419,7 @@ class ChatViewModel(
     }
 
     private fun checkModel() {
-        launchGuarded(onError = ::logError) {
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
             val status = when (val ready = llmEngine.readiness()) {
                 is Outcome.Success -> {
                     val info = ready.value
@@ -483,7 +477,7 @@ class ChatViewModel(
         id: Long,
         throwable: Throwable
     ) {
-        logError(throwable = throwable)
+        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
 
         follow(
             id = id,
@@ -491,12 +485,7 @@ class ChatViewModel(
         )
     }
 
-    private fun logError(throwable: Throwable) {
-        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-    }
-
     private companion object {
-        const val LOG_TAG = "ChatViewModel"
         const val UNFINISHED = "…"
 
         const val UNEXPECTED_ERROR_MESSAGE = "The chat failed unexpectedly"

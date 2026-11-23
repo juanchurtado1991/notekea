@@ -8,7 +8,6 @@ import app.notekea.core.settings.domain.SettingsTopic
 import app.notekea.settings.domain.SettingsHelpExchange
 import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.settings.domain.SettingsHelpStep
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 
 /**
@@ -20,7 +19,6 @@ class SettingsHelpViewModel(
 ) : BaseViewModel<SettingsHelpState, SettingsHelpIntent, Nothing>(
     initialState = SettingsHelpState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var answer: Job? = null
 
     override fun handleIntent(intent: SettingsHelpIntent) {
@@ -131,7 +129,6 @@ class SettingsHelpViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "SettingsHelpViewModel"
         const val FAILED_MESSAGE = "Settings help failed"
     }
 }

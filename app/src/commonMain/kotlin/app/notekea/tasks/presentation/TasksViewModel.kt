@@ -9,7 +9,6 @@ import app.notekea.tasks.domain.ListTasksUseCase
 import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tasks.domain.TaskRow
 import app.notekea.tasks.domain.TaskView
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
@@ -30,7 +29,6 @@ class TasksViewModel(
     private val localCalendar: LocalCalendar,
     private val dispatchers: AppDispatchers
 ) : BaseViewModel<TasksState, TasksIntent, TasksEffect>(initialState = TasksState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private val writes = Mutex()
     private var notes: Collection<NoteEntry> = emptyList()
     private var isShown = false
@@ -99,7 +97,7 @@ class TasksViewModel(
             moment = moment
         )
 
-        refreshJob = launchGuarded(onError = ::logUnexpectedError) {
+        refreshJob = launchLogged(message = UNEXPECTED_ERROR) {
             val list = withContext(context = dispatchers.default) { listTasks(view, shown, today) }
 
             reduce {
@@ -126,7 +124,7 @@ class TasksViewModel(
             moment.minute * SECONDS_IN_MINUTE +
             moment.second
 
-        midnightJob = launchGuarded(onError = ::logUnexpectedError) {
+        midnightJob = launchLogged(message = UNEXPECTED_ERROR) {
             delay(timeMillis = (SECONDS_IN_DAY - secondOfDay) * MILLIS_IN_SECOND)
 
             if (clock.now() > now) refresh()
@@ -188,13 +186,9 @@ class TasksViewModel(
     }
 
     private fun showFailure(throwable: Throwable) {
-        logUnexpectedError(throwable = throwable)
+        logger.e(throwable = throwable) { UNEXPECTED_ERROR }
 
         reduce { it.copy(isWriteFailed = true) }
-    }
-
-    private fun logUnexpectedError(throwable: Throwable) {
-        logger.e(throwable = throwable) { UNEXPECTED_ERROR }
     }
 
     private companion object {
@@ -203,7 +197,6 @@ class TasksViewModel(
         const val SECONDS_IN_DAY = 86_400L
         const val SECONDS_IN_HOUR = 3_600
         const val SECONDS_IN_MINUTE = 60
-        const val LOG_TAG = "Tasks"
         const val UNEXPECTED_ERROR = "Unexpected tasks failure"
     }
 }

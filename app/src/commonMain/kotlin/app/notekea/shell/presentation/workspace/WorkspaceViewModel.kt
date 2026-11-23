@@ -15,7 +15,7 @@ import app.notekea.core.presentation.designsystem.images.scaledToCover
 import app.notekea.shell.domain.PlayedVideo
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.viewmodel.TreeFilePreviews
-import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,7 +32,6 @@ class WorkspaceViewModel(
 ) : BaseViewModel<WorkspaceState, WorkspaceIntent, WorkspaceEffect>(
     initialState = WorkspaceState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private val filePreviews = TreeFilePreviews(
         vaultPath = vaultPath,
         attachmentStore = tools.attachmentStore,
@@ -341,7 +340,10 @@ class WorkspaceViewModel(
         if (path in coverSources) return
         coverSources[path] = sourceOf(path = path)
 
-        launchGuarded(onError = ::logCoverError) {
+        launchLogged(
+            message = COVER_ERROR_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val tree = state.value.tree
 
             val picture = if (path.isMarkdown) {
@@ -425,16 +427,12 @@ class WorkspaceViewModel(
     }
 
     /** A card without its picture shows its icon, so this is worth a line in the log and nothing more. */
-    private fun logCoverError(throwable: Throwable) {
-        logger.w(throwable = throwable) { COVER_ERROR_MESSAGE }
-    }
 
     companion object {
         /**
          * The most folder grid cards whose pictures are kept: more than a screen of cards, so scrolling back is quick.
          */
         const val MAX_COVERS = 60
-        private const val LOG_TAG = "WorkspaceViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the editor's tabs"
         private const val COVER_ERROR_MESSAGE = "A card's picture could not be read"
     }

@@ -21,7 +21,6 @@ import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlin.time.Clock
 
@@ -43,7 +42,6 @@ class ClipViewModel(
     private val clock: Clock,
     private val automatic: AutomaticWebUpdate? = null
 ) : BaseViewModel<ClipState, ClipIntent, ClipEffect>(initialState = ClipState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var clipping: Job? = null
 
     init {
@@ -448,7 +446,6 @@ class ClipViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "ClipViewModel"
         const val FAILED_MESSAGE = "The page could not be clipped"
         const val UPDATE_FAILED_MESSAGE = "The web sources could not be updated"
     }

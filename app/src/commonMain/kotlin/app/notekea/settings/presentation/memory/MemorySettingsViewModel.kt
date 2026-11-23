@@ -12,7 +12,6 @@ import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -35,7 +34,6 @@ class MemorySettingsViewModel(
 ) : BaseViewModel<MemorySettingsState, MemorySettingsIntent, Nothing>(
     initialState = MemorySettingsState(hasVault = vaultPath != null)
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     // Each field waits for its own pause, so typing in one never drops another's write (as Settings → Files does).
     private val saving = mutableMapOf<MemoryField, Job>()
@@ -217,7 +215,6 @@ class MemorySettingsViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "MemorySettingsViewModel"
         const val FAILED_MESSAGE = "The chat's memory could not be read or written"
         const val TRASH = ".trash"
         val FOLDER = RelativePath(value = "Notekea")

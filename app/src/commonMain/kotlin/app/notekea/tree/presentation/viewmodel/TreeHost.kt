@@ -6,9 +6,8 @@ import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
- * What the sidebar's parts share with [VaultTreeViewModel], which routes the intents to them: the [state], the ways to
- * change it ([reduce], or [updateTree], which flattens the rows again and saves the tree's preferences), send an effect
- * ([emit]), start work ([launch]), open an entry in a tab ([open]) and select one before opening it ([reveal]).
+ * What the sidebar's parts share with [VaultTreeViewModel], besides the [ViewModelHost]: [updateTree], which flattens
+ * the rows again and saves the tree's preferences, opening an entry in a tab ([open]) and selecting one ([reveal]).
  */
 internal interface TreeHost : ViewModelHost<VaultTreeState, VaultTreeEffect> {
     fun updateTree(transform: (VaultTreeState) -> VaultTreeState)

@@ -2,7 +2,6 @@ package app.notekea.ai.presentation
 
 import app.notekea.ai.domain.ModelInstaller
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 
 /**
  * The status bar's view of the chat model's installation, run by the [installer] in Settings → AI model (3.1), so its
@@ -12,7 +11,6 @@ class ModelDownloadViewModel(private val installer: ModelInstaller) :
     BaseViewModel<ModelDownloadState, ModelDownloadIntent, ModelDownloadEffect>(
         initialState = ModelDownloadState()
     ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {
         launchGuarded(onError = {
@@ -31,7 +29,6 @@ class ModelDownloadViewModel(private val installer: ModelInstaller) :
     }
 
     private companion object {
-        const val LOG_TAG = "ModelDownloadViewModel"
         const val FOLLOW_FAILED_MESSAGE = "The model's installation could not be followed"
     }
 }

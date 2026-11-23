@@ -2,7 +2,7 @@ package app.notekea.shell.presentation.onboarding
 
 import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.first
 
 /**
@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.first
 class OnboardingViewModel(
     private val store: AppPreferencesStore
 ) : BaseViewModel<OnboardingState, OnboardingIntent, Nothing>(initialState = OnboardingState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val hasSeen = store
                 .observe()
                 .first()
@@ -59,18 +61,16 @@ class OnboardingViewModel(
     private fun finish() {
         reduce { it.copy(isShown = false) }
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val saved = store.observe().first()
             store.save(preferences = saved.copy(hasSeenWelcome = true))
         }
     }
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
-    }
-
     private companion object {
-        const val LOG_TAG = "OnboardingViewModel"
         const val FAILED_MESSAGE = "The welcome could not be kept as seen"
     }
 }

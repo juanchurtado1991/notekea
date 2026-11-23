@@ -7,6 +7,7 @@ import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.templates.FillTemplateUseCase
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.core.presentation.ViewModelHost
 import app.notekea.editor.domain.EditorPreferencesStore
 import app.notekea.editor.domain.KeepUnsavedTextUseCase
 import app.notekea.editor.domain.ObserveNoteOnDiskUseCase
@@ -26,7 +27,6 @@ import app.notekea.editor.presentation.noteinfo.NoteInfoTools
 import app.notekea.editor.presentation.properties.EditorProperties
 import app.notekea.editor.presentation.properties.PropertyTools
 import app.notekea.editor.presentation.reading.ReadLink
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -53,21 +53,10 @@ class EditorViewModel(
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
 
-    private val logger = Logger.withTag(tag = LOG_TAG)
-    private val host = object : EditorHost {
-        override val state: StateFlow<EditorState> get() = this@EditorViewModel.state
+    private val host = object :
+        EditorHost,
+        ViewModelHost<EditorState, EditorEffect> by hostOf(onError = ::showUnexpectedError) {
         override val buffer: TextFieldState get() = this@EditorViewModel.buffer
-
-        override fun reduce(transform: (EditorState) -> EditorState) = this@EditorViewModel.reduce(
-            transform = transform
-        )
-
-        override fun emit(effect: EditorEffect) = this@EditorViewModel.emit(effect = effect)
-
-        override fun launch(block: suspend () -> Unit): Job = launchGuarded(
-            onError = ::showUnexpectedError,
-            block = block
-        )
     }
     private val find = EditorFind(host = host)
     private val textEdits = EditorTextEdits(host = host)
@@ -469,7 +458,6 @@ class EditorViewModel(
 
     companion object {
         val AUTOSAVE_DELAY = 1.seconds
-        private const val LOG_TAG = "EditorViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the note editor"
     }
 }

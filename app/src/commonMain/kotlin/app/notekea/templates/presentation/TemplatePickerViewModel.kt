@@ -14,7 +14,6 @@ import app.notekea.core.notes.domain.templates.Templates
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.templates.domain.GetTemplateSettingsUseCase
-import co.touchlab.kermit.Logger
 
 /**
  * The template picker: the notes of the vault's templates folder, found by name as in the quick switcher. The settings
@@ -29,7 +28,6 @@ class TemplatePickerViewModel(
 ) : BaseViewModel<TemplatePickerState, TemplatePickerIntent, TemplatePickerEffect>(
     initialState = TemplatePickerState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private val templates = Templates()
     private var tree = VaultTree.EMPTY
     private var settings = TemplateSettings.DEFAULT
@@ -223,7 +221,6 @@ class TemplatePickerViewModel(
     )
 
     companion object {
-        private const val LOG_TAG = "TemplatePicker"
         private const val UNEXPECTED_MESSAGE = "The template picker failed unexpectedly"
     }
 }

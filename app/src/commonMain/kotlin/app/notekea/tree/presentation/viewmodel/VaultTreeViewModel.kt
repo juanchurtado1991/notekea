@@ -7,6 +7,7 @@ import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.core.presentation.ViewModelHost
 import app.notekea.tree.domain.BookmarkStore
 import app.notekea.tree.domain.CreateFolderUseCase
 import app.notekea.tree.domain.FileRevealer
@@ -20,7 +21,6 @@ import app.notekea.tree.presentation.model.BookmarkIntent
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.TimeSource
@@ -52,26 +52,13 @@ class VaultTreeViewModel(
         platformConventions = platformConventions
     )
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
-    private val host = object : TreeHost {
-        override val state: StateFlow<VaultTreeState> get() = this@VaultTreeViewModel.state
-
-        override fun reduce(transform: (VaultTreeState) -> VaultTreeState) =
-            this@VaultTreeViewModel.reduce(
-                transform = transform
-            )
-
+    private val host = object :
+        TreeHost,
+        ViewModelHost<VaultTreeState, VaultTreeEffect> by hostOf(onError = ::showUnexpectedError) {
         override fun updateTree(transform: (VaultTreeState) -> VaultTreeState) =
             this@VaultTreeViewModel.updateTree(
                 transform = transform
             )
-
-        override fun emit(effect: VaultTreeEffect) = this@VaultTreeViewModel.emit(effect = effect)
-
-        override fun launch(block: suspend () -> Unit): Job = launchGuarded(
-            onError = ::showUnexpectedError,
-            block = block
-        )
 
         override fun open(path: RelativePath?) = this@VaultTreeViewModel.open(path = path)
 
@@ -547,7 +534,6 @@ class VaultTreeViewModel(
     companion object {
         private const val NOTES_IN = " notes in "
         private const val TREE_LOADED_MESSAGE = "Vault tree loaded: "
-        private const val LOG_TAG = "VaultTreeViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the vault tree"
     }
 }

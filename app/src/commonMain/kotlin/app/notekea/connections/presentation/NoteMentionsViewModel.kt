@@ -9,7 +9,6 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -30,7 +29,6 @@ class NoteMentionsViewModel(
 ) : BaseViewModel<NoteMentionsState, NoteMentionsIntent, Nothing>(
     initialState = NoteMentionsState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: Map<RelativePath, NoteEntry> = emptyMap()
     private var search: Job? = null
 
@@ -113,7 +111,7 @@ class NoteMentionsViewModel(
                 notes[it]
             } ?: return
 
-        launchGuarded(onError = ::logUnexpectedError) {
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
             val isLinked = linkMention(
                 vaultPath = vaultPath,
                 mention = mention,
@@ -128,7 +126,7 @@ class NoteMentionsViewModel(
     }
 
     private fun onSearchFailed(throwable: Throwable) {
-        logUnexpectedError(throwable = throwable)
+        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
 
         reduce {
             it.copy(
@@ -138,12 +136,7 @@ class NoteMentionsViewModel(
         }
     }
 
-    private fun logUnexpectedError(throwable: Throwable) {
-        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-    }
-
     private companion object {
-        const val LOG_TAG = "NoteMentionsViewModel"
         const val UNEXPECTED_ERROR_MESSAGE =
             "Unexpected error finding the notes that name the open one"
 

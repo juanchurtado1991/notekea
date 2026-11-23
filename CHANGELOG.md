@@ -56,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   repeated is written once. Block 1, core helpers: `Outcome` is a sealed class with `valueOrNull`, `errorOrNull` and
   `map`; `CalendarDate.iso`, `ofIso` and `today`; `RelativePath.bare()`; `lineStartAt`, `lineEndAt`, `forEachLine`
   and `forEachLineOutsideCode`; `TextFolder` is one object that every reader folding accents uses.
+  Block 2: `BaseViewModel` gives every ViewModel its `logger`, `launchLogged` and `hostOf`, which the editor's,
+  chat's, tree's and graph's hosts delegate to.
 - The chat's loop starts each turn by saying which notes, and which entries in them, a request means, from notes the
   app finds (`docs/agent-frame.md`). The app then asks only when the request means one and several fit, never asks
   when it says which, and works on each when it means several. It replaces the word lists that decided this

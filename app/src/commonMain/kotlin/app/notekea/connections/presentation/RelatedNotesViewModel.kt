@@ -5,7 +5,6 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -22,7 +21,6 @@ class RelatedNotesViewModel(
 ) : BaseViewModel<RelatedNotesState, RelatedNotesIntent, Nothing>(
     initialState = RelatedNotesState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var text = ""
     private var notes: List<RelativePath> = emptyList()
     private var search: Job? = null
@@ -117,7 +115,6 @@ class RelatedNotesViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "RelatedNotesViewModel"
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error finding related notes"
 
         // Another note: soon, so the section follows the tab. Typing: once the person pauses, not at every key.

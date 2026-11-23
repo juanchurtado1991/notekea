@@ -18,7 +18,6 @@ import app.notekea.query.domain.SaveQueryUseCase
 import app.notekea.query.domain.SetPropertyUseCase
 import app.notekea.query.domain.TranslateQueryUseCase
 import app.notekea.query.domain.VaultQuery
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -42,7 +41,6 @@ class QueryViewModel(
     private val clock: Clock,
     private val dispatchers: AppDispatchers
 ) : BaseViewModel<QueryState, QueryIntent, QueryEffect>(initialState = QueryState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: Collection<NoteEntry> = emptyList()
     private var isShown = false
     private var isQueryRead = false
@@ -51,7 +49,7 @@ class QueryViewModel(
     private val noteSaves = Mutex()
 
     init {
-        launchGuarded(onError = ::logUnexpectedError) {
+        launchLogged(message = UNEXPECTED_ERROR) {
             val query = preferencesStore.read(vaultPath = vaultPath)
             isQueryRead = true
 
@@ -137,7 +135,7 @@ class QueryViewModel(
             )
         }
 
-        launchGuarded(onError = ::logUnexpectedError) {
+        launchLogged(message = UNEXPECTED_ERROR) {
             val iso = CalendarDate.today(
                 localCalendar = localCalendar,
                 clock = clock
@@ -197,7 +195,7 @@ class QueryViewModel(
             )
         }
 
-        launchGuarded(onError = ::logUnexpectedError) {
+        launchLogged(message = UNEXPECTED_ERROR) {
             // The latest query, in turn: of two quick changes, the first must not be the one that stays.
             queryWrites.withLock {
                 preferencesStore.write(
@@ -216,7 +214,7 @@ class QueryViewModel(
         val shown = notes
         refreshJob?.cancel()
 
-        refreshJob = launchGuarded(onError = ::logUnexpectedError) {
+        refreshJob = launchLogged(message = UNEXPECTED_ERROR) {
             val (result, catalog) = withContext(context = dispatchers.default) {
                 runQuery(query, shown) to buildCatalog(shown)
             }
@@ -321,17 +319,12 @@ class QueryViewModel(
     }
 
     private fun showFailure(throwable: Throwable) {
-        logUnexpectedError(throwable = throwable)
+        logger.e(throwable = throwable) { UNEXPECTED_ERROR }
 
         reduce { it.copy(notice = QueryNotice.WriteFailed) }
     }
 
-    private fun logUnexpectedError(throwable: Throwable) {
-        logger.e(throwable = throwable) { UNEXPECTED_ERROR }
-    }
-
     private companion object {
-        const val LOG_TAG = "Query"
         const val UNEXPECTED_ERROR = "Unexpected query failure"
     }
 }

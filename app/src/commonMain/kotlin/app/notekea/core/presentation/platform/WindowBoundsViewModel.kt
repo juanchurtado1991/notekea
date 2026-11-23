@@ -3,7 +3,6 @@ package app.notekea.core.presentation.platform
 import app.notekea.core.appearance.domain.WindowBounds
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 
 /**
  * Keeps where the main window is left, for the next run: a window that cannot be kept simply opens as it does first.
@@ -13,10 +12,9 @@ class WindowBoundsViewModel(
 ) : BaseViewModel<WindowBoundsState, WindowBoundsIntent, Nothing>(
     initialState = WindowBoundsState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {
-        launchGuarded(onError = ::logUnexpectedError) {
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
             val kept = windowBoundsStore.bounds()
 
             reduce { state -> state.copy(bounds = state.bounds ?: kept) }
@@ -40,15 +38,10 @@ class WindowBoundsViewModel(
     private fun keep(bounds: WindowBounds) {
         reduce { it.copy(bounds = bounds) }
 
-        launchGuarded(onError = ::logUnexpectedError) { windowBoundsStore.save(bounds = bounds) }
-    }
-
-    private fun logUnexpectedError(throwable: Throwable) {
-        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) { windowBoundsStore.save(bounds = bounds) }
     }
 
     private companion object {
-        const val LOG_TAG = "WindowBoundsViewModel"
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error keeping the window's size"
     }
 }

@@ -7,7 +7,6 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
 import app.notekea.search.domain.SearchPassagesUseCase
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -27,7 +26,6 @@ class QuickSwitcherViewModel(
 ) : BaseViewModel<QuickSwitcherState, QuickSwitcherIntent, QuickSwitcherEffect>(
     initialState = QuickSwitcherState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: Collection<NoteEntry> = emptyList()
     private var searchJob: Job? = null
 
@@ -254,7 +252,6 @@ class QuickSwitcherViewModel(
     companion object {
         /** Content search waits for this pause in typing, so it does not run for every keystroke. */
         private val CONTENT_DEBOUNCE = 150.milliseconds
-        private const val LOG_TAG = "QuickSwitcherViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the quick switcher"
     }
 }

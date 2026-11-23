@@ -8,7 +8,7 @@ import app.notekea.sync.domain.ConflictCopies
 import app.notekea.sync.domain.RepairChoice
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.domain.VaultSyncs
-import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 
 /**
  * The open vault's sync (4.2): its engine runs while the vault is open, its status shows in the status bar, and a
@@ -21,13 +21,15 @@ class SyncStatusViewModel(
 ) : BaseViewModel<SyncStatusState, SyncStatusIntent, SyncStatusEffect>(
     initialState = SyncStatusState()
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private val engine = engines.of(vaultPath = vaultPath)
 
     init {
         engine.start()
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             engine.status.collect { status ->
                 reduce {
                     it.copy(
@@ -43,7 +45,10 @@ class SyncStatusViewModel(
             }
         }
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             engine.leftOut.collect { files ->
                 reduce { it.copy(leftOut = files) }
             }
@@ -69,7 +74,10 @@ class SyncStatusViewModel(
     }
 
     private fun review(note: RelativePath) {
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val theirs = noteContentStore.read(
                 vaultPath = vaultPath,
                 path = note
@@ -98,7 +106,10 @@ class SyncStatusViewModel(
         val note = state.value.review?.note ?: return
         reduce { it.copy(review = null) }
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             engine.resolve(
                 note = note,
                 choice = choice
@@ -108,7 +119,11 @@ class SyncStatusViewModel(
 
     private fun repair(choice: RepairChoice) {
         reduce { it.copy(isRepairShown = false) }
-        launchGuarded(onError = ::logError) { engine.repair(choice = choice) }
+
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) { engine.repair(choice = choice) }
     }
 
     // A sync under way keeps the conflicts it started with; any other status says what is left.
@@ -121,12 +136,7 @@ class SyncStatusViewModel(
         else -> emptyList()
     }
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
-    }
-
     private companion object {
-        const val LOG_TAG = "SyncStatusViewModel"
         const val FAILED_MESSAGE = "Sync could not be followed"
     }
 }

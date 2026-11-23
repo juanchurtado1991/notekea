@@ -4,7 +4,6 @@ import app.notekea.core.appearance.domain.GetUiZoomUseCase
 import app.notekea.core.appearance.domain.SaveUiZoomUseCase
 import app.notekea.core.appearance.domain.UiZoomLevels
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 
 /**
  * The window's zoom: it starts where it was left and each change is kept for the next run. Its state
@@ -14,14 +13,13 @@ class UiZoomViewModel(
     private val getUiZoom: GetUiZoomUseCase,
     private val saveUiZoom: SaveUiZoomUseCase
 ) : BaseViewModel<Float, UiZoomIntent, Nothing>(initialState = UiZoomLevels.DEFAULT) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     // A zoom chosen before the kept one came back stays: the load put the old one over it (the
     // code review of 2026-11-22).
     private var isChanged = false
 
     init {
-        launchGuarded(onError = ::logUnexpectedError) {
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
             val kept = getUiZoom()
             if (!isChanged) reduce { kept }
         }
@@ -43,15 +41,10 @@ class UiZoomViewModel(
         isChanged = true
         reduce { scale }
 
-        launchGuarded(onError = ::logUnexpectedError) { saveUiZoom(scale = scale) }
-    }
-
-    private fun logUnexpectedError(throwable: Throwable) {
-        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        launchLogged(message = UNEXPECTED_ERROR_MESSAGE) { saveUiZoom(scale = scale) }
     }
 
     private companion object {
-        const val LOG_TAG = "UiZoomViewModel"
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error with the window's zoom"
     }
 }

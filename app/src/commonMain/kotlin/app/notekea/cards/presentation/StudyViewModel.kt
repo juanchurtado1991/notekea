@@ -11,7 +11,7 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -32,7 +32,6 @@ class StudyViewModel(
     private val localCalendar: LocalCalendar,
     private val clock: Clock
 ) : BaseViewModel<StudyState, StudyIntent, StudyEffect>(initialState = StudyState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: Collection<NoteEntry> = emptyList()
     private var isShown = false
 
@@ -80,7 +79,10 @@ class StudyViewModel(
     }
 
     private fun load() {
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val today = today()
 
             // After an answer being written, never beside it: read a moment before, the deck still had the card
@@ -129,13 +131,16 @@ class StudyViewModel(
 
         reduce { it.copy(isMakingChoices = true) }
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val choices = try {
                 choicesOf(card = card).await()
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (exception: Exception) {
-                logError(throwable = exception)
+                logger.w(throwable = exception) { FAILED_MESSAGE }
                 null
             }
 
@@ -209,7 +214,10 @@ class StudyViewModel(
 
         askCurrent()
 
-        launchGuarded(onError = ::logError) {
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             val answered = writing.withLock {
                 answerCard(
                     vaultPath = vaultPath,
@@ -244,12 +252,7 @@ class StudyViewModel(
         clock = clock
     )
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
-    }
-
     private companion object {
-        const val LOG_TAG = "StudyViewModel"
         const val FAILED_MESSAGE = "The study cards could not be read or scheduled"
     }
 }

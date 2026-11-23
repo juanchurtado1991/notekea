@@ -3,7 +3,6 @@ package app.notekea.settings.presentation.appearance
 import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 
 /**
  * Settings → Appearance: shows the kept appearance and keeps each choice, which every window then
@@ -12,7 +11,6 @@ import co.touchlab.kermit.Logger
 class AppearanceViewModel(
     private val appearanceStore: AppearanceStore
 ) : BaseViewModel<AppearanceState, AppearanceIntent, Nothing>(initialState = AppearanceState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {
         launchGuarded(onError = ::logUnexpectedError) {
@@ -59,7 +57,6 @@ class AppearanceViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "AppearanceViewModel"
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error with the appearance"
     }
 }

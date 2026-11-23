@@ -11,7 +11,6 @@ import app.notekea.ai.domain.RecommendModelUseCase
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.stacksAlertButtons
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
 
 /**
  * Settings → AI model: reads the catalog and this computer once, recommends a size, and follows the
@@ -31,7 +30,6 @@ class ModelManagerViewModel(
         stacksAlertButtons = platformConventions.stacksAlertButtons
     )
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     /** The catalog once read, to find a size's files; the state keeps only what the screen shows. */
     private var loadedCatalog: ModelCatalog? = null
@@ -175,7 +173,6 @@ class ModelManagerViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "ModelManagerViewModel"
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the model manager"
     }
 }

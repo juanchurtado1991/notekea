@@ -16,7 +16,6 @@ import app.notekea.vault.domain.SampleVaultSource
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.VaultFileSystem
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.first
 
 /**
@@ -40,7 +39,6 @@ class WelcomeViewModel(
 ) : BaseViewModel<WelcomeState, WelcomeIntent, Nothing>(
     initialState = WelcomeState(platformConventions = platformConventions)
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     private val importing = WelcomeImport(
         importVault = importVault,
@@ -294,7 +292,6 @@ class WelcomeViewModel(
     }
 
     companion object {
-        private const val LOG_TAG = "WelcomeViewModel"
         private const val SAMPLE_NAME = "Notekea Sample Vault"
         private const val MAX_SAMPLES = 20
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the welcome flow"

@@ -8,7 +8,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.VaultSettingsWriter
 import app.notekea.core.presentation.BaseViewModel
-import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlin.time.Clock
@@ -29,21 +29,26 @@ class FilesSettingsViewModel(
 ) : BaseViewModel<FilesSettingsState, FilesSettingsIntent, Nothing>(
     initialState = FilesSettingsState(hasVault = vaultPath != null)
 ) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
 
     // Each field waits for its own pause, so typing in one never drops another's write (bug hunt, 2026-11-11).
     private val saving = mutableMapOf<Field, Job>()
 
     init {
         vaultPath?.let { vault ->
-            launchGuarded(onError = ::logError) { load(vault = vault) }
+            launchLogged(
+                message = FAILED_MESSAGE,
+                severity = Severity.Warn
+            ) { load(vault = vault) }
         }
     }
 
     override fun handleIntent(intent: FilesSettingsIntent) {
         when (intent) {
             FilesSettingsIntent.OnShown -> vaultPath?.let { vault ->
-                launchGuarded(onError = ::logError) { load(vault = vault) }
+                launchLogged(
+                    message = FAILED_MESSAGE,
+                    severity = Severity.Warn
+                ) { load(vault = vault) }
             }
 
             is FilesSettingsIntent.OnAttachmentsChange -> change(field = Field.ATTACHMENTS) {
@@ -119,7 +124,10 @@ class FilesSettingsViewModel(
         reduce { transform(it).copy(hasFailed = false) }
         saving[field]?.cancel()
 
-        saving[field] = launchGuarded(onError = ::logError) {
+        saving[field] = launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
             delay(duration = PAUSE)
 
             val saved = save(
@@ -154,15 +162,10 @@ class FilesSettingsViewModel(
         )
     }
 
-    private fun logError(throwable: Throwable) {
-        logger.w(throwable = throwable) { FAILED_MESSAGE }
-    }
-
     // The file a field goes to.
     private enum class Field { ATTACHMENTS, DAILY, TEMPLATES }
 
     private companion object {
-        const val LOG_TAG = "FilesSettingsViewModel"
         const val FAILED_MESSAGE = "Files settings failed"
         val PAUSE = 600.milliseconds
     }

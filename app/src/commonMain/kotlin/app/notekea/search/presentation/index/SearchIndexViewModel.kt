@@ -9,7 +9,6 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.search.domain.IndexProgress
 import app.notekea.search.domain.IndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -32,7 +31,6 @@ class SearchIndexViewModel(
     private val describeElapsedTime: DescribeElapsedTimeUseCase,
     private val clock: Clock
 ) : BaseViewModel<SearchIndexState, SearchIndexIntent, Nothing>(initialState = SearchIndexState()) {
-    private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: List<NoteFile>? = null
     private var run: Job? = null
     private var lastRunAt: Instant? = null
@@ -234,7 +232,6 @@ class SearchIndexViewModel(
     }
 
     private companion object {
-        const val LOG_TAG = "SearchIndexViewModel"
         const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error indexing the vault"
 
         // A save writes the note, then the tree reports it: one run for the burst, well within 2 s.
