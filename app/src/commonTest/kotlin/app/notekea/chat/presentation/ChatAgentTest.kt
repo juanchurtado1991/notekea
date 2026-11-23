@@ -18,23 +18,18 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Agent mode in the chat (4.7): offered only for the sizes that have it, its moves listed, its end a card. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatAgentTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatAgentTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
     private val store = FakeNoteContentStore()
@@ -43,7 +38,6 @@ class ChatAgentTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
         store.texts[RelativePath(value = "Books/Dune.md")] = "Dune is a novel."
 
         engine.reply = { messages ->
@@ -60,11 +54,6 @@ class ChatAgentTest {
                 else -> "Hello."
             }
         }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     private fun TestScope.started(hasAgent: Boolean): ChatViewModel {
@@ -111,7 +100,7 @@ class ChatAgentTest {
 
     @Test
     fun `the agent lists its moves and ends on a card, and nothing is written before it is confirmed`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             moves += "{\"move\":\"read\",\"note\":\"Dune\"}"
 
             moves += "{\"move\":\"propose\",\"summary\":\"Tag Dune.\",\"steps\":" +
@@ -137,7 +126,7 @@ class ChatAgentTest {
 
     @Test
     fun `a size without agent mode answers as usual even with the toggle on`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = TALK
             val viewModel = started(hasAgent = false)
             val entry = asked(viewModel = viewModel)
@@ -157,7 +146,7 @@ class ChatAgentTest {
     // searched for the word "notes"; the plan describes the vault.
     @Test
     fun `in agent mode the vault's overview, help and talk are the plan's, not the agent's`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"overview\"}]}"
 
             val entry = asked(
@@ -177,7 +166,7 @@ class ChatAgentTest {
 
     @Test
     fun `auto hands the agent an action whose note the plan could not name, and only where it is offered`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"add_tag\",\"note\":\"the desert novel\",\"tag\":\"scifi\"}]}"
             moves += "{\"move\":\"search\",\"query\":\"desert novel\"}"
             moves += "{\"move\":\"finish\",\"summary\":\"Dune.\"}"
@@ -205,7 +194,7 @@ class ChatAgentTest {
 
     @Test
     fun `an agent that finds nothing ends on the not found reply, not its own words`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             moves += "{\"move\":\"search\",\"query\":\"dentist\"}"
             moves += "{\"move\":\"finish\",\"summary\":\"No dentist appointment was found in your notes.\"}"
 

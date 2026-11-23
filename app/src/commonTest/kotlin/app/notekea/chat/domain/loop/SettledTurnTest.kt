@@ -16,9 +16,8 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteFixtures.tags
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -33,10 +32,7 @@ import kotlin.time.Clock
 class SettledTurnTest {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = NoteTextCache(
-        contentStore = store,
-        textFolder = TextFolder
-    )
+    private val cache = noteTextCache(store = store)
 
     private fun runTurn(frame: TaskFrame?) = RunTurnUseCase(
         llmEngine = engine,

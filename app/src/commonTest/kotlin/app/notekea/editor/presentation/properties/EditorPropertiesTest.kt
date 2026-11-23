@@ -6,43 +6,32 @@ import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.editor.domain.PropertyType
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.PropertyIntent
 import app.notekea.editor.presentation.viewmodel.EditorViewModels
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The properties above a note, edited over real use cases and fakes: saved at once, line by line. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class EditorPropertiesTest {
-    private val testDispatcher = StandardTestDispatcher()
+class EditorPropertiesTest : ViewModelTestBase() {
     private val fixture = EditorViewModels(dispatcher = testDispatcher)
     private val viewModel by lazy { fixture.create() }
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
         fixture.store.texts[NOTE] = TEXT
         fixture.scanner.addNote(file = file(path = NOTE.value))
         fixture.operations.existing += NOTE
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test

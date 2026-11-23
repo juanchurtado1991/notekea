@@ -15,29 +15,24 @@ import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.presentation.ViewModelTestBase
+import app.notekea.core.presentation.effectsOf
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
 import app.notekea.search.domain.SearchPassagesUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The palette over the real search use cases and a content store that suspends like the disk. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class QuickSwitcherViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class QuickSwitcherViewModelTest : ViewModelTestBase() {
     private val store = FakeNoteContentStore().apply { suspendsLikeDisk = true }
     private val embedder = FakeTextEmbedder()
     private val notes = listOf(
@@ -98,16 +93,6 @@ class QuickSwitcherViewModelTest {
             ),
             dispatchers = dispatchers
         ).apply { onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes)) }
-    }
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -202,7 +187,7 @@ class QuickSwitcherViewModelTest {
     @Test
     fun `arrows wrap around, and enter opens the selected note and closes the palette`() =
         runSwitcherTest {
-            val effects = collectEffects()
+            val effects = effectsOf(viewModel = viewModel)
             send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
             send(QuickSwitcherIntent.OnSelectPrevious)
             val wrapped = viewModel.state.value.selectedIndex
@@ -225,7 +210,7 @@ class QuickSwitcherViewModelTest {
     @Test
     fun `closing without choosing says so, so the keyboard can go back to the note`() =
         runSwitcherTest {
-            val effects = collectEffects()
+            val effects = effectsOf(viewModel = viewModel)
             send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
             send(QuickSwitcherIntent.OnClose)
 
@@ -268,7 +253,7 @@ class QuickSwitcherViewModelTest {
     @Test
     fun `a tag opens content search with the tag typed, and clicking a result opens it`() =
         runSwitcherTest {
-            val effects = collectEffects()
+            val effects = effectsOf(viewModel = viewModel)
 
             send(
                 QuickSwitcherIntent.OnOpen(
@@ -294,7 +279,7 @@ class QuickSwitcherViewModelTest {
     @Test
     fun `a note chosen to link is linked instead of opened, and linking stays on names`() =
         runSwitcherTest {
-            val effects = collectEffects()
+            val effects = effectsOf(viewModel = viewModel)
 
             send(
                 QuickSwitcherIntent.OnOpen(
@@ -376,18 +361,6 @@ class QuickSwitcherViewModelTest {
     private fun TestScope.send(intent: QuickSwitcherIntent) {
         viewModel.onIntent(intent = intent)
         runCurrent()
-    }
-
-    private fun TestScope.collectEffects(): List<QuickSwitcherEffect> {
-        val effects = mutableListOf<QuickSwitcherEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
-
-        runCurrent()
-
-        return effects
     }
 
     private fun names(): List<String> = viewModel

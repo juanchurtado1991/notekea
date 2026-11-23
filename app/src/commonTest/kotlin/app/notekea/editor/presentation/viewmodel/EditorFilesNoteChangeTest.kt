@@ -4,26 +4,22 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.editor.presentation.model.EditorIntent
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Another note opening while a paste, a picker or a copy runs: what they bring never lands in it. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class EditorFilesNoteChangeTest {
-    private val testDispatcher = StandardTestDispatcher()
+class EditorFilesNoteChangeTest : ViewModelTestBase() {
     private val fixture = EditorViewModels(
         dispatcher = testDispatcher,
         io = StandardTestDispatcher(scheduler = testDispatcher.scheduler)
@@ -32,8 +28,6 @@ class EditorFilesNoteChangeTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-
         putOnDisk(
             path = FIRST,
             text = "![[gone.png]]\n"
@@ -45,11 +39,6 @@ class EditorFilesNoteChangeTest {
         )
 
         fixture.attachmentStore.outside[OUTSIDE] = BYTES
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test

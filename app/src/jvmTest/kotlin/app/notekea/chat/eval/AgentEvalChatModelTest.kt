@@ -27,6 +27,7 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryYaml
@@ -391,10 +392,7 @@ class AgentEvalChatModelTest {
     }
 
     private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
-        val cache = NoteTextCache(
-            contentStore = indexed.store,
-            textFolder = TextFolder
-        )
+        val cache = noteTextCache(store = indexed.store)
 
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 

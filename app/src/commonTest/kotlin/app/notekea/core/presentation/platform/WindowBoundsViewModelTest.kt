@@ -4,37 +4,21 @@ import app.notekea.core.appearance.data.SettingsWindowBoundsStore
 import app.notekea.core.appearance.domain.WindowBounds
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import com.russhwolf.settings.MapSettings
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Where the window is left is kept for the next run, and maximizing never loses its own size (audit 48). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class WindowBoundsViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class WindowBoundsViewModelTest : ViewModelTestBase() {
     private val store = SettingsWindowBoundsStore(
         settings = MapSettings(),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     @Test
     fun `a window never kept has no bounds, and one moved is kept for the next run`() = runTest(

@@ -16,22 +16,17 @@ import app.notekea.core.notes.domain.index.IndexError
 import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.notes.domain.index.NoteChunk
 import app.notekea.core.notes.domain.index.VectorIndex
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.minutes
@@ -42,23 +37,12 @@ import kotlin.time.Instant
  * a busy index is tried again, Rebuild index starts over, and a large first run shows its notice.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class SearchIndexViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class SearchIndexViewModelTest : ViewModelTestBase() {
     private val contents = FakeNoteContentStore()
     private val index = FakeVectorIndex()
     private val states = FakeIndexStateStore()
     private val clock = FakeClock(currentTime = NOW)
     private val embedder = FakeTextEmbedder()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModel(vectorIndex: VectorIndex = index) = SearchIndexViewModel(
         vaultPath = VAULT,

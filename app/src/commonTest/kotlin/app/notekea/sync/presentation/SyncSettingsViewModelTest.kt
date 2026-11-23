@@ -1,5 +1,6 @@
 package app.notekea.sync.presentation
 
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.sync.data.SyncEngine
 import app.notekea.sync.domain.FakeGitRepository
 import app.notekea.sync.domain.FakeSyncSettingsStore
@@ -8,39 +9,22 @@ import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.domain.VaultSyncs
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
 /** Settings → Sync: what address it takes, what connecting keeps, and Stop syncing. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class SyncSettingsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class SyncSettingsViewModelTest : ViewModelTestBase() {
     private val repository = FakeGitRepository()
     private val tokens = FakeTokenStore()
     private val settings = FakeSyncSettingsStore()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private var vaultBytes = 0L
 
@@ -79,7 +63,7 @@ class SyncSettingsViewModelTest {
 
     @Test
     fun `an https or a local address connects, anything else is refused before trying`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val refused = connect(
                 viewModel = viewModel(),
                 url = "git@github.com:ana/notes.git"
@@ -122,7 +106,7 @@ class SyncSettingsViewModelTest {
 
     @Test
     fun `a refused token is told, and Stop syncing forgets the vault's settings`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             repository.connectError = SyncError.AuthFailed
             val viewModel = viewModel()
 
@@ -162,7 +146,7 @@ class SyncSettingsViewModelTest {
 
     @Test
     fun `without a vault there is nothing to sync, and a synced vault shows its settings`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             settings.settings[VAULT] = SyncSettings(
                 remoteUrl = URL,
                 isAuto = false,
@@ -189,33 +173,34 @@ class SyncSettingsViewModelTest {
     // The developer's request of 2026-11-11: a vault over 1 GB is warned of before GitHub only, never kept on this
     // computer or synced elsewhere.
     @Test
-    fun `a vault over a gigabyte is warned of with a GitHub address only`() = runTest(dispatcher) {
-        vaultBytes = 1_400_000_000L
-        val viewModel = viewModel()
-        runCurrent()
+    fun `a vault over a gigabyte is warned of with a GitHub address only`() =
+        runTest(testDispatcher) {
+            vaultBytes = 1_400_000_000L
+            val viewModel = viewModel()
+            runCurrent()
 
-        val warned = listOf("", "file:///home/me/remote.git", URL_ON_GITLAB, URL_ON_GITHUB)
-            .map {
-                viewModel.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = it))
-                viewModel.state.value.isTooLargeForGitHub
-            }
+            val warned = listOf("", "file:///home/me/remote.git", URL_ON_GITLAB, URL_ON_GITHUB)
+                .map {
+                    viewModel.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = it))
+                    viewModel.state.value.isTooLargeForGitHub
+                }
 
-        vaultBytes = 900_000_000L
-        val small = viewModel()
-        runCurrent()
-        small.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = URL_ON_GITHUB))
+            vaultBytes = 900_000_000L
+            val small = viewModel()
+            runCurrent()
+            small.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = URL_ON_GITHUB))
 
-        assertEquals(
-            expected = listOf(false, false, false, true, false),
-            actual = warned + small.state.value.isTooLargeForGitHub
-        )
-    }
+            assertEquals(
+                expected = listOf(false, false, false, true, false),
+                actual = warned + small.state.value.isTooLargeForGitHub
+            )
+        }
 
     // Code review of 2026-11-11: an address typed but not connected was saved by a change of auto-sync, and the
     // token was then looked up under it.
     @Test
     fun `a change of auto-sync keeps the address it is connected to, not one only typed`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = viewModel()
 
             connect(

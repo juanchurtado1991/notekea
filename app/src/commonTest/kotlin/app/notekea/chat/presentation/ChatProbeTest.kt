@@ -20,15 +20,11 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,16 +35,13 @@ import kotlin.time.Instant
  * its own why, and the chat's memory fills, is compacted into a summary, and gives it to the next question.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatProbeTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatProbeTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
     private var plan = ""
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-
         engine.reply = { messages ->
             val system = messages.first().text
 
@@ -59,11 +52,6 @@ class ChatProbeTest {
                 else -> "A long answer about the notes. ".repeat(n = 20)
             }
         }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     private val clock = FakeClock(currentTime = Instant.parse("2026-11-11T09:00:00Z"))
@@ -104,7 +92,7 @@ class ChatProbeTest {
 
     @Test
     fun `a question the plan answers with tables is answered in words above them`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"find_notes\",\"request\":\"books finished\"}]}"
             runner.found = FoundNotes(rows = listOf(FoundRow(note = RelativePath(value = "Books/Dune.md"))))
 
@@ -122,7 +110,7 @@ class ChatProbeTest {
     // The chat probe of 2026-11-11: the tables' answer was cut at its first words, its turn already ended.
     @Test
     fun `the turn is answering while the tables found are answered in words`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"find_notes\",\"request\":\"books finished\"}]}"
             runner.found = FoundNotes(rows = listOf(FoundRow(note = RelativePath(value = "Books/Dune.md"))))
             val viewModel = started()
@@ -151,7 +139,7 @@ class ChatProbeTest {
         }
 
     @Test
-    fun `a refusal is the model's own why, in the person's words`() = runTest(dispatcher) {
+    fun `a refusal is the model's own why, in the person's words`() = runTest(testDispatcher) {
         plan = "{\"steps\":[{\"action\":\"refuse\",\"text\":\"Notekea no puede enviar recordatorios.\"}]}"
 
         val entry = asked(
@@ -167,7 +155,7 @@ class ChatProbeTest {
 
     @Test
     fun `the memory fills, compacts itself into a summary when full, and gives it to the next question`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val viewModel = started()
 
@@ -205,34 +193,35 @@ class ChatProbeTest {
         }
 
     @Test
-    fun `compact chat writes the summary when asked, and clear forgets it`() = runTest(dispatcher) {
-        plan = "{\"steps\":[{\"action\":\"chat\"}]}"
-        val viewModel = started()
+    fun `compact chat writes the summary when asked, and clear forgets it`() =
+        runTest(testDispatcher) {
+            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+            val viewModel = started()
 
-        repeat(times = 4) {
-            asked(
-                viewModel = viewModel,
-                question = "question $it"
+            repeat(times = 4) {
+                asked(
+                    viewModel = viewModel,
+                    question = "question $it"
+                )
+            }
+
+            val before = viewModel.state.value.contextUsage
+            viewModel.onIntent(intent = ChatIntent.OnCompact)
+            advanceUntilIdle()
+            val after = viewModel.state.value.contextUsage
+            viewModel.onIntent(intent = ChatIntent.OnClearHistory)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(true, 0f),
+                actual = listOf(after < before, viewModel.state.value.contextUsage)
             )
         }
-
-        val before = viewModel.state.value.contextUsage
-        viewModel.onIntent(intent = ChatIntent.OnCompact)
-        advanceUntilIdle()
-        val after = viewModel.state.value.contextUsage
-        viewModel.onIntent(intent = ChatIntent.OnClearHistory)
-        advanceUntilIdle()
-
-        assertEquals(
-            expected = listOf(true, 0f),
-            actual = listOf(after < before, viewModel.state.value.contextUsage)
-        )
-    }
 
     // The developer's goal of 2026-11-11: the chat compacts itself after a while, as a new session.
     @Test
     fun `a chat left for half an hour is compacted before the next question, one asked at once is not`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val viewModel = started()
 
@@ -279,41 +268,42 @@ class ChatProbeTest {
 
     // The chat probe of 2026-11-11: "going back to the start: how much flour was it?" after ten turns had lost it.
     @Test
-    fun `the chat's first exchange is given to a question long after it`() = runTest(dispatcher) {
-        plan = "{\"steps\":[{\"action\":\"chat\"}]}"
-        val viewModel = started()
+    fun `the chat's first exchange is given to a question long after it`() =
+        runTest(testDispatcher) {
+            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+            val viewModel = started()
 
-        listOf("how much flour do the arepas take?", "a", "b", "c", "d", "e").forEach {
+            listOf("how much flour do the arepas take?", "a", "b", "c", "d", "e").forEach {
+                asked(
+                    viewModel = viewModel,
+                    question = it
+                )
+            }
+
             asked(
                 viewModel = viewModel,
-                question = it
+                question = "going back to the start: how much flour was it?"
+            )
+
+            val talk = engine.generated.last {
+                it
+                    .first()
+                    .text
+                    .startsWith("You are")
+            }
+
+            assertEquals(
+                expected = true,
+                actual = talk.any {
+                    it.text == "how much flour do the arepas take?"
+                }
             )
         }
-
-        asked(
-            viewModel = viewModel,
-            question = "going back to the start: how much flour was it?"
-        )
-
-        val talk = engine.generated.last {
-            it
-                .first()
-                .text
-                .startsWith("You are")
-        }
-
-        assertEquals(
-            expected = true,
-            actual = talk.any {
-                it.text == "how much flour do the arepas take?"
-            }
-        )
-    }
 
     // The chat probe of 2026-11-11: in Auto, questions the passages could not answer were left unanswered.
     @Test
     fun `in auto a question the notes' passages do not answer is worked on by the agent`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"answer\",\"request\":\"who owns the launch?\"}]}"
 
             engine.readiness = app
@@ -356,7 +346,7 @@ class ChatProbeTest {
     // The chat probe of 2026-11-11: a question Auto thought through was left unanswered, the agent never asked.
     @Test
     fun `in auto a deep question the passages do not answer is worked on by the agent too`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"answer\",\"request\":\"what did I learn from my books?\"}]}"
 
             engine.readiness = app
@@ -401,7 +391,7 @@ class ChatProbeTest {
     // Compacting after the replies.
     @Test
     fun `a long chat from an earlier session is compacted, and the ring says the memory again`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val history = FakeChatHistoryStore()
 
@@ -451,44 +441,46 @@ class ChatProbeTest {
 
     // The comparison with Claude, 2026-11-11: "What did I change today?" was answered "I cannot access your computer".
     @Test
-    fun `the talk knows the notes changed today and the last one changed`() = runTest(dispatcher) {
-        plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+    fun `the talk knows the notes changed today and the last one changed`() =
+        runTest(testDispatcher) {
+            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
 
-        clock.currentTime = kotlin
-            .time
-            .Instant
-            .fromEpochMilliseconds(epochMilliseconds = 1_800_000_000_000L)
+            clock.currentTime = kotlin
+                .time
+                .Instant
+                .fromEpochMilliseconds(epochMilliseconds = 1_800_000_000_000L)
 
-        val viewModel = started()
+            val viewModel = started()
 
-        viewModel.onIntent(
-            intent = ChatIntent.OnNotesChange(
-                notes = listOf(
-                    entry(path = "Books/Dune.md"),
-                    entry(
-                        path = "Recipes/Old.md",
-                        modifiedOffsetMillis = -THREE_DAYS
+            viewModel.onIntent(
+                intent = ChatIntent.OnNotesChange(
+                    notes = listOf(
+                        entry(path = "Books/Dune.md"),
+                        entry(
+                            path = "Recipes/Old.md",
+                            modifiedOffsetMillis = -THREE_DAYS
+                        )
                     )
                 )
             )
-        )
 
-        asked(
-            viewModel = viewModel,
-            question = "What did I change today?"
-        )
+            asked(
+                viewModel = viewModel,
+                question = "What did I change today?"
+            )
 
-        val talk = engine
-            .generated
-            .last()
-            .first()
-            .text
+            val talk = engine
+                .generated
+                .last()
+                .first()
+                .text
 
-        assertEquals(
-            expected = true,
-            actual = "Notes changed today: Books/Dune. The last changed note is Books/Dune" in talk
-        )
-    }
+            assertEquals(
+                expected = true,
+                actual = "Notes changed today: Books/Dune. The last changed note is Books/Dune" in
+                    talk
+            )
+        }
 
     private companion object {
         const val THREE_DAYS = 3L * 24 * 60 * 60 * 1_000

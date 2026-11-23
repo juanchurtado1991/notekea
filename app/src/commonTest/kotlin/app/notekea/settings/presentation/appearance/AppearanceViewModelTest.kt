@@ -4,33 +4,16 @@ import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.appearance.domain.ThemeMode
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Settings → Appearance: it shows the kept appearance and keeps each choice. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class AppearanceViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
+class AppearanceViewModelTest : ViewModelTestBase() {
     @Test
     fun `a choice that cannot be kept says so, until the next one is`() = runTest(
         context = testDispatcher

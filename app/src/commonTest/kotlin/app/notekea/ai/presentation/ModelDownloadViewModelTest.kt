@@ -4,35 +4,19 @@ import app.notekea.ai.domain.FakeModelInstaller
 import app.notekea.ai.domain.InstallProgress
 import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelSize
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The model's installation in the status bar: its progress as it goes, and a click that opens Settings. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ModelDownloadViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class ModelDownloadViewModelTest : ViewModelTestBase() {
     private val installer = FakeModelInstaller()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     @Test
     fun `the installation's progress follows the installer, and a click opens Settings`() = runTest(

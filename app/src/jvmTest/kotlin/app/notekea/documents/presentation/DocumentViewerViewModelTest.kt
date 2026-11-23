@@ -7,18 +7,13 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.FakeFileOpener
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.documents.domain.PageMark
 import app.notekea.documents.domain.PdfPages
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.io.encoding.Base64
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,19 +22,8 @@ import kotlin.test.assertEquals
  * screen, since its ViewModel stays while the vault is open (memory leak hunt, 2026-11-11).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class DocumentViewerViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class DocumentViewerViewModelTest : ViewModelTestBase() {
     private val pages = CountingPdfPages()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModel(reader: DocumentReader = TextReader()) = DocumentViewerViewModel(
         vaultPath = VAULT,
@@ -47,13 +31,13 @@ class DocumentViewerViewModelTest {
         reader = reader,
         pdfPages = pages,
         fileOpener = FakeFileOpener(),
-        dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
 
     // The code review of 2026-11-22: a page whose drawing threw was taken as still being drawn, for good.
     @Test
     fun `a page whose drawing broke is drawn the next time it comes into view`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = viewModel()
 
             pages.brokenRenders = 1
@@ -72,7 +56,7 @@ class DocumentViewerViewModelTest {
 
     // The code review of 2026-11-22: a document whose reading threw left its tab on the spinner for good.
     @Test
-    fun `a document whose reading breaks stops loading and says why`() = runTest(dispatcher) {
+    fun `a document whose reading breaks stops loading and says why`() = runTest(testDispatcher) {
         val viewModel = viewModel(reader = BrokenReader())
 
         advanceUntilIdle()
@@ -85,7 +69,7 @@ class DocumentViewerViewModelTest {
 
     @Test
     fun `a page in view is drawn, and a hidden tab lets its pages and its PDF go`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = viewModel()
 
             advanceUntilIdle()

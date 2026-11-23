@@ -34,16 +34,12 @@ import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.index.NoteChunk
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,8 +49,7 @@ import kotlin.time.Clock
 
 /** The chat panel over the real answer, with fakes of the index, the models and the history. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class ChatViewModelTest : ViewModelTestBase() {
     private val store = FakeNoteContentStore()
     private val index = FakeVectorIndex()
     private val embedder = FakeTextEmbedder()
@@ -66,13 +61,7 @@ class ChatViewModelTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
         engine.scoreOf = { _, _ -> 1f }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test

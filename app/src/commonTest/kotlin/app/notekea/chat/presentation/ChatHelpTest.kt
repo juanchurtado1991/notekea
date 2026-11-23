@@ -15,15 +15,11 @@ import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,8 +29,7 @@ import kotlin.test.assertEquals
  * note, "what is in my notes?" describes the vault, and "en español" says the last reply again.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatHelpTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatHelpTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
     private var plan = ""
@@ -46,8 +41,6 @@ class ChatHelpTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-
         engine.reply = { messages ->
             when {
                 messages.isPrompt(start = "You turn a request") -> plan
@@ -62,11 +55,6 @@ class ChatHelpTest {
                 else -> "Las notas tienen recetas."
             }
         }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     private fun List<ChatMessage>.isPrompt(start: String): Boolean =
@@ -113,7 +101,7 @@ class ChatHelpTest {
 
     @Test
     fun `how to create a note is explained with this system's shortcut, offered, and never done`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = started()
 
             // A small model may plan the note too: help wins, and nothing is proposed.
@@ -146,29 +134,30 @@ class ChatHelpTest {
         }
 
     @Test
-    fun `what is in the notes is told from the vault's folders and names`() = runTest(dispatcher) {
-        val viewModel = started()
-        plan = "{\"steps\":[{\"action\":\"overview\"}]}"
+    fun `what is in the notes is told from the vault's folders and names`() =
+        runTest(testDispatcher) {
+            val viewModel = started()
+            plan = "{\"steps\":[{\"action\":\"overview\"}]}"
 
-        val entry = asked(
-            viewModel = viewModel,
-            question = "explicame que hay en las notas"
-        )
+            val entry = asked(
+                viewModel = viewModel,
+                question = "explicame que hay en las notas"
+            )
 
-        val vault = engine
-            .generated
-            .last()
-            .first()
-            .text
+            val vault = engine
+                .generated
+                .last()
+                .first()
+                .text
 
-        assertEquals(
-            expected = listOf<Any?>("Recetas y viajes.", true, true),
-            actual = listOf(entry.answer, "- Recipes (1): Arepas" in vault, "- Travel (1): Lisbon trip" in vault)
-        )
-    }
+            assertEquals(
+                expected = listOf<Any?>("Recetas y viajes.", true, true),
+                actual = listOf(entry.answer, "- Recipes (1): Arepas" in vault, "- Travel (1): Lisbon trip" in vault)
+            )
+        }
 
     @Test
-    fun `in Spanish says the last reply again from the chat so far`() = runTest(dispatcher) {
+    fun `in Spanish says the last reply again from the chat so far`() = runTest(testDispatcher) {
         val viewModel = started()
         plan = "{\"steps\":[{\"action\":\"overview\"}]}"
 

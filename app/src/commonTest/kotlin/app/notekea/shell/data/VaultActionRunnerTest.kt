@@ -18,13 +18,12 @@ import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.FakeNoteScanner
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.links.PlanLinkUpdatesUseCase
 import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
+import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.core.notes.domain.templates.FillTemplateUseCase
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
@@ -99,10 +98,7 @@ class VaultActionRunnerTest {
                 noteContentStore = store,
                 applyLinkUpdates = apply
             ),
-            noteTextCache = NoteTextCache(
-                contentStore = store,
-                textFolder = TextFolder
-            ),
+            noteTextCache = noteTextCache(store = store),
             linkFinder = JetBrainsMarkdownLinkFinder(),
             localCalendar = calendar,
             clock = clock

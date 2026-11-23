@@ -12,6 +12,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryCondition
@@ -32,26 +33,20 @@ import app.notekea.query.presentation.QueryTestData.NOTES
 import app.notekea.query.presentation.QueryTestData.VAULT
 import app.notekea.query.presentation.QueryTestData.note
 import app.notekea.query.presentation.QueryTestData.rating
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class QueryViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class QueryViewModelTest : ViewModelTestBase() {
     private val store = FakeNoteContentStore()
     private val preferences = KeptQuery()
     private val viewModel by lazy {
@@ -70,23 +65,17 @@ class QueryViewModelTest {
             translateQuery = TranslateQueryUseCase(FakeLlmEngine(), GhostQueryJsonReader()),
             localCalendar = FakeLocalCalendar(),
             clock = Clock.System,
-            dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
         )
-    }
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
     }
 
     @AfterTest
     fun tearDown() {
         viewModel.viewModelScope.cancel()
-        Dispatchers.resetMain()
     }
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(
-        context = dispatcher,
+        context = testDispatcher,
         testBody = block
     )
 

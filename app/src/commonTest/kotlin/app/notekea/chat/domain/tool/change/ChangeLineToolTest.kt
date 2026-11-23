@@ -10,11 +10,10 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,10 +27,7 @@ class ChangeLineToolTest {
     private val day = RelativePath(value = "Journal/2026-11-20.md")
 
     private val tool = ChangeLineTool(
-        noteTextCache = NoteTextCache(
-            contentStore = store,
-            textFolder = TextFolder
-        )
+        noteTextCache = noteTextCache(store = store)
     )
 
     private fun contextOf(entry: String? = null) = ToolContext(

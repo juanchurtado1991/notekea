@@ -20,16 +20,11 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,8 +33,7 @@ import kotlin.test.assertEquals
  * proposed and how that ended, and a turn the app was closed on is there, stopped.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatReopenedTest {
-    private val testDispatcher = StandardTestDispatcher()
+class ChatReopenedTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val history = FakeChatHistoryStore()
 
@@ -67,16 +61,6 @@ class ChatReopenedTest {
         ),
         scopeName = null
     )
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun TestScope.started(): ChatViewModel {
         val viewModel = chatViewModel(

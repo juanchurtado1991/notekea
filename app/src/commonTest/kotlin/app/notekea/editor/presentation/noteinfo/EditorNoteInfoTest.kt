@@ -7,22 +7,18 @@ import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.editor.domain.NoteStats
 import app.notekea.editor.domain.NoteTimes
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.PropertyIntent
 import app.notekea.editor.presentation.viewmodel.EditorViewModels
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,14 +26,12 @@ import kotlin.time.Instant
 
 /** The side panel's Note info for the open note, counted over real use cases and fakes. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class EditorNoteInfoTest {
-    private val testDispatcher = StandardTestDispatcher()
+class EditorNoteInfoTest : ViewModelTestBase() {
     private val fixture = EditorViewModels(dispatcher = testDispatcher)
     private val viewModel by lazy { fixture.create() }
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
         fixture.store.texts[NOTE] = TEXT
         fixture.scanner.addNote(file = file(path = NOTE.value))
         fixture.operations.existing += NOTE
@@ -46,11 +40,6 @@ class EditorNoteInfoTest {
             createdAt = Instant.parse(input = "2026-10-12T09:30:00Z"),
             modifiedAt = Instant.parse(input = "2026-10-20T18:05:00Z")
         )
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test

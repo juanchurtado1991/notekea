@@ -5,37 +5,21 @@ import app.notekea.core.appearance.domain.GetUiZoomUseCase
 import app.notekea.core.appearance.domain.SaveUiZoomUseCase
 import app.notekea.core.appearance.domain.UiZoomStore
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import com.russhwolf.settings.MapSettings
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The window's zoom lives in a view model: it comes back, is kept, and a failing store breaks nothing (audit 60). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class UiZoomViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class UiZoomViewModelTest : ViewModelTestBase() {
     private val store = SettingsUiZoomStore(
         settings = MapSettings(),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModel(uiZoomStore: UiZoomStore = store) = UiZoomViewModel(
         getUiZoom = GetUiZoomUseCase(uiZoomStore = uiZoomStore),

@@ -12,6 +12,7 @@ import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.editor.domain.FakeEditorPreferencesStore
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
@@ -31,17 +32,12 @@ import app.notekea.shell.presentation.workspace.PaneEditors
 import app.notekea.shell.presentation.workspace.WorkspaceIntent
 import app.notekea.shell.presentation.workspace.WorkspaceTools
 import app.notekea.shell.presentation.workspace.WorkspaceViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -51,8 +47,7 @@ import kotlin.test.assertEquals
  * palette's keyboard) reaches that note's pane, not the pane that was active when it was asked.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class PaneEditorsTest {
-    private val testDispatcher = StandardTestDispatcher()
+class PaneEditorsTest : ViewModelTestBase() {
     private val fixture = EditorViewModels(dispatcher = testDispatcher)
     private val workspaces = FakeWorkspaceStore()
     private val editors by lazy {
@@ -61,16 +56,9 @@ class PaneEditorsTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-
         listOf(AREPAS, WELCOME).forEach { fixture.store.texts[it] = TEXT }
 
         listOf(AREPAS, WELCOME).forEach { fixture.scanner.addNote(file = file(path = it.value)) }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test

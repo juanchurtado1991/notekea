@@ -1,34 +1,19 @@
 package app.notekea.tree.presentation.tags
 
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
+import app.notekea.core.presentation.effectsOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TagPickerViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class TagPickerViewModelTest : ViewModelTestBase() {
     private val viewModel by lazy {
         TagPickerViewModel().apply { onIntent(intent = TagPickerIntent.OnTagsChange(tags = TAGS)) }
-    }
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -58,7 +43,7 @@ class TagPickerViewModelTest {
     fun `enter adds the selected tag, a click adds its row, and closing says so`() = runTest(
         testDispatcher
     ) {
-        val effects = collectEffects()
+        val effects = effectsOf(viewModel = viewModel)
         viewModel.onIntent(intent = TagPickerIntent.OnOpen(query = "weekend plan"))
         viewModel.onIntent(intent = TagPickerIntent.OnConfirm)
         viewModel.onIntent(intent = TagPickerIntent.OnOpen())
@@ -110,18 +95,6 @@ class TagPickerViewModelTest {
         .value
         .rows
         .map { it.name }
-
-    private fun TestScope.collectEffects(): List<TagPickerEffect> {
-        val effects = mutableListOf<TagPickerEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
-
-        runCurrent()
-
-        return effects
-    }
 
     companion object {
         private val TAGS = listOf(

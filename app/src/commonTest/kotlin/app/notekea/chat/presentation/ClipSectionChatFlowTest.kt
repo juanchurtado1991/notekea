@@ -17,24 +17,17 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** A pasted documentation page in the chat: it asks, and the button clips the page with its links on one card. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ClipSectionChatFlowTest {
-    private val dispatcher = StandardTestDispatcher()
-
+class ClipSectionChatFlowTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine().apply {
         reply = { messages ->
             val request = messages
@@ -118,19 +111,9 @@ class ClipSectionChatFlowTest {
         )
     }
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
     fun `a pasted page is asked about, and This page and 2 more proposes them all`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = chatViewModel(
                 engine = engine,
                 store = FakeNoteContentStore(),
@@ -196,7 +179,7 @@ class ClipSectionChatFlowTest {
     // A deep choice is counted first, and clipped once its count is confirmed.
     @Test
     fun `two levels deep is counted and asked again, then clipped, the chat showing how many pages`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = asked()
             var shown: PageProgress? = null
             progressShown = { shown = last(viewModel).progress }

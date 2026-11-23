@@ -8,19 +8,13 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.notes.domain.noteTextCache
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -29,19 +23,8 @@ import kotlin.test.assertEquals
  * mention into a link, which moves it to Linked.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class NoteMentionsViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class NoteMentionsViewModelTest : ViewModelTestBase() {
     private val contents = FakeNoteContentStore()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModel() = NoteMentionsViewModel(
         vaultPath = VAULT,
@@ -53,10 +36,7 @@ class NoteMentionsViewModelTest {
             noteContentStore = contents,
             applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
         ),
-        noteTextCache = NoteTextCache(
-            contentStore = contents,
-            textFolder = TextFolder
-        ),
+        noteTextCache = noteTextCache(store = contents),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
 

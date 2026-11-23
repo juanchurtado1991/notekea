@@ -9,28 +9,22 @@ import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** A card's Undo clicked twice takes the plan back once (the code review of 2026-11-22). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatUndoTwiceTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatUndoTwiceTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
         engine.scoreOf = { _, _ -> 1f }
 
         engine.reply = { messages ->
@@ -43,15 +37,10 @@ class ChatUndoTwiceTest {
         }
     }
 
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     // The code review of 2026-11-22: a second Undo while the first ran undid the plan twice.
     @Test
     fun `Undo clicked twice undoes the plan once, and the card stays undone`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = chatViewModel(
                 engine = engine,
                 store = FakeNoteContentStore(),

@@ -16,17 +16,13 @@ import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,8 +32,7 @@ import kotlin.test.assertEquals
  * answer is offered the site of the vault's web sources, its pages are listed, and only the ticked ones are clipped.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatSiteSearchTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatSiteSearchTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val clipped = mutableListOf<String>()
 
@@ -85,8 +80,6 @@ class ChatSiteSearchTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-
         engine.reply = { messages ->
             val asked = messages.first().text
 
@@ -96,11 +89,6 @@ class ChatSiteSearchTest {
                 else -> "NOT_FOUND"
             }
         }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     private fun last(viewModel: ChatViewModel): ChatEntry = viewModel
@@ -119,7 +107,7 @@ class ChatSiteSearchTest {
 
     @Test
     fun `not found offers the site, lists its pages ticked, and clips only the ones left ticked to answer`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = chatViewModel(
                 engine = engine,
                 store = FakeNoteContentStore(),
@@ -173,7 +161,7 @@ class ChatSiteSearchTest {
     // The code review of 2026-11-13: a suggestion or a question's button clicked mid-answer ran two turns at once.
     @Test
     fun `a suggested question clicked while a turn is answering starts no second turn`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = chatViewModel(
                 engine = engine,
                 store = FakeNoteContentStore(),
@@ -202,7 +190,7 @@ class ChatSiteSearchTest {
     // took the place of the work Stop ends.
     @Test
     fun `a clip of an older turn clicked while a turn is answering clips nothing`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = withSites()
 
             send(viewModel, ChatIntent.OnQuestionChange(text = "how do I open a store?"))
@@ -223,7 +211,7 @@ class ChatSiteSearchTest {
 
     // The code review of 2026-11-22: a clip answer stopped was written as ended again when its work was cancelled.
     @Test
-    fun `a clip answer that is stopped stays stopped`() = runTest(dispatcher) {
+    fun `a clip answer that is stopped stays stopped`() = runTest(testDispatcher) {
         val viewModel = withSites()
 
         send(viewModel, ChatIntent.OnQuestionChange(text = "how do I open a store?"))

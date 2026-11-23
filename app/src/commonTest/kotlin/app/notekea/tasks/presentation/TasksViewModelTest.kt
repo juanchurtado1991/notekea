@@ -13,26 +13,22 @@ import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.tasks.NoteTask
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.tasks.domain.ListTasksUseCase
 import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tasks.domain.TaskGroup
 import app.notekea.tasks.domain.TaskGrouping
 import app.notekea.tasks.domain.TaskRow
 import app.notekea.tasks.domain.TaskWhen
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -41,8 +37,7 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TasksViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class TasksViewModelTest : ViewModelTestBase() {
     private val store = FakeNoteContentStore()
     private val viewModel by lazy {
         TasksViewModel(
@@ -54,23 +49,17 @@ class TasksViewModelTest {
             ),
             clock = FixedClock,
             localCalendar = FixedCalendar,
-            dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
         )
-    }
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
     }
 
     @AfterTest
     fun tearDown() {
         viewModel.viewModelScope.cancel()
-        Dispatchers.resetMain()
     }
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(
-        context = dispatcher,
+        context = testDispatcher,
         testBody = block
     )
 
@@ -129,7 +118,7 @@ class TasksViewModelTest {
 
         val tickingClock = object : Clock {
             override fun now(): Instant = Instant.fromEpochSeconds(
-                epochSeconds = start + dispatcher.scheduler.currentTime / 1_000
+                epochSeconds = start + testDispatcher.scheduler.currentTime / 1_000
             )
         }
 
@@ -142,7 +131,7 @@ class TasksViewModelTest {
             ),
             clock = tickingClock,
             localCalendar = FakeLocalCalendar(),
-            dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
         )
 
         overnight.onIntent(intent = TasksIntent.OnNotesChange(notes = listOf(NOTE)))

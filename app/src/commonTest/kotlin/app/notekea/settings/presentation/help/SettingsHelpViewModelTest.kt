@@ -1,45 +1,28 @@
 package app.notekea.settings.presentation.help
 
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.core.presentation.settings.SettingsSpotlight
 import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.core.settings.domain.SettingsTopic
 import app.notekea.settings.domain.SettingsHelpError
 import app.notekea.settings.domain.SettingsHelpExchange
 import app.notekea.settings.domain.SettingsHelpStep
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Settings → Sync's help (the developer's request of 2026-11-11): questions answered, follow-ups, no model, Stop. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class SettingsHelpViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
+class SettingsHelpViewModelTest : ViewModelTestBase() {
     @Test
     fun `a question is answered under it, and the next one is asked with it`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val asked = mutableListOf<List<SettingsHelpExchange>>()
 
             val viewModel = SettingsHelpViewModel(
@@ -90,34 +73,38 @@ class SettingsHelpViewModelTest {
         }
 
     @Test
-    fun `without a model it says so, and an empty question is not asked`() = runTest(dispatcher) {
-        var calls = 0
+    fun `without a model it says so, and an empty question is not asked`() =
+        runTest(testDispatcher) {
+            var calls = 0
 
-        val viewModel = SettingsHelpViewModel(
-            helper = { _, _, _ ->
-                calls++
-                flowOf(SettingsHelpStep.Failed(error = SettingsHelpError.NoModel))
-            }
-        )
+            val viewModel = SettingsHelpViewModel(
+                helper = { _, _, _ ->
+                    calls++
+                    flowOf(SettingsHelpStep.Failed(error = SettingsHelpError.NoModel))
+                }
+            )
 
-        ask(
-            viewModel = viewModel,
-            question = "   "
-        )
+            ask(
+                viewModel = viewModel,
+                question = "   "
+            )
 
-        ask(
-            viewModel = viewModel,
-            question = "what is a token?"
-        )
+            ask(
+                viewModel = viewModel,
+                question = "what is a token?"
+            )
 
-        assertEquals(
-            expected = listOf<Any?>(1, SettingsHelpError.NoModel, false),
-            actual = listOf(calls, viewModel.state.value.error, viewModel.state.value.isAnswering)
-        )
-    }
+            assertEquals(
+                expected = listOf<Any?>(1, SettingsHelpError.NoModel, false),
+                actual = viewModel
+                    .state
+                    .value
+                    .let { listOf(calls, it.error, it.isAnswering) }
+            )
+        }
 
     @Test
-    fun `Stop keeps the reply as written so far`() = runTest(dispatcher) {
+    fun `Stop keeps the reply as written so far`() = runTest(testDispatcher) {
         val viewModel = SettingsHelpViewModel(
             helper = { _, _, _ ->
                 flow {
@@ -154,7 +141,7 @@ class SettingsHelpViewModelTest {
     // The developer's request of 2026-11-11: the chat opens the setting it is about, as an intent opens a screen.
     @Test
     fun `the setting a question names is shown at once, one its reply names after it, and Show again`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = SettingsHelpViewModel(
                 helper = { _, _, _ ->
                     flowOf(SettingsHelpStep.Done(text = "Paste the access token GitHub gave you."))
@@ -207,7 +194,7 @@ class SettingsHelpViewModelTest {
         }
 
     @Test
-    fun `without a model the setting a question names is still shown`() = runTest(dispatcher) {
+    fun `without a model the setting a question names is still shown`() = runTest(testDispatcher) {
         val viewModel = SettingsHelpViewModel(
             helper = { _, _, _ ->
                 flowOf(SettingsHelpStep.Failed(error = SettingsHelpError.NoModel))

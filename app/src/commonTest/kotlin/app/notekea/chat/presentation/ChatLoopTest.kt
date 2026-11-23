@@ -28,21 +28,16 @@ import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.core.web.domain.WebSearchProblem
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,14 +48,10 @@ import kotlin.time.Clock
  * and a question back comes with its answers as buttons, the one chosen sent as the next message.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatLoopTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatLoopTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = NoteTextCache(
-        contentStore = store,
-        textFolder = TextFolder
-    )
+    private val cache = noteTextCache(store = store)
 
     private var route = ROUTE
     private var call = ASK
@@ -70,8 +61,6 @@ class ChatLoopTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-
         engine.readiness = Outcome.Success(
             value = LlmModelInfo(
                 isSmall = false,
@@ -88,11 +77,6 @@ class ChatLoopTest {
                 else -> "Hello."
             }
         }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     private fun loopOf(isOn: Boolean): ChatLoop {
@@ -158,7 +142,7 @@ class ChatLoopTest {
 
     @Test
     fun `turned on, the loop asks back with the answers as buttons, and the one chosen is the next message`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = asked(isOn = true)
 
             val asked = viewModel
@@ -187,7 +171,7 @@ class ChatLoopTest {
 
     @Test
     fun `turned off, agent mode is today's agent, which never asks with buttons`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = asked(isOn = false)
 
             assertEquals(
@@ -204,7 +188,7 @@ class ChatLoopTest {
     // The 2B repeats a refused call until the turn ends (docs/agent-loop.md, item 7): it keeps today's agent.
     @Test
     fun `turned on with the small model, agent mode is still today's agent`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             engine.readiness = Outcome.Success(
                 value = LlmModelInfo(
                     isSmall = true,
@@ -227,7 +211,7 @@ class ChatLoopTest {
 
     @Test
     fun `turned on, it takes a request in Auto too, and a greeting it hands to the chat's own talk`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             route = """{"work":"talk","skill":"none"}"""
 
             val viewModel = asked(
@@ -250,7 +234,7 @@ class ChatLoopTest {
 
     @Test
     fun `turned on, a note asked to be opened is shown at once, with no card to confirm`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             route = """{"work":"app","skill":"none"}"""
             call = """{"tool":"open_note","note":"Home/Budget 2026"}"""
 

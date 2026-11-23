@@ -3,40 +3,24 @@ package app.notekea.vault.presentation.welcome
 import app.notekea.core.domain.Outcome
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.vault.domain.FakeVaultFileSystem
 import app.notekea.vault.domain.FolderAccess
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.VaultFixture
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class WelcomeViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class WelcomeViewModelTest : ViewModelTestBase() {
     private val fixture = VaultFixture()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     @Test
     fun `startup reopens the last vault`() = runWelcomeTest {

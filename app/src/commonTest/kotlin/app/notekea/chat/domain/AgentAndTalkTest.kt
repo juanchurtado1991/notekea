@@ -17,10 +17,9 @@ import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.index.NoteChunk
+import app.notekea.core.notes.domain.noteTextCache
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -33,10 +32,7 @@ class AgentAndTalkTest {
     private val embedder = FakeTextEmbedder()
     private val engine = FakeLlmEngine()
     private val notes = mutableListOf<NoteEntry>()
-    private val cache = NoteTextCache(
-        contentStore = store,
-        textFolder = TextFolder
-    )
+    private val cache = noteTextCache(store = store)
     private val answer = AnswerFromNotesUseCase(embedder, index, cache, engine)
     private val agent = AgentAnswerUseCase(answer, cache, engine, GhostActionPlanReader())
     private val moves = ArrayDeque(elements = listOf(SEARCH_CORN, ANSWER_MOVE))

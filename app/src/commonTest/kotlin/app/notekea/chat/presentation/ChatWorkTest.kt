@@ -13,23 +13,18 @@ import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The chat knows where the person is (the developer's choice of 2026-11-13: always, shown as chips). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChatWorkTest {
-    private val dispatcher = StandardTestDispatcher()
+class ChatWorkTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
 
     private val arepas = WorkContext(
@@ -41,18 +36,12 @@ class ChatWorkTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
         engine.reply = { TALK }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
     fun `where the person is and what they selected reach the plan and the talk, as one line`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = started()
 
             viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = arepas))
@@ -70,26 +59,27 @@ class ChatWorkTest {
         }
 
     @Test
-    fun `a removed chip stays out of the model until the person moves on`() = runTest(dispatcher) {
-        val viewModel = started()
+    fun `a removed chip stays out of the model until the person moves on`() =
+        runTest(testDispatcher) {
+            val viewModel = started()
 
-        viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = arepas))
-        viewModel.onIntent(intent = ChatIntent.OnWorkRemove(part = WorkPart.SELECTED))
-        val withoutSelected = viewModel.state.value.shared
+            viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = arepas))
+            viewModel.onIntent(intent = ChatIntent.OnWorkRemove(part = WorkPart.SELECTED))
+            val withoutSelected = viewModel.state.value.shared
 
-        viewModel.onIntent(intent = ChatIntent.OnWorkRemove(part = WorkPart.PLACE))
-        viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = arepas.copy(section = "Steps")))
-        val stillHidden = viewModel.state.value.shared
+            viewModel.onIntent(intent = ChatIntent.OnWorkRemove(part = WorkPart.PLACE))
+            viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = arepas.copy(section = "Steps")))
+            val stillHidden = viewModel.state.value.shared
 
-        val graph = WorkContext(place = WorkPlace.GRAPH)
-        viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = graph))
-        advanceUntilIdle()
+            val graph = WorkContext(place = WorkPlace.GRAPH)
+            viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = graph))
+            advanceUntilIdle()
 
-        assertEquals(
-            expected = listOf<Any?>(arepas.copy(selected = null), null, graph),
-            actual = listOf(withoutSelected, stillHidden, viewModel.state.value.shared)
-        )
-    }
+            assertEquals(
+                expected = listOf<Any?>(arepas.copy(selected = null), null, graph),
+                actual = listOf(withoutSelected, stillHidden, viewModel.state.value.shared)
+            )
+        }
 
     @Test
     fun `the context says the place, its section and the selection`() {

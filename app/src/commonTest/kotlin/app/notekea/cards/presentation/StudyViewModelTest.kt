@@ -13,42 +13,26 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
 
 /** The Study tab (4.6): the cards due, one at a time, each answer written in its note, as multiple choice. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class StudyViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class StudyViewModelTest : ViewModelTestBase() {
     private val store = FakeNoteContentStore()
     private val note = RelativePath(value = "Capitals.md")
     private val engine = FakeLlmEngine()
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     // Code review of 2026-11-11: two answers in a row each rewrote the note's old text, and the first was lost.
     @Test
-    fun `two answers in a row are both scheduled, with no model`() = runTest(dispatcher) {
+    fun `two answers in a row are both scheduled, with no model`() = runTest(testDispatcher) {
         engine.readiness = Outcome.Failure(error = LlmError.NoModel)
         val viewModel = started()
 
@@ -72,7 +56,7 @@ class StudyViewModelTest {
     // The code review of 2026-11-22: the effect named the note only, so unsaved edits dropped the card's schedule.
     @Test
     fun `an answer tells the editors the note's text before it, to carry their unsaved edits over`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             engine.readiness = Outcome.Failure(error = LlmError.NoModel)
             val viewModel = started()
             val effects = mutableListOf<StudyEffect>()
@@ -99,7 +83,7 @@ class StudyViewModelTest {
 
     @Test
     fun `a card is multiple choice, a right choice is Good, a wrong one Hard, and the next card is made ahead`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             engine.reply = { messages ->
                 if ("Lima" in messages.last().text) WRONG_PERU else WRONG_CHILE
             }

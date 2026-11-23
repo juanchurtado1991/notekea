@@ -13,8 +13,7 @@ import app.notekea.chat.eval.blind.BlindExams
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
-import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.search.eval.EvalVault
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -117,10 +116,7 @@ class FrameEvalChatModelTest {
             written = written
         )
 
-        val cache = NoteTextCache(
-            contentStore = indexed.store,
-            textFolder = TextFolder
-        )
+        val cache = noteTextCache(store = indexed.store)
 
         // A trace of each set's own, as the memory's sets ask the unseen tasks again.
         val trace = EvalTrace(engine = engine)

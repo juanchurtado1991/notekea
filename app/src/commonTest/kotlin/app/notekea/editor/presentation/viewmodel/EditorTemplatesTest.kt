@@ -6,35 +6,29 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.ViewModelTestBase
+import app.notekea.core.presentation.effectsOf
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** A template inserted in the open note, over real use cases and fakes. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class EditorTemplatesTest {
-    private val testDispatcher = StandardTestDispatcher()
+class EditorTemplatesTest : ViewModelTestBase() {
     private val fixture = EditorViewModels(dispatcher = testDispatcher)
     private val viewModel by lazy { fixture.create() }
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-
         putOnDisk(
             path = AREPAS,
             text = AREPAS_TEXT
@@ -51,15 +45,10 @@ class EditorTemplatesTest {
         )
     }
 
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
     fun `the template goes in at the cursor with its properties saved`() = runTemplateTest {
         open(path = AREPAS)
-        val effects = collectEffects()
+        val effects = effectsOf(viewModel = viewModel)
 
         viewModel.buffer.edit { selection = TextRange(index = AREPAS_BODY.length) }
 
@@ -137,18 +126,6 @@ class EditorTemplatesTest {
         Snapshot.sendApplyNotifications()
         advanceTimeBy(delayTimeMillis = SETTLE_MILLIS)
         runCurrent()
-    }
-
-    private fun TestScope.collectEffects(): List<EditorEffect> {
-        val effects = mutableListOf<EditorEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
-
-        runCurrent()
-
-        return effects
     }
 
     private fun putOnDisk(

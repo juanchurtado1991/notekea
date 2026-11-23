@@ -3,28 +3,22 @@ package app.notekea.vault.presentation.welcome
 import app.notekea.core.domain.Outcome
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.VaultFixture
 import app.notekea.vault.domain.VaultImporter
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Import a vault from a repository, on the welcome screen (the developer's request of 2026-11-14). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class WelcomeImportTest {
-    private val testDispatcher = StandardTestDispatcher()
+class WelcomeImportTest : ViewModelTestBase() {
     private val fixture = VaultFixture()
 
     // What bringing a repository answers; a gate holds it open to cancel it half way.
@@ -48,16 +42,6 @@ class WelcomeImportTest {
                 Outcome.Failure(error = it)
             } ?: Outcome.Success(value = Unit)
         }
-    }
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     private fun runWelcomeTest(block: suspend TestScope.() -> Unit) = runTest(

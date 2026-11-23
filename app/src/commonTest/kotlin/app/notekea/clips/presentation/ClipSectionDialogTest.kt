@@ -18,16 +18,11 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.WebSourcesFolder
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
@@ -37,8 +32,7 @@ import kotlin.time.Instant
  * page or the pages it links under its path too, and writes one note, or the page as the index of a folder of notes.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ClipSectionDialogTest {
-    private val dispatcher = StandardTestDispatcher()
+class ClipSectionDialogTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine().apply {
         readiness = Outcome.Failure(error = LlmError.NoModel)
     }
@@ -100,16 +94,6 @@ class ClipSectionDialogTest {
         clock = FakeClock(currentTime = Instant.parse("2026-11-11T09:00:00Z"))
     )
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     private fun kotlinx.coroutines.test.TestScope.asked(): ClipViewModel {
         val viewModel = viewModel()
 
@@ -123,7 +107,7 @@ class ClipSectionDialogTest {
 
     @Test
     fun `a page that links pages under its path asks first, and writes nothing until answered`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val state = asked().state.value
 
             assertEquals(
@@ -139,7 +123,7 @@ class ClipSectionDialogTest {
 
     @Test
     fun `only this page writes one note, the page and its links write a folder with the page as its index`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             asked().onIntent(intent = ClipIntent.OnClipPage)
             advanceUntilIdle()
 
@@ -175,7 +159,7 @@ class ClipSectionDialogTest {
     // The code review of 2026-11-22: a note the vault refused closed the dialog as if it had been written.
     @Test
     fun `a note the vault refuses is said in the dialog, which stays open, and no empty note is left`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val note = RelativePath(value = "Web sources/Introduction.md")
             val viewModel = asked()
 
@@ -199,7 +183,7 @@ class ClipSectionDialogTest {
     // The code review of 2026-11-22: a section with a page the vault refused was opened on notes left empty.
     @Test
     fun `a section with a note the vault refuses is said in the dialog instead of opened`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val viewModel = asked()
 
             store.refused += RelativePath(value = "Web sources/Introduction/Axiom.md")
@@ -220,7 +204,7 @@ class ClipSectionDialogTest {
 
     // The code review of 2026-11-22: an update that threw left its dialog on "Looking at the notes…" for good.
     @Test
-    fun `an update that breaks is shown as failed in its dialog`() = runTest(dispatcher) {
+    fun `an update that breaks is shown as failed in its dialog`() = runTest(testDispatcher) {
         val viewModel = viewModel()
 
         attachments.contents[RelativePath(value = "Web sources/Old.md")] = ByteArray(size = 0)
@@ -250,7 +234,7 @@ class ClipSectionDialogTest {
     // The code review of 2026-11-22: the update named the notes it rewrote only, so unsaved edits undid it.
     @Test
     fun `an update tells the editors the text each rewritten note had before`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val note = RelativePath(value = "Web sources/Axiom.md")
             val viewModel = viewModel()
             val effects = mutableListOf<ClipEffect>()

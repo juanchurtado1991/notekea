@@ -19,9 +19,8 @@ import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.noteTextCache
 import app.notekea.core.web.domain.WebResult
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -37,10 +36,7 @@ import kotlin.time.Clock
 class WebChecksTest {
     private val engine = FakeLlmEngine()
     private val store = FakeNoteContentStore()
-    private val cache = NoteTextCache(
-        contentStore = store,
-        textFolder = TextFolder
-    )
+    private val cache = noteTextCache(store = store)
 
     private val searched = mutableListOf<String>()
     private val fetched = mutableListOf<String>()

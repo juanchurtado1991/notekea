@@ -12,20 +12,15 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.index.ChunkNoteUseCase
 import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
@@ -35,23 +30,12 @@ import kotlin.time.Instant
  * the index ends a run, and tells a failing model apart.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class RelatedNotesViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class RelatedNotesViewModelTest : ViewModelTestBase() {
     private val contents = FakeNoteContentStore()
     private val embedder = FakeTextEmbedder()
     private val index = FakeVectorIndex()
     private val chunkNote =
         ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModel() = RelatedNotesViewModel(
         vaultPath = VAULT,

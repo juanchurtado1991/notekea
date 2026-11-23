@@ -6,36 +6,30 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.ViewModelTestBase
+import app.notekea.core.presentation.effectsOf
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.viewmodel.EditorViewModels
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The open note's outline, over real use cases and fakes, and the side panel's floating state. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class EditorOutlineTest {
-    private val testDispatcher = StandardTestDispatcher()
+class EditorOutlineTest : ViewModelTestBase() {
     private val fixture = EditorViewModels(dispatcher = testDispatcher)
     private val viewModel by lazy { fixture.create() }
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-
         putOnDisk(
             path = AREPAS,
             text = "---\ntags: [recipe]\n---\n# Arepas\n\n## Dough\nMix.\n"
@@ -45,11 +39,6 @@ class EditorOutlineTest {
             path = PLAIN,
             text = "No headings here.\n"
         )
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -94,7 +83,7 @@ class EditorOutlineTest {
     fun `choosing a heading in edit mode puts the cursor at its end, scrolls to it and gives the text the keyboard`() =
         runOutlineTest {
             open(path = AREPAS)
-            val effects = collectEffects()
+            val effects = effectsOf(viewModel = viewModel)
 
             send(intent = EditorIntent.OnHeadingClick(index = 1))
 
@@ -110,7 +99,7 @@ class EditorOutlineTest {
     @Test
     fun `choosing a heading that is gone does nothing`() = runOutlineTest {
         open(path = AREPAS)
-        val effects = collectEffects()
+        val effects = effectsOf(viewModel = viewModel)
 
         send(intent = EditorIntent.OnHeadingClick(index = 5))
 
@@ -165,7 +154,7 @@ class EditorOutlineTest {
     fun `a passage only shown is selected without the keyboard, and marked so its lines are not edited`() =
         runOutlineTest {
             open(path = AREPAS)
-            val effects = collectEffects()
+            val effects = effectsOf(viewModel = viewModel)
 
             send(
                 intent = EditorIntent.OnRevealRequest(
@@ -280,18 +269,6 @@ class EditorOutlineTest {
         Snapshot.sendApplyNotifications()
         advanceTimeBy(delayTimeMillis = SETTLE_MILLIS)
         runCurrent()
-    }
-
-    private fun TestScope.collectEffects(): List<EditorEffect> {
-        val effects = mutableListOf<EditorEffect>()
-
-        backgroundScope.launch {
-            viewModel.effects.collect { effects += it }
-        }
-
-        runCurrent()
-
-        return effects
     }
 
     private fun putOnDisk(

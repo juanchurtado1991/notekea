@@ -11,37 +11,21 @@ import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelCatalogs
 import app.notekea.ai.domain.ModelSize
 import app.notekea.ai.domain.RecommendModelUseCase
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Settings → AI model: the recommended size first, then what the person does with each size. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class ModelManagerViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class ModelManagerViewModelTest : ViewModelTestBase() {
     private val storage = FakeModelStorage()
     private val hardware = FakeHardwareProbe()
     private val activeModelStore = FakeActiveModelStore()
     private val installer = FakeModelInstaller()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModel() = ModelManagerViewModel(
         catalogSource = FakeModelCatalogSource(),

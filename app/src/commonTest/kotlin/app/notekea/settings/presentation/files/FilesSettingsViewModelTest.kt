@@ -6,15 +6,10 @@ import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FakeVaultSettingsWriter
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.templates.DailyNoteSettings
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
@@ -22,22 +17,10 @@ import kotlin.time.Instant
 
 /** Settings → Files reads and writes the vault's `.obsidian` settings, once typing pauses (5.2, 2026-11-11). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class FilesSettingsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
+class FilesSettingsViewModelTest : ViewModelTestBase() {
     @Test
     fun `the vault's settings show, a folder typed is written once typing pauses, a failure is said`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val writer = FakeVaultSettingsWriter()
             val attachmentStore = FakeAttachmentStore()
 
@@ -86,7 +69,7 @@ class FilesSettingsViewModelTest {
         }
 
     @Test
-    fun `typing in one folder and then another writes both`() = runTest(dispatcher) {
+    fun `typing in one folder and then another writes both`() = runTest(testDispatcher) {
         val writer = FakeVaultSettingsWriter()
 
         val viewModel = FilesSettingsViewModel(
@@ -116,7 +99,7 @@ class FilesSettingsViewModelTest {
     // The code review of 2026-11-22: Settings shown again before the pause ended put the old folder back and wrote it.
     @Test
     fun `a folder chosen and not saved yet stays when the settings are read again`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val writer = FakeVaultSettingsWriter()
 
             val viewModel = FilesSettingsViewModel(
@@ -143,7 +126,7 @@ class FilesSettingsViewModelTest {
     // a date format shows as a date.
     @Test
     fun `the folders offered are the vault's, without the hidden ones, and each format shows a date written in it`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             val attachmentStore = FakeAttachmentStore()
 
             listOf("Journal/Daily/2026-11-13.md", "attachments/plate.png", ".obsidian/app.json", "Welcome.md")
@@ -189,7 +172,7 @@ class FilesSettingsViewModelTest {
     }
 
     @Test
-    fun `without a vault there is nothing to change`() = runTest(dispatcher) {
+    fun `without a vault there is nothing to change`() = runTest(testDispatcher) {
         val viewModel = FilesSettingsViewModel(
             reader = FakeVaultSettingsReader(),
             writer = FakeVaultSettingsWriter(),

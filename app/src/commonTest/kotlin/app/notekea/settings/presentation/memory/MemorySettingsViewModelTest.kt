@@ -7,15 +7,10 @@ import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
-import kotlinx.coroutines.Dispatchers
+import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
@@ -23,8 +18,7 @@ import kotlin.time.Instant
 
 /** Settings → Chat memory reads and writes `Notekea/Memory.md` (`docs/agent-memory.md`). */
 @OptIn(ExperimentalCoroutinesApi::class)
-class MemorySettingsViewModelTest {
-    private val dispatcher = StandardTestDispatcher()
+class MemorySettingsViewModelTest : ViewModelTestBase() {
     private val store = FakeNoteContentStore()
     private val files = FakeNoteFileOperations()
     private val preferences = FakeAppPreferencesStore()
@@ -36,16 +30,6 @@ class MemorySettingsViewModelTest {
         ## About me
         - I live in Costa Rica <!-- 2026-11-15, settings -->
     """.trimIndent() + "\n"
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = dispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     private fun viewModelOf() = MemorySettingsViewModel(
         noteContentStore = store,
@@ -61,7 +45,7 @@ class MemorySettingsViewModelTest {
 
     @Test
     fun `the memory shows as fields and learnt lines, a field typed is written once typing pauses`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             store.texts[MemoryNote.PATH] = note
             val viewModel = viewModelOf()
             advanceUntilIdle()
@@ -89,7 +73,7 @@ class MemorySettingsViewModelTest {
 
     @Test
     fun `a learnt line is forgotten, the switch is saved, and Forget everything moves the note to the trash`() =
-        runTest(dispatcher) {
+        runTest(testDispatcher) {
             store.texts[MemoryNote.PATH] = note
             val viewModel = viewModelOf()
             advanceUntilIdle()

@@ -4,33 +4,17 @@ import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.platform.domain.FakeSystemEnvironment
+import app.notekea.core.presentation.ViewModelTestBase
 import app.notekea.settings.domain.GetDiagnosticsUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AboutViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+class AboutViewModelTest : ViewModelTestBase() {
     private val clipboard = FakeTextClipboard()
-
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(dispatcher = testDispatcher)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
 
     @Test
     fun `Copy diagnostics says so when they cannot be copied`() = runTest(testDispatcher) {
