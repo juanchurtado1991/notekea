@@ -3,6 +3,8 @@ package app.notekea.editor.domain
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.TextEdit
 import app.notekea.core.notes.domain.isTableRow
@@ -289,20 +291,12 @@ class MarkdownFormatter {
         style: LineStyle,
         placeholder: String
     ): TextEdit {
-        val lineStart = text.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = start - 1
-        ) + 1
+        val lineStart = text.lineStartAt(index = start)
 
         val hasLastNewLine = end > start && text.getOrNull(index = end - 1) == NEW_LINE_CHAR
         val lastLineEnd = if (hasLastNewLine) end - 1 else end
 
-        val lineEnd = text.indexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = lastLineEnd
-        ).takeIf {
-            it >= 0
-        } ?: text.length
+        val lineEnd = text.lineEndAt(index = lastLineEnd)
 
         val lines = text.substring(
             startIndex = lineStart,

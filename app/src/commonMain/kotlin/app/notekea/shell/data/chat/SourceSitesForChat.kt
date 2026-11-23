@@ -6,6 +6,7 @@ import app.notekea.chat.domain.sources.SourcePage
 import app.notekea.chat.domain.sources.SourceSites
 import app.notekea.clips.domain.FoundSourcePage
 import app.notekea.clips.domain.WebSourceSearch
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.RelativePath
@@ -86,25 +87,8 @@ class SourceSitesForChat(
         }
     }
 
-    private fun today(): String {
-        val date = localCalendar.momentOf(instant = clock.now()).date
-
-        val month = date
-            .month
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        val day = date
-            .day
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        return "${date.year}-$month-$day"
-    }
+    private fun today(): String = CalendarDate.today(
+        localCalendar = localCalendar,
+        clock = clock
+    ).iso
 }

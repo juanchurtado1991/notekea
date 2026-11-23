@@ -28,13 +28,7 @@ class OkioNoteScanner(
     override suspend fun scan(vaultPath: String): Outcome<VaultListing, NotesError> = withContext(
         context = dispatchers.io
     ) {
-        when (val rootEntries = listRoot(vaultPath = vaultPath)) {
-            is Outcome.Failure -> rootEntries
-
-            is Outcome.Success -> Outcome.Success(
-                value = listingOf(rootEntries = rootEntries.value)
-            )
-        }
+        listRoot(vaultPath = vaultPath).map { listingOf(rootEntries = it) }
     }
 
     override suspend fun stat(

@@ -30,7 +30,7 @@ internal object TurnSetup {
         notes = notes,
         task = task,
         openNote = openNote,
-        today = dateOf(written = today),
+        today = CalendarDate.ofIso(text = today),
         country = countryOf(
             task = task,
             remembered = remembered
@@ -89,8 +89,7 @@ internal object TurnSetup {
             ?.others
             ?.map {
                 it
-                    .value
-                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                    .bare()
                     .lowercase()
             }
             .orEmpty()
@@ -120,20 +119,4 @@ internal object TurnSetup {
             it.section == MemorySection.ABOUT
         }
         .firstNotNullOfOrNull { Countries.codeIn(text = it.text) }
-
-    private fun dateOf(written: String): CalendarDate? {
-        val parts = written
-            .split("-")
-            .mapNotNull { it.toIntOrNull() }
-
-        if (parts.size != DATE_PARTS) return null
-
-        return CalendarDate(
-            year = parts[0],
-            month = parts[1],
-            day = parts[2]
-        ).takeIf { it.isValid }
-    }
-
-    private const val DATE_PARTS = 3
 }

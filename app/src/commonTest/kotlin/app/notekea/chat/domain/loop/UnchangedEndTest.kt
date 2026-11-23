@@ -30,7 +30,7 @@ class UnchangedEndTest {
 
     private val cache = NoteTextCache(
         contentStore = FakeNoteContentStore(),
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val runTurn = RunTurnUseCase(

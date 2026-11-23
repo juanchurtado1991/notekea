@@ -44,13 +44,10 @@ internal object ActionFixtures {
             planReader = GhostActionPlanReader()
         )
 
-        val steps = (
-            plan(
-                request = request.get(REQUEST).asText(),
-                context = SampleVaultNames.context(openNote = open)
-            ) as? Outcome.Success
-            )
-            ?.value
+        val steps = plan(
+            request = request.get(REQUEST).asText(),
+            context = SampleVaultNames.context(openNote = open)
+        ).valueOrNull()
             .orEmpty()
 
         return ActionGrade.isRight(

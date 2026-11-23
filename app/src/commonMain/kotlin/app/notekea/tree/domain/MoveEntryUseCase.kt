@@ -27,12 +27,11 @@ class MoveEntryUseCase(private val noteFileOperations: NoteFileOperations) {
             noteFileOperations.exists(vaultPath = vaultPath, path = target) ->
                 Outcome.Failure(error = NotesError.NameTaken(name = path.name))
 
-            else -> when (
-                val moved = noteFileOperations.move(vaultPath = vaultPath, from = path, to = target)
-            ) {
-                is Outcome.Failure -> moved
-                is Outcome.Success -> Outcome.Success(value = target)
-            }
+            else -> noteFileOperations.move(
+                vaultPath = vaultPath,
+                from = path,
+                to = target
+            ).map { target }
         }
     }
 }

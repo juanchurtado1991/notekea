@@ -123,7 +123,7 @@ class RolePlayChatModelTest {
             written = mapOf(VaultGuide.MEMORY.value to WebEvalCases.COSTA_RICA)
         )
 
-        val cache = NoteTextCache(indexed.store, TextFolder())
+        val cache = NoteTextCache(indexed.store, TextFolder)
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
         val search = DuckDuckGoSearch(fetcher = pages)
         val loop = LoopEval.loopOf(engine, embedder, indexed, runner, clips, search, clips)

@@ -38,7 +38,7 @@ internal object UnreadChoice {
             .filter {
                 it !in read
             }
-            .map { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            .map { it.bare() }
 
         val isHeld = unread.isNotEmpty() && state.told.add(UNREAD)
 
@@ -88,8 +88,7 @@ internal object UnreadChoice {
             .map { it.file.path }
             .firstOrNull {
                 val path = it
-                    .value
-                    .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                    .bare()
                     .lowercase()
 
                 path == wanted || path.substringAfterLast(delimiter = '/') == wanted

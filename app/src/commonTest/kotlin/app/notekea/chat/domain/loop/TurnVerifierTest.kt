@@ -43,7 +43,7 @@ class TurnVerifierTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val lease = RelativePath(value = "Home/Lease.md")

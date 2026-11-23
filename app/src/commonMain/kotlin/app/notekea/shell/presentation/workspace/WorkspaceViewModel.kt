@@ -379,12 +379,13 @@ class WorkspaceViewModel(
         path: RelativePath,
         size: IntSize
     ): ImageBitmap? {
-        val bytes = (
-            tools.attachmentStore.read(
+        val bytes = tools
+            .attachmentStore
+            .read(
                 vaultPath = vaultPath,
                 path = path
-            ) as? Outcome.Success
-            )?.value
+            )
+            .valueOrNull()
             ?: return null
 
         val image = decodedImage(

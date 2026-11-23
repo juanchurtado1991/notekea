@@ -122,16 +122,14 @@ class FollowLinkUseCase(
         vaultPath: String,
         folder: RelativePath,
         name: String
-    ): Outcome<FollowedLink, NotesError> = when (
-        val created = createNote(vaultPath = vaultPath, folder = folder, baseName = name)
-    ) {
-        is Outcome.Failure -> created
-
-        is Outcome.Success -> Outcome.Success(
-            value = FollowedLink(
-                path = created.value,
-                isNew = true
-            )
+    ): Outcome<FollowedLink, NotesError> = createNote(
+        vaultPath = vaultPath,
+        folder = folder,
+        baseName = name
+    ).map {
+        FollowedLink(
+            path = it,
+            isNew = true
         )
     }
 

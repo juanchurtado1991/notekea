@@ -84,13 +84,11 @@ class UpdateWebSourcesUseCase(
     internal suspend fun pagesOf(
         url: String,
         levels: Int
-    ): List<String> = (
-        findSection(
-            url = url,
-            depth = levels
-        ) as? Outcome.Success
-        )
-        ?.value
+    ): List<String> = findSection(
+        url = url,
+        depth = levels
+    )
+        .valueOrNull()
         ?.urls
         .orEmpty()
 
@@ -147,8 +145,10 @@ class UpdateWebSourcesUseCase(
     ): List<SourceSection> {
         if (!WebSourcesFolder.holds(path = target)) return emptyList()
 
-        val files =
-            (attachmentStore.files(vaultPath = vaultPath) as? Outcome.Success)?.value.orEmpty()
+        val files = attachmentStore
+            .files(vaultPath = vaultPath)
+            .valueOrNull()
+            .orEmpty()
 
         val notes = files.filter {
             it.isMarkdown && it.isWithin(folder = WebSourcesFolder.PATH)

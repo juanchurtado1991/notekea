@@ -83,7 +83,7 @@ class ClipSectionChatTest {
         llmEngine = FakeLlmEngine(),
         noteTextCache = NoteTextCache(
             contentStore = FakeNoteContentStore(),
-            textFolder = TextFolder()
+            textFolder = TextFolder
         ),
         planReader = GhostActionPlanReader(),
         clipper = clipper

@@ -49,12 +49,10 @@ class OkioNoteContentStore(
     override suspend fun read(
         vaultPath: String,
         path: RelativePath
-    ): String? = (
-        readText(
-            vaultPath = vaultPath,
-            path = path
-        ) as? Outcome.Success
-        )?.value
+    ): String? = readText(
+        vaultPath = vaultPath,
+        path = path
+    ).valueOrNull()
 
     override suspend fun write(
         vaultPath: String,

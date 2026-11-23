@@ -32,7 +32,7 @@ class AgentContextTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val agent = AgentTaskUseCase(
@@ -82,7 +82,7 @@ class AgentContextTest {
                 notes = paths.map { entry(path = it.value) },
                 context = ActionContext(
                     today = "2026-11-14",
-                    notes = paths.map { it.value.removeSuffix(suffix = ".md") }
+                    notes = paths.map { it.bare() }
                 ),
                 openNote = null
             ).toList()

@@ -92,7 +92,7 @@ class InstallModelUseCase(
                         )
                     )
 
-                    is DownloadStep.Finished -> failure = (step.outcome as? Outcome.Failure)?.error
+                    is DownloadStep.Finished -> failure = step.outcome.errorOrNull()
                 }
             }
         }
@@ -100,7 +100,7 @@ class InstallModelUseCase(
         if (failure != null) return failure
         emit(value = InstallProgress.Verifying)
 
-        return (storage.verifyAndInstall(file = file) as? Outcome.Failure)?.error
+        return storage.verifyAndInstall(file = file).errorOrNull()
     }
 
     private companion object {

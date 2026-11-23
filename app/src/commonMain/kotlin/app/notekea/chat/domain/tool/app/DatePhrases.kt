@@ -1,6 +1,7 @@
 package app.notekea.chat.domain.tool.app
 
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.domain.TextFolder
 
 /**
  * The day a phrase names, counted from today by the app: "tomorrow", "next Friday", "in 3 weeks", "end of month",
@@ -11,9 +12,6 @@ internal object DatePhrases {
     private val ISO = Regex(pattern = "(\\d{4})-(\\d{1,2})-(\\d{1,2})")
     private val AHEAD = Regex(pattern = "(?:in|en|dentro de) (\\d+) ([a-z]+)")
     private val BACK = Regex(pattern = "(\\d+) ([a-z]+) ago|hace (\\d+) ([a-z]+)")
-    private val ACCENTS =
-        mapOf('á' to 'a', 'é' to 'e', 'í' to 'i', 'ó' to 'o', 'ú' to 'u', 'ñ' to 'n')
-
     private val WEEKDAYS = listOf(
         listOf("monday", "lunes"),
         listOf("tuesday", "martes"),
@@ -64,12 +62,7 @@ internal object DatePhrases {
         phrase: String,
         today: CalendarDate?
     ): CalendarDate? {
-        val said = phrase
-            .lowercase()
-            .map {
-                ACCENTS[it] ?: it
-            }
-            .joinToString(separator = "")
+        val said = TextFolder.fold(text = phrase)
 
         return offset(said = said)
             ?: written(said = said)
@@ -128,25 +121,7 @@ internal object DatePhrases {
     }
 
     /** [date] as `2026-11-20 (Friday)`. */
-    fun written(date: CalendarDate): String {
-        val month = date
-            .month
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        val day = date
-            .day
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        return "${date.year}-$month-$day (${NAMES[date.dayOfWeek - 1]})"
-    }
+    fun written(date: CalendarDate): String = "${date.iso} (${NAMES[date.dayOfWeek - 1]})"
 
     // A span before or after a written day: "una semana antes de 2026-04-03" was answered 2026-04-03 itself (the
     // loop's eighth run), as a written day was taken alone.

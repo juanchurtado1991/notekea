@@ -1,6 +1,8 @@
 package app.notekea.editor.presentation.reading
 
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.OutlineHeading
@@ -90,18 +92,9 @@ sealed interface ReadingSegment {
                     it.embed.range.first >= offset &&
                     it.embed.range.last < offset + text.length
             }.map { view ->
-                val lineStart = text.lastIndexOf(
-                    char = StringPatterns.NEW_LINE_CHAR,
-                    startIndex = view.embed.range.first - offset - 1
-                ) + 1
+                val lineStart = text.lineStartAt(index = view.embed.range.first - offset)
 
-                val lineEnd = text.indexOf(
-                    char = StringPatterns.NEW_LINE_CHAR,
-                    startIndex = view.embed.range.last - offset
-                )
-                    .takeIf {
-                        it >= 0
-                    } ?: text.length
+                val lineEnd = text.lineEndAt(index = view.embed.range.last - offset)
 
                 Cut(
                     lineStart = lineStart,
@@ -133,13 +126,7 @@ sealed interface ReadingSegment {
             var lineStart = 0
 
             while (lineStart < text.length) {
-                val lineEnd = text.indexOf(
-                    char = StringPatterns.NEW_LINE_CHAR,
-                    startIndex = lineStart
-                )
-                    .takeIf {
-                        it >= 0
-                    } ?: text.length
+                val lineEnd = text.lineEndAt(index = lineStart)
 
                 val wasOpen = tracker.isOpen
 

@@ -150,8 +150,7 @@ internal object FrameGroups {
     private fun titleOf(candidate: FrameCandidates.Candidate): Set<String> {
         val title = candidate
             .path
-            .value
-            .removeSuffix(suffix = ".md")
+            .bare()
 
         return FrameWords.of(text = title) + FrameWords.numbersOf(text = title)
     }

@@ -16,8 +16,7 @@ class SectionRanker(private val textEmbedder: TextEmbedder) {
         val query = "${titleOf(page = page)} ${SectionLinks.wordsOf(url = page.url)}".trim()
         val texts = links.urls.map { links.aboutOf(url = it) }
 
-        val vectors = (textEmbedder.embed(texts = listOf(query) + texts) as? Outcome.Success)
-            ?.value
+        val vectors = textEmbedder.embed(texts = listOf(query) + texts).valueOrNull()
             ?: return null
 
         val asked = vectors.first()

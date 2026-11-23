@@ -2,6 +2,7 @@ package app.notekea.editor.presentation.markdown
 
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.lineStartAt
 
 /**
  * Builds the [ShownText] of the note's window: the Markdown marks are hidden, and a list's mark is a dot, on every
@@ -165,10 +166,7 @@ class ShownTextBuilder(private val highlighter: MarkdownHighlighter = MarkdownHi
             maximumValue = text.length
         )
 
-        val start = text.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = first - 1
-        ) + 1
+        val start = text.lineStartAt(index = first)
 
         val end = text
             .indexOf(

@@ -1,6 +1,9 @@
 package app.notekea.core.notes.domain.tasks
 
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.forEachLineOutsideCode
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 
@@ -12,18 +15,15 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
 class TaskFinder {
     fun tasks(text: String): List<TaskMarker> {
         val tasks = mutableListOf<TaskMarker>()
-        val fences = FenceTracker()
-        var lineStart = 0
 
-        text.split(NEW_LINE_CHAR).forEach { line ->
-            if (!fences.read(text = line)) {
-                markerIn(
-                    line = line,
-                    lineStart = lineStart
-                )?.let { tasks += it }
-            }
-
-            lineStart += line.length + 1
+        text.forEachLineOutsideCode { start, end ->
+            markerIn(
+                line = text.substring(
+                    startIndex = start,
+                    endIndex = end
+                ),
+                lineStart = start
+            )?.let { tasks += it }
         }
 
         return tasks
@@ -49,17 +49,9 @@ class TaskFinder {
         text: String,
         offset: Int
     ): TaskMarker? {
-        val lineStart = text.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = offset - 1
-        ) + 1
+        val lineStart = text.lineStartAt(index = offset)
 
-        val lineEnd = text.indexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = offset
-        ).takeIf {
-            it >= 0
-        } ?: text.length
+        val lineEnd = text.lineEndAt(index = offset)
 
         return tasks(text = text).firstOrNull {
             it.stateIndex in lineStart until lineEnd

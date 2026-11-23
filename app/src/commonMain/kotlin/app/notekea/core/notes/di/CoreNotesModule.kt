@@ -40,5 +40,5 @@ val coreNotesModule = module {
     factoryOf(::UpdateLinksAfterRenameUseCase)
     factoryOf(::RenameEntryUseCase)
     factoryOf(::NewNoteDefaults)
-    factoryOf(::TextFolder)
+    factory { TextFolder }
 }

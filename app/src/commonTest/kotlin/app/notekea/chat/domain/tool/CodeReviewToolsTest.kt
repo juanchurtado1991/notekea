@@ -31,7 +31,7 @@ class CodeReviewToolsTest {
 
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val context = ToolContext(

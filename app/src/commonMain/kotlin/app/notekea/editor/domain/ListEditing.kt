@@ -3,6 +3,8 @@ package app.notekea.editor.domain
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.notes.domain.TextEdit
 /**
@@ -71,17 +73,9 @@ class ListEditing {
         text: String,
         cursor: Int
     ): TextEdit? {
-        val lineStart = text.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = cursor - 1
-        ) + 1
+        val lineStart = text.lineStartAt(index = cursor)
 
-        val lineEnd = text.indexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = cursor
-        ).takeIf {
-            it >= 0
-        } ?: text.length
+        val lineEnd = text.lineEndAt(index = cursor)
 
         val line = ListLine.of(
             line = text.substring(
@@ -114,17 +108,9 @@ class ListEditing {
         text: String,
         cursor: Int
     ): TextEdit? {
-        val lineStart = text.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = cursor - 1
-        ) + 1
+        val lineStart = text.lineStartAt(index = cursor)
 
-        val lineEnd = text.indexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = cursor
-        ).takeIf {
-            it >= 0
-        } ?: text.length
+        val lineEnd = text.lineEndAt(index = cursor)
 
         val line = ListLine.of(
             line = text.substring(
@@ -355,12 +341,7 @@ class ListEditing {
         var lineStart = 0
 
         for (line in 0..index) {
-            val lineEnd = text.indexOf(
-                char = NEW_LINE_CHAR,
-                startIndex = lineStart
-            ).takeIf {
-                it >= 0
-            } ?: text.length
+            val lineEnd = text.lineEndAt(index = lineStart)
 
             val wasOpen = fences.isOpen
 

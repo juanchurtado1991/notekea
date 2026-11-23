@@ -31,7 +31,7 @@ class SameNoteQuestionTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val runTurn = RunTurnUseCase(

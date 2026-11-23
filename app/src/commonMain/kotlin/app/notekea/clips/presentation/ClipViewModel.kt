@@ -14,6 +14,7 @@ import app.notekea.clips.domain.WebClip
 import app.notekea.clips.domain.WebClipNote
 import app.notekea.clips.domain.WebClipSection
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFileOperations
@@ -417,11 +418,10 @@ class ClipViewModel(
         return path
     }
 
-    private fun today(): String {
-        val date = localCalendar.momentOf(instant = clock.now()).date
-
-        return "${date.year}-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
-    }
+    private fun today(): String = CalendarDate.today(
+        localCalendar = localCalendar,
+        clock = clock
+    ).iso
 
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }

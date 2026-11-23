@@ -24,7 +24,7 @@ class LongNoteTest {
     private val read = ReadTool(
         noteTextCache = NoteTextCache(
             contentStore = store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         )
     )
 

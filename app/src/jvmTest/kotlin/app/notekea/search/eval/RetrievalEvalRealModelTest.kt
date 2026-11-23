@@ -86,7 +86,7 @@ class RetrievalEvalRealModelTest {
             dispatchers = dispatchers
         )
 
-        val textFolder = TextFolder()
+        val textFolder = TextFolder
 
         val cache = NoteTextCache(
             contentStore = indexed.store,

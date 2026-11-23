@@ -221,8 +221,7 @@ internal object ChangeChecks {
             step.notes.isNotEmpty()
     }
 
-    private fun nameOf(path: RelativePath): String =
-        path.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+    private fun nameOf(path: RelativePath): String = path.bare()
 
     private val TEMPLATE_WORD = Regex(pattern = "\\b(templates?|plantillas?)\\b")
     private val TEMPLATE_FOLDER = Regex(pattern = "(_)?(templates?|plantillas?)")

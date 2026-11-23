@@ -52,16 +52,11 @@ class RenameEntryUseCase(
         vaultPath: String,
         path: RelativePath,
         target: RelativePath
-    ): Outcome<RelativePath, NotesError> = when (
-        val moved = noteFileOperations.move(
-            vaultPath = vaultPath,
-            from = path,
-            to = target
-        )
-    ) {
-        is Outcome.Failure -> moved
-        is Outcome.Success -> Outcome.Success(value = target)
-    }
+    ): Outcome<RelativePath, NotesError> = noteFileOperations.move(
+        vaultPath = vaultPath,
+        from = path,
+        to = target
+    ).map { target }
 
     private fun String.removeSuffixIgnoringCase(suffix: String): String {
         val hasSuffix = endsWith(

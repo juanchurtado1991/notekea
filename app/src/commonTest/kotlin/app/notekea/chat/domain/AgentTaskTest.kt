@@ -37,7 +37,7 @@ class AgentTaskTest {
     private val pages = mutableListOf<String>()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
     private val author = NoteProperty(
         key = "author",

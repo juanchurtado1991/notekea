@@ -35,7 +35,7 @@ class AgentAndTalkTest {
     private val notes = mutableListOf<NoteEntry>()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
     private val answer = AnswerFromNotesUseCase(embedder, index, cache, engine)
     private val agent = AgentAnswerUseCase(answer, cache, engine, GhostActionPlanReader())

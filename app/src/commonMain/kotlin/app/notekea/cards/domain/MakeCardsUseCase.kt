@@ -93,7 +93,7 @@ class MakeCardsUseCase(
             texts = listOf(card.sentence)
         )
 
-        val best = (score as? Outcome.Success)?.value?.firstOrNull() ?: Float.NEGATIVE_INFINITY
+        val best = score.valueOrNull()?.firstOrNull() ?: Float.NEGATIVE_INFINITY
 
         return best >= SUPPORT
     }

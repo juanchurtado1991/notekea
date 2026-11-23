@@ -243,19 +243,19 @@ class AnswerFromNotesUseCase(
         question: String,
         only: Set<RelativePath>?
     ): Outcome<List<AnswerSource>, ChatError> {
-        val vector =
-            (textEmbedder.embed(texts = listOf(question)) as? Outcome.Success)?.value?.single()
-                ?: return Outcome.Failure(error = ChatError.Search)
+        val vector = textEmbedder
+            .embed(texts = listOf(question))
+            .valueOrNull()
+            ?.single()
+            ?: return Outcome.Failure(error = ChatError.Search)
 
-        val hits = (
-            vectorIndex.search(
-                vaultPath,
-                question,
-                vector,
-                CANDIDATES,
-                only
-            ) as? Outcome.Success
-            )?.value
+        val hits = vectorIndex.search(
+            vaultPath,
+            question,
+            vector,
+            CANDIDATES,
+            only
+        ).valueOrNull()
             ?: return Outcome.Failure(error = ChatError.Search)
 
         val byPath = notes.associateBy { it.file.path }

@@ -1,5 +1,8 @@
 package app.notekea.core.domain.time
 
+import app.notekea.core.domain.StringPatterns
+import kotlin.time.Clock
+
 /**
  * A day of the proleptic Gregorian calendar, without a time or a time zone: what a daily note is named after
  *. [month] runs from 1 to 12 and [day] from 1; [isValid] says whether the three make a real day.
@@ -58,6 +61,10 @@ data class CalendarDate(
             }
         }
 
+    /** The day as ISO 8601 writes it, `2026-11-22`: how notes, file names and the model read a date. */
+    val iso: String
+        get() = "$year-${twoDigits(value = month)}-${twoDigits(value = day)}"
+
     fun plusDays(days: Long): CalendarDate = ofEpochDay(epochDay = epochDay + days)
 
     override fun compareTo(other: CalendarDate): Int = epochDay.compareTo(other = other.epochDay)
@@ -66,6 +73,7 @@ data class CalendarDate(
         const val MONTHS = 12
         const val DAYS_IN_WEEK = 7
         private const val CENTURY = 100
+        private const val DATE_PARTS = 3
         private const val DAYS_IN_ERA = 146_097L
         private const val DAYS_IN_YEAR = 365
         private const val EPOCH_SHIFT = 719_468L
@@ -86,6 +94,27 @@ data class CalendarDate(
         private const val WEEKS_IN_LONG_YEAR = 53
         private const val WEEKS_IN_YEAR = 52
         private val SHORT_MONTHS = setOf(4, 6, 9, 11)
+
+        /** The day it is now where the user is: [clock]'s now on [localCalendar]. */
+        fun today(
+            localCalendar: LocalCalendar,
+            clock: Clock
+        ): CalendarDate = localCalendar.momentOf(instant = clock.now()).date
+
+        /** The day [text] writes as year, month and day joined by hyphens (`2026-11-22`); null when it is no day. */
+        fun ofIso(text: String): CalendarDate? {
+            val parts = text
+                .split(StringPatterns.HYPHEN)
+                .mapNotNull { it.toIntOrNull() }
+
+            if (parts.size != DATE_PARTS) return null
+
+            return CalendarDate(
+                year = parts[0],
+                month = parts[1],
+                day = parts[2]
+            ).takeIf { it.isValid }
+        }
 
         /** The day [epochDay] days after 1970-01-01. */
         fun ofEpochDay(epochDay: Long): CalendarDate {
@@ -131,6 +160,11 @@ data class CalendarDate(
             month in SHORT_MONTHS -> SHORT_MONTH
             else -> LONG_MONTH
         }
+
+        private fun twoDigits(value: Int): String = value.toString().padStart(
+            length = 2,
+            padChar = StringPatterns.ZERO_CHAR
+        )
 
         /** How many ISO weeks [year] has: 53 when it starts on a Thursday, or on a Wednesday in a leap year. */
         private fun weeksIn(year: Int): Int {

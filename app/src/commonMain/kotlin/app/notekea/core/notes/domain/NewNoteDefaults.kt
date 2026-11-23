@@ -1,5 +1,6 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import kotlin.time.Clock
 
@@ -14,25 +15,12 @@ class NewNoteDefaults(
 ) {
     /** The frontmatter of a note created now. */
     fun header(): String {
-        val today = localCalendar.momentOf(instant = clock.now()).date
+        val today = CalendarDate.today(
+            localCalendar = localCalendar,
+            clock = clock
+        )
 
-        val month = today
-            .month
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        val day = today
-            .day
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        return "---\n$CREATED: ${today.year}-$month-$day\n$TAGS: []\n---\n"
+        return "---\n$CREATED: ${today.iso}\n$TAGS: []\n---\n"
     }
 
     /** [text] as a new note's: with the default properties unless it brings its own. */

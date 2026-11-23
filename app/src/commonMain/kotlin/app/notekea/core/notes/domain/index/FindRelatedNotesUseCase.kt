@@ -126,7 +126,7 @@ class FindRelatedNotesUseCase(
                 limit = CANDIDATES
             )
 
-            val hits = (found as? Outcome.Success)?.value ?: return null
+            val hits = found.valueOrNull() ?: return null
 
             hits.filter {
                 it.note !in leftOut

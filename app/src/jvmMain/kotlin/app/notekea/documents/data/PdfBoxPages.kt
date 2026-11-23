@@ -80,7 +80,7 @@ class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
             )
         }
 
-        return (found as? Outcome.Success)?.value.orEmpty()
+        return found.valueOrNull().orEmpty()
     }
 
     override fun release(

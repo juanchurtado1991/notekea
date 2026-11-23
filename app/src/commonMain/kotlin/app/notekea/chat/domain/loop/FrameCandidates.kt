@@ -73,7 +73,7 @@ internal object FrameCandidates {
         val markdown = notes.map { it.file.path }.filter { it.isMarkdown }
 
         val named = markdown.filter { path ->
-            val title = path.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            val title = path.bare()
 
             FrameWords.of(text = title).any { word ->
                 words.any {

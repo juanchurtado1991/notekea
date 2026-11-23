@@ -75,12 +75,10 @@ class DocumentViewerViewModel(
         )
 
         val pageCount = if (state.value.format?.isPaged == true) {
-            (
-                pdfPages.count(
-                    vaultPath = vaultPath,
-                    path = path
-                ) as? Outcome.Success
-                )?.value ?: 0
+            pdfPages.count(
+                vaultPath = vaultPath,
+                path = path
+            ).valueOrNull() ?: 0
         } else {
             0
         }
@@ -191,7 +189,7 @@ class DocumentViewerViewModel(
             scale = PAGE_SCALE
         )
 
-        val image = (png as? Outcome.Success)?.value?.let {
+        val image = png.valueOrNull()?.let {
             decodedImage(
                 bytes = it,
                 dispatcher = dispatchers.io

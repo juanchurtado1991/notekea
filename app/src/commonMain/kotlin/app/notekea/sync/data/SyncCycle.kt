@@ -16,24 +16,26 @@ internal object SyncCycle {
         vaultPath: String,
         token: String?
     ): SyncError? {
-        (
-            repository.commitAll(
+        repository
+            .commitAll(
                 vaultPath = vaultPath,
                 message = MESSAGE
-            ) as? Outcome.Failure
-            )?.let {
-            return it.error
-        }
+            )
+            .errorOrNull()
+            ?.let {
+                return it
+            }
 
         repeat(times = 2) { attempt ->
-            (
-                repository.pull(
+            repository
+                .pull(
                     vaultPath = vaultPath,
                     token = token
-                ) as? Outcome.Failure
-                )?.let {
-                return it.error
-            }
+                )
+                .errorOrNull()
+                ?.let {
+                    return it
+                }
 
             val pushed = repository.push(
                 vaultPath = vaultPath,

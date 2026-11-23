@@ -63,7 +63,7 @@ internal object WebChecks {
                 .map { it.file.path }
         ) ?: return null
 
-        val note = named.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        val note = named.bare()
 
         return "(Not searched: a person's phone, address or email is never looked up on the web. Answer from the " +
             "note $note, or say the notes do not hold it.)"
@@ -85,9 +85,7 @@ internal object WebChecks {
 
         if (owned.isEmpty()) return null
 
-        val notes = owned.joinToString {
-            it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
-        }
+        val notes = owned.joinToString { it.bare() }
 
         return "(Not searched: the task means the person's own note, $notes, not a page of the web. Read it and " +
             "answer from it; when two notes share its name, ask which.)"
@@ -155,7 +153,7 @@ internal object WebChecks {
                 }
         ) ?: return null
 
-        val note = named.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        val note = named.bare()
 
         val held =
             "(Not searched: \"${titleOf(path = named)}\" is a note of the vault, $note. Read it first: the web is " +

@@ -64,7 +64,7 @@ class QuickSwitcherViewModelTest {
         )
     )
     private val viewModel by lazy {
-        val folder = TextFolder()
+        val folder = TextFolder
         val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
         val naturalNames = NaturalNameComparator()
 

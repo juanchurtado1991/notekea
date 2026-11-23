@@ -140,7 +140,7 @@ class ChangeLineTool(
         lines: List<String>,
         wanted: String
     ): ToolResult {
-        val note = path.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        val note = path.bare()
 
         val match = LineMatch.of(
             lines = lines,

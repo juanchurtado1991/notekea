@@ -19,7 +19,7 @@ class VaultGuideTest {
     private val guide = VaultGuide(
         noteTextCache = NoteTextCache(
             contentStore = store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         )
     )
 

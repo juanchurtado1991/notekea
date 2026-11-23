@@ -55,6 +55,9 @@ value class RelativePath(val value: String) {
             else -> ROOT
         }
 
+    /** The path without its `.md`, as wikilinks and the chat name a note: `Projects/Plan`. */
+    fun bare(): String = value.removeSuffix(suffix = MARKDOWN_EXTENSION)
+
     fun child(name: String): RelativePath = if (isRoot) {
         RelativePath(value = name)
     } else {

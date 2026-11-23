@@ -91,8 +91,8 @@ internal fun reduceHybridAnswer(
     exact: List<QuickSwitcherRow>,
     outcome: Outcome<List<PassageResult>, IndexRunError>
 ): QuickSwitcherState {
-    val passages = (outcome as? Outcome.Success)
-        ?.value
+    val passages = outcome
+        .valueOrNull()
         .orEmpty()
         .map(transform = ::passageRowOf)
 

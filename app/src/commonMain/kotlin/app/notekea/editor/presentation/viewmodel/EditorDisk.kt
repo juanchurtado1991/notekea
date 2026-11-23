@@ -72,7 +72,7 @@ internal class EditorDisk(
         )
 
         if (isUnreadable(outcome = current)) return
-        val expected = (current as? Outcome.Success)?.value?.toText()
+        val expected = current.valueOrNull()?.toText()
 
         host.reduce { it.copy(hasConflict = false) }
         conflictText = null
@@ -136,12 +136,10 @@ internal class EditorDisk(
     ) {
         if (host.state.value.notePath != path) return
 
-        val document = (
-            openNote(
-                vaultPath = vaultPath,
-                path = path
-            ) as? Outcome.Success
-            )?.value ?: return
+        val document = openNote(
+            vaultPath = vaultPath,
+            path = path
+        ).valueOrNull() ?: return
 
         val isOtherConflict = host.state.value.hasConflict && conflictText != document.toText()
         // An outside change is still waiting for an answer: taking the rewrite would drop it unseen, and the
@@ -251,7 +249,7 @@ internal class EditorDisk(
 
     /** Whether [outcome] failed with the file still there: that is shown as a failed save. */
     private fun isUnreadable(outcome: Outcome<NoteDocument, NotesError>): Boolean {
-        val error = (outcome as? Outcome.Failure)?.error
+        val error = outcome.errorOrNull()
         if (error == null || error is NotesError.EntryMissing) return false
 
         host.reduce { it.copy(saveError = error) }
@@ -306,12 +304,10 @@ internal class EditorDisk(
         val path = host.state.value.notePath ?: return false
         if (host.state.value.isDeleted) return false
 
-        val current = (
-            openNote(
-                vaultPath = vaultPath,
-                path = path
-            ) as? Outcome.Success
-            )?.value?.toText()
+        val current = openNote(
+            vaultPath = vaultPath,
+            path = path
+        ).valueOrNull()?.toText()
 
         return current != null && current == saving.onDisk
     }

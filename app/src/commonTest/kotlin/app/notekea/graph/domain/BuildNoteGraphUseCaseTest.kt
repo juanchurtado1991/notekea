@@ -29,7 +29,7 @@ class BuildNoteGraphUseCaseTest {
         val build = BuildNoteGraphUseCase(
             noteTextCache = NoteTextCache(
                 contentStore = store,
-                textFolder = TextFolder()
+                textFolder = TextFolder
             ),
             linkFinder = JetBrainsMarkdownLinkFinder(),
             dispatchers = FakeAppDispatchers(dispatcher = dispatcher)

@@ -45,7 +45,7 @@ class TemplatePickerViewModelTest {
                 noteFileOperations = operations,
                 noteContentStore = store
             ),
-            fuzzyMatcher = FuzzyMatcher(textFolder = TextFolder())
+            fuzzyMatcher = FuzzyMatcher(textFolder = TextFolder)
         )
     }
 

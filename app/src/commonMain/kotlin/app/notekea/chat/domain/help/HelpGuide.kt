@@ -1,5 +1,7 @@
 package app.notekea.chat.domain.help
 
+import app.notekea.core.notes.domain.TextFolder
+
 /**
  * The app's guide (`files/guide/guide.md`) as [HelpTopic]s: one per `# ` heading, with its `words:` and `try:`
  * lines; the topics a question is about are those whose title and words share the most with it.
@@ -31,8 +33,6 @@ class HelpGuide(val topics: List<HelpTopic>) {
         private const val MAX_TOPICS = 3
         private const val WORDS = "words:"
         private const val TRY = "try:"
-        private val ACCENTS =
-            mapOf('á' to 'a', 'é' to 'e', 'í' to 'i', 'ó' to 'o', 'ú' to 'u', 'ñ' to 'n')
         private val SHORTCUT = Regex(pattern = "\\{([a-zA-Z]+)\\}")
         private val COMMENT = Regex(
             pattern = "<!--.*?-->",
@@ -101,12 +101,8 @@ class HelpGuide(val topics: List<HelpTopic>) {
             )
         }
 
-        private fun plain(text: String): String = text
-            .lowercase()
-            .map {
-                ACCENTS[it] ?: it
-            }
-            .joinToString(separator = "")
+        private fun plain(text: String): String = TextFolder
+            .fold(text = text)
             .replace(Regex(pattern = "[¿?¡!.,:;\"']"), " ")
             .replace(Regex(pattern = "\\s+"), " ")
             .trim()

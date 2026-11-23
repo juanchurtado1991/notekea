@@ -36,15 +36,10 @@ class SaveNoteUseCase(private val noteContentStore: NoteContentStore) {
 
         val text = document.toText()
 
-        return when (
-            val written = noteContentStore.write(
-                vaultPath = vaultPath,
-                path = path,
-                content = text
-            )
-        ) {
-            is Outcome.Failure -> written
-            is Outcome.Success -> Outcome.Success(value = text)
-        }
+        return noteContentStore.write(
+            vaultPath = vaultPath,
+            path = path,
+            content = text
+        ).map { text }
     }
 }

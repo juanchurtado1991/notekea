@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 
 /** What the graph tab draws. */
 class GraphReducersTest {
-    private val matcher = FuzzyMatcher(textFolder = TextFolder())
+    private val matcher = FuzzyMatcher(textFolder = TextFolder)
 
     @Test
     fun `notes with as many links are smaller on a farther ring`() {

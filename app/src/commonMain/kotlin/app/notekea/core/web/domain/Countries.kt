@@ -1,5 +1,7 @@
 package app.notekea.core.web.domain
 
+import app.notekea.core.notes.domain.TextFolder
+
 /**
  * The country a web search is made in (`docs/agent-web.md`, "The region"): by its name in English or Spanish, as a
  * request ("in Mexico", "en Colombia") or the memory ("I live in Bogotá, Colombia") says it, to its ISO code.
@@ -53,15 +55,7 @@ object Countries {
             word.replaceFirstChar { it.uppercase() }
         }
 
-    private fun folded(text: String): String = text
-        .lowercase()
-        .map {
-            ACCENTS[it] ?: it
-        }
-        .joinToString(separator = "")
-
-    private val ACCENTS =
-        mapOf('á' to 'a', 'é' to 'e', 'í' to 'i', 'ó' to 'o', 'ú' to 'u', 'ñ' to 'n')
+    private fun folded(text: String): String = TextFolder.fold(text = text)
 
     // Bare "usa" is the Spanish verb ("usa la web"), "chile" a food, "cuba" a barrel, "el salvador" a title.
     private val AMBIGUOUS = setOf("usa", "chile", "cuba", "panama", "el salvador")

@@ -181,7 +181,7 @@ class WebEvalChatModelTest {
                 .orEmpty()
         )
 
-        val cache = NoteTextCache(indexed.store, TextFolder())
+        val cache = NoteTextCache(indexed.store, TextFolder)
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
         val loop = LoopEval.loopOf(trace.recorded, embedder, indexed, runner, clips, search, clips)

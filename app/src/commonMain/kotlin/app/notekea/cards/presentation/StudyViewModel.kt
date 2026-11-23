@@ -239,7 +239,10 @@ class StudyViewModel(
     // A card is the same card while its question and answer are, whatever its schedule says.
     private fun keyOf(card: StudyCard): Pair<String, String> = card.question to card.answer
 
-    private fun today(): CalendarDate = localCalendar.momentOf(instant = clock.now()).date
+    private fun today(): CalendarDate = CalendarDate.today(
+        localCalendar = localCalendar,
+        clock = clock
+    )
 
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }

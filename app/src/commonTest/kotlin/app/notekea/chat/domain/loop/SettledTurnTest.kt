@@ -35,7 +35,7 @@ class SettledTurnTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private fun runTurn(frame: TaskFrame?) = RunTurnUseCase(
@@ -255,8 +255,7 @@ class SettledTurnTest {
                     it
                         .file
                         .path
-                        .value
-                        .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                        .bare()
                 }
             ),
             openNote = null

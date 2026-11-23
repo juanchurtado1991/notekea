@@ -189,8 +189,7 @@ internal class VaultNames(
 
         return paths.firstOrNull {
             it
-                .value
-                .removeSuffix(suffix = MARKDOWN)
+                .bare()
                 .equals(wanted, ignoreCase = true)
         }
             ?: paths.firstOrNull { it.nameWithoutExtension.equals(wanted, ignoreCase = true) }

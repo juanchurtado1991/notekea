@@ -59,7 +59,7 @@ class ChatLoopTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private var route = ROUTE

@@ -122,7 +122,7 @@ class FindSectionUseCase(
                 val pages = coroutineScope {
                     batch
                         .map {
-                            async { (fetcher.fetch(url = it) as? Outcome.Success)?.value }
+                            async { fetcher.fetch(url = it).valueOrNull() }
                         }
                         .awaitAll()
                 }
@@ -178,8 +178,10 @@ class FindSectionUseCase(
             url = url,
             name = name
         ).forEach { place ->
-            val text =
-                (fetcher.fetch(url = place) as? Outcome.Success)?.value?.html ?: return@forEach
+            val text = fetcher
+                .fetch(url = place)
+                .valueOrNull()
+                ?.html ?: return@forEach
 
             // A site answers a missing file with its web page: that is no index.
             val isPage = !MarkdownArticle.isMarkdown(text = text) && "<urlset" !in text

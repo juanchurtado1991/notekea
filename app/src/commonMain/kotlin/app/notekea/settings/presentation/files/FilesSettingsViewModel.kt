@@ -1,6 +1,7 @@
 package app.notekea.settings.presentation.files
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.AttachmentStore
 import app.notekea.core.notes.domain.RelativePath
@@ -100,7 +101,10 @@ class FilesSettingsViewModel(
                 templatesFolder = templatesFolder,
                 folders = folders.map { it.value }.sorted(),
                 formats = DateFormatChoice.choicesOf(
-                    today = localCalendar.momentOf(instant = clock.now()).date,
+                    today = CalendarDate.today(
+                        localCalendar = localCalendar,
+                        clock = clock
+                    ),
                     current = format
                 )
             )

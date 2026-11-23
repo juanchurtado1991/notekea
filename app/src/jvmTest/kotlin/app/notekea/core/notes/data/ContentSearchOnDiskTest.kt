@@ -45,7 +45,7 @@ class ContentSearchOnDiskTest {
             attributes = NioNoteFileAttributes()
         )
     )
-    private val folder = TextFolder()
+    private val folder = TextFolder
     private val search = SearchNoteContentUseCase(
         noteTextCache = NoteTextCache(
             contentStore = store,

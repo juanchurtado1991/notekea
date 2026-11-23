@@ -1,5 +1,7 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.notes.domain.links.NoteLink
@@ -77,17 +79,9 @@ internal class FormattingSteps(var text: String) {
     }
 
     fun lineAtCursor(): String {
-        val start = text.lastIndexOf(
-            char = '\n',
-            startIndex = selection.first - 1
-        ) + 1
+        val start = text.lineStartAt(index = selection.first)
 
-        val end = text.indexOf(
-            char = '\n',
-            startIndex = selection.first
-        ).takeIf {
-            it >= 0
-        } ?: text.length
+        val end = text.lineEndAt(index = selection.first)
 
         return text.substring(
             startIndex = start,

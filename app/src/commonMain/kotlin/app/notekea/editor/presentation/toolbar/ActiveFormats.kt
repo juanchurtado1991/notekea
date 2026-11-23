@@ -1,6 +1,7 @@
 package app.notekea.editor.presentation.toolbar
 
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.lineStartAt
 import app.notekea.editor.presentation.markdown.HighlightKind
 import app.notekea.editor.presentation.markdown.MarkdownHighlighter
 
@@ -21,10 +22,7 @@ class ActiveFormats {
             maximumValue = text.length
         )
 
-        val lineStart = text.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = position - 1
-        ) + 1
+        val lineStart = text.lineStartAt(index = position)
 
         val lineEnd = text
             .indexOf(

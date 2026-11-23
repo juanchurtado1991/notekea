@@ -1,6 +1,7 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.forEachLineOutsideCode
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.RelativePath
@@ -18,18 +19,15 @@ class EmbedFinder {
         includeNotes: Boolean = false
     ): List<Embed> {
         val embeds = mutableListOf<Embed>()
-        val fences = FenceTracker()
-        var lineStart = 0
 
-        text.split(StringPatterns.NEW_LINE_CHAR).forEach { line ->
-            if (!fences.read(text = line)) {
-                embeds += embedsOf(
-                    line = line,
-                    offset = lineStart
-                )
-            }
-
-            lineStart += line.length + 1
+        text.forEachLineOutsideCode { start, end ->
+            embeds += embedsOf(
+                line = text.substring(
+                    startIndex = start,
+                    endIndex = end
+                ),
+                offset = start
+            )
         }
 
         return embeds.filter {

@@ -101,11 +101,11 @@ class JGitRepository(
     }
 
     override suspend fun pendingChanges(vaultPath: String): Int =
-        (git(vaultPath = vaultPath) { JGitPending.of(git = it) } as? Outcome.Success)?.value ?: 0
+        git(vaultPath = vaultPath) { JGitPending.of(git = it) }.valueOrNull() ?: 0
 
     override suspend fun unfinished(vaultPath: String): UnfinishedSync? = (
-        git(vaultPath = vaultPath) { JGitRepair(git = it).unfinished() } as? Outcome.Success
-        )?.value
+        git(vaultPath = vaultPath) { JGitRepair(git = it).unfinished() }
+        ).valueOrNull()
 
     override suspend fun repair(
         vaultPath: String,

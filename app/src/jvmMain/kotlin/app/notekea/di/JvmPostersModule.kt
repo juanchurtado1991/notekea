@@ -74,5 +74,5 @@ private suspend fun firstPage(
         path = path
     )
 
-    return (page as? Outcome.Success)?.value
+    return page.valueOrNull()
 }

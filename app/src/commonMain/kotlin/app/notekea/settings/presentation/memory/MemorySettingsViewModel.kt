@@ -1,6 +1,7 @@
 package app.notekea.settings.presentation.memory
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.memory.domain.MemoryEdit
 import app.notekea.core.memory.domain.MemoryField
@@ -204,27 +205,11 @@ class MemorySettingsViewModel(
     }
 
     // When and how a field was written, kept as its line's hidden comment: "2026-11-15, settings".
-    private fun originOf(): String {
-        val today = localCalendar.momentOf(instant = clock.now()).date
-
-        val month = today
-            .month
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        val day = today
-            .day
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        return "${today.year}-$month-$day, settings"
-    }
+    private fun originOf(): String =
+        "${CalendarDate.today(
+            localCalendar = localCalendar,
+            clock = clock
+        ).iso}, settings"
 
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }

@@ -26,8 +26,9 @@ class TurnFrames(
         isChange: Boolean,
         openNote: RelativePath?
     ): TaskFrame? {
-        val found = (answerFromNotes.excerpts(vaultPath, notes, task) as? Outcome.Success)
-            ?.value
+        val found = answerFromNotes
+            .excerpts(vaultPath, notes, task)
+            .valueOrNull()
             .orEmpty()
             .map { it.note }
             .distinct()
@@ -83,8 +84,7 @@ class TurnFrames(
                 .map { it.file.path }
                 .firstOrNull {
                     val path = it
-                        .value
-                        .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                        .bare()
                         .lowercase()
 
                     if ('/' in link) path == link else it.nameWithoutExtension.lowercase() == link

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 // A selection is told once the person stops moving it, not at each key.
 private const val SETTLE_MILLIS = 300L
-private const val MARKDOWN = ".md"
 
 private val PLACES = mapOf(
     TabKind.NOTE to WorkPlace.NOTE,
@@ -71,8 +70,7 @@ internal fun workContextOf(
         ""
     } else {
         path
-            ?.value
-            ?.removeSuffix(suffix = MARKDOWN)
+            ?.bare()
             .orEmpty()
     }
 

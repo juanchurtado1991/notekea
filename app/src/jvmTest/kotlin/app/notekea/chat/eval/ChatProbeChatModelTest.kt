@@ -298,7 +298,7 @@ class ChatProbeChatModelTest {
         val store = OkioNoteContentStore(fileSystem, dispatchers, NioNoteFileAttributes())
         val scanner = OkioNoteScanner(fileSystem, dispatchers)
         val texts = DocumentAwareContentStore(store, TikaDocumentReader(dispatchers = dispatchers))
-        val cache = NoteTextCache(texts, TextFolder())
+        val cache = NoteTextCache(texts, TextFolder)
 
         val notes = notesOf(
             vault = vault,

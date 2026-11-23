@@ -135,7 +135,7 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
             ?.joinToString(
                 prefix = "\n(Also about this, by its links or tags: ",
                 postfix = ". Read them too.)"
-            ) { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            ) { it.bare() }
             .orEmpty()
 
         return ToolResult(

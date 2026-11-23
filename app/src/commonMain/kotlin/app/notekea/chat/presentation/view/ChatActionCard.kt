@@ -364,7 +364,7 @@ private fun targetOf(step: ActionStep): String {
     }
 }
 
-private fun nameOf(path: RelativePath): String = path.value.removeSuffix(suffix = ".md")
+private fun nameOf(path: RelativePath): String = path.bare()
 
 private fun verbOf(kind: ActionKind): StringResource = when (kind) {
     ActionKind.CREATE_NOTE -> Res.string.chat_action_create_note

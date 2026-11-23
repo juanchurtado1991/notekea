@@ -152,7 +152,7 @@ class AppToolsTest {
         val count = CountTool(
             noteTextCache = NoteTextCache(
                 contentStore = store,
-                textFolder = TextFolder()
+                textFolder = TextFolder
             )
         )
 
@@ -194,7 +194,7 @@ class AppToolsTest {
             val tally = TallyTool(
                 noteTextCache = NoteTextCache(
                     contentStore = store,
-                    textFolder = TextFolder()
+                    textFolder = TextFolder
                 )
             )
 
@@ -297,7 +297,7 @@ class AppToolsTest {
         val tally = TallyTool(
             noteTextCache = NoteTextCache(
                 contentStore = store,
-                textFolder = TextFolder()
+                textFolder = TextFolder
             )
         )
 

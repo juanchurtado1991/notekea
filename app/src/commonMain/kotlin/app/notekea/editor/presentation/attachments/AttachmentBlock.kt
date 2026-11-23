@@ -216,7 +216,7 @@ private fun hintOf(path: RelativePath): StringResource = if (FilesShownHere.hold
 
 /** The link that opens the note at [path], as a click on a wiki link to it does. */
 internal fun noteLinkOf(path: RelativePath): ReadLink.Note = ReadLink.Note(
-    target = path.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION),
+    target = path.bare(),
     kind = LinkKind.WIKI
 )
 

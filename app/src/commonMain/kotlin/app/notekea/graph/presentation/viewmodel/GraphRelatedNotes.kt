@@ -36,11 +36,10 @@ internal class GraphRelatedNotes(
         )[note]?.body
             ?: return emptyList()
 
-        val found = findRelatedNotes(vaultPath, note, text, notes.keys) as? Outcome.Success
+        val found = findRelatedNotes(vaultPath, note, text, notes.keys).valueOrNull()
             ?: return emptyList()
 
         val close = found
-            .value
             .related
             .filter {
                 it.score >= MIN_CLOSENESS

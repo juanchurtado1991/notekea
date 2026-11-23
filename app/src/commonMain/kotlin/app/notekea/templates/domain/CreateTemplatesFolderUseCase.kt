@@ -47,15 +47,10 @@ class CreateTemplatesFolderUseCase(
 
         if (hasExample) return Outcome.Success(value = example)
 
-        return when (
-            val written = noteContentStore.write(
-                vaultPath = vaultPath,
-                path = example,
-                content = exampleText
-            )
-        ) {
-            is Outcome.Failure -> written
-            is Outcome.Success -> Outcome.Success(value = example)
-        }
+        return noteContentStore.write(
+            vaultPath = vaultPath,
+            path = example,
+            content = exampleText
+        ).map { example }
     }
 }

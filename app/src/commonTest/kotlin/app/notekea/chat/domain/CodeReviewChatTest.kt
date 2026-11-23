@@ -45,7 +45,7 @@ class CodeReviewChatTest {
 
     private val cache = NoteTextCache(
         contentStore = FakeNoteContentStore(),
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val clipper = object : WebPageClipper {

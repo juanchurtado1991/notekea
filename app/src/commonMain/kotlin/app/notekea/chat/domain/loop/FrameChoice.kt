@@ -1,6 +1,5 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.loop.TaskFrame.Companion.bare
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolEffect

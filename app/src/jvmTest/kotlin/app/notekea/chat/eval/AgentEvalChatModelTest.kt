@@ -325,7 +325,7 @@ class AgentEvalChatModelTest {
 
         val agent = agentOf(indexed = indexed)
 
-        val cache = NoteTextCache(indexed.store, TextFolder())
+        val cache = NoteTextCache(indexed.store, TextFolder)
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
 
         val loop = LoopEval.loopOf(
@@ -393,7 +393,7 @@ class AgentEvalChatModelTest {
     private fun agentOf(indexed: EvalVault): AgentTaskUseCase {
         val cache = NoteTextCache(
             contentStore = indexed.store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         )
 
         val runner = AgentEvalSetup.runnerOf(indexed, cache, engine)

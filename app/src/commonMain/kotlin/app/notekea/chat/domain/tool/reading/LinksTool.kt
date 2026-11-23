@@ -84,7 +84,7 @@ class LinksTool(
 
     private fun namesOf(notes: List<RelativePath>): String = notes
         .take(n = MAX_NAMES)
-        .joinToString { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+        .joinToString { it.bare() }
         .ifEmpty { "no note" }
 
     companion object {

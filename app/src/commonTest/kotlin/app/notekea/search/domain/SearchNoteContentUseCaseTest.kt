@@ -232,7 +232,7 @@ class SearchNoteContentUseCaseTest {
     }
 
     private fun TestScope.search(): SearchNoteContentUseCase {
-        val folder = TextFolder()
+        val folder = TextFolder
 
         return SearchNoteContentUseCase(
             noteTextCache = NoteTextCache(

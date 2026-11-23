@@ -121,7 +121,7 @@ class ActionRunChatModelTest {
             ListTasksUseCase(),
             SetTaskDoneUseCase(store, apply),
             SetPropertyUseCase(store, apply),
-            NoteTextCache(store, TextFolder()),
+            NoteTextCache(store, TextFolder),
             JetBrainsMarkdownLinkFinder(),
             calendar,
             Clock.System
@@ -134,7 +134,7 @@ class ActionRunChatModelTest {
         checkPlan = CheckPlanUseCase(),
         composeNotes = ComposeNotesUseCase(
             engine,
-            NoteTextCache(store, TextFolder()),
+            NoteTextCache(store, TextFolder),
             GhostActionPlanReader()
         ),
         actionRunner = runner
@@ -212,14 +212,14 @@ class ActionRunChatModelTest {
             vaultPath = vault.path,
             steps = proposed.steps,
             notes = notes
-        ) as? Outcome.Success
+        ).valueOrNull()
             ?: return "not done"
 
         val problem = case.check(vault)
 
         runner.undo(
             vaultPath = vault.path,
-            done = done.value
+            done = done
         )
 
         return problem
@@ -239,14 +239,13 @@ class ActionRunChatModelTest {
         open: RelativePath?
     ) = ActionContext(
         today = "2026-11-10",
-        openNote = open?.value?.removeSuffix(suffix = ".md"),
+        openNote = open?.bare(),
         folders = ActionContext.foldersOf(paths = notes.map { it.file.path }),
         notes = notes.map {
             it
                 .file
                 .path
-                .value
-                .removeSuffix(suffix = ".md")
+                .bare()
         },
         properties = notes.flatMap { note ->
             note

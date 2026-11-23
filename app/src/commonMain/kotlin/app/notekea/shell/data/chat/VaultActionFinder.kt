@@ -89,7 +89,7 @@ class VaultActionFinder(
 
         val query = when (
             val translated =
-                translateQuery(request = request, catalog = catalog, today = isoOf(date = today()))
+                translateQuery(request = request, catalog = catalog, today = today().iso)
         ) {
             is QueryTranslation.Query -> translated.query
 
@@ -316,22 +316,15 @@ class VaultActionFinder(
         is PropertyValue.Text -> value.text
         is PropertyValue.Number -> value.text
         is PropertyValue.Checkbox -> value.isChecked.toString()
-        is PropertyValue.Date -> isoOf(date = value.date)
+        is PropertyValue.Date -> value.date.iso
         is PropertyValue.Items -> value.items.joinToString()
         is PropertyValue.Other -> value.source
     }
 
-    private fun today(): CalendarDate = localCalendar.momentOf(instant = clock.now()).date
-
-    private fun isoOf(date: CalendarDate): String =
-        "${date.year}-${date.month.toString().padStart(length = 2, padChar = '0')}-" +
-            date
-                .day
-                .toString()
-                .padStart(
-                    length = 2,
-                    padChar = '0'
-                )
+    private fun today(): CalendarDate = CalendarDate.today(
+        localCalendar = localCalendar,
+        clock = clock
+    )
 
     private companion object {
         // Written bare only as a plain decimal: "08001", "+34600111222", "1e5" or "NaN" stay text, as a YAML reader

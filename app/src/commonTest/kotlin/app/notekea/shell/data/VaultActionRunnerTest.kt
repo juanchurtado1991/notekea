@@ -101,7 +101,7 @@ class VaultActionRunnerTest {
             ),
             noteTextCache = NoteTextCache(
                 contentStore = store,
-                textFolder = TextFolder()
+                textFolder = TextFolder
             ),
             linkFinder = JetBrainsMarkdownLinkFinder(),
             localCalendar = calendar,

@@ -52,7 +52,7 @@ internal fun ChatLineChange(step: ActionStep) {
             .padding(all = NotekeaDimensions.SpacingS)
     ) {
         Text(
-            text = note.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION),
+            text = note.bare(),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary
         )

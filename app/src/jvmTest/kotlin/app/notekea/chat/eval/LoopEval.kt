@@ -42,7 +42,7 @@ internal object LoopEval {
     ): RunTurnUseCase {
         val cache = NoteTextCache(
             contentStore = indexed.store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         )
 
         val answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)

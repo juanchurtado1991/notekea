@@ -128,7 +128,7 @@ class AnswerEvalChatModelTest {
             vectorIndex = indexed.index,
             noteTextCache = NoteTextCache(
                 contentStore = indexed.store,
-                textFolder = TextFolder()
+                textFolder = TextFolder
             ),
             llmEngine = engine
         )
@@ -207,7 +207,7 @@ class AnswerEvalChatModelTest {
         answerFromNotes = answer,
         noteTextCache = NoteTextCache(
             contentStore = indexed.store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         ),
         llmEngine = engine,
         planReader = GhostActionPlanReader()

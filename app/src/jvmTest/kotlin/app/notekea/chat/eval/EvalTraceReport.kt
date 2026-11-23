@@ -3,7 +3,6 @@ package app.notekea.chat.eval
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.loop.FrameCount
 import app.notekea.chat.domain.loop.TaskFrame
-import app.notekea.chat.domain.loop.TaskFrame.Companion.bare
 
 /**
  * A task's [TracedCall]s written for a report: the route, each call as the model wrote it after what it was given

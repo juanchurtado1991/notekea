@@ -55,7 +55,7 @@ class NoteMentionsViewModelTest {
         ),
         noteTextCache = NoteTextCache(
             contentStore = contents,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         ),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )

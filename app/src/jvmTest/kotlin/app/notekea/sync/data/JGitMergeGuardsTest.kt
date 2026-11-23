@@ -92,7 +92,7 @@ class JGitMergeGuardsTest {
     }
 
     private fun messageOf(outcome: Outcome<*, SyncError>): String? =
-        ((outcome as? Outcome.Failure)?.error as? SyncError.Failed)?.message
+        (outcome.errorOrNull() as? SyncError.Failed)?.message
 
     @Test
     fun `a merge stopped by a note written meanwhile is a failed pull that names it`() =

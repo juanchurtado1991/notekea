@@ -1,5 +1,7 @@
 package app.notekea.core.memory.domain
 
+import app.notekea.core.notes.domain.TextFolder
+
 /**
  * What of the memory a turn is given (`docs/agent-memory.md`, "How it is read"), with no model call: *How I like
  * answers* and *About me* always, *Sources* in web work, and the other lines only when a word of the task matches
@@ -96,12 +98,8 @@ object MemoryLines {
         }
     ).distinct()
 
-    fun wordsOf(text: String): List<String> = text
-        .lowercase()
-        .map {
-            ACCENTS[it] ?: it
-        }
-        .joinToString(separator = "")
+    fun wordsOf(text: String): List<String> = TextFolder
+        .fold(text = text)
         .split(NOT_WORD)
         .filter { it.isNotEmpty() }
 
@@ -115,15 +113,5 @@ object MemoryLines {
     private val COMMON = setOf(
         "the", "and", "are", "goes", "into", "with", "los", "las", "van", "son", "una", "para", "con", "del", "means",
         "tagged", "folder", "note", "notes", "nota", "notas", "carpeta"
-    )
-
-    private val ACCENTS = mapOf(
-        'á' to 'a',
-        'é' to 'e',
-        'í' to 'i',
-        'ó' to 'o',
-        'ú' to 'u',
-        'ü' to 'u',
-        'ñ' to 'n'
     )
 }

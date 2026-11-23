@@ -1,5 +1,7 @@
 package app.notekea.connections.domain
 
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.notes.domain.MarkdownLineStripper
 
 /**
@@ -17,17 +19,9 @@ internal object MentionPassage {
         body: String,
         range: IntRange
     ): Pair<String, IntRange> {
-        val lineStart = body.lastIndexOf(
-            char = '\n',
-            startIndex = range.first - 1
-        ) + 1
+        val lineStart = body.lineStartAt(index = range.first)
 
-        val lineEnd = body.indexOf(
-            char = '\n',
-            startIndex = range.last
-        ).takeIf {
-            it >= 0
-        } ?: body.length
+        val lineEnd = body.lineEndAt(index = range.last)
 
         val plain = stripper.strip(
             line = body.substring(

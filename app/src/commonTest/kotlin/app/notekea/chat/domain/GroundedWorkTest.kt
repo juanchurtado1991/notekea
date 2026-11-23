@@ -41,7 +41,7 @@ class GroundedWorkTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
     private val note = RelativePath(value = "Contract/contract.md")
     private val document = RelativePath(value = "Contract/terms.docx")

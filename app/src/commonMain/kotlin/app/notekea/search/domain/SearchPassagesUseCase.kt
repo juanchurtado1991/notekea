@@ -43,7 +43,10 @@ class SearchPassagesUseCase(
         if (words.isEmpty()) return Outcome.Success(value = emptyList())
         val text = words.joinToString(separator = WORD_SEPARATOR)
 
-        val vector = (textEmbedder.embed(texts = listOf(text)) as? Outcome.Success)?.value?.single()
+        val vector = textEmbedder
+            .embed(texts = listOf(text))
+            .valueOrNull()
+            ?.single()
             ?: return Outcome.Failure(error = IndexRunError.Model)
 
         val allowed = allowedNotes(
@@ -54,15 +57,13 @@ class SearchPassagesUseCase(
 
         val only = allowed.keys.takeIf { tags.isNotEmpty() }
 
-        val hits = (
-            vectorIndex.search(
-                vaultPath,
-                text,
-                vector,
-                CANDIDATES,
-                only
-            ) as? Outcome.Success
-            )?.value
+        val hits = vectorIndex.search(
+            vaultPath,
+            text,
+            vector,
+            CANDIDATES,
+            only
+        ).valueOrNull()
             ?: return Outcome.Failure(error = IndexRunError.Index)
 
         val texts = noteTextCache.textsOf(

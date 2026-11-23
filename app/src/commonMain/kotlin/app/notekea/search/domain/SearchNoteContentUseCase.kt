@@ -2,6 +2,8 @@ package app.notekea.search.domain
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.lineEndAt
+import app.notekea.core.domain.lineStartAt
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
@@ -187,12 +189,7 @@ class SearchNoteContentUseCase(
             startIndex = offset
         ) + 1
 
-        val end = body.indexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = offset
-        ).takeIf {
-            it >= 0
-        } ?: body.length
+        val end = body.lineEndAt(index = offset)
 
         return start until end
     }
@@ -254,17 +251,9 @@ class SearchNoteContentUseCase(
         hits: List<IntRange>,
         first: Int
     ): Pair<String, List<IntRange>> {
-        val lineStart = body.lastIndexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = first - 1
-        ) + 1
+        val lineStart = body.lineStartAt(index = first)
 
-        val lineEnd = body.indexOf(
-            char = NEW_LINE_CHAR,
-            startIndex = first
-        ).takeIf {
-            it >= 0
-        } ?: body.length
+        val lineEnd = body.lineEndAt(index = first)
 
         val plain = markdownLineStripper.strip(
             line = body.substring(

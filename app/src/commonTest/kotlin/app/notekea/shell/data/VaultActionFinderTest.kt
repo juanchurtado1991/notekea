@@ -60,7 +60,7 @@ class VaultActionFinderTest {
         ),
         noteTextCache = NoteTextCache(
             contentStore = store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         ),
         linkFinder = JetBrainsMarkdownLinkFinder(),
         localCalendar = FakeLocalCalendar(),

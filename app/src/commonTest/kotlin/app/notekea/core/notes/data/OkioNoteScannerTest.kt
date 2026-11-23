@@ -228,17 +228,8 @@ class OkioNoteScannerTest {
 
     private fun sortedFiles(
         outcome: Outcome<VaultListing, NotesError>
-    ): Outcome<VaultListing, NotesError> = when (outcome) {
-        is Outcome.Failure -> outcome
-
-        is Outcome.Success -> Outcome.Success(
-            value = outcome.value.copy(
-                files = outcome
-                    .value
-                    .files
-                    .sortedBy { it.path.value }
-            )
-        )
+    ): Outcome<VaultListing, NotesError> = outcome.map { listing ->
+        listing.copy(files = listing.files.sortedBy { it.path.value })
     }
 
     private fun unlistable(folder: Path): FileSystem = object : ForwardingFileSystem(

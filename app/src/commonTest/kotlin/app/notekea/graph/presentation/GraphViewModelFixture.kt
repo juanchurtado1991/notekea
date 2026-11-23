@@ -53,7 +53,7 @@ abstract class GraphViewModelFixture {
         ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
     protected val preferences = KeptPreferences()
     protected val viewModel by lazy {
-        val folder = TextFolder()
+        val folder = TextFolder
         val dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
         val finder = JetBrainsMarkdownLinkFinder()
 

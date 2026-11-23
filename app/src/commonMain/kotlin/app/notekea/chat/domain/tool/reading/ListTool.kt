@@ -106,8 +106,7 @@ class ListTool : ChatTool {
         val name = note
             .file
             .path
-            .value
-            .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            .bare()
 
         val keys = note
             .metadata

@@ -37,7 +37,7 @@ class BugHuntTurnTest {
 
     private val cache = NoteTextCache(
         contentStore = FakeNoteContentStore(),
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val searched = mutableListOf<String>()

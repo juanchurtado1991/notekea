@@ -252,7 +252,7 @@ class ChangeTool(
         val next = frame
             .meant
             ?.let {
-                "The task means ${it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)}: call " +
+                "The task means ${it.bare()}: call " +
                     "$name again with only that note."
             } ?: open
 
@@ -288,9 +288,7 @@ class ChangeTool(
                 null
             } else {
                 "${paths.size} notes are named \"$name\": " +
-                    paths.joinToString {
-                        it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
-                    } + "."
+                    paths.joinToString { it.bare() } + "."
             }
         }
     }

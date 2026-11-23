@@ -151,8 +151,8 @@ class ActOnRequestUseCase(
         }
 
         return ActionTurnStep.Chat(
-            note = (named as? Outcome.Success)
-                ?.value
+            note = named
+                ?.valueOrNull()
                 ?.notes
                 ?.firstOrNull()
         )
@@ -208,7 +208,7 @@ class ActOnRequestUseCase(
                 onProgress = { emit(value = ActionTurnStep.Progress(progress = it)) }
             )
 
-            val failure = (written as? Outcome.Failure)?.error
+            val failure = written.errorOrNull()
             val isLeftOut = isOfSeveral && failure == ActionProblem.NoCards
 
             when {

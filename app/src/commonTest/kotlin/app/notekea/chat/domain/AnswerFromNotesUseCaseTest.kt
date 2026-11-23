@@ -36,7 +36,7 @@ class AnswerFromNotesUseCaseTest {
         vectorIndex = index,
         noteTextCache = NoteTextCache(
             contentStore = store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         ),
         llmEngine = engine
     )

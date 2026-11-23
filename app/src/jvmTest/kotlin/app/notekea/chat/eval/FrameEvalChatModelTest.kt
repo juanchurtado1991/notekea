@@ -119,7 +119,7 @@ class FrameEvalChatModelTest {
 
         val cache = NoteTextCache(
             contentStore = indexed.store,
-            textFolder = TextFolder()
+            textFolder = TextFolder
         )
 
         // A trace of each set's own, as the memory's sets ask the unseen tasks again.

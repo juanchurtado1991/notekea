@@ -54,7 +54,7 @@ class ToolContext(
             .filter {
                 it.isMarkdown && it.nameWithoutExtension.lowercase() == bare
             }
-            .map { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            .map { it.bare() }
             .takeIf {
                 it.size > 1
             }
@@ -63,6 +63,5 @@ class ToolContext(
 
     /** The vault's path of the note [name] names, without its extension; null when no note has that name. */
     fun pathOf(name: String): String? = noteNamed(name = name)
-        ?.value
-        ?.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+        ?.bare()
 }

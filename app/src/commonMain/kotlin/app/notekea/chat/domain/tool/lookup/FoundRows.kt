@@ -44,7 +44,7 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
         val lines = rows
             .take(n = ROWS)
             .joinToString(separator = "\n") {
-                "- \"${it.note.value.removeSuffix(suffix = MARKDOWN)}\" ${cellsOf(row = it.cells)}" +
+                "- \"${it.note.bare()}\" ${cellsOf(row = it.cells)}" +
                     whenOf(row = it)
             }
 
@@ -97,7 +97,6 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
         .joinToString(separator = " · ")
 
     companion object {
-        private const val MARKDOWN = ".md"
         private const val ROWS = 30
         const val ELSEWHERE =
             "A tag is listed with list and its tag; words in the text with search; links with links; open tasks " +

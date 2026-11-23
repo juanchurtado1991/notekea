@@ -31,7 +31,7 @@ import kotlin.test.assertEquals
 class SmokeQuickSwitcherTest {
     private val testDispatcher = StandardTestDispatcher()
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
-    private val folder = TextFolder()
+    private val folder = TextFolder
     private val naturalNames = NaturalNameComparator()
     private val searchNotes = SearchNotesUseCase(
         fuzzyMatcher = FuzzyMatcher(textFolder = folder),

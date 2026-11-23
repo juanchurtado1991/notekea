@@ -320,10 +320,10 @@ internal class ChatActions(
         }
 
     /** Today's date as the model reads it, YYYY-MM-DD. */
-    fun today(): String = dateOf(date = localCalendar.momentOf(instant = clock.now()).date)
-
-    private fun dateOf(date: CalendarDate): String =
-        "${date.year}-${twoDigits(date.month)}-${twoDigits(date.day)}"
+    fun today(): String = CalendarDate.today(
+        localCalendar = localCalendar,
+        clock = clock
+    ).iso
 
     /** Today for the talk, with what changed in [notes]: "2026-11-11. Notes changed today: none. Last changed: …". */
     fun todayIn(notes: Collection<NoteEntry>): String {
@@ -341,7 +341,12 @@ internal class ChatActions(
         val lastAt = notes
             .mapNotNull { it.file.modifiedAt }
             .maxOrNull()
-            ?.let { dateOf(date = localCalendar.momentOf(instant = it).date) }
+            ?.let {
+                localCalendar
+                    .momentOf(instant = it)
+                    .date
+                    .iso
+            }
 
         val last = context
             .latestNote
@@ -362,10 +367,12 @@ internal class ChatActions(
             }
             ?.file
             ?.path
-            ?.value
-            ?.removeSuffix(suffix = MARKDOWN)
+            ?.bare()
 
-        val day = localCalendar.momentOf(instant = clock.now()).date
+        val day = CalendarDate.today(
+            localCalendar = localCalendar,
+            clock = clock
+        )
 
         val changedToday = notes
             .filter { note ->
@@ -380,8 +387,7 @@ internal class ChatActions(
                 it
                     .file
                     .path
-                    .value
-                    .removeSuffix(suffix = MARKDOWN)
+                    .bare()
             }
 
         return latest to changedToday
@@ -409,7 +415,7 @@ internal class ChatActions(
                     it in path.value.lowercase()
                 }
             }
-            .map { it.value.removeSuffix(suffix = MARKDOWN) }
+            .map { it.bare() }
 
         val (latest, changedToday) = changesIn(notes = notes)
 
@@ -417,7 +423,7 @@ internal class ChatActions(
             today = today(),
             working = host.working?.described(),
             changedToday = changedToday,
-            openNote = openNote?.value?.removeSuffix(suffix = MARKDOWN),
+            openNote = openNote?.bare(),
             latestNote = latest,
             folders = ActionContext.foldersOf(paths = paths),
             notes = names,
@@ -445,13 +451,7 @@ internal class ChatActions(
         )
     }
 
-    private fun twoDigits(value: Int): String = value.toString().padStart(
-        length = 2,
-        padChar = '0'
-    )
-
     private companion object {
-        const val MARKDOWN = ".md"
         val WORD_BREAK = Regex(pattern = "[^\\p{L}\\p{N}]+")
 
         // The app's light or dark mode, which set_theme also takes.

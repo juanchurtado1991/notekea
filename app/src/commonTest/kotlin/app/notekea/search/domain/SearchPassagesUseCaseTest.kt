@@ -27,7 +27,7 @@ class SearchPassagesUseCaseTest {
     private val store = FakeNoteContentStore()
     private val index = FakeVectorIndex()
     private val embedder = FakeTextEmbedder()
-    private val folder = TextFolder()
+    private val folder = TextFolder
     private val cache = NoteTextCache(
         contentStore = store,
         textFolder = folder

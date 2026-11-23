@@ -18,13 +18,8 @@ internal object NoteProperties {
         is PropertyValue.Text -> value.text
         is PropertyValue.Number -> value.text
         is PropertyValue.Checkbox -> value.isChecked.toString()
-        is PropertyValue.Date -> with(value.date) { "$year-${month.padded()}-${day.padded()}" }
+        is PropertyValue.Date -> value.date.iso
         is PropertyValue.Items -> value.items.joinToString(separator = ", ")
         is PropertyValue.Other -> value.source
     }
-
-    private fun Int.padded(): String = toString().padStart(
-        length = 2,
-        padChar = '0'
-    )
 }

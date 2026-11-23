@@ -360,7 +360,7 @@ class VaultTreeViewModel(
                 )
             }
 
-            if (!isFolder) open(path = (outcome as? Outcome.Success)?.value)
+            if (!isFolder) open(path = outcome.valueOrNull())
         }
     }
 
@@ -466,7 +466,7 @@ class VaultTreeViewModel(
             }
 
             open(
-                path = (outcome as? Outcome.Success)?.value?.path,
+                path = outcome.valueOrNull()?.path,
                 inBackground = intent.inBackground
             )
         }

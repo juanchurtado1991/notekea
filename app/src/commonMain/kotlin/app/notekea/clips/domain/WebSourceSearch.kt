@@ -96,9 +96,9 @@ class WebSourceSearch(
             url = index.source,
             depth = levels.coerceAtMost(maximumValue = SectionLinks.MAX_DEPTH),
             most = MOST_WEIGHED
-        ) as? Outcome.Success ?: return emptyList()
+        ).valueOrNull() ?: return emptyList()
 
-        val links = found.value
+        val links = found
 
         return (links.urls + links.rest)
             .filter {
@@ -120,7 +120,7 @@ class WebSourceSearch(
         candidates: List<FoundSourcePage>
     ): List<FoundSourcePage> {
         val texts = listOf(question) + candidates.map { it.about }
-        val vectors = (textEmbedder.embed(texts = texts) as? Outcome.Success)?.value
+        val vectors = textEmbedder.embed(texts = texts).valueOrNull()
 
         val scores = if (vectors == null) {
             candidates.map {

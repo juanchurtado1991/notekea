@@ -75,8 +75,7 @@ internal object AgentEvalSetup {
             it
                 .file
                 .path
-                .value
-                .removeSuffix(suffix = ".md")
+                .bare()
         },
         properties = notes.flatMap { note ->
             note

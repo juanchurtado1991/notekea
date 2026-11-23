@@ -91,7 +91,7 @@ class ClipWebPageUseCase(
         if (isCopy || isOtherFile) return null
 
         val copy = url.trimEnd('/').removeSuffix(suffix = ".html") + ".md"
-        val fetched = (fetcher.fetch(url = copy) as? Outcome.Success)?.value ?: return null
+        val fetched = fetcher.fetch(url = copy).valueOrNull() ?: return null
         if (!MarkdownArticle.isMarkdown(text = fetched.html)) return null
 
         val article = MarkdownArticle.of(text = fetched.html) ?: return null

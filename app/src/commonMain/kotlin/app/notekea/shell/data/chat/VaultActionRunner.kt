@@ -294,8 +294,7 @@ class VaultActionRunner(
     ): List<RelativePath> {
         if (step.notes.isNotEmpty()) return step.notes
 
-        val today =
-            (openDailyNote(vaultPath = vaultPath) as? Outcome.Success)?.value ?: return emptyList()
+        val today = openDailyNote(vaultPath = vaultPath).valueOrNull() ?: return emptyList()
 
         // A daily note the step had to make goes with Undo too, only while it holds what it was made with: the
         // person may have written in it since (A3).

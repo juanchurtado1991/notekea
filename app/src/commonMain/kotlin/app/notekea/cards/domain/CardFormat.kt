@@ -51,7 +51,7 @@ object CardFormat {
     ): String {
         val lines = text.lines().toMutableList()
         val due = card.due ?: return text
-        val comment = "<!--SR:!${isoOf(date = due)},${card.interval},${card.ease}-->"
+        val comment = "<!--SR:!${due.iso},${card.interval},${card.ease}-->"
         val below = lines.getOrNull(index = card.line + 1)
 
         if (below != null && below.trim().let { SCHEDULE.matches(input = it) }) {
@@ -129,7 +129,4 @@ object CardFormat {
         .replace(SEPARATOR, ":")
         .replace('\n', ' ')
         .trim()
-
-    private fun isoOf(date: CalendarDate): String =
-        "${date.year}-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
 }

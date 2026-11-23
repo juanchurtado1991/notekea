@@ -18,7 +18,7 @@ data class Remembering(
             .lowercase()
 
         val note = notes.firstOrNull {
-            val path = it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            val path = it.bare()
             chosen == path.lowercase() || chosen == it.nameWithoutExtension.lowercase()
         } ?: notes.firstOrNull {
             it.nameWithoutExtension.lowercase() in chosen
@@ -29,7 +29,7 @@ data class Remembering(
         } > 1
 
         val link = if (isShared) {
-            note.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+            note.bare()
         } else {
             note.nameWithoutExtension
         }

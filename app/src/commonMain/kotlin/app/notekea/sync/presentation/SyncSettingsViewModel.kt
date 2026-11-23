@@ -132,7 +132,7 @@ class SyncSettingsViewModel(
                     token = "",
                     hasToken = hasToken,
                     isConnected = connected is Outcome.Success || it.isConnected,
-                    error = (connected as? Outcome.Failure)?.error
+                    error = connected.errorOrNull()
                 )
             }
         }

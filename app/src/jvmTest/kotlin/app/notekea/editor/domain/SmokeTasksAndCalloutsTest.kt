@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.domain.lineEndAt
 import app.notekea.core.domain.markdown.CalloutFold
 import app.notekea.core.domain.markdown.CalloutKind
 import app.notekea.core.domain.markdown.CalloutParser
@@ -97,12 +98,7 @@ class SmokeTasksAndCalloutsTest {
             startIndex = index
         ) + 1
 
-        val end = note.indexOf(
-            char = '\n',
-            startIndex = index
-        ).takeIf {
-            it >= 0
-        } ?: note.length
+        val end = note.lineEndAt(index = index)
 
         return note.substring(
             startIndex = start,

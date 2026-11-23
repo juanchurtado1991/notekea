@@ -52,8 +52,7 @@ class MemoryTool private constructor(
                     it
                         .file
                         .path
-                        .value
-                        .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
+                        .bare()
                 },
                 folders = context
                     .notes
@@ -84,23 +83,7 @@ class MemoryTool private constructor(
     private fun originOf(context: ToolContext): String {
         val day = context.today ?: return HOW
 
-        val month = day
-            .month
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        val date = day
-            .day
-            .toString()
-            .padStart(
-                length = 2,
-                padChar = '0'
-            )
-
-        return "${day.year}-$month-$date, $HOW"
+        return "${day.iso}, $HOW"
     }
 
     // The section the model names, by a word of its heading; People and names when it names none.

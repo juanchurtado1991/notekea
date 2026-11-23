@@ -37,10 +37,9 @@ class SearchTool(
     ): ToolResult {
         val query = call.text(name = QUERY)
 
-        val passages = (
-            answerFromNotes.excerpts(context.vaultPath, context.notes, query) as? Outcome.Success
-            )
-            ?.value
+        val passages = answerFromNotes
+            .excerpts(context.vaultPath, context.notes, query)
+            .valueOrNull()
             .orEmpty()
 
         val lines = passages.take(n = PASSAGES).map {
@@ -78,7 +77,7 @@ class SearchTool(
                 }
             }
             .keys
-            .map { it.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION) }
+            .map { it.bare() }
             .sorted()
 
         if (names.isEmpty()) return emptyList()

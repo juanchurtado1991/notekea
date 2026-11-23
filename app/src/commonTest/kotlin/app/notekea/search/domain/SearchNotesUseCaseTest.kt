@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 
 class SearchNotesUseCaseTest {
     private val search = SearchNotesUseCase(
-        fuzzyMatcher = FuzzyMatcher(textFolder = TextFolder()),
+        fuzzyMatcher = FuzzyMatcher(textFolder = TextFolder),
         naturalNameComparator = NaturalNameComparator()
     )
     private val notes = listOf(

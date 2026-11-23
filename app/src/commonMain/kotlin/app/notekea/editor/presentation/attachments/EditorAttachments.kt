@@ -243,12 +243,10 @@ class EditorAttachments(
             )
         }
 
-        val bytes = (
-            attachmentStore.read(
-                vaultPath = vaultPath,
-                path = path
-            ) as? Outcome.Success
-            )?.value
+        val bytes = attachmentStore.read(
+            vaultPath = vaultPath,
+            path = path
+        ).valueOrNull()
             ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
 
         val text = textOf(bytes = bytes) ?: return view.copy(
@@ -339,10 +337,10 @@ class EditorAttachments(
             folderSetting = vaultSettingsReader.attachmentFolderPath(vaultPath = vaultPath)
 
             // A listing that failed says nothing about the vault: the last one stays, and the next reading tries again.
-            (attachmentStore.files(vaultPath = vaultPath) as? Outcome.Success)?.let {
-                files =
-                    it.value
-            }
+            attachmentStore
+                .files(vaultPath = vaultPath)
+                .valueOrNull()
+                ?.let { files = it }
         }
 
         return files.orEmpty()
@@ -423,12 +421,10 @@ class EditorAttachments(
     }
 
     private suspend fun decodeImage(path: RelativePath): ImageBitmap? {
-        val bytes = (
-            attachmentStore.read(
-                vaultPath = vaultPath,
-                path = path
-            ) as? Outcome.Success
-            )?.value
+        val bytes = attachmentStore.read(
+            vaultPath = vaultPath,
+            path = path
+        ).valueOrNull()
 
         return bytes?.let {
             decodedImage(

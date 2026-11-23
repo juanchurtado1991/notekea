@@ -24,12 +24,10 @@ class TreeFilePreviews(
             )
         }
 
-        val bytes = (
-            attachmentStore.read(
-                vaultPath = vaultPath,
-                path = file.path
-            ) as? Outcome.Success
-            )?.value
+        val bytes = attachmentStore.read(
+            vaultPath = vaultPath,
+            path = file.path
+        ).valueOrNull()
 
         val image = bytes?.let {
             decodedImage(

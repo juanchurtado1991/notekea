@@ -22,7 +22,7 @@ internal object PropertyPassages {
     private val NOT_A_LETTER = Regex(pattern = "[^\\p{L}\\p{N}]+")
 
     // Words are compared without accents, so "cafe" names "Café" and "dueño" is the "duen" above.
-    private val textFolder = TextFolder()
+    private val textFolder = TextFolder
 
     private val COMMON = foldedSetOf(
         "the", "and", "what", "which", "who", "whom", "did", "does", "how", "many", "much", "are", "was", "for", "with",
@@ -62,8 +62,7 @@ internal object PropertyPassages {
                     text = note
                         .file
                         .path
-                        .value
-                        .removeSuffix(suffix = ".md") + " " + properties.joinToString(" ")
+                        .bare() + " " + properties.joinToString(" ")
                 )
 
                 val score = asked.count { word ->

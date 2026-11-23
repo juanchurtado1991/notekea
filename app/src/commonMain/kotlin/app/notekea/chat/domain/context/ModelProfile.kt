@@ -29,6 +29,6 @@ data class ModelProfile(
 
         /** The profile of the model [llmEngine] has in use now; the narrowest one when it has none. */
         suspend fun of(llmEngine: LlmEngine): ModelProfile =
-            of(info = (llmEngine.readiness() as? Outcome.Success)?.value)
+            of(info = llmEngine.readiness().valueOrNull())
     }
 }

@@ -1,6 +1,7 @@
 package app.notekea.query.presentation
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
@@ -137,15 +138,10 @@ class QueryViewModel(
         }
 
         launchGuarded(onError = ::logUnexpectedError) {
-            val today = localCalendar.momentOf(instant = clock.now()).date
-
-            val iso = listOf(today.year, today.month, today.day)
-                .joinToString(separator = "-") {
-                    it.toString().padStart(
-                        length = 2,
-                        padChar = '0'
-                    )
-                }
+            val iso = CalendarDate.today(
+                localCalendar = localCalendar,
+                clock = clock
+            ).iso
 
             val catalog = withContext(context = dispatchers.default) { buildCatalog(notes) }
 

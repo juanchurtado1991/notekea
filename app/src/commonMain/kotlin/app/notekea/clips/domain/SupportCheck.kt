@@ -50,7 +50,7 @@ class SupportCheck(private val llmEngine: LlmEngine) {
                 texts = passages
             )
 
-            ((scores as? Outcome.Success)?.value?.maxOrNull() ?: Float.NEGATIVE_INFINITY) >= SUPPORT
+            (scores.valueOrNull()?.maxOrNull() ?: Float.NEGATIVE_INFINITY) >= SUPPORT
         }
 
         return if (backed.isEmpty()) null else marker + backed.joinToString(separator = " ")

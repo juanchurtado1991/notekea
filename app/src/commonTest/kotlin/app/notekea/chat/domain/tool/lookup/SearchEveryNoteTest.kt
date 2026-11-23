@@ -25,7 +25,7 @@ class SearchEveryNoteTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val days = (20..23).map { RelativePath(value = "Journal/2026-10-$it.md") }

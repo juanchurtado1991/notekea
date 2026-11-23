@@ -32,7 +32,7 @@ class FrameTurnTest {
     private val store = FakeNoteContentStore()
     private val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val home = RelativePath(value = "Home/Budget.md")

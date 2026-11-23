@@ -53,7 +53,7 @@ internal fun chatViewModel(
 ): ChatViewModel {
     val cache = NoteTextCache(
         contentStore = store,
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     val answer = AnswerFromNotesUseCase(

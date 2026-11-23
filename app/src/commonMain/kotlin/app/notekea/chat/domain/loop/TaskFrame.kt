@@ -101,9 +101,4 @@ data class TaskFrame(
 
         else -> ""
     }
-
-    companion object {
-        fun RelativePath.bare(): String =
-            value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
-    }
 }

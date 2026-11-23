@@ -16,15 +16,13 @@ internal object GroundedSteps {
     /** The steps whose text the model writes. */
     val WRITTEN = setOf(ActionKind.CREATE_NOTE, ActionKind.WRITE_FROM_NOTES)
 
-    private const val MARKDOWN = ".md"
-
     fun of(
         move: AgentTaskMove,
         read: List<RelativePath>
     ): AgentTaskMove {
         if (read.isEmpty()) return move
 
-        val names = read.map { it.value.removeSuffix(suffix = MARKDOWN) }
+        val names = read.map { it.bare() }
 
         return move.copy(
             steps = move.steps.map { step ->

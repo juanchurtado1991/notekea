@@ -1,9 +1,9 @@
 package app.notekea.core.settings.domain
 
+import app.notekea.core.notes.domain.TextFolder
+
 /** The setting a text names ("¿dónde pongo el token?" → [SettingsPlace.SYNC_TOKEN]), by the longest of its words. */
 object SettingsPlaces {
-    private val ACCENTS =
-        mapOf('á' to 'a', 'é' to 'e', 'í' to 'i', 'ó' to 'o', 'ú' to 'u', 'ñ' to 'n')
     private val MARKS = Regex(pattern = "[¿?¡!.,:;\"'()]")
     private val SPACES = Regex(pattern = "\\s+")
 
@@ -37,12 +37,8 @@ object SettingsPlaces {
     }
 
     // " lowercase words without accents or marks ", so a word matches only whole.
-    private fun plain(text: String): String = text
-        .lowercase()
-        .map {
-            ACCENTS[it] ?: it
-        }
-        .joinToString(separator = "")
+    private fun plain(text: String): String = TextFolder
+        .fold(text = text)
         .replace(MARKS, " ")
         .replace(SPACES, " ")
         .trim()

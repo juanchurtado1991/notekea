@@ -64,7 +64,7 @@ class ChatMemoryChatModelTest {
                 dispatchers = dispatchers
             )
 
-            val cache = NoteTextCache(indexed.store, TextFolder())
+            val cache = NoteTextCache(indexed.store, TextFolder)
             val answer = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)
 
             val before = residentMb()

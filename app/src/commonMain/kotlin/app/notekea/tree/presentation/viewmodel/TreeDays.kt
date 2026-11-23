@@ -71,7 +71,7 @@ internal class TreeDays(
                 )
             }
 
-            host.open(path = (outcome as? Outcome.Success)?.value?.path)
+            host.open(path = outcome.valueOrNull()?.path)
         }
     }
 

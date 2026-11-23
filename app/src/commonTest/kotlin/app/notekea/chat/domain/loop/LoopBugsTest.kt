@@ -33,7 +33,7 @@ class LoopBugsTest {
 
     private val cache = NoteTextCache(
         contentStore = FakeNoteContentStore(),
-        textFolder = TextFolder()
+        textFolder = TextFolder
     )
 
     private val notes = listOf("Recipes/Arepas.md", "Recipes/Black beans.md").map {

@@ -108,13 +108,10 @@ class ActionEvalChatModelTest {
 
         val start = System.nanoTime()
 
-        val steps = (
-            plan(
-                request = asked,
-                context = SampleVaultNames.context(openNote = open)
-            ) as? Outcome.Success
-            )
-            ?.value
+        val steps = plan(
+            request = asked,
+            context = SampleVaultNames.context(openNote = open)
+        ).valueOrNull()
             .orEmpty()
 
         val millis = (System.nanoTime() - start) / NANOS_PER_MILLI

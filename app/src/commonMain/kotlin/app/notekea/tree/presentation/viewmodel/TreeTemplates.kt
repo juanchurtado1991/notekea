@@ -54,7 +54,7 @@ internal class TreeTemplates(
                 )
             }
 
-            val path = (outcome as? Outcome.Success)?.value ?: return@launch
+            val path = outcome.valueOrNull() ?: return@launch
             pending = path to intent.template
             host.open(path = path)
         }

@@ -117,10 +117,10 @@ class ComposeNotesUseCase(
 
         val maker = cardMaker ?: return Outcome.Failure(error = ActionProblem.NoCards)
 
-        return when (val made = maker.cardsFor(vaultPath = vaultPath, note = note)) {
-            is Outcome.Success -> Outcome.Success(value = step.copy(text = made.value))
-            is Outcome.Failure -> made
-        }
+        return maker.cardsFor(
+            vaultPath = vaultPath,
+            note = note
+        ).map { step.copy(text = it) }
     }
 
     /** A web page clipped as it is written (4.4): its note is the page's, never cleaned like the model's notes. */

@@ -2,6 +2,7 @@ package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.lineEndAt
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.model.EditorEffect
 
@@ -161,13 +162,7 @@ internal class EditorFocus(
         val isEditable = host.state.value.isEditable
 
         if (isEditable) {
-            val lineEnd = text.indexOf(
-                char = NEW_LINE_CHAR,
-                startIndex = heading.offset
-            ).takeIf {
-                it >= 0
-            }
-                ?: text.length
+            val lineEnd = text.lineEndAt(index = heading.offset)
 
             host.buffer.edit { selection = TextRange(index = lineEnd) }
         }
