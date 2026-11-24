@@ -276,6 +276,8 @@ tasks.register<Test>("chatModelTest") {
     systemProperty("notekea.chat.vault", providers.gradleProperty("chatVault").getOrElse(""))
     // Only the evaluation tasks whose text holds one of these words (comma separated): a quick rerun of the failures.
     systemProperty("notekea.chat.tasks", providers.gradleProperty("chatTasks").getOrElse(""))
+    // Only the tasks a file lists, a line each: the fast set of a round that tunes (scripts/loop-eval/fastset.py).
+    systemProperty("notekea.chat.taskFile", providers.gradleProperty("chatTaskFile").getOrElse(""))
     // The blind pool (docs/eval-blind.md): -PchatPool=sample measures ten unsealed exams picked by -PchatPoolSeed,
     // -PchatPool=all the 40 unsealed ones, -PchatPool=sealed the ten sealed ones, only for the final number.
     systemProperty("notekea.chat.pool", providers.gradleProperty("chatPool").getOrElse("sample"))

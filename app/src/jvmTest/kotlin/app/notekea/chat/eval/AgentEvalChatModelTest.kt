@@ -309,17 +309,9 @@ class AgentEvalChatModelTest {
             dispatchers = dispatchers
         )
 
-        // -PchatTasks="budget,reading challenge" runs only the tasks that hold one of those words.
-        val picked = System
-            .getProperty("notekea.chat.tasks")
-            .orEmpty()
-            .split(",")
-            .map { it.trim().lowercase() }
-            .filter { it.isNotEmpty() }
-
-        val cases = all.filter { case ->
-            picked.isEmpty() || picked.any { it in case.task.lowercase() }
-        }
+        // Only the tasks a round is narrowed to, by words or by a list (`EvalTasks`).
+        val picked = EvalTasks.fromProperties()
+        val cases = all.filter { picked.holds(task = it.task) }
 
         if (cases.isEmpty()) return 1.0 to ""
 

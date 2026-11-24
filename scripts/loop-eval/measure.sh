@@ -25,6 +25,8 @@ tests=app.notekea.chat.eval.AgentEvalChatModelTest
 # the model only what changed. Never for the pool, the reference nor the sealed exams, whose numbers count.
 replies=()
 case $what in frame|tuned|dev) [ -n "${NOTEKEA_REPLIES:-}" ] && replies=("-PchatReplies=$NOTEKEA_REPLIES") ;; esac
+# NOTEKEA_TASKS=<file> measures only the tasks the file lists, a line each (fastset.py): a shorter round to tune with.
+[ -n "${NOTEKEA_TASKS:-}" ] && case $what in tuned|dev) replies+=("-PchatTaskFile=$NOTEKEA_TASKS") ;; esac
 
 case $what in
   frame) filter="app.notekea.chat.eval.FrameEvalChatModelTest"; extra=(); files="frame-*-$size.md" ;;
@@ -52,5 +54,5 @@ start=$(date +%s)
 ./gradlew :app:chatModelTest --rerun --console=plain --tests "$filter" \
   "-PchatModels=$models" "-PchatSize=$size" "${extra[@]}" "${replies[@]}" > "$out/gradle-$what-$size.log" 2>&1
 echo "$what $size exit=$? minutes=$(( ($(date +%s) - start) / 60 ))" | tee -a "$out/status.txt"
-[ ${#replies[@]} -gt 0 ] && tail -n 1 "$NOTEKEA_REPLIES/rounds.txt" | tee -a "$out/status.txt"
+[ -n "${NOTEKEA_REPLIES:-}" ] && [ ${#replies[@]} -gt 0 ] && tail -n 1 "$NOTEKEA_REPLIES/rounds.txt" | tee -a "$out/status.txt"
 cp app/build/reports/$files "$out/" 2>/dev/null

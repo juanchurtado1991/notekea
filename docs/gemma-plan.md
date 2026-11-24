@@ -277,3 +277,9 @@ What it costs, and so how it is used:
 The second round asks the model nothing and no task of the 393 ends another way, by cause as well. The 3,342 replies
 take 14 MB. The three minutes left are the build, the models loaded and the notes indexed. The E4B and the 12B fill
 the same folder with their first round each.
+
+**A fast set.** Over the E4B's 17 dev rounds, 173 of the 393 tasks were right every time, 31 never and 189 now and
+then. `fastset.py <set> <size> <prefix> [cause]` lists the tasks that failed in at least one round (220 on dev), or
+only those that ever failed by one cause (asking needlessly 105, changes 47, figures 35), and
+`NOTEKEA_TASKS=<file> measure.sh …` measures those alone. It does not see a change that breaks a task that never
+failed: like the kept replies, it is for tuning, and the whole dev set and the pool confirm.
