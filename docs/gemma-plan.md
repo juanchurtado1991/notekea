@@ -91,8 +91,9 @@ E4B hardly does. On the tuned set both fail mostly on changes: the wrong change 
 
 1. **A base that can be read, measured twice.** The pool is blind, so nothing is tuned on it. Measure the E4B and
    the E2B on the sets whose tasks may be read (`measure.sh <label> dev` and `tuned`, about 90 minutes a size), on
-   the current commit with the fence fix committed: **done 2026-11-23**, the tables above. A second pool round with another seed goes beside round 10: one
-   round moves about 4 tasks by chance, and a change that gains 5 must be told from that.
+   the current commit with the fence fix committed: **done 2026-11-23**, the tables above. A second pool round with
+   another seed goes beside round 10: one round moves about 4 tasks by chance, and a change that gains 5 must be told
+   from that.
 2. **What is the harness's and what is the model's, before anything is written.** The holds were set on Qwen. In the
    E4B's failed tasks "Not asked: the task names what it means" shows in 8 and "the answer says a figure no tool
    gave" in 7. Measure dev with each hold off, one at a time: taking one out may gain more than adding one.
