@@ -209,3 +209,41 @@ to write them (length, order, examples). What they do say, against what the loop
 
 Not ours: the template's loop when a harness sends back the reasoning of earlier steps (the loop sends none), and
 FunctionGemma (Gemma 3, 270M).
+
+## 6. The frame and a reason before each call, tried on the E4B
+
+Measured on 2026-11-24 on dev (393 tasks, base 281 and 284 in 47 minutes; one round moves about 4 by chance). None
+has gone to the pool, so none is in the code: the changes are kept as a patch
+(`~/.cache/notekea-loop-runs/gemma4-why/experiment.patch`) to go on from.
+
+**Where the needless questions come from.** Of the 36 on the base, 19 are asked because the frame says the task is
+open, not because the model chooses to in the loop:
+
+- a table's heading row is shown as an entry and marked "yes" (`| Bill | Amount | Due | Paid |` for "mark the water
+  bill as paid"): 8 tasks of the frame alone;
+- a request that adds something new (a task, a row, a line) is called an item already written, so the note's entries
+  are marked: 6;
+- two notes of one person or thing are taken for two things (a school report and a school note of one child, a
+  meeting and the person's note): 5, not tried yet.
+
+| Tried, each on top of the one before | Right | Asked needlessly | Should have asked | Change | Figure | Minutes |
+|---|---|---|---|---|---|---|
+| Base | 281, 284 | 36 | 17 | 25 | 17 | 47 |
+| Heading rows are no entries; "new" as a third kind of thing (`gemma4-f1`) | 286 | 30 | 17 | 26 | 16 | 45 |
+| The open frame says a change to the whole note needs no question (`gemma4-f4`) | 285 | 27 | 17 | 28 | 20 | — |
+| A sentence of why before the tool in each call (`gemma4-why`) | 291 | 37 | 18 | 27 | 6 | 67 |
+
+The frame alone (`measure.sh <label> frame medium`, 11 minutes) was used to word the count question: three wordings
+(`gemma4-f1`, `-f2`, `-f3`) end at 49 to 52 errors against the base's 57 over dev and tuned, each moving failures
+between asking too much and too little. The gain is the two changes of the first; the wording after it is chance.
+
+What it says:
+
+- The frame's changes take the needless questions from 36 to 27 and lose no question that was due, yet the total
+  stays within chance: what is gained there is lost in changes and figures.
+- A reason written first does for figures what thinking did (17 to 6, thinking 11) at 1.4 times the time in place of
+  2.4, and like thinking it brings the needless questions back (37). It does nothing for changes, which thinking
+  halved.
+- So the next round is the reason kept for the calls that work out a figure and left out of the choice to ask, with
+  the frame's changes, then the pool. The changes (25 to 28 whatever is tried, but 11 with thinking) are the cause
+  to read next.
