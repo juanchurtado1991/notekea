@@ -87,6 +87,29 @@ The E4B's largest cause on dev is asking when the task's words settle it (36 of 
 (step 2). The E2B's are the reverse, going on when it must ask (43), and running out of steps (62 of 178), which the
 E4B hardly does. On the tuned set both fail mostly on changes: the wrong change proposed, not the wrong ending.
 
+**Each hold off, one at a time** (plan step 2, done 2026-11-24). Dev on the E4B, commit `ad03338d`, labels
+`gemma4-off-<name>`; the switch lived in the measuring worktree only. A second base on the same commit
+(`gemma4-base2`) gave 284, so the base is 281 to 284.
+
+| Hold taken off | Right of 393 |
+|---|---|
+| none (the two bases) | 281, 284 |
+| the question the frame says is needless | 283 |
+| a related note not read before an answer | 287 |
+| the review of a proposal on many notes | 287 |
+| the note the frame says is meant | 288 |
+| a figure no tool gave | 286 |
+| an option not read before a question | 287 |
+| each of several notes not read | 283 |
+| an end where the frame says to ask | 288 |
+| the change tools' own (several notes, a shared name) | 286 |
+| a proposal with nothing added | 289 |
+
+**No hold is the cause.** Every round lands within 5 tasks of the second base, whichever hold is off, and two rounds
+of the same code differ by 3: none can be told from chance, and none is taken off. Asking when the task's words
+settle it stays at 26 to 38 failures with any hold off, the needless question's own included (38): the model asks
+on its own, not because a hold sends it there. That leaves the instructions and the engine's settings (step 3).
+
 ## 2. The plan
 
 1. **A base that can be read, measured twice.** The pool is blind, so nothing is tuned on it. Measure the E4B and
@@ -97,9 +120,12 @@ E4B hardly does. On the tuned set both fail mostly on changes: the wrong change 
 2. **What is the harness's and what is the model's, before anything is written.** The holds were set on Qwen. In the
    E4B's failed tasks "Not asked: the task names what it means" shows in 8 and "the answer says a figure no tool
    gave" in 7. Measure dev with each hold off, one at a time: taking one out may gain more than adding one.
-3. **The instructions written again for Gemma, not adjusted.** They are long and shaped by what Qwen needed. Gemma
-   takes half the steps (3 a task against 6), so it needs fewer warnings against repeating a call and a clearer
-   word on how a turn ends.
+   **Done 2026-11-24**: none gains more than chance, the table above.
+3. **The engine's settings, then the instructions written again for Gemma, not adjusted.** First two dev rounds on
+   the E4B, one each, as either changes how the instructions are best written (section 5): Google's sampling in
+   place of temperature 0, and thinking on. Then the instructions: they are long and shaped by what Qwen needed.
+   Gemma takes half the steps (3 a task against 6), so it needs fewer warnings against repeating a call and a
+   clearer word on how a turn ends.
 4. **Tune by cause, the largest first, on the E4B**, then check the E2B and the 12B:
    - ending the wrong way (54): an answer where a proposal or a question was due, or the reverse;
    - never finding it (24) and finding it without saying it (21);
@@ -109,13 +135,14 @@ E4B hardly does. On the tuned set both fail mostly on changes: the wrong change 
 5. **Each change the same way**: read the failures on dev, fix their cause in the foundation
    (`feedback`: no word list, no case for one task), measure dev, then one pool round. It stays when the pool gains
    4 or more and no other cause falls.
-6. **The ceiling, once.** One pool round with Gemma 4 26B-A4B or 31B (17 to 22 GB, hours on this machine: they do not
-   fit its 16 GB of video memory). Not a product size: it says how much of what is missing is the model's and how
-   much the harness's or the exams', before 90 % is chased.
-7. **The product, last**: the model catalog and its downloads, the memory budgets (the E2B does not fit the 2.5 GB
+6. **The product, last**: the model catalog and its downloads, the memory budgets (the E2B does not fit the 2.5 GB
    the Small size was given with the reranker and the editor), the texts that name the models, and the answer and
    Spanish evaluations of the tournament again, where plain-Q4 Gemma was weakest. Speed counts here: the 12B took 93
-   seconds a task on its first exam, against 27 for the Qwen 4B.
+   seconds a task on its first exam, against 27 for the Qwen 4B. The 8-bit files of the E2B and the E4B
+   (section 5) are weighed here, as they change the download and the memory.
+
+No round with Gemma 4 26B-A4B or 31B: the developer left them out on 2026-11-23, as neither is a size of the
+product. How much of what is missing is the model's is seen by tuning.
 
 Targets are the loop plan's: 85 % on the medium size and 90 % on the large one.
 
@@ -153,3 +180,23 @@ models and code, so the loop is not copied. Taken, each inside the step it serve
 Not taken: prompts by family (one family now: the prompts are rewritten for Gemma), its repair of malformed
 arguments (the schema already holds them) and its fixed text at the step limit (the loop already ends on what it
 found).
+
+## 5. From Gemma's own documentation
+
+Read on 2026-11-23 (gemma.ai's prompt formatting, function calling and best practices, Unsloth's guide, the
+`google-gemma/cookbook`). No repository holds an agent's instructions written for Gemma 4, and none of these says how
+to write them (length, order, examples). What they do say, against what the loop does:
+
+- **Sampling**: Google asks for temperature 1.0, top_p 0.95 and top_k 64 "across all use cases". The loop's calls
+  run at temperature 0. One dev round (step 3).
+- **Thinking**: on with `<|think|>` at the start of the system message, off in the engine today (`enable_thinking`
+  false, set for Qwen). The largest cause of the three sizes is the choice between asking and going on, which
+  thinking first may help; it costs time a step, to be measured with it. One dev round (step 3).
+- **Its own tool calls**: Gemma 4 was trained on `<|tool_call>call:name{…}<tool_call|>` and the loop holds each reply
+  to a JSON schema, which it wraps in a fence. The largest change of these; after the tuning, if the ending of a
+  turn is still the main failure.
+- **8 bits for the small ones**: Unsloth starts the E2B and the E4B at Q8; the files here are Q4. A matter of the
+  product's sizes (step 6).
+
+Not ours: the template's loop when a harness sends back the reasoning of earlier steps (the loop sends none), and
+FunctionGemma (Gemma 3, 270M).
