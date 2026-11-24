@@ -266,3 +266,14 @@ What it costs, and so how it is used:
 - It says nothing of the time a task takes.
 - The engine's own settings (thinking, the sampler's other values, llama.cpp's version) are not in what a reply is
   kept under: empty the folder when one of them changes.
+
+**Checked on the E2B, 2026-11-24** (dev, 393 tasks, the folder `~/.cache/notekea-loop-runs/replies`):
+
+| Round | Minutes | Replies read from disk | Replies the model wrote | Right |
+|---|---|---|---|---|
+| The first, which fills it (`gemma4-cache-fill`) | 30 | 2 | 3,340 | 219 |
+| The same again (`gemma4-cache-read`) | 3 | 3,342 | 0 | 219 |
+
+The second round asks the model nothing and no task of the 393 ends another way, by cause as well. The 3,342 replies
+take 14 MB. The three minutes left are the build, the models loaded and the notes indexed. The E4B and the 12B fill
+the same folder with their first round each.
