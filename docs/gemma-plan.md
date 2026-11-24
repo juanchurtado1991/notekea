@@ -123,7 +123,8 @@ on its own, not because a hold sends it there. That leaves the instructions and 
    **Done 2026-11-24**: none gains more than chance, the table above.
 3. **The engine's settings, then the instructions written again for Gemma, not adjusted.** First two dev rounds on
    the E4B, one each, as either changes how the instructions are best written (section 5): Google's sampling in
-   place of temperature 0, and thinking on. Then the instructions: they are long and shaped by what Qwen needed.
+   place of temperature 0, and thinking on. **Done 2026-11-24**: neither is taken, section 5. Then the
+   instructions: they are long and shaped by what Qwen needed.
    Gemma takes half the steps (3 a task against 6), so it needs fewer warnings against repeating a call and a
    clearer word on how a turn ends.
 4. **Tune by cause, the largest first, on the E4B**, then check the E2B and the 12B:
@@ -188,10 +189,18 @@ Read on 2026-11-23 (gemma.ai's prompt formatting, function calling and best prac
 to write them (length, order, examples). What they do say, against what the loop does:
 
 - **Sampling**: Google asks for temperature 1.0, top_p 0.95 and top_k 64 "across all use cases". The loop's calls
-  run at temperature 0. One dev round (step 3).
+  run at temperature 0. **Measured 2026-11-24** (E4B, dev, label `gemma4-sampling`): 269 of 393 against 281 and
+  284, with more turns that should have asked (25 against 17) and more wrong changes (29 against 25). Temperature 0
+  stays.
 - **Thinking**: on with `<|think|>` at the start of the system message, off in the engine today (`enable_thinking`
   false, set for Qwen). The largest cause of the three sizes is the choice between asking and going on, which
-  thinking first may help; it costs time a step, to be measured with it. One dev round (step 3).
+  thinking first may help; it costs time a step, to be measured with it. **Measured 2026-11-24** (E4B, label
+  `gemma4-think`, a budget of 256 tokens of thought a call, which the JSON schema allows): on the frame alone 15
+  false alarms of 319 against 25, yet on dev **291 of 393 in 115 minutes against 281 and 284 in 47**. Wrong changes
+  fall (11 against 25) and so do figures (11 against 17), while asking needlessly rises (45 against 36): a cause
+  falls and each task costs 2.4 times the time, so it is not turned on. What it says for step 4: the changes and
+  the figures are within the model's reach when it works them out first, so thought on those calls alone, or the
+  working-out asked for in the reply, is worth a round there.
 - **Its own tool calls**: Gemma 4 was trained on `<|tool_call>call:name{…}<tool_call|>` and the loop holds each reply
   to a JSON schema, which it wraps in a fence. The largest change of these; after the tuning, if the ending of a
   turn is still the main failure.
