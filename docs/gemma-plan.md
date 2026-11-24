@@ -51,11 +51,47 @@ into yet.
 replies of the frame evaluation). The schema still holds inside it. The rounds above ran with the fence taken off in
 the measuring worktree only; the app takes it off as the reply streams since `JsonFence` (`LlamaLlmEngine`).
 
+**The base that can be read** (plan step 1). Label `gemma4-base`, the harness as tuned on Qwen, the fence taken off
+by the app: the E4B on `e9dee957`, the E2B on `be6346bb` (the same loop: its replies read by Ghost, equal to the old
+reader on 57,862 recorded cases).
+
+| Set | Gemma E4B | Gemma E2B |
+|---|---|---|
+| dev (393) | **281 (71.5 %)**, 47 min | **215 (54.7 %)**, 33 min |
+| tuned (259) | **201 (77.6 %)**, 39 min | **162 (62.5 %)**, 31 min |
+
+Dev says what the pool said, within a point (71.8 % and 55.1 %), so a gain on dev can be believed. Failures by cause:
+
+| Cause | E4B dev | E4B tuned | E2B dev | E2B tuned |
+|---|---|---|---|---|
+| should have asked, did not | 17 | 8 | 43 | 9 |
+| asked, should not have | 36 | 6 | 27 | 6 |
+| days between dates | 9 | 2 | 7 | 1 |
+| figure worked out | 17 | 10 | 30 | 15 |
+| change wrong or incomplete | 25 | 24 | 38 | 43 |
+| fact wrong or incomplete | 7 | 6 | 11 | 11 |
+| other (routed to talk, stopped) | 1 | 2 | 22 | 12 |
+
+And by the report's kind:
+
+| Kind | E4B dev | E4B tuned | E2B dev | E2B tuned |
+|---|---|---|---|---|
+| ended the wrong way | 46 | 13 | 58 | 13 |
+| never found it | 27 | 10 | 36 | 18 |
+| ran out of steps or repeated itself | 21 | 9 | 62 | 31 |
+| found it, then did not say it | 11 | 4 | 15 | 5 |
+| did the wrong thing | 4 | 21 | 3 | 25 |
+| routed where the turn cannot end, stopped, call too long | 0 | 1 | 4 | 5 |
+
+The E4B's largest cause on dev is asking when the task's words settle it (36 of 112), which is the holds' ground
+(step 2). The E2B's are the reverse, going on when it must ask (43), and running out of steps (62 of 178), which the
+E4B hardly does. On the tuned set both fail mostly on changes: the wrong change proposed, not the wrong ending.
+
 ## 2. The plan
 
 1. **A base that can be read, measured twice.** The pool is blind, so nothing is tuned on it. Measure the E4B and
    the E2B on the sets whose tasks may be read (`measure.sh <label> dev` and `tuned`, about 90 minutes a size), on
-   the current commit with the fence fix committed. A second pool round with another seed goes beside round 10: one
+   the current commit with the fence fix committed: **done 2026-11-23**, the tables above. A second pool round with another seed goes beside round 10: one
    round moves about 4 tasks by chance, and a change that gains 5 must be told from that.
 2. **What is the harness's and what is the model's, before anything is written.** The holds were set on Qwen. In the
    E4B's failed tasks "Not asked: the task names what it means" shows in 8 and "the answer says a figure no tool
