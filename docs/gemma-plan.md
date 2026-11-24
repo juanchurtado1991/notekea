@@ -141,11 +141,22 @@ on its own, not because a hold sends it there. That leaves the instructions and 
    Spanish evaluations of the tournament again, where plain-Q4 Gemma was weakest. Speed counts here: the 12B took 93
    seconds a task on its first exam, against 27 for the Qwen 4B. The 8-bit files of the E2B and the E4B
    (section 5) are weighed here, as they change the download and the memory.
+7. **The study cards, once the tuning ends** (the developer, 2026-11-24): section 8, in this same pull request, in
+   commits of their own. It begins when steps 4 and 5 are done and does not wait for step 6. It moves neither target.
 
 No round with Gemma 4 26B-A4B or 31B: the developer left them out on 2026-11-23, as neither is a size of the
 product. How much of what is missing is the model's is seen by tuning.
 
 Targets are the loop plan's: 85 % on the medium size and 90 % on the large one.
+
+**Decided with the developer, 2026-11-24:**
+
+- **Time**: a task may take up to 1.5 times what it takes today. A reason written before a call fits (1.4 measured);
+  thinking on every call does not (2.4).
+- **The target not reached**: if the E4B ends the tuning near 80 %, that is accepted, what is missing is written down by
+  cause, and the plan goes on. No patch is made to reach a number.
+- **The web** (section 3): its set and its tuning go in a pull request after this one, designed with the developer.
+- **A card's evidence** (section 8): a hidden HTML comment on the card, tried with the plugin first.
 
 ## 3. The web needs a set of its own
 
@@ -275,11 +286,51 @@ What it costs, and so how it is used:
 | The same again (`gemma4-cache-read`) | 3 | 3,342 | 0 | 219 |
 
 The second round asks the model nothing and no task of the 393 ends another way, by cause as well. The 3,342 replies
-take 14 MB. The three minutes left are the build, the models loaded and the notes indexed. The E4B and the 12B fill
-the same folder with their first round each.
+take 14 MB. The three minutes left are the build, the models loaded and the notes indexed. The E4B and the 12B filled
+the same folder the same day (commit `2ef940de`), and it holds 43 MB. This is the 12B's first dev round:
+
+| Dev, 393 tasks | Minutes | Right | Should have asked | Asked needlessly | Days | Figure | Change | Fact | Other |
+|---|---|---|---|---|---|---|---|---|---|
+| E4B (`gemma4-e4b-fill`) | 44 | 285 (72.5 %) | 17 | 32 | 7 | 21 | 23 | 7 | 1 |
+| 12B (`gemma4-12b-fill`) | 161 | 323 (82.2 %) | 23 | 15 | 0 | 14 | 15 | 3 | 0 |
+
+The 12B's largest cause is the reverse of the E4B's: going on when it must ask. 37 of its 70 failures end the wrong
+way, 10 never find it and 10 run out of steps.
 
 **A fast set.** Over the E4B's 17 dev rounds, 173 of the 393 tasks were right every time, 31 never and 189 now and
 then. `fastset.py <set> <size> <prefix> [cause]` lists the tasks that failed in at least one round (220 on dev), or
 only those that ever failed by one cause (asking needlessly 105, changes 47, figures 35), and
 `NOTEKEA_TASKS=<file> measure.sh …` measures those alone. It does not see a change that breaks a task that never
 failed: like the kept replies, it is for tuning, and the whole dev set and the pool confirm.
+
+## 8. After the tuning: the study cards
+
+A list of ideas for a local notes app (evidence on cards, structured replies, small steps, retries) was read against
+the code on 2026-11-24. Most of what it says of reliability is here already or was measured and left out: grammars on
+every structured call, quotes checked against the note, temperature 0 (section 5), and evidence extracted before
+answering (`docs/answer-quality.md`, 3.5). The study cards (4.6) are where it helps. Read in the code:
+
+- `CardsPrompt` gives the model the note's first 8,000 characters, so a long note's end makes no cards.
+- The sentence a card comes from is checked and then dropped: `CardFormat.blockOf` writes `Question::Answer` alone,
+  while `docs/roadmap/M4b.md` says each question cites it.
+- A card's figures are not checked; `BackedFigures` checks them in the other written notes.
+- A card that fails its checks is left out and never asked for again.
+- No evaluation measures the cards.
+
+In this order, each change measured alone and kept only when it beats the cards as they are. No patches here either
+(`AGENTS.md`): a bad card's cause is fixed in how cards are made, never by a word list or a case for one note.
+
+1. **A set that measures the cards**, on the dev vaults, by counts: cards kept, backed, right, and the part of the
+   note they cover. Without it nothing below is judged.
+2. **The making of a card**, one change at a time: the sentence asked for before the question and the answer; a long
+   note by its sections; the figures checked; one retry that says what failed.
+3. **The evidence kept with the card**, a click that opens it, and a card marked when its sentence is no longer in
+   the note. It is kept in a hidden HTML comment on the card, before the schedule's: the sentence itself, so an edit of
+   it is seen, and the note's text is not touched. First it is tried with Obsidian's Spaced Repetition plugin, whose
+   format the cards keep; should the plugin not take it, the place is asked again.
+4. **A card failed again and again written anew** from its sentence, proposed and never changed alone. The failures
+   in a row are not kept today, only the ease.
+
+Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
+briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
+gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
