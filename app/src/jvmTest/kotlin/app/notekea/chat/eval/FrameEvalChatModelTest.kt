@@ -54,15 +54,22 @@ class FrameEvalChatModelTest {
         onGpu = true
     )
 
-    private val engine = LlamaLlmEngine(
+    private val llama = LlamaLlmEngine(
         setupSource = { Outcome.Success(value = setup) },
         nativeFolder = natives,
         dispatchers = dispatchers
     )
 
+    // The model, its replies kept on disk when a round asks for it (`ReplyCache`).
+    private val engine = ReplyCache.around(
+        engine = llama,
+        modelPath = setup.modelPath
+    )
+
     @AfterTest
     fun tearDown() {
-        engine.close()
+        (engine as? ReplyCache)?.note()
+        llama.close()
         embedder.close()
     }
 

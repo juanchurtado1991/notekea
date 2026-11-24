@@ -283,6 +283,8 @@ tasks.register<Test>("chatModelTest") {
     // The web's evaluation keeps the pages it downloads here, and reads only those with -PwebReplay=true.
     systemProperty("notekea.web.pages", providers.gradleProperty("webPages").getOrElse(""))
     systemProperty("notekea.web.replay", providers.gradleProperty("webReplay").getOrElse("false"))
+    // The model's replies kept in this folder and read from it (ReplyCache): only for the rounds that tune.
+    systemProperty("notekea.chat.replies", providers.gradleProperty("chatReplies").getOrElse(""))
     systemProperty("notekea.roleplay", providers.gradleProperty("rolePlay").getOrElse(""))
     systemProperty("notekea.stepmemory", providers.gradleProperty("stepMemory").getOrElse(""))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.

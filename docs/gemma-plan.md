@@ -247,3 +247,22 @@ What it says:
 - So the next round is the reason kept for the calls that work out a figure and left out of the choice to ask, with
   the frame's changes, then the pool. The changes (25 to 28 whatever is tried, but 11 with thinking) are the cause
   to read next.
+
+## 7. Rounds made shorter: the model's replies kept
+
+A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
+the frame of every task, and each step up to where a change shows. `ReplyCache` (the evaluation's code, never the
+product's) keeps each reply on disk under what decides it: the model's file and its length, the messages, the tokens,
+the temperature, the seed and the schema. A call made again is read back; any of these changed asks the model.
+
+`NOTEKEA_REPLIES=<folder> measure.sh <label> <frame|tuned|dev> <size>` turns it on; one folder holds the three sizes,
+each filled by its first round. The script never passes it for the pool, the reference nor the sealed exams.
+
+What it costs, and so how it is used:
+
+- The same call gives another reply now and then on a GPU (the base measured 281 and 284). A kept reply fixes one of
+  the two, so a task on the edge stays where its first round left it. A round with kept replies is for tuning: a
+  change is confirmed by a dev round and a pool round without them, and the plan's rule (step 5) is unchanged.
+- It says nothing of the time a task takes.
+- The engine's own settings (thinking, the sampler's other values, llama.cpp's version) are not in what a reply is
+  kept under: empty the folder when one of them changes.
