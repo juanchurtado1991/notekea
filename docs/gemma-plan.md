@@ -147,7 +147,8 @@ on its own, not because a hold sends it there. That leaves the instructions and 
 No round with Gemma 4 26B-A4B or 31B: the developer left them out on 2026-11-23, as neither is a size of the
 product. How much of what is missing is the model's is seen by tuning.
 
-Targets are the loop plan's: 85 % on the medium size and 90 % on the large one.
+Targets: 80 % on the medium size, held on more than one sample of the blind pool and in a round without kept replies
+(the developer, 2026-11-25; the loop plan's was 85 %), and 90 % on the large one.
 
 **Decided with the developer, 2026-11-24:**
 
@@ -314,6 +315,22 @@ Every other cause is level. 328 and 336 are the same code but for one task, so a
 **The 12B on the pool with the last look and the group review** (`gemma4-12b-pool`): 364 of 439 (82.9 %) against 357,
 which is the base of 2026-11-23, before what was kept on the 24th. Missed questions 34 to 25, needless ones 19 to 23,
 figures 8 to 3, changes 16 to 18. Dev 323 to 336 of 393.
+
+**Each change on its own, on three still pools** (2026-11-25; the E4B's seeds 10 and 11, the 12B's seed 10; every
+version over the base with the two fixes):
+
+| | E4B, seed 10 (of 439) | E4B, seed 11 (of 435) | 12B, seed 10 (of 439) | Gained | Lost |
+|---|---|---|---|---|---|
+| Base with the two fixes | 336 | 317 | 359 (81.8 %) | | |
+| The last look alone (`gemma4-last-e4b`, `-s11`, `-12b`) | 338 | 321 | **363** (82.7 %) | 12 | 2 |
+| The group review alone (`gemma4-g9k-pool`, `gemma4-s11g`, `gemma4-12b-kg`) | 337 | 320 | 358 | 5 | 2 |
+| Both (`gemma4-c9k-pool`, `gemma4-s11c`, `gemma4-12b-kc`) | 339 | 324 | 362 (82.5 %) | 13 | 3 |
+
+- The E4B's two samples share three vaults; without repeats they are 742 tasks: base 553 (74.5 %), the last look 559
+  (75.3 %), both 562 (75.7 %). 594 are its 80 %.
+- The last look asks what had to be asked: missed questions 28 to 24, 26 to 21 and 35 to 27. Needless ones rise by 0, 2
+  and 2; wrong changes by 2, -1 and 2.
+- The group review is level on the 12B and 3 tasks better on the E4B's seed 11, within chance (5 to 2).
 
 ## 7. Rounds made shorter: the model's replies kept
 
