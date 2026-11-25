@@ -16,10 +16,14 @@ class DaysTool : ChatTool {
     override val name = NAME
 
     override val description =
-        "the days between two days: from and to, each a date (2026-12-06) or a phrase (today, next Friday); you " +
+        "the days between two days: ${FigureReason.TEXT}, from and to, each a date (2026-12-06) or a phrase (today, next Friday); you " +
             "get how many days apart they are. Never count days yourself."
 
     override val arguments = listOf(
+        ToolArgument(
+            name = FigureReason.WHY,
+            isReason = true
+        ),
         ToolArgument(name = FROM),
         ToolArgument(name = TO)
     )

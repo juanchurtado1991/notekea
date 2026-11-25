@@ -15,10 +15,16 @@ class CalculateTool : ChatTool {
     override val name = NAME
 
     override val description =
-        "an arithmetic expression with the figures you read, as 4250 * 12 + 18 * 5 or 15% of 240; you get " +
+        "${FigureReason.TEXT}, then an arithmetic expression with the figures you read, as 4250 * 12 + 18 * 5 or 15% of 240; you get " +
             "what it comes to. Never do sums yourself."
 
-    override val arguments = listOf(ToolArgument(name = EXPRESSION))
+    override val arguments = listOf(
+        ToolArgument(
+            name = FigureReason.WHY,
+            isReason = true
+        ),
+        ToolArgument(name = EXPRESSION)
+    )
     override val effect = ToolEffect.READS
 
     override fun targetOf(

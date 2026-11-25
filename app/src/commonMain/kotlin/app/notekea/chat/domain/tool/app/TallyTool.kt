@@ -20,11 +20,15 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
     override val name = NAME
 
     override val description =
-        "figures from lines of the notes you read, worked out by the app: how (sum, average, count, product, " +
+        "figures from lines of the notes you read, worked out by the app: ${FigureReason.TEXT}, how (sum, average, count, product, " +
             "min, max or difference), items (each \"figure | the line it is on\", one for every line that counts), " +
             "left_out (each \"line | why it does not count\": refunded, paid, another year). Never add up yourself."
 
     override val arguments = listOf(
+        ToolArgument(
+            name = FigureReason.WHY,
+            isReason = true
+        ),
         ToolArgument(name = HOW),
         ToolArgument(
             name = ITEMS,
