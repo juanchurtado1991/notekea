@@ -1,44 +1,57 @@
 package app.notekea.chat.domain.plan
 
+import app.notekea.chat.domain.tool.app.FigureValues
+
 /**
- * The figures of a text written from notes that the notes do not hold: a price, a date or a measure a model makes up
- * reads as true as the ones it copied. Checked after writing, as its last step; one-digit numbers are left out
- * (counts, list numbers), which a text may well say without the notes writing them.
+ * The figures of a text written from notes that the notes do not hold, checked as its last step: a price made up reads
+ * as true as one copied. One-digit numbers (counts, list numbers) and what the copied ones add up to ([WorkedFigures])
+ * are left out: a right total was taken for a made-up one and written out of the note (dev, 2026-11-25).
  */
 internal object BackedFigures {
-    private val FIGURE = Regex(pattern = "\\d+(?:[.,]\\d+)?")
+    private val FIGURE = Regex(pattern = "\\d[\\d.,]*")
     private const val MIN_DIGITS = 2
 
     fun missingIn(
         text: String,
         sources: List<String>
     ): List<String> {
-        val held = sources
-            .flatMap { source ->
-                FIGURE.findAll(input = source).map { normal(figure = it.value) }
-            }
-            .toSet()
+        val held = sources.flatMap { FigureValues.allIn(text = it) }
 
-        return FIGURE
-            .findAll(input = text)
-            .map { it.value }
-            .filter { figure ->
-                figure.count { it.isDigit() } >= MIN_DIGITS
-            }
-            .filter {
-                normal(figure = it) !in held
+        return text
+            .lines()
+            .flatMap { line ->
+                FIGURE
+                    .findAll(input = line)
+                    .map { it.value.trimEnd('.', ',') }
+                    .filter { figure ->
+                        figure.count { it.isDigit() } >= MIN_DIGITS
+                    }
+                    .filterNot { isBacked(it, line, text, sources, held) }
             }
             .distinct()
-            .toList()
     }
 
-    // "2,60" and "2.60" and "2.6" are one figure.
-    private fun normal(figure: String): String {
-        val dotted = figure.replace(
-            oldChar = ',',
-            newChar = '.'
-        )
+    // A mark that is no value ("12.03.2026", a version) is backed where a note writes it so.
+    private fun isBacked(
+        figure: String,
+        line: String,
+        text: String,
+        sources: List<String>,
+        held: List<Double>
+    ): Boolean {
+        val value = FigureValues.valueOf(written = figure)
+            ?: return sources.any {
+                figure in it
+            }
 
-        return if ('.' in dotted) dotted.trimEnd('0').trimEnd('.') else dotted
+        return WorkedFigures.isAmong(
+            value = value,
+            values = held
+        ) || WorkedFigures.isWorked(
+            value = value,
+            line = line,
+            text = text,
+            held = held
+        )
     }
 }
