@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * The replies of an evaluation's model kept on disk under what decides each (the model's file, the messages, how it is
- * written), so a round made again asks the model only what changed. Only for the rounds that tune: a kept reply hides
- * that a GPU gives another one now and then (`docs/gemma-plan.md`, section 7).
+ * written), so a round made again asks the model only what changed. Never for a number that stands alone: a kept reply
+ * hides that a GPU gives another one now and then (`docs/gemma-plan.md`, section 7).
  */
 internal class ReplyCache(
     private val engine: LlmEngine,

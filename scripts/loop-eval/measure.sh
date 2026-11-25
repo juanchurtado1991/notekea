@@ -22,9 +22,14 @@ out=$runs/$label
 tests=app.notekea.chat.eval.AgentEvalChatModelTest
 
 # NOTEKEA_REPLIES=<folder> keeps the model's replies there and reads them back (ReplyCache): a round made again asks
-# the model only what changed. Never for the pool, the reference nor the sealed exams, whose numbers count.
-replies=()
-case $what in frame|tuned|dev) [ -n "${NOTEKEA_REPLIES:-}" ] && replies=("-PchatReplies=$NOTEKEA_REPLIES") ;; esac
+# the model only what changed. The pool's are kept apart, in <folder>-pool, and never read by anyone: two of its rounds
+# then differ only where the code does. Never for the reference nor the sealed exams, whose numbers stand alone.
+replies=(); kept=""
+[ -n "${NOTEKEA_REPLIES:-}" ] && case $what in
+  frame|tuned|dev) kept=$NOTEKEA_REPLIES ;;
+  pool) kept=$NOTEKEA_REPLIES-pool ;;
+esac
+[ -n "$kept" ] && replies=("-PchatReplies=$kept")
 # NOTEKEA_TASKS=<file> measures only the tasks the file lists, a line each (fastset.py): a shorter round to tune with.
 [ -n "${NOTEKEA_TASKS:-}" ] && case $what in tuned|dev) replies+=("-PchatTaskFile=$NOTEKEA_TASKS") ;; esac
 
@@ -54,5 +59,5 @@ start=$(date +%s)
 ./gradlew :app:chatModelTest --rerun --console=plain --tests "$filter" \
   "-PchatModels=$models" "-PchatSize=$size" "${extra[@]}" "${replies[@]}" > "$out/gradle-$what-$size.log" 2>&1
 echo "$what $size exit=$? minutes=$(( ($(date +%s) - start) / 60 ))" | tee -a "$out/status.txt"
-[ -n "${NOTEKEA_REPLIES:-}" ] && [ ${#replies[@]} -gt 0 ] && tail -n 1 "$NOTEKEA_REPLIES/rounds.txt" | tee -a "$out/status.txt"
+[ -n "$kept" ] && tail -n 1 "$kept/rounds.txt" | tee -a "$out/status.txt"
 cp app/build/reports/$files "$out/" 2>/dev/null
