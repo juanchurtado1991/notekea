@@ -287,12 +287,12 @@ the notes left open are all about one person was tried and left out, as the E4B 
 **What is next, read on dev:** of the wrong figures and changes, 24 of 44 on the E4B and 18 of 29 on the 12B are tasks
 that pick several notes or lines by a condition ("every report card with a grade under 65", "the unpaid invoices").
 
-**Measured the night of 2026-11-24 and not kept** (patches in `~/.cache/notekea-loop-runs`, none in the code):
+**Measured the night of 2026-11-24 and not kept then** (patches in `~/.cache/notekea-loop-runs`, none in the code):
 
 - **Picking by a condition** (a `select` tool; `gemma4-select`): the E4B writes the condition wrong as often as it picks
   wrong.
-- **A last look before a change or an answer** (`cover-c9`): what else the request could be about, asked when something
-  is.
+- **A last look before a change** (`cover-c9`): what else the request could be about, asked when something is. Kept the
+  day after, once measured alone (below).
 - **Each note of a change judged on its own text**, its mentions in other notes and those like it that were missed
   (`group-g9`). Wrong changes on dev went 24 to 15 over nine versions and the pool did not follow: nine versions on the
   same 393 tasks fit those tasks. At most three versions of an idea are tried on dev before the pool.
@@ -331,6 +331,9 @@ version over the base with the two fixes):
 - The last look asks what had to be asked: missed questions 28 to 24, 26 to 21 and 35 to 27. Needless ones rise by 0, 2
   and 2; wrong changes by 2, -1 and 2.
 - The group review is level on the 12B and 3 tasks better on the E4B's seed 11, within chance (5 to 2).
+
+**Kept: the last look, on both models** (the developer, 2026-11-25; `OtherTargets`, `docs/agent-frame.md`). The group
+review stays out.
 
 ## 7. Rounds made shorter: the model's replies kept
 

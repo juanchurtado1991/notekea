@@ -63,6 +63,14 @@ expressions: `AmbiguousTask`, `SingularTask`, `ToldApart`, `SharedNames`, `Memor
    | Every | Never asked which |
    | None, or no frame | Nothing is held back for it |
 
+   **The last look** (`OtherTargets`, 2026-11-25): the frame judges before anything is read; when a change to one
+   thing is proposed, its note and its line are known. The code finds what else the request could be about: the notes
+   whose names write the same words of it, the entries of the changed line's section and kind (`NoteEntries`), and
+   those of another note that write more of the request than the line does (`RequestCover`). An entry lacking a name
+   or a number the line shares with the request is another thing. The model marks each, as in the frame, and several
+   marked hold the change, once, for the person to choose. Not looked at: the open note, one the memory names, and a
+   change the frame says is to several.
+
    The loop's prompt says the frame in one line. A memory line naming a note the frame says the task does not mean
    is not given (`TurnSetup.memoryOf`). The words of an open question become the memory's line once the person
    picks one (`TaskFrame.rememberingOf`).

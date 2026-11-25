@@ -10,6 +10,7 @@ import app.notekea.chat.domain.agent.Remembering
 import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.context.ModelProfile
 import app.notekea.chat.domain.context.StepMemory
+import app.notekea.chat.domain.loop.OfferedTools.AGAIN
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.skill.VaultGuide
@@ -22,7 +23,6 @@ import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolRegistry
 import app.notekea.chat.domain.tool.app.ShowTool
 import app.notekea.chat.domain.tool.change.ProposeTool
-import app.notekea.chat.domain.tool.lookup.RecallTool
 import app.notekea.chat.domain.tool.work.AnswerTool
 import app.notekea.chat.domain.tool.work.AskUserTool
 import app.notekea.chat.domain.tool.work.HandTool
@@ -74,6 +74,12 @@ class RunTurnUseCase(
             llmEngine = llmEngine,
             modelJson = modelJson
         )
+    )
+
+    private val otherTargets = OtherTargets(
+        llmEngine = llmEngine,
+        modelJson = modelJson,
+        vaultGuide = vaultGuide
     )
 
     private val router = TurnRouter(
@@ -190,7 +196,7 @@ class RunTurnUseCase(
             val isStopped = state.mustStop && tool?.effect != ToolEffect.ENDS
             if (isStopped) return emit(value = unread(state = state))
 
-            val held = TurnChecks.heldOf(
+            val held = heldOf(
                 call = call,
                 state = state,
                 tool = tool
@@ -263,6 +269,20 @@ class RunTurnUseCase(
 
         emit(value = unread(state = state))
     }
+
+    // What the model is told instead of its call being made, else null.
+    private suspend fun heldOf(
+        call: ToolCall,
+        state: TurnState,
+        tool: ChatTool?
+    ): String? = TurnChecks.heldOf(
+        call = call,
+        state = state,
+        tool = tool
+    ) ?: otherTargets.heldOf(
+        call = call,
+        state = state
+    )
 
     // A call that reads or works: shown as a step, run once, and told when it is made again.
     private suspend fun FlowCollector<AgentStep>.made(
@@ -387,38 +407,10 @@ class RunTurnUseCase(
     ): ToolCall? {
         val fitted = StepRecall.shownOf(state = state)
 
-        // A call just made again is not offered for the next one: the model takes another way.
-        val again = state
-            .repeated
-            .lastOrNull()
-            ?.substringBefore(delimiter = ':')
-            ?.takeIf {
-                state
-                    .found
-                    .lastOrNull()
-                    ?.contains(other = AGAIN) == true
-            }
-
-        // Recall is offered once something is no longer shown: before, there is nothing to ask back.
-        val looking =
-            if (state.hidden.isEmpty()) state.tools.without(name = RecallTool.NAME) else state.tools
-
-        val offered = when {
-            state.mustStop -> state.tools.ends()
-            isEnding -> state.tools.ending()
-            else -> looking
-        }
-
-        val asking = state
-            .tools
-            .only(name = AskUserTool.NAME)
-            .takeIf { UnsettledEnd.mustAsk(state = state) }
-
-        val withheld = (listOfNotNull(again) + state.withheld)
-            .fold(initial = offered) { left, name -> left.without(name = name) }
-            .takeIf { it.tools.isNotEmpty() }
-
-        val tools = asking ?: withheld ?: offered
+        val tools = OfferedTools.of(
+            state = state,
+            isEnding = isEnding
+        )
 
         val json = try {
             ReplyText.of(
@@ -474,6 +466,5 @@ class RunTurnUseCase(
         private const val CALL_TOKENS = 700
         private const val RETRY_TOKENS = 1_400
         private const val WORK_TOKENS = 300
-        private const val AGAIN = "again: its result is above."
     }
 }
