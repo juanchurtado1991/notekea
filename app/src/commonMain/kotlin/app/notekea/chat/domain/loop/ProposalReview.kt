@@ -20,19 +20,22 @@ internal class ProposalReview(
     private val llmEngine: LlmEngine,
     private val modelJson: ModelJson
 ) {
-    /** Takes out of the turn's changes the notes the task does not ask for; none when the marks say nothing. */
+    /**
+     * Takes out of the turn's changes the notes the task does not ask for; none when the marks say nothing. Whether
+     * any was taken out.
+     */
     suspend fun review(
         state: TurnState,
         found: List<String>
-    ) {
+    ): Boolean {
         val notes = notesOf(state = state)
-        if (notes.size !in MANY..MOST) return
+        if (notes.size !in MANY..MOST) return false
 
         val marks = marksOf(
             notes = notes,
             state = state,
             found = found
-        ) ?: return
+        ) ?: return false
 
         val unasked = notes.filterIndexed { at, _ ->
             marks["$ID${at + 1}"] == FramePrompts.NO
@@ -40,7 +43,7 @@ internal class ProposalReview(
 
         // Every note marked no says nothing of any: the changes go on the card, where the person sees them.
         val saysNothing = unasked.isEmpty() || unasked.size == notes.size
-        if (saysNothing) return
+        if (saysNothing) return false
 
         val dropped = unasked.map { state.turn.noteNamed(name = it) }.toSet()
 
@@ -50,6 +53,8 @@ internal class ProposalReview(
             .drop {
                 state.turn.noteNamed(name = it) in dropped
             }
+
+        return true
     }
 
     private suspend fun marksOf(

@@ -54,14 +54,9 @@ internal class TurnEnd(
             ProposeTool.NAME -> if (isEmpty) {
                 unchanged(state = state)
             } else {
-                review.review(
-                    state = state,
-                    found = fittedOf(state = state)
-                )
-
-                proposed(
-                    state = state,
-                    summary = call.text(name = ProposeTool.SUMMARY)
+                reviewed(
+                    call = call,
+                    state = state
                 )
             }
 
@@ -78,6 +73,24 @@ internal class TurnEnd(
                 )
             }
         }
+    }
+
+    // The card of what the review left: a summary written before it would tell of notes the card no longer changes.
+    private suspend fun reviewed(
+        call: ToolCall,
+        state: TurnState
+    ): AgentStep {
+        val isCut = review.review(
+            state = state,
+            found = fittedOf(state = state)
+        )
+
+        val summary = if (isCut) "" else call.text(name = ProposeTool.SUMMARY)
+
+        return proposed(
+            state = state,
+            summary = summary
+        )
     }
 
     // The turn's kind changes notes: its change tools are offered.

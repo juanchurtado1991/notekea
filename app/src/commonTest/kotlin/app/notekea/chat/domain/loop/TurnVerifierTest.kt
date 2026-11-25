@@ -278,8 +278,8 @@ class TurnVerifierTest {
             )
         }
 
-    // The notes left on the card of a change to both books, each marked as [marks] says.
-    private suspend fun taggedWith(marks: String): List<String> {
+    // The card of a change to both books, each marked as [marks] says.
+    private suspend fun cardWith(marks: String): AgentStep.Proposed {
         script(
             """{"tool":"add_tag","notes":["Dune","Sapiens"],"tag":"later"}""",
             """{"tool":"propose","summary":"$SUMMARY"}""",
@@ -292,12 +292,15 @@ class TurnVerifierTest {
             notes = notes + books
         )
 
-        return (steps.last() as AgentStep.Proposed)
-            .steps
-            .single()
-            .notes
-            .map { it.nameWithoutExtension }
+        return steps.last() as AgentStep.Proposed
     }
+
+    // The notes left on that card.
+    private suspend fun taggedWith(marks: String): List<String> = cardWith(marks = marks)
+        .steps
+        .single()
+        .notes
+        .map { it.nameWithoutExtension }
 
     // Dev, 2026-11-24: asked to name the notes to drop, the Gemma E4B named those it meant to keep.
     @Test
@@ -330,6 +333,19 @@ class TurnVerifierTest {
                 actual = listOf(
                     taggedWith(marks = """{"N1":"no","N2":"no"}"""),
                     taggedWith(marks = """{"N1":"n""")
+                )
+            )
+        }
+
+    // Dev, 2026-11-25: the card's summary, written before the review, named the notes it had taken out.
+    @Test
+    fun `a card the review took a note out of drops the summary that names it, and any other keeps its own`() =
+        runTest {
+            assertEquals(
+                expected = listOf("", SUMMARY),
+                actual = listOf(
+                    cardWith(marks = """{"N1":"yes","N2":"no"}""").summary,
+                    cardWith(marks = """{"N1":"yes","N2":"yes"}""").summary
                 )
             )
         }
