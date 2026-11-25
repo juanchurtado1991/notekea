@@ -324,7 +324,7 @@ version over the base with the two fixes):
 | Base with the two fixes | 336 | 317 | 359 (81.8 %) | | |
 | The last look alone (`gemma4-last-e4b`, `-s11`, `-12b`) | 338 | 321 | **363** (82.7 %) | 12 | 2 |
 | The group review alone (`gemma4-g9k-pool`, `gemma4-s11g`, `gemma4-12b-kg`) | 337 | 320 | 358 | 5 | 2 |
-| Both (`gemma4-c9k-pool`, `gemma4-s11c`, `gemma4-12b-kc`) | 339 | 324 | 362 (82.5 %) | 13 | 3 |
+| Both (`gemma4-c9k-pool`, `gemma4-s11c`, `gemma4-12b-kc`) | 339 | 324 | 362 (82.5 %) | 17 | 4 |
 
 - The E4B's two samples share three vaults; without repeats they are 742 tasks: base 553 (74.5 %), the last look 559
   (75.3 %), both 562 (75.7 %). 594 are its 80 %.
