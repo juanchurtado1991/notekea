@@ -7,6 +7,7 @@ internal object FramePrompts {
     const val NO = "no"
     const val ITEM = "item"
     const val NOTE = "note"
+    const val NEW = "new"
 
     const val COUNT =
         """You read a request made to a notes app and say how many things in the person's notes it is about. You
@@ -17,10 +18,19 @@ are not shown the notes: judge by the request's words. Reply with JSON:
   "every" when it is about every note or entry a condition picks out ("all clients with an unpaid invoice", "my
   recipes", "the notes tagged travel", "every open task"). "none" when it is about no particular note (write a
   new note from nothing, a question about the app or the world).
-- words: the request's own words for what it is about, copied as written ("Laura", "the budget").
-- thing: "item" when the one thing is an item already inside a note that the request changes or asks about (an
-  appointment, an order, a row, a task, a payment); "note" when it is a whole note, a person or a document, and when
-  the request adds something new to a note ("add a task to my recipe", "add Ana to Contactos")."""
+- words: the shortest words of the request that name the one thing, copied as written: a person, a note, a place, an
+  order. Never the verb, what is asked about it, or a value it is given. "what's Laura's phone" -> "Laura". "how much
+  do I pay Ana a day" -> "Ana". "how much of the garden budget is left" -> "the garden budget". "move the appointment
+  with Pau to 11:00" -> "the appointment with Pau".
+- which: what else the request says to tell it from another of the same name, copied as written, or "": "what did
+  Tomás, the one from the chess club, say about the hall" -> "the one from the chess club". Never what is asked about
+  it: "what's Laura's phone" -> "".
+- thing: "new" when the request adds to a note something not yet written in it: a task, a reminder, a line, a row,
+  an entry ("add a task to my recipe", "add Ana to Contactos", "log today's run", "add 45 for bags to the budget").
+  "item" when it changes or asks about one line already written inside a note (an appointment moved, an order
+  cancelled, a row or a payment marked, a task done). "note" when it is a whole note, a person or a document, and
+  always when the request tags, links, renames or moves the note or sets a property of it ("tag my sleep log",
+  "link the trip with its budget")."""
 
     const val MARK_NOTES =
         """A request made to a notes app is about one thing in the person's notes, and each note below (N1, N2…)

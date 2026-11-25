@@ -24,14 +24,14 @@ internal class FrameQuestions(
         memory: List<MemoryLine>
     ): FrameCountReply? {
         val counts = FrameCount.entries.joinToString(separator = ",") { "\"${it.written}\"" }
-        val things = "\"${FramePrompts.NOTE}\",\"${FramePrompts.ITEM}\""
+        val things = "\"${FramePrompts.NOTE}\",\"${FramePrompts.ITEM}\",\"${FramePrompts.NEW}\""
 
         val fields = asked(
             system = FramePrompts.COUNT,
             user = "${remembered(memory = memory)}Request: $task",
             schema = "{\"type\":\"object\",\"properties\":{\"$COUNT\":{\"enum\":[$counts]}," +
-                "\"$WORDS\":{\"type\":\"string\"},\"$THING\":{\"enum\":[$things]}}," +
-                "\"required\":[\"$COUNT\",\"$WORDS\",\"$THING\"]}"
+                "\"$WORDS\":{\"type\":\"string\"},\"$WHICH\":{\"type\":\"string\"},\"$THING\":{\"enum\":[$things]}}," +
+                "\"required\":[\"$COUNT\",\"$WORDS\",\"$WHICH\",\"$THING\"]}"
         ) ?: return null
 
         val count = FrameCount.entries.firstOrNull {
@@ -41,6 +41,7 @@ internal class FrameQuestions(
         return FrameCountReply(
             count = count,
             words = fields[WORDS].orEmpty(),
+            which = fields[WHICH].orEmpty(),
             isItem = fields[THING] == FramePrompts.ITEM
         )
     }
@@ -187,6 +188,7 @@ internal class FrameQuestions(
         const val COUNT = "count"
         const val WORDS = "words"
         const val THING = "thing"
+        const val WHICH = "which"
         const val TOKENS = 100
         const val MARK_TOKENS = 10
         const val MOST_MARKED = 12

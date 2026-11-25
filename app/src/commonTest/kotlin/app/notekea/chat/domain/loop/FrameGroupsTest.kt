@@ -180,4 +180,28 @@ class FrameGroupsTest {
             )
         )
     }
+
+    // Dev, 2026-11-24: "my lab budget" was open between Lab/Budget and Travel/Budget, as "lab" has three letters, and
+    // "the team budget" between two whose first heading says which is the team's.
+    @Test
+    fun `a folder of three letters and a note's own title settle the set`() {
+        val lab = candidate(path = "Lab/Budget.md")
+        val travel = candidate(path = "Travel/Budget.md")
+        val admin = candidate(path = "Admin/Budget.md").copy(title = "# Team budget 2026")
+        val hiring = candidate(path = "Hiring/Budget.md").copy(title = "# Open roles")
+
+        assertEquals(
+            expected = listOf(lab, admin),
+            actual = listOf(
+                FrameGroups.settledOf(
+                    task = "how much of my lab budget is paid?",
+                    group = listOf(lab, travel)
+                ),
+                FrameGroups.settledOf(
+                    task = "how much of the team budget is left?",
+                    group = listOf(admin, hiring)
+                )
+            )
+        )
+    }
 }

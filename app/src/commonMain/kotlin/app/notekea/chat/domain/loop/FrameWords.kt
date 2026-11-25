@@ -15,6 +15,16 @@ internal object FrameWords {
         .map { folded(text = it) }
         .toSet()
 
+    /** The words of three letters [text] writes in any case: one names a note only as a word of its path, "lab". */
+    fun shortOf(text: String): Set<String> = WORD
+        .findAll(input = text)
+        .map { it.value }
+        .filter {
+            it.length == NAME
+        }
+        .map { folded(text = it) }
+        .toSet()
+
     /** The numbers [text] writes, as written: a number names a note only exactly, "47" is no "470". */
     fun numbersOf(text: String): Set<String> = NUMBER
         .findAll(input = text)

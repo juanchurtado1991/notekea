@@ -193,8 +193,29 @@ internal class VaultNames(
                 .equals(wanted, ignoreCase = true)
         }
             ?: paths.firstOrNull { it.nameWithoutExtension.equals(wanted, ignoreCase = true) }
+            ?: alikeOf(wanted = wanted)
             ?: throw ProblemFound(problem = ActionProblem.UnknownNote(name = name))
     }
+
+    // The one note whose path, or else whose name, has the same letters and digits: a model splits a name's word
+    // ("Payout s v2" for "Payouts v2") and cannot write it otherwise. Two such notes are none.
+    private fun alikeOf(wanted: String): RelativePath? {
+        val key = keyOf(text = wanted)
+        if (key.isEmpty()) return null
+
+        return paths
+            .filter {
+                keyOf(text = it.bare()) == key
+            }
+            .ifEmpty {
+                paths.filter {
+                    keyOf(text = it.nameWithoutExtension) == key
+                }
+            }
+            .singleOrNull()
+    }
+
+    private fun keyOf(text: String): String = text.lowercase().filter { it.isLetterOrDigit() }
 
     private fun folderOf(name: String): RelativePath {
         val wanted = name.trim().trim('/')

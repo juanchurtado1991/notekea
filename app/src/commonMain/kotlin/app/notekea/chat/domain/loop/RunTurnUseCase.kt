@@ -69,7 +69,11 @@ class RunTurnUseCase(
 
     private val turnEnd = TurnEnd(
         finalAnswer = finalAnswer,
-        proposal = proposal
+        proposal = proposal,
+        review = ProposalReview(
+            llmEngine = llmEngine,
+            modelJson = modelJson
+        )
     )
 
     private val router = TurnRouter(

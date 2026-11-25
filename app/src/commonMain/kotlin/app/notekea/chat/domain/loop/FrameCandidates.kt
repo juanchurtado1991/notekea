@@ -10,14 +10,15 @@ import app.notekea.core.notes.domain.RelativePath
 internal object FrameCandidates {
     /**
      * A note shown to the frame's model: its path, its first line, the entries the task's words touch, the [lines]
-     * that write one of them, and every word it writes ([words]): what tells it apart from a note of the same name.
+     * that write one of them, and what tells it from a note of the same name: the [words] it writes and its [title].
      */
     data class Candidate(
         val path: RelativePath,
         val gist: String,
         val entries: List<String>,
         val lines: List<String> = emptyList(),
-        val words: Set<String> = emptySet()
+        val words: Set<String> = emptySet(),
+        val title: String = ""
     )
 
     fun of(
@@ -38,7 +39,11 @@ internal object FrameCandidates {
                 task = task,
                 text = text
             ),
-            words = FrameWords.of(text = text)
+            words = FrameWords.of(text = text),
+            title = text
+                .lineSequence()
+                .firstOrNull { it.startsWith(prefix = "# ") }
+                .orEmpty()
         )
     }
 
@@ -150,9 +155,13 @@ internal object FrameCandidates {
                 }
             }
 
+        // A table's heading row, the one above its rule, names the columns: it is no entry. The Gemma E4B marked
+        // "| Bill | Amount | Due | Paid |" as the water bill to mark paid (the frame alone, 2026-11-24).
         val entries = lines
             .zip(other = sections.drop(n = 1))
-            .filter { (line, _) -> isEntry(line = line) }
+            .filterIndexed { index, (line, _) ->
+                isEntry(line = line) && !isRule(line = lines.getOrNull(index = index + 1).orEmpty())
+            }
 
         val touched = entries.filter { (line, isSection) ->
             isSection || touches(line = line, words = words)
@@ -185,11 +194,13 @@ internal object FrameCandidates {
     }
 
     // A list item, a task, a numbered item or a table row that is not the table's rule.
-    private fun isEntry(line: String): Boolean {
-        val isRule = line.startsWith(prefix = "|") && line.all { it in RULE }
+    private fun isEntry(line: String): Boolean =
+        ITEM.containsMatchIn(input = line) || isRow(line = line)
 
-        return ITEM.containsMatchIn(input = line) || (line.startsWith(prefix = "|") && !isRule)
-    }
+    private fun isRow(line: String): Boolean = line.startsWith(prefix = "|") && !isRule(line = line)
+
+    private fun isRule(line: String): Boolean =
+        line.startsWith(prefix = "|") && line.all { it in RULE }
 
     private val ITEM = Regex(pattern = "^([-*+]\\s|\\d+[.)]\\s)")
     private const val RULE = "|-: "

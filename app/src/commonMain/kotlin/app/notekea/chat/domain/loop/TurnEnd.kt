@@ -19,7 +19,8 @@ import app.notekea.chat.domain.tool.work.AskUserTool
  */
 internal class TurnEnd(
     private val finalAnswer: AgentFinalAnswer,
-    private val proposal: ProposalCheck
+    private val proposal: ProposalCheck,
+    private val review: ProposalReview
 ) {
     suspend fun stepOf(
         call: ToolCall,
@@ -53,6 +54,11 @@ internal class TurnEnd(
             ProposeTool.NAME -> if (isEmpty) {
                 unchanged(state = state)
             } else {
+                review.review(
+                    state = state,
+                    found = fittedOf(state = state)
+                )
+
                 proposed(
                     state = state,
                     summary = call.text(name = ProposeTool.SUMMARY)

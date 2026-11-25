@@ -28,13 +28,6 @@ internal object TurnChecks {
             state = state
         )
 
-        if (call.name == ProposeTool.NAME) {
-            ProposalReview.dropped(
-                call = call,
-                state = state
-            )
-        }
-
         return when {
             unread != null -> unread
 
@@ -66,9 +59,6 @@ internal object TurnChecks {
                 call = call,
                 state = state
             ) ?: AnswerFigures.heldOf(
-                call = call,
-                state = state
-            ) ?: ProposalReview.heldOf(
                 call = call,
                 state = state
             )

@@ -34,7 +34,7 @@ import kotlin.time.Clock
 
 /**
  * The loop's checks before a turn ends (`docs/agent-loop.md`, "Why the loop fails", items 3 and 4): a task that can
- * mean several notes is asked back, and a change to several notes is listed back once to drop what does not fit.
+ * mean several notes is asked back, and each note of a change to several is marked before the card.
  */
 class TurnVerifierTest {
     private val engine = FakeLlmEngine()
@@ -87,7 +87,8 @@ class TurnVerifierTest {
     private fun script(
         vararg calls: String,
         work: String = "ask",
-        skill: String = "none"
+        skill: String = "none",
+        marks: String = ""
     ) {
         val left = ArrayDeque(elements = calls.toList())
         val route = """{"work":"$work","skill":"$skill"}"""
@@ -98,6 +99,7 @@ class TurnVerifierTest {
             when {
                 asked.startsWith(prefix = "You say how a request") -> route
                 asked.startsWith(prefix = CALLS) -> left.removeFirst()
+                asked.startsWith(prefix = REVIEW) -> marks
                 else -> "The rent is **11,400 euros** a year."
             }
         }
@@ -261,45 +263,73 @@ class TurnVerifierTest {
         )
     }
 
-    @Test
-    fun `a change to several notes is listed back once with what each holds, and the ones dropped are left out`() =
-        runTest {
-            val books =
-                listOf("4" to "Books/Dune.md", "3" to "Books/Sapiens.md").map { (rating, path) ->
-                    entry(
-                        path = path,
-                        metadata = NoteMetadata.NONE.copy(
-                            properties = listOf(
-                                NoteProperty(
-                                    key = "rating",
-                                    value = PropertyValue.Number(text = rating)
-                                )
-                            )
+    private val books =
+        listOf("4" to "Books/Dune.md", "3" to "Books/Sapiens.md").map { (rating, path) ->
+            entry(
+                path = path,
+                metadata = NoteMetadata.NONE.copy(
+                    properties = listOf(
+                        NoteProperty(
+                            key = "rating",
+                            value = PropertyValue.Number(text = rating)
                         )
                     )
+                )
+            )
+        }
+
+    // The notes left on the card of a change to both books, each marked as [marks] says.
+    private suspend fun taggedWith(marks: String): List<String> {
+        script(
+            """{"tool":"add_tag","notes":["Dune","Sapiens"],"tag":"later"}""",
+            """{"tool":"propose","summary":"$SUMMARY"}""",
+            work = "organize",
+            marks = marks
+        )
+
+        val steps = run(
+            task = "tag the books I rated 4 with later",
+            notes = notes + books
+        )
+
+        return (steps.last() as AgentStep.Proposed)
+            .steps
+            .single()
+            .notes
+            .map { it.nameWithoutExtension }
+    }
+
+    // Dev, 2026-11-24: asked to name the notes to drop, the Gemma E4B named those it meant to keep.
+    @Test
+    fun `each note of a change to several is marked by what it holds, and the ones marked no are left out`() =
+        runTest {
+            val tagged = taggedWith(marks = """{"N1":"yes","N2":"no"}""")
+
+            val shown = engine
+                .generated
+                .single {
+                    it
+                        .first()
+                        .text
+                        .startsWith(prefix = REVIEW)
                 }
-
-            script(
-                """{"tool":"add_tag","notes":["Dune","Sapiens"],"tag":"later"}""",
-                """{"tool":"propose","summary":"$SUMMARY"}""",
-                """{"tool":"propose","summary":"$SUMMARY","drop":["Sapiens"]}""",
-                work = "organize"
-            )
-
-            val steps = run(
-                task = "tag the books I rated 4 with later",
-                notes = notes + books
-            )
+                .last()
+                .text
 
             assertEquals(
-                expected = listOf(true, listOf("Dune")),
+                expected = listOf(listOf("Dune"), true),
+                actual = listOf(tagged, "N1 Dune: rating: 4\nN2 Sapiens: rating: 3" in shown)
+            )
+        }
+
+    @Test
+    fun `marks that say nothing, every note no or a reply cut short, leave the change as it was`() =
+        runTest {
+            assertEquals(
+                expected = List(size = 2) { listOf("Dune", "Sapiens") },
                 actual = listOf(
-                    "- Dune: rating: 4\n- Sapiens: rating: 3\n" in callPrompts()[2],
-                    (steps.last() as AgentStep.Proposed)
-                        .steps
-                        .single()
-                        .notes
-                        .map { it.nameWithoutExtension }
+                    taggedWith(marks = """{"N1":"no","N2":"no"}"""),
+                    taggedWith(marks = """{"N1":"n""")
                 )
             )
         }
@@ -307,5 +337,6 @@ class TurnVerifierTest {
     private companion object {
         const val SUMMARY = "Tags the books."
         const val CALLS = "You work on a task in the person's notes"
+        const val REVIEW = "A person's request changes notes"
     }
 }

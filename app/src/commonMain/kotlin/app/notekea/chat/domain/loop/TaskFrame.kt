@@ -81,9 +81,10 @@ data class TaskFrame(
                 "says which: ask the person with ask_user, these as the options, before changing or answering."
 
         openEntries.isNotEmpty() ->
-            "The task means one entry of ${notes.single().bare()} and its words fit ${openEntries.size}: " +
-                "${openEntries.joinToString(separator = "; ")}. Ask the person which with ask_user, these as " +
-                "the options, before changing it."
+            "The task means ${notes.single().bare()}. When it changes one entry already written there, its " +
+                "words fit ${openEntries.size}: ${openEntries.joinToString(separator = "; ")}. Ask the person " +
+                "which with ask_user, these as the options, before changing it. A change to the note as a " +
+                "whole (a tag, a property, a link, a rename) needs no question: make it."
 
         meant != null ->
             "The task means ${meant.bare()}" + entry?.let { ", its entry \"$it\"" }.orEmpty() +

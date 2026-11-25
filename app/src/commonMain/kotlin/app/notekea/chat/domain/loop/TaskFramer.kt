@@ -65,6 +65,9 @@ class TaskFramer(
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
         val words = reply.words.ifBlank { task }
 
+        // What tells it from another of its kind is no word of its name: "Rita, the one from the book club".
+        val told = "$words ${reply.which}"
+
         val group = FrameGroups
             .of(
                 task = words,
@@ -74,7 +77,7 @@ class TaskFramer(
 
         val (fits, reason) = group
             ?.let {
-                fitsOf(task, words, it, memory) ?: return null
+                fitsOf(task, told, it, memory) ?: return null
             }
             ?: (emptyList<FrameCandidates.Candidate>() to FrameReason.PICK)
 
@@ -99,7 +102,7 @@ class TaskFramer(
         }
 
         val (meant, by) = if (group == null && namesakes.size > 1) {
-            val (fitting, said) = fitsOf(task, words, namesakes, memory) ?: return null
+            val (fitting, said) = fitsOf(task, told, namesakes, memory) ?: return null
             if (fitting.size != 1) return targetsOf(fitting.ifEmpty { namesakes }) to said
 
             fitting.single() to said

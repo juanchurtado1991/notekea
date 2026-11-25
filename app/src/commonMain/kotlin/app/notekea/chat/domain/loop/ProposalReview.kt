@@ -3,48 +3,46 @@ package app.notekea.chat.domain.loop
 import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.NoteProperties
-import app.notekea.chat.domain.tool.ToolCall
-import app.notekea.chat.domain.tool.ToolEffect
-import app.notekea.chat.domain.tool.change.ProposeTool
-import app.notekea.core.notes.domain.RelativePath
+import app.notekea.chat.domain.tool.ModelJson
+import app.notekea.core.llm.domain.ChatMessage
+import app.notekea.core.llm.domain.ChatRole
+import app.notekea.core.llm.domain.GenerationOptions
+import app.notekea.core.llm.domain.LlmEngine
+import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.ReplyText
 
 /**
- * The notes of a change to many, listed back once before the card with what each holds, so the model drops those
- * the task does not ask for (`docs/agent-loop.md`, "Why the loop fails", item 4).
+ * The notes of a change to many, each marked by the model as one the task asks to change or not, by what it holds,
+ * and those it does not ask taken out before the card. Asked to name the ones to drop, the Gemma E4B named the ones
+ * it meant to keep and emptied its own proposal (dev, 2026-11-24): it marks each one, as the frame's questions do.
  */
-internal object ProposalReview {
-    /** What the model is told when [call] proposes changes to several notes for the first time, else null. */
-    fun heldOf(
-        call: ToolCall,
-        state: TurnState
-    ): String? {
-        val notes = notesOf(state = state)
-        val isFirst = call.name == ProposeTool.NAME && notes.size >= MANY
-
-        if (!isFirst || !state.told.add(REVIEWED)) return null
-
-        val listed = notes
-            .joinToString(separator = "\n") { name ->
-                "- $name: ${heldBy(name = name, state = state)}"
-            }
-
-        return "(Not proposed yet. The changes act on these notes; check each against the task by what it " +
-            "holds:\n$listed\nA note that lists or links the others (a reading list, a menu, a home page) is " +
-            "not one of them. Call propose again, with drop naming each note the task does not ask for, or " +
-            "none.)"
-    }
-
-    /** The notes [call] drops taken out of the turn's changes, by their names or paths. */
-    fun dropped(
-        call: ToolCall,
-        state: TurnState
+internal class ProposalReview(
+    private val llmEngine: LlmEngine,
+    private val modelJson: ModelJson
+) {
+    /** Takes out of the turn's changes the notes the task does not ask for; none when the marks say nothing. */
+    suspend fun review(
+        state: TurnState,
+        found: List<String>
     ) {
-        val dropped = call
-            .list(name = ProposeTool.DROP)
-            .mapNotNull { state.turn.noteNamed(name = it) }
-            .toSet()
+        val notes = notesOf(state = state)
+        if (notes.size !in MANY..MOST) return
 
-        if (dropped.isEmpty()) return
+        val marks = marksOf(
+            notes = notes,
+            state = state,
+            found = found
+        ) ?: return
+
+        val unasked = notes.filterIndexed { at, _ ->
+            marks["$ID${at + 1}"] == FramePrompts.NO
+        }
+
+        // Every note marked no says nothing of any: the changes go on the card, where the person sees them.
+        val saysNothing = unasked.isEmpty() || unasked.size == notes.size
+        if (saysNothing) return
+
+        val dropped = unasked.map { state.turn.noteNamed(name = it) }.toSet()
 
         state
             .turn
@@ -52,12 +50,47 @@ internal object ProposalReview {
             .drop {
                 state.turn.noteNamed(name = it) in dropped
             }
+    }
 
-        // A change taken out may be asked for again: its call is no longer one already made (the loop's eighth run
-        // answered "is in the proposal" for a change the drop had removed, and the turn ended with nothing).
-        state.made.removeAll { key ->
-            state.tools[key.substringBefore(delimiter = ':')]?.effect == ToolEffect.PROPOSES
+    private suspend fun marksOf(
+        notes: List<String>,
+        state: TurnState,
+        found: List<String>
+    ): Map<String, String>? {
+        val listed = notes
+            .mapIndexed { at, name -> "$ID${at + 1} $name: ${heldBy(name = name, state = state)}" }
+            .joinToString(separator = "\n")
+
+        val ids = notes.indices.map { "\"$ID${it + 1}\"" }
+        val mark = "{\"enum\":[\"${FramePrompts.YES}\",\"${FramePrompts.NO}\"]}"
+
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = listOf(
+                    ChatMessage(
+                        role = ChatRole.SYSTEM,
+                        text = INSTRUCTIONS
+                    ),
+                    ChatMessage(
+                        role = ChatRole.USER,
+                        text = "What was found:\n${found.joinToString(separator = "\n\n")}\n\n" +
+                            "Request: ${state.task}\n\nNotes:\n$listed"
+                    )
+                ),
+                options = GenerationOptions(
+                    maxTokens = TOKENS + MARK_TOKENS * notes.size,
+                    temperature = 0f,
+                    jsonSchema = "{\"type\":\"object\",\"properties\":{" +
+                        ids.joinToString(separator = ",") { "$it:$mark" } +
+                        "},\"required\":[${ids.joinToString(separator = ",")}]}"
+                )
+            )
+        } catch (_: LlmException) {
+            return null
         }
+
+        return modelJson.fields(json = json)
     }
 
     // The notes the changes act on, each once, as they were written: a new note's sources are what it is written
@@ -76,12 +109,12 @@ internal object ProposalReview {
             state.turn.noteNamed(name = it) ?: it
         }
 
-    // Its properties, tags and open tasks: what a condition of the task is checked on.
+    // Its properties, tags and open tasks, then what it says: what a condition of the task is checked on.
     private fun heldBy(
         name: String,
         state: TurnState
     ): String {
-        val path: RelativePath? = state.turn.noteNamed(name = name)
+        val path = state.turn.noteNamed(name = name)
 
         val note = state
             .turn
@@ -106,6 +139,17 @@ internal object ProposalReview {
             .ifEmpty { "no properties" }
     }
 
-    private const val MANY = 2
-    private const val REVIEWED = "proposal reviewed"
+    private companion object {
+        const val ID = "N"
+        const val MANY = 2
+        const val MOST = 40
+        const val TOKENS = 40
+        const val MARK_TOKENS = 10
+
+        const val INSTRUCTIONS =
+            """A person's request changes notes of their app. Each note below (N1, N2…) is one a change was prepared
+for, with what it holds. Mark "yes" when the request asks to change that note, "no" when it does not: it does not meet
+the request's condition, or it only lists or links the others (a reading list, a menu, a home page). Judge each note
+alone. Reply with JSON, every note marked: {"N1":"yes","N2":"no"}"""
+    }
 }

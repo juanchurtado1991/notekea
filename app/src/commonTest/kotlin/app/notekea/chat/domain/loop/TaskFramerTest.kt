@@ -249,4 +249,21 @@ class TaskFramerTest {
                 actual = listOf(every?.isSeveral, calls, cut, nothing, engine.generated.size)
             )
         }
+
+    @Test
+    fun `what the task says to tell its thing from another of its name settles it`() = runTest {
+        val words =
+            """{"count":"one","words":"the budget","which":"the kitchen one","thing":"note"}"""
+
+        val frame = frameOf(
+            task = "what is the total of the budget, the kitchen one?",
+            candidates = listOf(kitchen, work),
+            replies = mapOf(FramePrompts.COUNT to words)
+        )
+
+        assertEquals(
+            expected = kitchen.path,
+            actual = frame?.meant
+        )
+    }
 }

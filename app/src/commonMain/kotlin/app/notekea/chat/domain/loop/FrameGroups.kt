@@ -44,8 +44,11 @@ internal object FrameGroups {
         task: String,
         group: List<FrameCandidates.Candidate>
     ): FrameCandidates.Candidate? {
-        // A number of a name is a word of it too: "ADR-015", "sprint 47", "chapter 2" (the frame alone, 2026-11-18).
-        val words = FrameWords.of(text = task) + FrameWords.numbersOf(text = task)
+        // A number of a name is a word of it too: "ADR-015", "sprint 47", "chapter 2" (the frame alone, 2026-11-18);
+        // and one of three letters: "my lab budget" is Lab/Budget.
+        val words = FrameWords.of(text = task) +
+            FrameWords.numbersOf(text = task) +
+            FrameWords.shortOf(text = task)
 
         val named = group.filter { candidate ->
             val others = group
@@ -152,7 +155,9 @@ internal object FrameGroups {
             .path
             .bare()
 
-        return FrameWords.of(text = title) + FrameWords.numbersOf(text = title)
+        return FrameWords.of(text = title) +
+            FrameWords.numbersOf(text = title) +
+            FrameWords.of(text = candidate.title)
     }
 
     private const val MOST = 6

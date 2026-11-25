@@ -138,6 +138,26 @@ class PlanPathsTest {
         )
     }
 
+    // Dev, 2026-11-24: the Gemma E4B could only write "Payouts v2" as "Payout s v2", and no call found the note.
+    @Test
+    fun `a name split or joined by the model is the one note of the same letters, and two such notes are none`() {
+        val names = VaultNames(
+            notes = listOf("Projects/Payouts v2.md", "Ideas/A B.md", "Ideas/AB.md").map {
+                entry(path = it)
+            },
+            openNote = null
+        )
+
+        val found = listOf("Projects/Payout s v2", "Payout s v2", "a-b").map {
+            runCatching { names.noteOf(name = it).value }.getOrNull()
+        }
+
+        assertEquals(
+            expected = listOf("Projects/Payouts v2.md", "Projects/Payouts v2.md", null),
+            actual = found
+        )
+    }
+
     private companion object {
         const val UPPER = "#ROAD-TRIP"
         val RETRO = listOf("Retro")

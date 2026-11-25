@@ -56,7 +56,10 @@ class ChangeTool(
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val called = calledOf(call = call)
+        val called = NewNoteTitle.placed(
+            step = calledOf(call = call),
+            notes = context.notes
+        )
 
         val empty = emptyOf(call = call)
         if (empty != null) return ToolResult(forModel = "$name: not added. $empty")

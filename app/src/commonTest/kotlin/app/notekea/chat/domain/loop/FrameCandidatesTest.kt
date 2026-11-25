@@ -78,7 +78,7 @@ class FrameCandidatesTest {
         assertEquals(
             expected = listOf(
                 listOf("- 2026-12-01 10:00 cleaning", "- 2026-12-09 16:30 filling"),
-                listOf("| Date | Paid |", "| 2026-10-02 | 40 |", "- insurance card renewed")
+                listOf("| 2026-10-02 | 40 |", "- insurance card renewed")
             ),
             actual = listOf(
                 FrameCandidates.entriesOf(
@@ -107,6 +107,25 @@ class FrameCandidatesTest {
             expected = listOf("- 2026-11-13 07:30 strength progression", "- 2026-11-20 07:30 physio review"),
             actual = FrameCandidates.entriesOf(
                 task = "move my physio appointment to 8:00",
+                text = text
+            )
+        )
+    }
+
+    // The frame alone, 2026-11-24: "| Bill | Amount | Paid |" was marked as the water bill to mark paid.
+    @Test
+    fun `a table's heading row and its rule are no entries`() {
+        val text = """
+            | Bill | Amount | Paid |
+            |---|---|---|
+            | Water bill | 30 | no |
+            | Power bill | 50 | no |
+        """.trimIndent()
+
+        assertEquals(
+            expected = listOf("| Water bill | 30 | no |", "| Power bill | 50 | no |"),
+            actual = FrameCandidates.entriesOf(
+                task = "mark the bill as paid",
                 text = text
             )
         )
