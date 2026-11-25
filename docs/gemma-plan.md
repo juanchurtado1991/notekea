@@ -286,6 +286,35 @@ the notes left open are all about one person was tried and left out, as the E4B 
 **What is next, read on dev:** of the wrong figures and changes, 24 of 44 on the E4B and 18 of 29 on the 12B are tasks
 that pick several notes or lines by a condition ("every report card with a grade under 65", "the unpaid invoices").
 
+**Measured the night of 2026-11-24 and not kept** (patches in `~/.cache/notekea-loop-runs`, none in the code):
+
+- **Picking by a condition** (a `select` tool; `gemma4-select`): the E4B writes the condition wrong as often as it picks
+  wrong.
+- **A last look before a change or an answer** (`cover-c9`): what else the request could be about, asked when something
+  is.
+- **Each note of a change judged on its own text**, its mentions in other notes and those like it that were missed
+  (`group-g9`). Wrong changes on dev went 24 to 15 over nine versions and the pool did not follow: nine versions on the
+  same 393 tasks fit those tasks. At most three versions of an idea are tried on dev before the pool.
+
+**Two bugs found by them, fixed with a test each (2026-11-25):** a right total worked out from copied figures was taken
+for a made-up one and the note written again without it; and a card's summary named notes the review had taken out.
+
+**The same on a pool that holds still** (E4B, seed 10, replies kept: section 7), each over the one before:
+
+| | Right, of 439 | Gained | Lost | Should have asked | Change |
+|---|---|---|---|---|---|
+| Without the two fixes (`gemma4-nofix-pool`) | 335 | | | 28 | 30 |
+| With them (`gemma4-fix-pool`) | **336** (76.5 %) | 1 | 0 | 28 | 29 |
+| And the group review (`gemma4-g9k-pool`) | 337 | 2 | 1 | 28 | 28 |
+| And the last look (`gemma4-c9k-pool`) | 339 | 2 | 0 | 24 | 30 |
+
+Every other cause is level. 328 and 336 are the same code but for one task, so an E4B round's own error is about 8, and
+20 of its tasks end another way: a difference of 4 between two rounds without kept replies says nothing.
+
+**The 12B on the pool with the last look and the group review** (`gemma4-12b-pool`): 364 of 439 (82.9 %) against 357,
+which is the base of 2026-11-23, before what was kept on the 24th. Missed questions 34 to 25, needless ones 19 to 23,
+figures 8 to 3, changes 16 to 18. Dev 323 to 336 of 393.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
@@ -294,13 +323,14 @@ product's) keeps each reply on disk under what decides it: the model's file and 
 the temperature, the seed and the schema. A call made again is read back; any of these changed asks the model.
 
 `NOTEKEA_REPLIES=<folder> measure.sh <label> <frame|tuned|dev> <size>` turns it on; one folder holds the three sizes,
-each filled by its first round. The script never passes it for the pool, the reference nor the sealed exams.
+each filled by its first round. The pool's replies go to `<folder>-pool`, which nobody reads (2026-11-25); the script
+never passes it for the reference nor the sealed exams.
 
 What it costs, and so how it is used:
 
 - The same call gives another reply now and then on a GPU (the base measured 281 and 284). A kept reply fixes one of
-  the two, so a task on the edge stays where its first round left it. A round with kept replies is for tuning: a
-  change is confirmed by a dev round and a pool round without them, and the plan's rule (step 5) is unchanged.
+  the two, so a task on the edge stays where its first round left it. Kept replies say what a change is worth, as two
+  rounds then differ only where it shows; they do not say the score itself, which is told by rounds without them.
 - It says nothing of the time a task takes.
 - The engine's own settings (thinking, the sampler's other values, llama.cpp's version) are not in what a reply is
   kept under: empty the folder when one of them changes.
@@ -329,6 +359,9 @@ then. `fastset.py <set> <size> <prefix> [cause]` lists the tasks that failed in 
 only those that ever failed by one cause (asking needlessly 105, changes 47, figures 35), and
 `NOTEKEA_TASKS=<file> measure.sh …` measures those alone. It does not see a change that breaks a task that never
 failed: like the kept replies, it is for tuning, and the whole dev set and the pool confirm.
+
+**Checked on the pool, 2026-11-25** (E4B, seed 10): filled in 48 minutes (`gemma4-fix-pool`, 3,706 replies), and read
+again in 4 (`gemma4-fix-pool2`): no reply asked, the ten exams alike task by task. A changed version takes 4 to 5.
 
 ## 8. After the tuning: the study cards
 
