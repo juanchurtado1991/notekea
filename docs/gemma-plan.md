@@ -259,6 +259,33 @@ What it says:
   the frame's changes, then the pool. The changes (25 to 28 whatever is tried, but 11 with thinking) are the cause
   to read next.
 
+**What was kept, 2026-11-24** (E4B; dev and the pool without kept replies):
+
+| | Right | Should have asked | Asked needlessly | Days | Figure | Change | Fact | Minutes |
+|---|---|---|---|---|---|---|---|---|
+| Dev (393), three bases | 281, 284, 285 | 16 to 17 | 32 to 36 | 7 to 9 | 17 to 21 | 23 to 26 | 7 | 43 to 47 |
+| Dev, all of it (`gemma4-w3-full`) | **299** | 14 | 22 | 5 | 20 | 24 | 9 | 46 |
+| Pool (439), the base (`gemma4-qat`) | 315 | 28 | 25 | 8 | 20 | 30 | 10 | 49 |
+| Pool, the reason for figures alone (`gemma4-fig-pool`) | 322 | 28 | 29 | 5 | 14 | 31 | 7 | 49 |
+| Pool, all of it (`gemma4-w3-pool`) | **328** | 29 | 25 | 4 | 12 | 31 | 7 | 48 |
+
+- **A reason in the tools that work out a figure** (`tally`, `calculate`, `days`): `why`, written after the tool's name
+  and before its figures. It costs no time, as the turns are shorter, and it is what figures and days gain by.
+- **The frame's first question**: the shortest words for the thing, and what tells it from another of its name in a
+  field of its own (`which`); "new" for what is added; a note tagged, linked or renamed is a note, not an item. By the
+  code, a table's heading row is no entry, and a note's own title and a folder of three letters tell a set apart. The
+  frame alone: 37 errors over dev and tuned against the base's 57.
+- **Each note of a change to several is marked** yes or no under a grammar (`ProposalReview`). Asked to name the notes
+  to drop, the E4B named the ones it meant to keep, and the proposal was left empty. A title that says its folder and a
+  name written with its letters split are read for what they are.
+
+The frame and the changes add 6 on the pool to the 7 of the reason, above what one round moves by chance (about 4) but
+not by much, and the 14 tasks dev gained are twice that: the question's examples are near dev's tasks. Asking whether
+the notes left open are all about one person was tried and left out, as the E4B said yes to two different meetings.
+
+**What is next, read on dev:** of the wrong figures and changes, 24 of 44 on the E4B and 18 of 29 on the 12B are tasks
+that pick several notes or lines by a condition ("every report card with a grade under 65", "the unpaid invoices").
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
