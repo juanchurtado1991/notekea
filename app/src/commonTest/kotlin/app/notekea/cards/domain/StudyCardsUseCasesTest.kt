@@ -141,7 +141,7 @@ class StudyCardsUseCasesTest {
         store.texts[note] = "# Peru\n\nThe capital of Peru is Lima, on the coast.\n\n#flashcards\nOld question::old"
 
         engine.reply = {
-            "{\"cards\":[" +
+            "{\"language\":\"English\",\"cards\":[" +
                 "{\"question\":\"Capital of Peru?\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}," +
                 "{\"question\":\"\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}," +
                 "{\"question\":\"Old question\",\"answer\":\"old\",\"sentence\":\"The capital of Peru is Lima\"}," +

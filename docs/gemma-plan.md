@@ -483,6 +483,21 @@ Of the 1,551 proposed, 58 quote no sentence of the note and 49 are not backed. T
 cards each, all from their first 8,000 characters (cover 3 to 14 %); two give none, as the model thinks for 2,000 to
 3,000 characters and runs out of its 900 tokens.
 
+**The sentence asked for first** (step 2, three versions, E4B, no kept replies). A translated question showed only
+by reading the cards, so the set counts one more thing: a question worded from its note, when half or more of its
+words of four letters or more are the note's (`CardsGrade.isWorded`). Its base (`cards-base3`) is the code above:
+
+| | Dev: notes with a card | Kept | Held | Worded | Cover | Long: with a card | Held | Worded | Cover |
+|---|---|---|---|---|---|---|---|---|---|
+| Base | 213 | 1,436 | 97 % | 80 % | 54 % | 4 of 6 | 91 % | 97 % | 7 % |
+| Sentence first (`cards-first`) | 216 | 1,498 | 90 % | | 60 % | 6 | 60 % | | 10 % |
+| And "never translate" (`cards-first2`) | 217 | 1,492 | 96 % | 78 % | 60 % | 6 | 69 % | 67 % | 10 % |
+| The note's language named first (`cards-first3`) | 216 | 1,505 | 98 % | 79 % | 59 % | 6 | 96 % | 98 % | 10 % |
+
+The first wrote questions in Portuguese, German, French and Japanese for English and Spanish notes; the second
+still wrote Spanish ones for two English contracts. Kept: the third, where the reply begins with the note's language
+(`"language"`) and each card with its sentence. Figures held fell from 100 to 98 % (12 cards), within held, which rose.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
