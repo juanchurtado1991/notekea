@@ -512,6 +512,18 @@ fits in one part: 1,507 kept, 98 % held). The six long notes:
 left out (`UNFIGURED`, by `BackedFigures`, before the reranker). Dev: 12 cards left out, every one of them not held;
 kept 1,507 to 1,496, held 98 to 99 %, figures held 98 to 100 %, cover 59 %. The long notes do not move.
 
+**One retry that says what failed, not kept** (patch `~/.cache/notekea-loop-runs/cards-retry2.patch`): the cards
+left out for a fault of the reply (not quoted, a figure, not backed) told back once with why, and as many others
+asked for. Dev, kept 1,496 (no retry), 1,549 (`cards-retry`, but 278 cards past the eight a part keeps: asked for one,
+the model wrote eight), 1,517 with the retry's schema holding it to as many as were left out (`cards-retry2`); held
+99 % in all three, cover 59, 61 and 60 %. A second call of the model on half the notes, seconds each on the E4B,
+for 1 to 3.5 % more cards: not a gain clear enough.
+
+Step 2 ends here: the sentence before its question with the note's language named first, a long note by its
+sections, and the figures checked are kept. Dev against the cards as they were this morning: notes with a card 47
+to 216 of 217, kept 335 to 1,496, held 96 to 99 %, cover 11 to 59 %; the long notes 32 to 119 cards, 56 from past
+their first 8,000 characters.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
