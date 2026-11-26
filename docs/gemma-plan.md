@@ -366,6 +366,10 @@ Then two more, on the same five rounds (`DaysTool`; the tally's as a patch, `~/.
 242 to 255 of 439 (58.1 %). The E2B is not made worse: dev moves within what a round's own noise moves it, and on the
 pool should-have-asked fell from 49 to 37 and asked-needlessly from 26 to 23; "other" rose from 22 to 26.
 
+**The E4B on a sample not seen before, without kept replies** (seed 13, commit `5c7b79fa`, 2026-11-25): 347 of 435
+(79.8 %). With seeds 10, 11 and 12 (351, 339, 356), 1,393 of 1,748 (79.7 %); 80 % is 1,399, 6 tasks short. The
+failures on seed 13: should have asked 21, changes 21, asked needlessly 16, figures 13, facts 9, other 5, days 3.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
