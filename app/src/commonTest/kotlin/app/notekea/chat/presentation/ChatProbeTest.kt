@@ -319,7 +319,8 @@ class ChatProbeTest : ViewModelTestBase() {
                         .domain
                         .LlmModelInfo(
                             isSmall = false,
-                            hasAgent = true
+                            hasAgent = true,
+                            isAgentPicked = true
                         )
                 )
 
@@ -362,7 +363,8 @@ class ChatProbeTest : ViewModelTestBase() {
                         .domain
                         .LlmModelInfo(
                             isSmall = false,
-                            hasAgent = true
+                            hasAgent = true,
+                            isAgentPicked = true
                         )
                 )
 

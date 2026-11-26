@@ -60,7 +60,8 @@ class ChatAgentTest : ViewModelTestBase() {
         engine.readiness = Outcome.Success(
             value = LlmModelInfo(
                 isSmall = false,
-                hasAgent = hasAgent
+                hasAgent = hasAgent,
+                isAgentPicked = hasAgent
             )
         )
 

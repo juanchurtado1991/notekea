@@ -1,6 +1,7 @@
 package app.notekea.chat.presentation.model
 
 import app.notekea.chat.domain.ChatScope
+import app.notekea.chat.domain.agent.AgentUse
 import app.notekea.chat.domain.answer.DeepQuestion
 import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.plan.NewNotePlace
@@ -23,6 +24,8 @@ data class ChatState(
     val tier: ModelTier? = null,
     val isDeepOffered: Boolean = false,
     val isAgentOffered: Boolean = false,
+    val isDeepPicked: Boolean = false,
+    val isAgentPicked: Boolean = false,
     val mode: ChatMode = ChatMode.AUTO,
     val contextUsage: Float = 0f,
     val isCompacting: Boolean = false,
@@ -56,11 +59,19 @@ data class ChatState(
 
         ChatMode.AUTO ->
             isDeepOffered &&
+                isDeepPicked &&
                 reply is ChatReply.Question &&
                 DeepQuestion.isAsked(reply.question)
 
         else -> false
     }
+
+    /** When a request goes to the agent in this mode, on this model. */
+    internal val agentUse: AgentUse
+        get() = mode.agentUse(
+            isAgentOffered = isAgentOffered,
+            isAgentPicked = isAgentPicked
+        )
 
     /** What the model is told of where the person is: [working] without the chips removed. */
     val shared: WorkContext?

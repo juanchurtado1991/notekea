@@ -1,5 +1,6 @@
 package app.notekea.ai.data
 
+import app.notekea.ai.domain.ModeMeasures
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSetupSource
 import app.notekea.ai.domain.ModelSize
@@ -122,6 +123,8 @@ class LlamaLlmEngine(
                         tier = TIERS.getValue(found.value.size),
                         hasDeepAnswer = hasDeepAnswer,
                         hasAgent = found.value.size in AGENT_SIZES,
+                        isDeepPicked = ModeMeasures.isDeepPicked(size = found.value.size),
+                        isAgentPicked = ModeMeasures.isAgentPicked(size = found.value.size),
                         contextTokens = found.value.contextTokens * found.value.slots
                     )
                 )

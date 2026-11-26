@@ -13,19 +13,22 @@ class ChatModeTest {
     private val oneFact = ChatReply.Question(question = "how many servings do the arepas make?")
     private val medium = ChatState(
         isDeepOffered = true,
-        isAgentOffered = true
+        isAgentOffered = true,
+        isDeepPicked = true,
+        isAgentPicked = true
     )
 
     @Test
-    fun `auto thinks deeply only about a question that asks to reason, and only where the model offers it`() {
+    fun `auto thinks deeply only about a question that asks to reason, where the model offers it and it was measured to help`() {
         val auto = medium.copy(mode = ChatMode.AUTO)
 
         assertEquals(
-            expected = listOf(true, false, false, false, true, false),
+            expected = listOf(true, false, false, false, false, true, false),
             actual = listOf(
                 auto.isDeepFor(reply = reasoning),
                 auto.isDeepFor(reply = oneFact),
                 auto.copy(isDeepOffered = false).isDeepFor(reply = reasoning),
+                auto.copy(isDeepPicked = false).isDeepFor(reply = reasoning),
                 auto.isDeepFor(reply = ChatReply.Overview),
                 medium.copy(mode = ChatMode.DEEP).isDeepFor(reply = oneFact),
                 medium.copy(mode = ChatMode.FAST).isDeepFor(reply = reasoning)
@@ -34,21 +37,39 @@ class ChatModeTest {
     }
 
     @Test
-    fun `the agent works when chosen, when Auto or Deep thinking is stuck, and never where it is not offered`() {
+    fun `the agent works when chosen, when Auto or Deep thinking is stuck where it was measured to its target, never unoffered`() {
         assertEquals(
             expected = listOf(
                 AgentUse.WHEN_STUCK,
                 AgentUse.NEVER,
                 AgentUse.WHEN_STUCK,
                 AgentUse.FOR_WORK,
-                AgentUse.NEVER
+                AgentUse.NEVER,
+                AgentUse.NEVER,
+                AgentUse.NEVER,
+                AgentUse.FOR_WORK
             ),
             actual = listOf(
-                ChatMode.AUTO.agentUse(isAgentOffered = true),
-                ChatMode.FAST.agentUse(isAgentOffered = true),
-                ChatMode.DEEP.agentUse(isAgentOffered = true),
-                ChatMode.AGENT.agentUse(isAgentOffered = true),
-                ChatMode.AGENT.agentUse(isAgentOffered = false)
+                medium.copy(mode = ChatMode.AUTO).agentUse,
+                medium.copy(mode = ChatMode.FAST).agentUse,
+                medium.copy(mode = ChatMode.DEEP).agentUse,
+                medium.copy(mode = ChatMode.AGENT).agentUse,
+                medium.copy(
+                    mode = ChatMode.AGENT,
+                    isAgentOffered = false
+                ).agentUse,
+                medium.copy(
+                    mode = ChatMode.AUTO,
+                    isAgentPicked = false
+                ).agentUse,
+                medium.copy(
+                    mode = ChatMode.DEEP,
+                    isAgentPicked = false
+                ).agentUse,
+                medium.copy(
+                    mode = ChatMode.AGENT,
+                    isAgentPicked = false
+                ).agentUse
             )
         )
     }

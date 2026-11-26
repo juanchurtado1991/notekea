@@ -55,7 +55,7 @@ internal class ChatAnswering(
                 notes = host.notes,
                 history = history,
                 openNote = host.activeNote,
-                agentUse = current.mode.agentUse(isAgentOffered = current.isAgentOffered)
+                agentUse = current.agentUse
             )
         } else {
             ChatReply.Question(question = question)
@@ -82,7 +82,7 @@ internal class ChatAnswering(
         val isAgentNext =
             host.state.value.entries.lastOrNull { it.id == id }?.outcome == TurnOutcome.NOT_FOUND &&
                 scope == ChatScope.VAULT &&
-                current.mode.agentUse(current.isAgentOffered) == AgentUse.WHEN_STUCK
+                current.agentUse == AgentUse.WHEN_STUCK
 
         if (isAgentNext) agent.takeOver(id, question, host.notes, history, host.activeNote)
     }
