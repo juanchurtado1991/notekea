@@ -135,4 +135,44 @@ class StudyCardsUseCasesTest {
             actual = made
         )
     }
+
+    @Test
+    fun `each card proposed is told by the first check it fails`() = runTest {
+        store.texts[note] = "# Peru\n\nThe capital of Peru is Lima, on the coast.\n\n#flashcards\nOld question::old"
+
+        engine.reply = {
+            "{\"cards\":[" +
+                "{\"question\":\"Capital of Peru?\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"Old question\",\"answer\":\"old\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"Its river?\",\"answer\":\"Rímac\",\"sentence\":\"Lima lies on the river Rímac\"}," +
+                "{\"question\":\"Its coast?\",\"answer\":\"Pacific\",\"sentence\":\"Lima, on the coast\"}," +
+                "{\"question\":\"capital of peru?\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}]}"
+        }
+
+        engine.scoreOf = { query, _ ->
+            if ("Lima" in query) 2f else -8f
+        }
+
+        val judged = MakeCardsUseCase(
+            llmEngine = engine,
+            reader = GhostCardsReader(),
+            noteContentStore = store
+        ).judged(
+            vaultPath = VAULT,
+            note = note
+        )
+
+        assertEquals(
+            expected = listOf(
+                CardVerdict.KEPT,
+                CardVerdict.BLANK,
+                CardVerdict.KNOWN,
+                CardVerdict.UNQUOTED,
+                CardVerdict.UNBACKED,
+                CardVerdict.REPEATED
+            ),
+            actual = (judged as Outcome.Success).value.map { it.verdict }
+        )
+    }
 }

@@ -22,6 +22,32 @@ class MakeCardsUseCase(
         vaultPath: String,
         note: RelativePath
     ): Outcome<List<ProposedCard>, CardsProblem> {
+        val judged = when (
+            val made = judged(
+                vaultPath = vaultPath,
+                note = note
+            )
+        ) {
+            is Outcome.Success -> made.value
+            is Outcome.Failure -> return Outcome.Failure(error = made.error)
+        }
+
+        val kept = judged
+            .filter {
+                it.verdict == CardVerdict.KEPT
+            }
+            .map { it.card }
+
+        if (kept.isEmpty()) return failed(problem = CardsProblem.NONE_BACKED)
+
+        return Outcome.Success(value = kept)
+    }
+
+    /** Every card the model proposed for [note], each with what became of it; or why the model gave none. */
+    suspend fun judged(
+        vaultPath: String,
+        note: RelativePath
+    ): Outcome<List<JudgedCard>, CardsProblem> {
         val text = noteContentStore.read(
             vaultPath = vaultPath,
             path = note
@@ -45,7 +71,8 @@ class MakeCardsUseCase(
             return Outcome.Failure(error = CardsProblem.MODEL_FAILED)
         }
 
-        val proposed = reader.read(json = json) ?: return failed(CardsProblem.MODEL_FAILED)
+        val proposed =
+            reader.read(json = json) ?: return Outcome.Failure(error = CardsProblem.MODEL_FAILED)
 
         val known = CardFormat
             .cardsOf(
@@ -55,36 +82,54 @@ class MakeCardsUseCase(
             .map { it.question.lowercase() }
             .toSet()
 
-        val kept = proposed
-            .filter {
-                it.question.isNotBlank() &&
-                    it.answer.isNotBlank() &&
-                    it.question.lowercase() !in known
-            }
-            .filter {
-                isBacked(
-                    card = it,
-                    text = text
+        val asked = mutableSetOf<String>()
+
+        return Outcome.Success(
+            value = proposed.map { card ->
+                JudgedCard(
+                    card = card,
+                    verdict = verdictOf(
+                        card = card,
+                        text = text,
+                        known = known,
+                        asked = asked
+                    )
                 )
             }
-            .distinctBy { it.question.lowercase() }
-            .take(n = CardsPrompt.MAX_CARDS)
-
-        if (kept.isEmpty()) return failed(problem = CardsProblem.NONE_BACKED)
-
-        return Outcome.Success(value = kept)
+        )
     }
 
-    private suspend fun isBacked(
+    // The first check [card] fails, in the order they cost; a card kept adds its question to [asked].
+    private suspend fun verdictOf(
         card: ProposedCard,
-        text: String
-    ): Boolean {
-        val isQuoted = plain(text = card.sentence).let {
-            it.length >= MIN_SENTENCE && it in plain(text = text)
+        text: String,
+        known: Set<String>,
+        asked: MutableSet<String>
+    ): CardVerdict {
+        val question = card.question.lowercase()
+
+        val verdict = when {
+            card.question.isBlank() || card.answer.isBlank() -> CardVerdict.BLANK
+            question in known -> CardVerdict.KNOWN
+            !isQuoted(card = card, text = text) -> CardVerdict.UNQUOTED
+            !isBacked(card = card) -> CardVerdict.UNBACKED
+            question in asked || asked.size >= CardsPrompt.MAX_CARDS -> CardVerdict.REPEATED
+            else -> CardVerdict.KEPT
         }
 
-        if (!isQuoted) return false
+        if (verdict == CardVerdict.KEPT) asked += question
 
+        return verdict
+    }
+
+    private fun isQuoted(
+        card: ProposedCard,
+        text: String
+    ): Boolean = plain(text = card.sentence).let {
+        it.length >= MIN_SENTENCE && it in plain(text = text)
+    }
+
+    private suspend fun isBacked(card: ProposedCard): Boolean {
         val score = llmEngine.rerank(
             query = "${card.question} ${card.answer}",
             texts = listOf(card.sentence)
