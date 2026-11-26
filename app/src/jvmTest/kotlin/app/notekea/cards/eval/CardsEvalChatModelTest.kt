@@ -4,7 +4,11 @@ import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
 import app.notekea.cards.data.GhostCardsReader
+import app.notekea.cards.data.GhostChoicesReader
+import app.notekea.cards.domain.CardVerdict
 import app.notekea.cards.domain.MakeCardsUseCase
+import app.notekea.cards.domain.MakeChoicesUseCase
+import app.notekea.cards.domain.StudyCard
 import app.notekea.chat.eval.EvalModels
 import app.notekea.chat.eval.ReplyCache
 import app.notekea.chat.eval.blind.BlindExams
@@ -25,6 +29,7 @@ import org.junit.Assume.assumeTrue
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.random.Random
 import kotlin.test.AfterTest
 import kotlin.test.Test
 
@@ -118,6 +123,12 @@ class CardsEvalChatModelTest {
             noteSections = NoteSections(outlineFinder = OutlineFinder())
         )
 
+        val choices = MakeChoicesUseCase(
+            llmEngine = engine,
+            reader = GhostChoicesReader(),
+            random = Random(seed = 1)
+        )
+
         val slots = Semaphore(permits = SLOTS)
 
         return coroutineScope {
@@ -132,12 +143,31 @@ class CardsEvalChatModelTest {
                                 note = path
                             )
 
+                            val made = (judged as? Outcome.Success)?.value.orEmpty()
+
+                            // The first card kept asked as a multiple choice, as the Study tab asks it.
+                            val first = made.firstOrNull {
+                                it.verdict == CardVerdict.KEPT
+                            }
+
+                            val chosen = first?.let {
+                                choices(
+                                    card = StudyCard(
+                                        note = path,
+                                        line = 0,
+                                        question = it.card.question,
+                                        answer = it.card.answer
+                                    )
+                                ) != null
+                            }
+
                             NoteCards(
                                 vault = vault,
                                 note = path.bare(),
                                 text = text,
-                                judged = (judged as? Outcome.Success)?.value.orEmpty(),
-                                problem = (judged as? Outcome.Failure)?.error?.name
+                                judged = made,
+                                problem = (judged as? Outcome.Failure)?.error?.name,
+                                choices = chosen
                             )
                         }
                     }

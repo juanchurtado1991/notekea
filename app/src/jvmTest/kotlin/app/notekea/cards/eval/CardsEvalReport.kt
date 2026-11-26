@@ -10,7 +10,8 @@ internal data class NoteCards(
     val note: String,
     val text: String,
     val judged: List<JudgedCard>,
-    val problem: String?
+    val problem: String?,
+    val choices: Boolean? = null
 ) {
     val kept: List<JudgedCard>
         get() = judged.filter {
@@ -53,12 +54,14 @@ internal class CardsEvalReport(
             }
         }
 
+        val asked = notes.mapNotNull { it.choices }
+
         val made = notes.count { it.kept.isNotEmpty() }
         val proposed = notes.sumOf { it.judged.size }
 
         return "Notes ${notes.size}, with a card $made; proposed $proposed, kept ${kept.size}, held " +
             "${shareOf(held, kept.size)}, figures held ${shareOf(figures, figured.size)}, worded from the note " +
-            "${shareOf(worded, kept.size)}; cover " +
+            "${shareOf(worded, kept.size)}, choices made ${shareOf(asked.count { it }, asked.size)}; cover " +
             "${percentOf(notes.map { coverOf(it) }.average())}."
     }
 

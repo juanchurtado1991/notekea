@@ -540,6 +540,11 @@ mark wait for the developer's pick of three designs.
 | E4B (`cards-figures`) | 216 | 1,496 | 99 % | 78 % | 59 % | 12 |
 | 12B (`cards-now-large`) | 216 | 1,494 | 99 % | 75 % | 59 % | 26 |
 
+**The multiple choice, with and without the fence fixed** (the set counts, for each note's first card kept, whether
+the Study tab's choices are made, `MakeChoicesUseCase`): on the E4B, 4 of 216 with the `JsonFence` of before
+`0f68580f` (`cards-choices-old`), 216 of 216 with it (`cards-choices`). On Gemma every card was asked as a plain
+card, its answer shown on request.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
