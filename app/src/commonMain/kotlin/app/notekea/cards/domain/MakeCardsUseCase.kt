@@ -6,17 +6,18 @@ import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
 import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * Flashcards made from a note by the model (4.6), each kept only when its sentence is in the note and the reranker
- * finds that sentence backs the question and its answer, as 3.5 checks answers; questions the note already has as
- * cards are left out. Returns the cards, or why none could be made.
+ * Flashcards made from a note by the model (4.6), a long one part by part ([CardsParts]), each kept when its sentence
+ * is in the note and the reranker finds it backs the card, as 3.5 checks answers, and the note has no such card.
  */
 class MakeCardsUseCase(
     private val llmEngine: LlmEngine,
     private val reader: CardsReader,
-    private val noteContentStore: NoteContentStore
+    private val noteContentStore: NoteContentStore,
+    private val noteSections: NoteSections
 ) {
     suspend operator fun invoke(
         vaultPath: String,
@@ -54,25 +55,23 @@ class MakeCardsUseCase(
         )
             ?: return Outcome.Failure(error = CardsProblem.NOTE_UNREADABLE)
 
-        val json = try {
-            ReplyText.of(
-                llmEngine = llmEngine,
-                messages = CardsPrompt.messages(
-                    title = note.nameWithoutExtension,
-                    text = text
-                ),
-                options = GenerationOptions(
-                    maxTokens = MAX_TOKENS,
-                    temperature = 0f,
-                    jsonSchema = CardsPrompt.SCHEMA
-                )
+        val parts = CardsParts.of(
+            text = text,
+            sections = noteSections.of(body = text),
+            max = CardsPrompt.MAX_NOTE_CHARS
+        )
+
+        val replies = parts.mapIndexed { index, part ->
+            proposedOf(
+                title = note.nameWithoutExtension,
+                part = part,
+                place = if (parts.size == 1) null else "part ${index + 1} of ${parts.size}"
             )
-        } catch (_: LlmException) {
-            return Outcome.Failure(error = CardsProblem.MODEL_FAILED)
         }
 
-        val proposed =
-            reader.read(json = json) ?: return Outcome.Failure(error = CardsProblem.MODEL_FAILED)
+        if (replies.all { it == null }) return Outcome.Failure(error = CardsProblem.MODEL_FAILED)
+
+        val proposed = replies.filterNotNull().flatten()
 
         val known = CardFormat
             .cardsOf(
@@ -92,11 +91,40 @@ class MakeCardsUseCase(
                         card = card,
                         text = text,
                         known = known,
-                        asked = asked
+                        asked = asked,
+                        most = CardsPrompt.MAX_CARDS * parts.size
                     )
                 )
             }
         )
+    }
+
+    // The cards the model proposes from one [part] of the note, at its [place] when the note has several; null
+    // when its reply is not the cards' JSON.
+    private suspend fun proposedOf(
+        title: String,
+        part: String,
+        place: String?
+    ): List<ProposedCard>? {
+        val json = try {
+            ReplyText.of(
+                llmEngine = llmEngine,
+                messages = CardsPrompt.messages(
+                    title = title,
+                    text = part,
+                    place = place
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = 0f,
+                    jsonSchema = CardsPrompt.SCHEMA
+                )
+            )
+        } catch (_: LlmException) {
+            return null
+        }
+
+        return reader.read(json = json)
     }
 
     // The first check [card] fails, in the order they cost; a card kept adds its question to [asked].
@@ -104,7 +132,8 @@ class MakeCardsUseCase(
         card: ProposedCard,
         text: String,
         known: Set<String>,
-        asked: MutableSet<String>
+        asked: MutableSet<String>,
+        most: Int
     ): CardVerdict {
         val question = card.question.lowercase()
 
@@ -113,7 +142,7 @@ class MakeCardsUseCase(
             question in known -> CardVerdict.KNOWN
             !isQuoted(card = card, text = text) -> CardVerdict.UNQUOTED
             !isBacked(card = card) -> CardVerdict.UNBACKED
-            question in asked || asked.size >= CardsPrompt.MAX_CARDS -> CardVerdict.REPEATED
+            question in asked || asked.size >= most -> CardVerdict.REPEATED
             else -> CardVerdict.KEPT
         }
 

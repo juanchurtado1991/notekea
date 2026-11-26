@@ -11,6 +11,8 @@ import app.notekea.chat.eval.blind.BlindExams
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.NoteSections
+import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.search.eval.EvalVault
 import kotlinx.coroutines.async
@@ -112,7 +114,8 @@ class CardsEvalChatModelTest {
         val cards = MakeCardsUseCase(
             llmEngine = engine,
             reader = GhostCardsReader(),
-            noteContentStore = store
+            noteContentStore = store,
+            noteSections = NoteSections(outlineFinder = OutlineFinder())
         )
 
         val slots = Semaphore(permits = SLOTS)

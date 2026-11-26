@@ -9,7 +9,7 @@ import app.notekea.core.llm.domain.ChatRole
  */
 object CardsPrompt {
     const val MAX_CARDS = 8
-    private const val MAX_NOTE_CHARS = 8_000
+    const val MAX_NOTE_CHARS = 8_000
 
     // The note's language first, named by the model: asked for the sentence first, the E4B wrote Spanish
     // questions for English notes (the cards' set, 2026-11-26).
@@ -26,9 +26,11 @@ object CardsPrompt {
             "sentence, both in that language. Make up to $MAX_CARDS cards, fewer for a short note, each from a " +
             "different sentence."
 
+    /** [text] is the note, or the part of it at [place] ("part 2 of 5") when it is cut into several. */
     fun messages(
         title: String,
-        text: String
+        text: String,
+        place: String? = null
     ): List<ChatMessage> = listOf(
         ChatMessage(
             role = ChatRole.SYSTEM,
@@ -36,7 +38,7 @@ object CardsPrompt {
         ),
         ChatMessage(
             role = ChatRole.USER,
-            text = "Note \"$title\":\n${text.take(n = MAX_NOTE_CHARS)}"
+            text = "Note \"$title\"${place?.let { ", $it" }.orEmpty()}:\n${text.take(n = MAX_NOTE_CHARS)}"
         )
     )
 }

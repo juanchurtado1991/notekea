@@ -498,6 +498,16 @@ The first wrote questions in Portuguese, German, French and Japanese for English
 still wrote Spanish ones for two English contracts. Kept: the third, where the reply begins with the note's language
 (`"language"`) and each card with its sentence. Figures held fell from 100 to 98 % (12 cards), within held, which rose.
 
+**A long note by its sections** (`CardsParts`, `cards-parts`): a note longer than the 8,000 characters the model is
+given is cut into parts at its headings, as many sections in a part as fit, a section too long for one cut at its
+paragraphs; each part makes its cards, eight at most, and all are judged together. Dev does not move (every note
+fits in one part: 1,507 kept, 98 % held). The six long notes:
+
+| Long notes | Kept | Held | Worded | Cover | From past the first 8,000 characters |
+|---|---|---|---|---|---|
+| The note's first 8,000 characters (`cards-first3`) | 47 | 96 % | 98 % | 10 % | 0 |
+| By its sections (`cards-parts`) | 119 | 97 % | 97 % | 17 % | 56 |
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.

@@ -7,6 +7,8 @@ import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteSections
+import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -104,7 +106,8 @@ class StudyCardsUseCasesTest {
             val made = MakeCardsUseCase(
                 llmEngine = engine,
                 reader = GhostCardsReader(),
-                noteContentStore = store
+                noteContentStore = store,
+                noteSections = NoteSections(outlineFinder = OutlineFinder())
             )(
                 vaultPath = VAULT,
                 note = note
@@ -124,7 +127,8 @@ class StudyCardsUseCasesTest {
         val made = MakeCardsUseCase(
             llmEngine = engine,
             reader = GhostCardsReader(),
-            noteContentStore = store
+            noteContentStore = store,
+            noteSections = NoteSections(outlineFinder = OutlineFinder())
         )(
             vaultPath = VAULT,
             note = note
@@ -157,7 +161,8 @@ class StudyCardsUseCasesTest {
         val judged = MakeCardsUseCase(
             llmEngine = engine,
             reader = GhostCardsReader(),
-            noteContentStore = store
+            noteContentStore = store,
+            noteSections = NoteSections(outlineFinder = OutlineFinder())
         ).judged(
             vaultPath = VAULT,
             note = note
