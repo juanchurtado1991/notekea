@@ -1,4 +1,4 @@
-package app.notekea.chat.domain.tool.app
+package app.notekea.core.domain.figures
 
 /**
  * The value of a figure as notes write it, in English or Spanish style: "1,234.50", "1.234,50", "€ 120", "38,5".

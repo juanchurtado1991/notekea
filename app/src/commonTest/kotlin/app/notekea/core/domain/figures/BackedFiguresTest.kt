@@ -1,4 +1,4 @@
-package app.notekea.chat.domain.plan
+package app.notekea.core.domain.figures
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

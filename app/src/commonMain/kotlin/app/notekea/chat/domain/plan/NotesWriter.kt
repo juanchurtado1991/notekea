@@ -2,6 +2,7 @@ package app.notekea.chat.domain.plan
 
 import app.notekea.chat.domain.context.ModelProfile
 import app.notekea.chat.domain.prompt.WritePrompt
+import app.notekea.core.domain.figures.BackedFigures
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine

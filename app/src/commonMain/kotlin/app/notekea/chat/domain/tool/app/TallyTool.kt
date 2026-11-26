@@ -8,6 +8,7 @@ import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
+import app.notekea.core.domain.figures.FigureValues
 import app.notekea.core.notes.domain.NoteTextCache
 
 /**

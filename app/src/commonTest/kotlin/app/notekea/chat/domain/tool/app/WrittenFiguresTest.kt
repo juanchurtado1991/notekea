@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool.app
 
+import app.notekea.core.domain.figures.FigureValues
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

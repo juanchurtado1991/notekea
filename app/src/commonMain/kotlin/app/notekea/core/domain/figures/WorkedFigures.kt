@@ -1,6 +1,4 @@
-package app.notekea.chat.domain.plan
-
-import app.notekea.chat.domain.tool.app.FigureValues
+package app.notekea.core.domain.figures
 
 /**
  * The figures a text may work out from those it writes: what a column of one of its tables or lists adds up to, and

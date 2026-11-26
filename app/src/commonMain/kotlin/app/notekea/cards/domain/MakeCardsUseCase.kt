@@ -1,7 +1,7 @@
 package app.notekea.cards.domain
 
-import app.notekea.chat.domain.plan.BackedFigures
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.figures.BackedFigures
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException

@@ -9,13 +9,13 @@ import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
-import app.notekea.chat.domain.plan.BackedFigures
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.Placeholders
 import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.figures.BackedFigures
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmModelInfo

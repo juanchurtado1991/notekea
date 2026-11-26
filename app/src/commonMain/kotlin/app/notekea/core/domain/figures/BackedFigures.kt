@@ -1,6 +1,4 @@
-package app.notekea.chat.domain.plan
-
-import app.notekea.chat.domain.tool.app.FigureValues
+package app.notekea.core.domain.figures
 
 /**
  * The figures of a text written from notes that the notes do not hold, checked as its last step: a price made up reads

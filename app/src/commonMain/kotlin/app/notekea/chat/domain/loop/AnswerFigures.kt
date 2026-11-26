@@ -1,8 +1,8 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.tool.ToolCall
-import app.notekea.chat.domain.tool.app.FigureValues
 import app.notekea.chat.domain.tool.work.AnswerTool
+import app.notekea.core.domain.figures.FigureValues
 
 /**
  * An answer giving a figure (two digits or more) that no tool gave and the task does not write, a sum the model did
