@@ -529,8 +529,8 @@ not run): a comment on the card's line before its `<!--SR:...-->` is kept when i
 it finding the schedule; on its own line under the card it would cost the card its schedule (the plugin skips the
 line after a comment). So `CardFormat.blockOf` writes `Question::Answer <!--source: the sentence-->`, `cardsOf` reads the
 sentence off the answer into `StudyCard.source`, and a card is `isOutdated` once its note no longer writes it. Not yet
-seen in Obsidian: whether its review hides the comment, as Markdown does. The click that opens it and the outdated
-mark wait for the developer's pick of three designs.
+seen in Obsidian: whether its review hides the comment, as Markdown does. Shown as the developer's design A (`a1edad9f`):
+the sentence quoted under the answer once it is shown, and a "Note changed" chip by the deck when it is outdated.
 
 **The cards on the three sizes** (dev, the code of `0f1c922f`, no kept replies):
 
