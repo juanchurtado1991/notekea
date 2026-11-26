@@ -28,6 +28,24 @@ internal object CardsGrade {
     }
 
     /**
+     * Whether [card]'s question is worded from [text], in any language: half or more of its words of four letters
+     * or more are the note's. A question translated from the note shares few: "Was war ein Problem nach dem Lauf"
+     * for an English note (a round of 2026-11-26).
+     */
+    fun isWorded(
+        card: ProposedCard,
+        text: String
+    ): Boolean {
+        val note = wordsOf(text = text)
+
+        val asked = wordsOf(text = card.question).filter {
+            it.length >= WORDED
+        }
+
+        return asked.isEmpty() || asked.count { it in note } * 2 >= asked.size
+    }
+
+    /**
      * Where [sentence] is in [text], from 0 to 1 by its start and end, compared without case, spaces or marks;
      * null when it is not in it.
      */
@@ -97,6 +115,7 @@ internal object CardsGrade {
         .filter { it.isLetterOrDigit() }
 
     private const val MIN_WORD = 3
+    private const val WORDED = 4
     private val WORD = Regex(pattern = "[\\p{L}\\p{N}]+")
     private val FIGURE = Regex(pattern = "\\d+(?:[.:]\\d+)*")
 }

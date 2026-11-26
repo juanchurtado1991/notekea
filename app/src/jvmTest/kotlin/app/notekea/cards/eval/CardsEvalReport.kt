@@ -43,11 +43,22 @@ internal class CardsEvalReport(
         val figured = kept.filter { FIGURE.containsMatchIn(input = it.card.answer) }
 
         val figures = figured.count { CardsGrade.hasFigures(card = it.card) }
+
+        val worded = notes.sumOf { note ->
+            note.kept.count {
+                CardsGrade.isWorded(
+                    card = it.card,
+                    text = note.text
+                )
+            }
+        }
+
         val made = notes.count { it.kept.isNotEmpty() }
         val proposed = notes.sumOf { it.judged.size }
 
         return "Notes ${notes.size}, with a card $made; proposed $proposed, kept ${kept.size}, held " +
-            "${shareOf(held, kept.size)}, figures held ${shareOf(figures, figured.size)}; cover " +
+            "${shareOf(held, kept.size)}, figures held ${shareOf(figures, figured.size)}, worded from the note " +
+            "${shareOf(worded, kept.size)}; cover " +
             "${percentOf(notes.map { coverOf(it) }.average())}."
     }
 

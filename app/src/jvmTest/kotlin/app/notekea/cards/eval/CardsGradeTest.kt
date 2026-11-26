@@ -84,4 +84,31 @@ class CardsGradeTest {
             )
         )
     }
+
+    @Test
+    fun `a question is worded from its note in its language, and a translated one is not`() {
+        val note = "Second run of the week: calves felt tight after the run, so add more calf work."
+
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(
+                CardsGrade.isWorded(
+                    card = ProposedCard(
+                        question = "What felt tight after the second run?",
+                        answer = "Calves",
+                        sentence = note
+                    ),
+                    text = note
+                ),
+                CardsGrade.isWorded(
+                    card = ProposedCard(
+                        question = "Was war ein Problem nach dem Lauf und was soll geändert werden?",
+                        answer = "Enge Waden",
+                        sentence = note
+                    ),
+                    text = note
+                )
+            )
+        )
+    }
 }
