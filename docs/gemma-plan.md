@@ -430,6 +430,26 @@ failed: like the kept replies, it is for tuning, and the whole dev set and the p
 **Checked on the pool, 2026-11-25** (E4B, seed 10): filled in 48 minutes (`gemma4-fix-pool`, 3,706 replies), and read
 again in 4 (`gemma4-fix-pool2`): no reply asked, the ten exams alike task by task. A changed version takes 4 to 5.
 
+**Every mode to its target** (the developer, 2026-11-26): Fast, Deep thinking and Agent, and so what Auto picks,
+each at 65 % on the E2B, 80 % on the E4B and 90 % on the 12B; Auto never picks a mode not measured to its target.
+Only Agent was measured on Gemma until now (the blind pool is its evaluation); Fast and Deep thinking were last
+measured on Qwen (answers 80 / 89 / 85 %, action plans 75 / 92 / 91 %). They are measured first
+(`~/.cache/notekea-loop-runs/sets/modes.sh <size>`: the 504 answers with one draft and with three, the 126 action
+plans, and the answers through the agent), then tuned where they fall short, the E2B with them.
+
+**The modes measured, 2026-11-26** (HEAD 48de4d12, `modes-<size>`; the 437 answerable questions and the 126 plans):
+
+| Size | Fast, answers | Fast, plans | Deep thinking | Agent, answers | Blind pool (Agent) | Target |
+|---|---|---|---|---|---|---|
+| E2B | 83 % | 76 % | 82 % | 83 % | 58 % | 65 % |
+| E4B | 88 % | 91 % | 89 % | 88 % | 79.4 % | 80 % |
+| 12B | 91 % | 94 % | 91 % | 92 % | 84.7 % | 90 % |
+
+Every mode passes on the answer and plan sets, which are not blind; only the blind pool, the agent's work on exams it
+was never tuned on, falls short, on all three sizes. Deep thinking is never better than one draft (−1, +1 and 0
+points) and takes two to three times as long (E2B 8 minutes against 4, 12B 37 against 13). The tuning goes to the
+blind pool, the E2B first, where the gap is widest.
+
 ## 8. After the tuning: the study cards
 
 A list of ideas for a local notes app (evidence on cards, structured replies, small steps, retries) was read against
