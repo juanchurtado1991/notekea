@@ -1143,6 +1143,9 @@
     <string name="study_continue">Next</string>
     <string name="study_making">Writing the options…</string>
     <string name="study_progress_label">Cards reviewed</string>
+    <string name="study_source">From the note</string>
+    <string name="study_changed">Note changed</string>
+    <string name="study_outdated">The note no longer says this. Check the card before you grade it.</string>
     <string name="tab_study">Study</string>
     <string name="chat_action_make_cards">Make study cards</string>
     <string name="chat_action_cards_count">%1$d cards</string>
