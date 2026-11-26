@@ -111,10 +111,70 @@ class CardFormatTest {
     }
 
     @Test
-    fun `new cards go under a heading and the tag, with their separators taken out of the text`() {
+    fun `new cards go under a heading and the tag, their sentence in a comment, separators taken out`() {
         assertEquals(
-            expected = "\n\n## Flashcards\n\n#flashcards\n\nWhat is a:b?::it\n",
-            actual = CardFormat.blockOf(cards = listOf("What is a::b?" to "it"))
+            expected = "\n\n## Flashcards\n\n#flashcards\n\nWhat is a:b?::it <!--source: a:b is it - see-->\n",
+            actual = CardFormat.blockOf(
+                cards = listOf(
+                    ProposedCard(
+                        question = "What is a::b?",
+                        answer = "it",
+                        sentence = "a::b is it -- see"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `a card's sentence is read off its answer, kept when scheduled, and its card outdated once it is gone`() {
+        val card = "Capital of Peru::Lima <!--source: The capital of Peru is Lima-->"
+        val text = "#flashcards\n\nThe capital of Peru is Lima.\n\n$card"
+
+        val read = CardFormat
+            .cardsOf(
+                note = note,
+                text = text
+            )
+            .single()
+
+        val scheduled = CardFormat.scheduled(
+            text = text,
+            card = read.copy(
+                due = CalendarDate(
+                    year = 2026,
+                    month = 11,
+                    day = 14
+                ),
+                interval = 3
+            )
+        )
+
+        val edited = CardFormat
+            .cardsOf(
+                note = note,
+                text = text.replace(
+                    oldValue = "The capital of Peru is Lima.",
+                    newValue = "Lima is the capital."
+                )
+            )
+            .single()
+
+        assertEquals(
+            expected = listOf<Any?>(
+                "Lima",
+                "The capital of Peru is Lima",
+                false,
+                "$card <!--SR:!2026-11-14,3,250-->",
+                true
+            ),
+            actual = listOf(
+                read.answer,
+                read.source,
+                read.isOutdated,
+                scheduled.lines().last(),
+                edited.isOutdated
+            )
         )
     }
 

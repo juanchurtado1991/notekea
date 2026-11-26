@@ -16,11 +16,7 @@ class CardsForChat(private val makeCards: MakeCardsUseCase) : CardMaker {
     ): Outcome<String, ActionProblem> =
         when (val made = makeCards(vaultPath = vaultPath, note = note)) {
             is Outcome.Success -> Outcome.Success(
-                value = CardFormat.blockOf(
-                    cards = made.value.map {
-                        it.question to it.answer
-                    }
-                )
+                value = CardFormat.blockOf(cards = made.value)
             )
 
             is Outcome.Failure -> Outcome.Failure(

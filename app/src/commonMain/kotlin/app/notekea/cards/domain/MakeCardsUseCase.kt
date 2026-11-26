@@ -164,9 +164,10 @@ class MakeCardsUseCase(
     private fun isQuoted(
         card: ProposedCard,
         text: String
-    ): Boolean = plain(text = card.sentence).let {
-        it.length >= MIN_SENTENCE && it in plain(text = text)
-    }
+    ): Boolean = CardFormat.isQuoted(
+        sentence = card.sentence,
+        text = text
+    )
 
     private suspend fun isBacked(card: ProposedCard): Boolean {
         val score = llmEngine.rerank(
@@ -182,11 +183,8 @@ class MakeCardsUseCase(
     private fun failed(problem: CardsProblem): Outcome<List<ProposedCard>, CardsProblem> =
         Outcome.Failure(error = problem)
 
-    private fun plain(text: String): String = text.lowercase().filter { it.isLetterOrDigit() }
-
     private companion object {
         const val MAX_TOKENS = 900
-        const val MIN_SENTENCE = 12
         const val SUPPORT = -3f
     }
 }
