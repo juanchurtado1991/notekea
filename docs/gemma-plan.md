@@ -524,6 +524,22 @@ sections, and the figures checked are kept. Dev against the cards as they were t
 to 216 of 217, kept 335 to 1,496, held 96 to 99 %, cover 11 to 59 %; the long notes 32 to 119 cards, 56 from past
 their first 8,000 characters.
 
+**Step 3, the evidence kept with the card** (2026-11-26): Obsidian's Spaced Repetition plugin was read (its parser,
+not run): a comment on the card's line before its `<!--SR:...-->` is kept when it writes the schedule and does not stop
+it finding the schedule; on its own line under the card it would cost the card its schedule (the plugin skips the
+line after a comment). So `CardFormat.blockOf` writes `Question::Answer <!--source: the sentence-->`, `cardsOf` reads the
+sentence off the answer into `StudyCard.source`, and a card is `isOutdated` once its note no longer writes it. Not yet
+seen in Obsidian: whether its review hides the comment, as Markdown does. The click that opens it and the outdated
+mark wait for the developer's pick of three designs.
+
+**The cards on the three sizes** (dev, the code of `0f1c922f`, no kept replies):
+
+| Dev, 217 notes | Notes with a card | Kept | Held | Worded | Cover | Minutes |
+|---|---|---|---|---|---|---|
+| E2B (`cards-now-small`) | 216 | 1,419 | 97 % | 73 % | 55 % | 7 |
+| E4B (`cards-figures`) | 216 | 1,496 | 99 % | 78 % | 59 % | 12 |
+| 12B (`cards-now-large`) | 216 | 1,494 | 99 % | 75 % | 59 % | 26 |
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
