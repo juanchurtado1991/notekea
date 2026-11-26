@@ -19,7 +19,8 @@ internal class TurnState(
     val turn: ToolContext,
     val budget: ContextBudget,
     val memory: List<MemoryLine> = emptyList(),
-    val frame: TaskFrame? = null
+    val frame: TaskFrame? = null,
+    val kind: WorkKind? = null
 ) {
     val found = mutableListOf<String>()
     val made = mutableSetOf<String>()

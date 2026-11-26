@@ -160,7 +160,7 @@ class SettledTurnTest {
 
             assertEquals(
                 expected = true,
-                actual = "Not asked: the task names what it means" in prompts[2].last().text
+                actual = "Not asked: the task is a question" in prompts[2].last().text
             )
         }
 

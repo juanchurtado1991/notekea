@@ -335,6 +335,21 @@ version over the base with the two fixes):
 **Kept: the last look, on both models** (the developer, 2026-11-25; `OtherTargets`, `docs/agent-frame.md`). The group
 review stays out.
 
+**The night of 2026-11-25** (alone, at the developer's word; `docs/agent-frame.md`): of the needless questions, those
+the model asked of a question with nothing open were right 0 times of 33, and the sets left open between notes of other
+folders and other names were all wrong, on both models. Two changes, each measured on dev, then on the pools that hold
+still, then on a sample not seen before (seed 12, which shares 7 of its 10 exams with seeds 10 and 11):
+
+| | Dev (393) | E4B seed 10 | E4B seed 11 | E4B seed 12 | 12B seed 10 |
+|---|---|---|---|---|---|
+| Base: the last look | 310 | 338 | 321 | 340 | 363 |
+| A question not asked back | 316 | 343 | 332 | | 363 |
+| And only rivals left open | **318** | **349** | **337** | **351** | **372** (84.7 %) |
+| Gained / lost, both | 8 / 0 | 12 / 1 | 17 / 1 | 12 / 1 | 9 / 0 |
+
+The E4B's seeds 10 and 11 without repeats: 559 to 581 of 742 (78.3 %); 13 short of 80 %. Needless questions fell
+from 22, 32 and 29 to 6, 12 and 12; figures rose by 3, 2 and 3, tasks now answered that had been asked.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and

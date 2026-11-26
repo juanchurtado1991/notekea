@@ -157,17 +157,8 @@ class RunTurnUseCase(
             turn = turn,
             memory = memory,
             frame = frame,
-            budget = ContextBudget(
-                llmEngine = llmEngine,
-                tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,
-                fixed = LoopPrompt.fixedOf(system, task, context),
-                // The retry's room: less overflowed a small context (the bug hunt of 2026-11-17, E4).
-                replyTokens = RETRY_TOKENS + WORK_TOKENS,
-                memory = stepMemory,
-                need = task,
-                space = Random.nextLong().toString(),
-                wholeLast = wholeLast
-            )
+            kind = route.kind,
+            budget = budgetOf(system, task, context)
         )
 
         try {
@@ -176,6 +167,22 @@ class RunTurnUseCase(
             withContext(context = NonCancellable) { state.budget.forget() }
         }
     }
+
+    private suspend fun budgetOf(
+        system: String,
+        task: String,
+        context: ActionContext
+    ) = ContextBudget(
+        llmEngine = llmEngine,
+        tokens = ModelProfile.of(llmEngine = llmEngine).loopTokens,
+        fixed = LoopPrompt.fixedOf(system, task, context),
+        // The retry's room: less overflowed a small context (the bug hunt of 2026-11-17, E4).
+        replyTokens = RETRY_TOKENS + WORK_TOKENS,
+        memory = stepMemory,
+        need = task,
+        space = Random.nextLong().toString(),
+        wholeLast = wholeLast
+    )
 
     private suspend fun FlowCollector<AgentStep>.run(state: TurnState) {
         val deadline = clock.now() + TIME_LIMIT

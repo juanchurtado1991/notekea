@@ -99,6 +99,29 @@ class TaskFramerTest {
             )
         }
 
+    // Dev, 2026-11-25: "when does Marco go on sabbatical?" was asked between his meeting and his note.
+    @Test
+    fun `notes of other kinds that share a word are no open set, and the model picks among them`() =
+        runTest {
+            val frame = frameOf(
+                task = "when does Marco go on sabbatical?",
+                candidates = listOf(
+                    candidate(path = "Meetings/2026-10-28 Marco Brandt.md"),
+                    candidate(path = "People/Marco Brandt.md")
+                ),
+                replies = mapOf(
+                    FramePrompts.COUNT to """{"count":"one","words":"Marco","thing":"note"}""",
+                    FramePrompts.PICK to """{"pick":"N1"}"""
+                ),
+                isChange = false
+            )
+
+            assertEquals(
+                expected = listOf(false, "Meetings/2026-10-28 Marco Brandt.md", FrameReason.PICK),
+                actual = listOf(frame?.isOpen, frame?.meant?.value, frame?.reason)
+            )
+        }
+
     // The frame alone, 2026-11-18: "add a task in Tom's note: call him about the March trip" was told apart by the
     // one Tom whose note writes March, a word of what to add, not of which note.
     @Test

@@ -114,6 +114,36 @@ class FrameTurnTest {
             )
         }
 
+    // Dev, 2026-11-25: asked back of a question nothing left open, the Gemma E4B was right 0 times of 33.
+    @Test
+    fun `a question nothing left open is never asked back, and ask_user is no longer offered`() =
+        runTest {
+            script(
+                first = ASK,
+                then = ASK
+            )
+
+            val end = run(frame = frameOf(FrameCount.ONE, listOf(work))).last()
+
+            val offered = engine
+                .options
+                .drop(n = 1)
+                .mapNotNull { it.jsonSchema }
+                .filter {
+                    "\"answer\"" in it
+                }
+
+            assertEquals(
+                expected = listOf(false, false),
+                actual = listOf(
+                    end is AgentStep.Asked,
+                    offered.drop(n = 1).any {
+                        "ask_user" in it
+                    }
+                )
+            )
+        }
+
     @Test
     fun `an answer about several notes with one unread is held, and the loop is told which`() =
         runTest {

@@ -130,6 +130,29 @@ internal object FrameGroups {
         }
     }
 
+    /**
+     * The notes of [group] another of it is a rival of: two things of one kind, which a vault keeps in one folder or
+     * gives one name. A meeting with Marco and the person Marco are no rivals, nor an experiment and a paper.
+     */
+    fun rivalsOf(group: List<FrameCandidates.Candidate>): List<FrameCandidates.Candidate> =
+        group.filter { one ->
+            group.any {
+                it != one && isRival(one, it)
+            }
+        }
+
+    private fun isRival(
+        one: FrameCandidates.Candidate,
+        other: FrameCandidates.Candidate
+    ): Boolean {
+        val isBeside = one.path.parent == other.path.parent
+
+        return isBeside || one.path.nameWithoutExtension.equals(
+            other = other.path.nameWithoutExtension,
+            ignoreCase = true
+        )
+    }
+
     private fun isNamed(
         candidate: FrameCandidates.Candidate,
         word: String

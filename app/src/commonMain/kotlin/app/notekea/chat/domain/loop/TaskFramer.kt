@@ -83,10 +83,21 @@ class TaskFramer(
 
         // None marked is no answer either: the 4B marks every one "no" when it cannot tell them apart (the frame
         // alone, 2026-11-18), so the set stays open, as when several are marked.
-        if (group != null && fits.size != 1) return targetsOf(fits.ifEmpty { group }) to reason
+        val open = group
+            ?.takeIf {
+                fits.size != 1
+            }
+            ?.let {
+                fits.ifEmpty { it }
+            }
+            .orEmpty()
 
+        val rivals = FrameGroups.rivalsOf(group = open)
+        if (rivals.isNotEmpty()) return targetsOf(rivals) to reason
+
+        // Notes of other kinds that share a word are told apart by what the task is about: the model picks one.
         val picked = fits.singleOrNull()
-            ?: asking.pickOf(task, candidates, memory)
+            ?: asking.pickOf(task, open.ifEmpty { candidates }, memory)
             ?: return emptyList<FrameTarget>() to FrameReason.PICK
 
         // The note picked has namesakes the task's words did not find, in another language ("el presupuesto" for two
@@ -107,7 +118,7 @@ class TaskFramer(
 
             fitting.single() to said
         } else {
-            picked to if (fits.isEmpty()) FrameReason.PICK else reason
+            picked to if (fits.size == 1) reason else FrameReason.PICK
         }
 
         return entriesOf(task, reply, meant, memory, by)

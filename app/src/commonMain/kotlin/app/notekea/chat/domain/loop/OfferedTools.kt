@@ -43,7 +43,12 @@ internal object OfferedTools {
             else -> looking
         }
 
-        val withheld = (listOfNotNull(again) + state.withheld)
+        // Of a question nothing left open, nothing is asked back: ask_user is not offered again.
+        val unasked = listOf(AskUserTool.NAME).filter {
+            TurnChecks.NO_ASKING in state.told
+        }
+
+        val withheld = (listOfNotNull(again) + state.withheld + unasked)
             .fold(initial = offered) { left, name -> left.without(name = name) }
             .takeIf { it.tools.isNotEmpty() }
 

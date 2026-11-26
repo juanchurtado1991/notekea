@@ -25,6 +25,27 @@ class FrameGroupsTest {
     private val habits = candidate(path = "Books/Atomic Habits.md")
     private val shown = listOf(castro, mendez, contacts, home, work, dune, habits)
 
+    // Dev, 2026-11-25: of the sets left open across folders by names that differ, none was right to ask.
+    @Test
+    fun `rivals are notes of one folder or one name, and a meeting with Marco is no rival of Marco`() {
+        val marco = candidate(path = "People/Marco Brandt.md")
+        val meeting = candidate(path = "Meetings/2026-10-28 Marco Brandt.md")
+        val laura = candidate(path = "Contacts/Laura Castro.md")
+
+        assertEquals(
+            expected = listOf(
+                emptyList(),
+                listOf(castro, mendez),
+                listOf(castro, laura)
+            ),
+            actual = listOf(
+                FrameGroups.rivalsOf(group = listOf(marco, meeting)),
+                FrameGroups.rivalsOf(group = listOf(castro, mendez, meeting)),
+                FrameGroups.rivalsOf(group = listOf(castro, laura, home))
+            )
+        )
+    }
+
     @Test
     fun `the notes whose names share a word the task writes are a set`() {
         assertEquals(

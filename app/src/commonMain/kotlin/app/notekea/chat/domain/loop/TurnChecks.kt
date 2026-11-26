@@ -35,7 +35,7 @@ internal object TurnChecks {
 
             isEmptyProposal(call = call, state = state) -> NOTHING_ADDED
 
-            isNeedlessQuestion(call = call, state = state) -> NOT_ASKED
+            isNeedlessQuestion(call = call, state = state) -> needlessOf(state = state)
 
             else -> WebChecks.heldOf(
                 call = call,
@@ -87,7 +87,8 @@ internal object TurnChecks {
 
     // A question asked when the frame says the task leaves nothing open (my two budgets, the Venezuelan recipes,
     // "Ana Torres"): held back once, the model told to do it; asked again, it is asked, as it may lack something no
-    // tool finds. With no frame, nothing says it is needless.
+    // tool finds. With no frame, nothing says it is needless. Of a question, it is held every time: the Gemma E4B
+    // asked back 33 times on dev and the pool and was right none (2026-11-25).
     private fun isNeedlessQuestion(
         call: ToolCall,
         state: TurnState
@@ -99,8 +100,17 @@ internal object TurnChecks {
                 !isOpen &&
                 !isAskedFor(state = state)
 
+        if (isNeedless && state.kind == WorkKind.ASK) {
+            state.told += NO_ASKING
+
+            return true
+        }
+
         return isNeedless && state.told.add(NOT_ASKED)
     }
+
+    private fun needlessOf(state: TurnState): String =
+        if (state.kind == WorkKind.ASK) NOT_ASKED_BACK else NOT_ASKED
 
     // A question with one note as its only answer: the 4B found the one recipe of two servings, then asked "which
     // recipe? Options: Pancakes" (the loop's fifth run). Held back twice, as it asks again right away.
@@ -147,6 +157,13 @@ internal object TurnChecks {
     private const val NOT_ASKED =
         "(Not asked: the task names what it means, all of them, so there is nothing to choose. Do it with " +
             "what the tools found. Ask only if something it needs cannot be found.)"
+
+    // Nothing is left open of a question: it is answered, with what the notes hold of it.
+    const val NO_ASKING = "no asking"
+
+    private const val NOT_ASKED_BACK =
+        "(Not asked: the task is a question, and nothing in it is left open. Answer it with what the tools found, " +
+            "and say plainly what the notes do not hold.)"
 
     private const val NOTHING_ADDED =
         "(Nothing is added to the proposal yet, so there is nothing to confirm. Call the tool of each " +
