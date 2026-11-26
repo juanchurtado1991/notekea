@@ -1,10 +1,13 @@
 package app.notekea.cards.presentation
 
+import app.notekea.cards.data.GhostCardsReader
 import app.notekea.cards.data.GhostChoicesReader
 import app.notekea.cards.domain.AnswerCardUseCase
 import app.notekea.cards.domain.CardAnswer
 import app.notekea.cards.domain.MakeChoicesUseCase
 import app.notekea.cards.domain.ReadDeckUseCase
+import app.notekea.cards.domain.ReplaceCardUseCase
+import app.notekea.cards.domain.RewriteCardUseCase
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.llm.domain.FakeLlmEngine
@@ -132,8 +135,42 @@ class StudyViewModelTest : ViewModelTestBase() {
             )
         }
 
-    private fun TestScope.started(): StudyViewModel {
-        store.texts[note] = DECK
+    // Plan step 4, 2026-11-26: a hard card's new wording is proposed, and written only when the user chooses it.
+    @Test
+    fun `a hard card written anew is replaced in its note only when its new wording is chosen`() =
+        runTest(testDispatcher) {
+            engine.reply = { messages ->
+                if ("rewrite" in messages.first().text) REWRITE else WRONG_PERU
+            }
+
+            val viewModel = started(deck = HARD_DECK)
+
+            viewModel.onIntent(intent = StudyIntent.OnRewrite)
+            advanceUntilIdle()
+            val proposed = viewModel.state.value.rewrite?.question
+            viewModel.onIntent(intent = StudyIntent.OnKeepCard)
+            val kept = store.texts.getValue(note)
+
+            viewModel.onIntent(intent = StudyIntent.OnRewrite)
+            advanceUntilIdle()
+            viewModel.onIntent(intent = StudyIntent.OnUseRewrite)
+            advanceUntilIdle()
+            val shown = viewModel.state.value.current
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    "Which city is Peru's capital?",
+                    HARD_DECK,
+                    "$SENTENCE\n\n#flashcards\nWhich city is Peru's capital?::Lima <!--source: $SENTENCE-->",
+                    "Which city is Peru's capital?",
+                    true
+                ),
+                actual = listOf(proposed, kept, store.texts[note], shown?.question, shown?.isNew)
+            )
+        }
+
+    private fun TestScope.started(deck: String = DECK): StudyViewModel {
+        store.texts[note] = deck
         store.suspendsLikeDisk = true
 
         val viewModel = StudyViewModel(
@@ -144,6 +181,11 @@ class StudyViewModelTest : ViewModelTestBase() {
                 llmEngine = engine,
                 reader = GhostChoicesReader()
             ),
+            rewriteCard = RewriteCardUseCase(
+                llmEngine = engine,
+                reader = GhostCardsReader()
+            ),
+            replaceCard = ReplaceCardUseCase(noteContentStore = store),
             localCalendar = FakeLocalCalendar(),
             clock = Clock.System
         )
@@ -163,5 +205,10 @@ class StudyViewModelTest : ViewModelTestBase() {
         const val DECK = "#flashcards\nCapital of Peru::Lima\nCapital of Chile::Santiago"
         const val WRONG_PERU = "{\"wrong\":[\"Quito\",\"Bogotá\",\"lima \",\"Santiago\"]}"
         const val WRONG_CHILE = "{\"wrong\":[\"Buenos Aires\",\"Montevideo\",\"Asunción\"]}"
+        const val SENTENCE = "The capital of Peru is Lima."
+        const val HARD_DECK =
+            "$SENTENCE\n\n#flashcards\nCapital of Peru::Lima <!--source: $SENTENCE--> <!--SR:!2026-11-01,1,170-->"
+        const val REWRITE =
+            "{\"cards\":[{\"question\":\"Which city is Peru's capital?\",\"answer\":\"Lima\"}]}"
     }
 }

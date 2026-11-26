@@ -1,7 +1,6 @@
 package app.notekea.cards.domain
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.domain.figures.BackedFigures
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
@@ -20,6 +19,8 @@ class MakeCardsUseCase(
     private val noteContentStore: NoteContentStore,
     private val noteSections: NoteSections
 ) {
+    private val checks = CardChecks(llmEngine = llmEngine)
+
     suspend operator fun invoke(
         vaultPath: String,
         note: RelativePath
@@ -142,8 +143,8 @@ class MakeCardsUseCase(
             card.question.isBlank() || card.answer.isBlank() -> CardVerdict.BLANK
             question in known -> CardVerdict.KNOWN
             !isQuoted(card = card, text = text) -> CardVerdict.UNQUOTED
-            !isFigured(card = card) -> CardVerdict.UNFIGURED
-            !isBacked(card = card) -> CardVerdict.UNBACKED
+            !checks.isFigured(card = card) -> CardVerdict.UNFIGURED
+            !checks.isBacked(card = card) -> CardVerdict.UNBACKED
             question in asked || asked.size >= most -> CardVerdict.REPEATED
             else -> CardVerdict.KEPT
         }
@@ -153,14 +154,6 @@ class MakeCardsUseCase(
         return verdict
     }
 
-    // Every figure of its answer is its sentence's, or one worked from them.
-    private fun isFigured(card: ProposedCard): Boolean = BackedFigures
-        .missingIn(
-            text = card.answer,
-            sources = listOf(card.sentence)
-        )
-        .isEmpty()
-
     private fun isQuoted(
         card: ProposedCard,
         text: String
@@ -169,22 +162,10 @@ class MakeCardsUseCase(
         text = text
     )
 
-    private suspend fun isBacked(card: ProposedCard): Boolean {
-        val score = llmEngine.rerank(
-            query = "${card.question} ${card.answer}",
-            texts = listOf(card.sentence)
-        )
-
-        val best = score.valueOrNull()?.firstOrNull() ?: Float.NEGATIVE_INFINITY
-
-        return best >= SUPPORT
-    }
-
     private fun failed(problem: CardsProblem): Outcome<List<ProposedCard>, CardsProblem> =
         Outcome.Failure(error = problem)
 
     private companion object {
         const val MAX_TOKENS = 900
-        const val SUPPORT = -3f
     }
 }

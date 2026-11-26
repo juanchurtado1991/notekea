@@ -565,6 +565,15 @@ the Study tab's choices are made, `MakeChoicesUseCase`): on the E4B, 4 of 216 wi
 `0f68580f` (`cards-choices-old`), 216 of 216 with it (`cards-choices`). On Gemma every card was asked as a plain
 card, its answer shown on request.
 
+**Step 4, a hard card written anew** (2026-11-26, chosen while the developer was away, so open to review): a card is
+hard once it is not new and its ease fell to 170 (`CardSchedule.STRUGGLING_EASE`, four Hard answers more than Easy
+ones), read from the schedule the plugin already writes, so no history of answers is kept. Once its answer shows, its
+sentence's box says so and offers "Write it anew": the model writes up to three other wordings from the sentence only
+(`RewritePrompt`), and the first that asks something new and passes a new card's checks (`CardChecks`: figures and
+the reranker) is shown beside the card, with "Use the new one" and "Keep this one". Nothing changes until the first
+is chosen; then `ReplaceCardUseCase` writes it over the card's line, its schedule dropped, and it is asked at once as
+the new card it is. No offer for a card without its sentence or whose note no longer writes it.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.

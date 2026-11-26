@@ -8,6 +8,8 @@ import app.notekea.cards.domain.ChoicesReader
 import app.notekea.cards.domain.MakeCardsUseCase
 import app.notekea.cards.domain.MakeChoicesUseCase
 import app.notekea.cards.domain.ReadDeckUseCase
+import app.notekea.cards.domain.ReplaceCardUseCase
+import app.notekea.cards.domain.RewriteCardUseCase
 import app.notekea.cards.presentation.StudyViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -28,6 +30,8 @@ val cardsModule = module {
 
     factoryOf(::ReadDeckUseCase)
     factoryOf(::AnswerCardUseCase)
+    factoryOf(::RewriteCardUseCase)
+    factoryOf(::ReplaceCardUseCase)
 
     viewModel { parameters ->
         StudyViewModel(
@@ -35,6 +39,8 @@ val cardsModule = module {
             readDeck = get(),
             answerCard = get(),
             makeChoices = get(),
+            rewriteCard = get(),
+            replaceCard = get(),
             localCalendar = get(),
             clock = get()
         )

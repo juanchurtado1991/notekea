@@ -80,23 +80,57 @@ object CardFormat {
      */
     fun blockOf(cards: List<ProposedCard>): String = buildString {
         append("\n\n## Flashcards\n\n").append(TAG).append("\n\n")
-
-        cards.forEach {
-            append(clean(it.question))
-                .append(SEPARATOR)
-                .append(clean(it.answer))
-                .append(" ")
-                .append(SOURCE_OPEN)
-                .append(
-                    clean(it.sentence).replace(
-                        oldValue = "--",
-                        newValue = "-"
-                    )
-                )
-                .append(SOURCE_CLOSE)
-                .append('\n')
-        }
+        cards.forEach { append(lineOf(card = it)).append('\n') }
     }
+
+    /** [card] as it is in [text] now: at its line, or found by its question when the note moved on; null when gone. */
+    fun located(
+        text: String,
+        card: StudyCard
+    ): StudyCard? {
+        val current = cardsOf(
+            note = card.note,
+            text = text
+        )
+
+        return current.firstOrNull {
+            it.line == card.line && it.question == card.question
+        }
+            ?: current.firstOrNull {
+                it.question == card.question
+            }
+    }
+
+    /**
+     * [text] with [card] written as [with] on its line, where it starts again as a new card: its schedule, on its line
+     * or below, goes with the old wording, and the line keeps its indent and list mark.
+     */
+    fun replaced(
+        text: String,
+        card: StudyCard,
+        with: ProposedCard
+    ): String {
+        val lines = text.lines().toMutableList()
+        val line = lines[card.line]
+        val lead = line.takeWhile { it.isWhitespace() }
+        val mark = if (line.trimStart().startsWith(prefix = "- ")) "- " else ""
+
+        lines[card.line] = lead + mark + lineOf(card = with)
+
+        val below = lines.getOrNull(index = card.line + 1)
+        val isScheduleBelow = below != null && SCHEDULE.matches(input = below.trim())
+        if (isScheduleBelow) lines.removeAt(index = card.line + 1)
+
+        return lines.joinToString(separator = "\n")
+    }
+
+    // A card's line: its question and answer, and its sentence in a comment the plugin keeps and shows nothing of.
+    private fun lineOf(card: ProposedCard): String =
+        clean(card.question) + SEPARATOR + clean(card.answer) + " " +
+            SOURCE_OPEN + clean(card.sentence).replace(
+                oldValue = "--",
+                newValue = "-"
+            ) + SOURCE_CLOSE
 
     /** Whether [sentence] is written in [text], case, spaces and marks aside, the cards' own comments left out. */
     fun isQuoted(

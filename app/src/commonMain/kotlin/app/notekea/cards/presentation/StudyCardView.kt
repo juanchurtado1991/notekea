@@ -120,7 +120,18 @@ internal fun StudyCardView(
                 Source(
                     sentence = source,
                     isOutdated = card.isOutdated
-                )
+                ) {
+                    if (card.isStruggling && !card.isOutdated) {
+                        CardRewrite(
+                            isRewriting = state.isRewriting,
+                            isRewriteFailed = state.isRewriteFailed,
+                            onRewrite = { onIntent(StudyIntent.OnRewrite) },
+                            onUse = { onIntent(StudyIntent.OnUseRewrite) },
+                            onKeep = { onIntent(StudyIntent.OnKeepCard) },
+                            rewrite = state.rewrite
+                        )
+                    }
+                }
             }
         }
     }
@@ -174,12 +185,13 @@ private fun Header(
     }
 }
 
-// The note's sentence the card was made from, under its answer (the developer's design A of 2026-11-26), and a word
-// when the note no longer writes it.
+// The note's sentence the card was made from, under its answer (the developer's design A of 2026-11-26), a word
+// when the note no longer writes it, and what a hard card offers ([below]).
 @Composable
 private fun Source(
     sentence: String,
-    isOutdated: Boolean
+    isOutdated: Boolean,
+    below: @Composable () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -210,6 +222,8 @@ private fun Source(
                 color = NotekeaColors.warning
             )
         }
+
+        below()
     }
 }
 

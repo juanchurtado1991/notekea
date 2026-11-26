@@ -21,5 +21,8 @@ data class StudyCard(
 ) {
     val isNew: Boolean get() = due == null
 
+    /** Answered Hard often enough ([CardSchedule.STRUGGLING_EASE]) that a new wording may be remembered better. */
+    val isStruggling: Boolean get() = !isNew && ease <= CardSchedule.STRUGGLING_EASE
+
     fun isDue(today: CalendarDate): Boolean = due == null || due <= today
 }

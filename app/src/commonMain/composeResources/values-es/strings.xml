@@ -1146,6 +1146,13 @@
     <string name="study_source">De la nota</string>
     <string name="study_changed">La nota cambió</string>
     <string name="study_outdated">La nota ya no dice esto. Revisa la tarjeta antes de calificarla.</string>
+    <string name="study_struggling">Esta tarjeta te está costando.</string>
+    <string name="study_rewrite">Reescribirla</string>
+    <string name="study_rewriting">Reescribiéndola desde su frase…</string>
+    <string name="study_rewrite_failed">No se pudo escribir una versión más clara desde su frase.</string>
+    <string name="study_new_version">Versión nueva</string>
+    <string name="study_use_new">Usar la nueva</string>
+    <string name="study_keep_old">Quedarme con esta</string>
     <string name="tab_study">Estudiar</string>
     <string name="chat_action_make_cards">Make study cards</string>
     <string name="chat_action_cards_count">%1$d cards</string>
