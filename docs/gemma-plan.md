@@ -362,6 +362,10 @@ Then two more, on the same five rounds (`DaysTool`; the tally's as a patch, `~/.
   three E4B samples.
 - **The tally, not kept.** Dev's figures fell from 18 to 14 and the pool's did not follow.
 
+**The E2B with all of them** (commit `5c7b79fa`, 2026-11-25): dev 215 to 212 (gained 22, lost 25), its pool seed 10
+242 to 255 of 439 (58.1 %). The E2B is not made worse: dev moves within what a round's own noise moves it, and on the
+pool should-have-asked fell from 49 to 37 and asked-needlessly from 26 to 23; "other" rose from 22 to 26.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
