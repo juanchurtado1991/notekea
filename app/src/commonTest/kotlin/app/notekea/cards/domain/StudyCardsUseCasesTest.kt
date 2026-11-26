@@ -151,6 +151,7 @@ class StudyCardsUseCasesTest {
                 "{\"question\":\"Old question\",\"answer\":\"old\",\"sentence\":\"The capital of Peru is Lima\"}," +
                 "{\"question\":\"Its river?\",\"answer\":\"Rímac\",\"sentence\":\"Lima lies on the river Rímac\"}," +
                 "{\"question\":\"Its coast?\",\"answer\":\"Pacific\",\"sentence\":\"Lima, on the coast\"}," +
+                "{\"question\":\"Lima's people?\",\"answer\":\"Lima 10 million\",\"sentence\":\"The capital of Peru is Lima\"}," +
                 "{\"question\":\"capital of peru?\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}]}"
         }
 
@@ -175,6 +176,7 @@ class StudyCardsUseCasesTest {
                 CardVerdict.KNOWN,
                 CardVerdict.UNQUOTED,
                 CardVerdict.UNBACKED,
+                CardVerdict.UNFIGURED,
                 CardVerdict.REPEATED
             ),
             actual = (judged as Outcome.Success).value.map { it.verdict }

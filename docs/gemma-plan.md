@@ -508,6 +508,10 @@ fits in one part: 1,507 kept, 98 % held). The six long notes:
 | The note's first 8,000 characters (`cards-first3`) | 47 | 96 % | 98 % | 10 % | 0 |
 | By its sections (`cards-parts`) | 119 | 97 % | 97 % | 17 % | 56 |
 
+**A card's figures checked** (`cards-figures`): a card whose answer writes a figure its sentence does not hold is
+left out (`UNFIGURED`, by `BackedFigures`, before the reranker). Dev: 12 cards left out, every one of them not held;
+kept 1,507 to 1,496, held 98 to 99 %, figures held 98 to 100 %, cover 59 %. The long notes do not move.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.

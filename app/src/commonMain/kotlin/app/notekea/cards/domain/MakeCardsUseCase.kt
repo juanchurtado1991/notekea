@@ -1,5 +1,6 @@
 package app.notekea.cards.domain
 
+import app.notekea.chat.domain.plan.BackedFigures
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
@@ -141,6 +142,7 @@ class MakeCardsUseCase(
             card.question.isBlank() || card.answer.isBlank() -> CardVerdict.BLANK
             question in known -> CardVerdict.KNOWN
             !isQuoted(card = card, text = text) -> CardVerdict.UNQUOTED
+            !isFigured(card = card) -> CardVerdict.UNFIGURED
             !isBacked(card = card) -> CardVerdict.UNBACKED
             question in asked || asked.size >= most -> CardVerdict.REPEATED
             else -> CardVerdict.KEPT
@@ -150,6 +152,14 @@ class MakeCardsUseCase(
 
         return verdict
     }
+
+    // Every figure of its answer is its sentence's, or one worked from them.
+    private fun isFigured(card: ProposedCard): Boolean = BackedFigures
+        .missingIn(
+            text = card.answer,
+            sources = listOf(card.sentence)
+        )
+        .isEmpty()
 
     private fun isQuoted(
         card: ProposedCard,

@@ -11,6 +11,9 @@ enum class CardVerdict {
     /** Its sentence is not the note's: too short, or not in the note as written. */
     UNQUOTED,
 
+    /** Its answer writes a figure its sentence does not hold: "610 USD" from a sentence that writes 320. */
+    UNFIGURED,
+
     /** The reranker finds that its sentence does not back the question and its answer. */
     UNBACKED,
 
