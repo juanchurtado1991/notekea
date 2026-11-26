@@ -377,6 +377,11 @@ of a folder) settles it. Dev 321 to 322 (1 gained, 0 lost); the still pools 351/
 lost). Kept: small, and what the check's own comment said it did. A note's first heading would settle "the team
 budget" too, but the change tools do not read a note's text.
 
+**A fifth sample, without kept replies** (seed 14, commit `f97672ab`): 341 of 438 (77.9 %). The five samples:
+351, 339, 357, 347 and 341, 1,735 of 2,186 (79.4 %); 80 % is 1,749, 14 short. The two rounds without kept replies
+gave 79.8 % and 77.9 %: a sample's own spread is about two points. Seed 14's failures: changes 32, should have asked
+23, figures 16, asked needlessly 14, facts 7, days 4, other 1.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
