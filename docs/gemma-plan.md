@@ -350,6 +350,18 @@ still, then on a sample not seen before (seed 12, which shares 7 of its 10 exams
 The E4B's seeds 10 and 11 without repeats: 559 to 581 of 742 (78.3 %); 13 short of 80 %. Needless questions fell
 from 22, 32 and 29 to 6, 12 and 12; figures rose by 3, 2 and 3, tasks now answered that had been asked.
 
+Then two more, on the same five rounds (`DaysTool`; the tally's as a patch, `~/.cache/notekea-loop-runs/tally1.patch`):
+
+| | Dev | E4B seed 10 | E4B seed 11 | E4B seed 12 | 12B seed 10 | Gained / lost on the pools |
+|---|---|---|---|---|---|---|
+| The days said with today, and when a day of an earlier year next comes round | 321 | 351 | 339 | 356 | 372 | 12 / 3 |
+| A tally from a note seen only in a search held once, for it to be read | 325 | 350 | 342 | 355 | 372 | 9 / 8 |
+
+- **Days, kept.** The answer is written from what the tools gave, and the days tool did not say which day today
+  was: "days until the cutover" was answered "the notes do not hold today's date". Days fell from 20 to 10 on the
+  three E4B samples.
+- **The tally, not kept.** Dev's figures fell from 18 to 14 and the pool's did not follow.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
