@@ -370,6 +370,13 @@ pool should-have-asked fell from 49 to 37 and asked-needlessly from 26 to 23; "o
 (79.8 %). With seeds 10, 11 and 12 (351, 339, 356), 1,393 of 1,748 (79.7 %); 80 % is 1,399, 6 tasks short. The
 failures on seed 13: should have asked 21, changes 21, asked needlessly 16, figures 13, facts 9, other 5, days 3.
 
+**A note of a shared name the task tells apart** (`NamedApart`): "mark the formalin as paid in the lab budget" was
+held for a question between Lab/Budget and Travel/Budget, as the change tool held every note of a shared name the frame
+did not name. Now a word only one of them is called by (a folder, its title, an alias; a word of three letters only
+of a folder) settles it. Dev 321 to 322 (1 gained, 0 lost); the still pools 351/339/357 and the 12B 372 (1 gained, 0
+lost). Kept: small, and what the check's own comment said it did. A note's first heading would settle "the team
+budget" too, but the change tools do not read a note's text.
+
 ## 7. Rounds made shorter: the model's replies kept
 
 A dev round takes 47 minutes on the E4B, and most of its calls are the ones the round before made: the route and
