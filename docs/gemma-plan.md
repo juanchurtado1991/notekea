@@ -458,6 +458,15 @@ In this order, each change measured alone and kept only when it beats the cards 
 4. **A card failed again and again written anew** from its sentence, proposed and never changed alone. The failures
    in a row are not kept today, only the ease.
 
+**The set, built 2026-11-26** (`CardsEvalChatModelTest`, `measure.sh <label> cards <size>`): cards made from the 207
+notes of 400 characters or more in the nine dev vaults (`cards-dev`), and from the six committed notes longer than the
+8,000 characters the model is given, outside the blind vaults (`cards-long`). `MakeCardsUseCase.judged` says what
+became of each card proposed: blank, known, its sentence not the note's, not backed by the reranker, repeated, or kept.
+Of those kept, the code judges, with no model (`CardsGrade`): held, when the card's sentence writes every word and
+figure of its answer; figures held; the part of the note the sentences cover; and, for a long note, the cards from
+past its first 8,000 characters. Held is not right: a card can ask what its sentence does not answer, and the set
+lists each note's cards so that a round's changes can be read.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.

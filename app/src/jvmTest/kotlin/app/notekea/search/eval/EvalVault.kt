@@ -41,17 +41,12 @@ class EvalVault(
             val store = FakeNoteContentStore()
             val root = "$VAULTS_FOLDER/$vault/"
 
-            val notes = git("ls-files", "-z", "--", root)
-                .split('\u0000')
-                .filter { it.endsWith(suffix = MARKDOWN_SUFFIX) }
-                .map { file ->
-                    val path = RelativePath(value = file.removePrefix(prefix = root))
-                    val text = git("show", "HEAD:$file")
-                    store.texts[path] = text
-                    val file = NoteFile(path, text.length.toLong(), modifiedAt = null)
+            val notes = committed(vault = vault).map { (path, text) ->
+                store.texts[path] = text
+                val file = NoteFile(path, text.length.toLong(), modifiedAt = null)
 
-                    NoteEntry(file, NoteMetadata.NONE)
-                }
+                NoteEntry(file, NoteMetadata.NONE)
+            }
 
             val index =
                 LuceneVectorIndex(Files.createTempDirectory("notekea-eval").toString(), dispatchers)
@@ -78,6 +73,18 @@ class EvalVault(
                 store = store,
                 index = index
             )
+        }
+
+        /** The Markdown notes of [vault] as committed, by their paths in it, without indexing them. */
+        fun committed(vault: String): Map<RelativePath, String> {
+            val root = "$VAULTS_FOLDER/$vault/"
+
+            return git("ls-files", "-z", "--", root)
+                .split('\u0000')
+                .filter { it.endsWith(suffix = MARKDOWN_SUFFIX) }
+                .associate { file ->
+                    RelativePath(value = file.removePrefix(prefix = root)) to git("show", "HEAD:$file")
+                }
         }
 
         /** The output of `git [arguments]`, run at the repository's root (the tests run in `app`). */
