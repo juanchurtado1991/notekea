@@ -54,6 +54,30 @@ class JsonFenceTest {
         )
     }
 
+    @Test
+    fun `Gemma's empty thought before a fenced reply is taken off with the fence, wherever the pieces are cut`() {
+        val reply = "<|channel>thought<channel|>```json\n$JSON\n```"
+
+        (1..reply.length).forEach { size ->
+            assertEquals(
+                expected = JSON,
+                actual = read(pieces = reply.chunked(size = size)),
+                message = "pieces of $size"
+            )
+        }
+    }
+
+    @Test
+    fun `a thought with words in it is taken off too, and one never closed is kept as written`() {
+        assertEquals(
+            expected = listOf(JSON, "<|channel>thought\nThe cards are"),
+            actual = listOf(
+                read(pieces = listOf("<|channel>thought\nFirst the note.", "<channel|>", JSON)),
+                read(pieces = listOf("<|channel>thought\nThe cards are"))
+            )
+        )
+    }
+
     private fun read(pieces: List<String>): String {
         val fence = JsonFence()
 

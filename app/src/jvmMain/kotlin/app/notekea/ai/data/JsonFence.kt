@@ -1,9 +1,8 @@
 package app.notekea.ai.data
 
 /**
- * Takes the Markdown fence off a reply held to a schema, as it streams: Gemma 4's template writes the JSON between
- * ` ```json ` and ` ``` ` (the schema holds inside), Qwen3.5's writes it bare. A reply with no fence passes as it is.
- * One per reply: [taken] for each piece, then [ended].
+ * Takes the Markdown fence off a reply held to a schema, as it streams: Gemma 4 writes the JSON in ` ```json ` after
+ * its thought (`<|channel>thought<channel|>`, empty with thinking off); Qwen3.5 writes it bare, which passes as it is.
  */
 internal class JsonFence {
     private val held = StringBuilder()
@@ -42,9 +41,24 @@ internal class JsonFence {
         }
     }
 
-    // Whether the reply's start is settled: no fence, or a whole first line of one (dropped with its language).
+    // Whether the reply's start is settled: no fence, or a whole first line of one (dropped with its language), once
+    // a thought before it is whole and dropped. The cards read none of 172 replies that began with an empty thought
+    // (their set, 2026-11-26).
     private fun opened(): Boolean {
-        val start = held.trimStart()
+        val written = held.trimStart()
+        val isThought = written.startsWith(prefix = THOUGHT) || THOUGHT.startsWith(prefix = written)
+        val thoughtEnd = written.indexOf(string = THOUGHT_END)
+
+        if (isThought && thoughtEnd < 0) return false
+
+        val start = if (isThought) {
+            written
+                .substring(startIndex = thoughtEnd + THOUGHT_END.length)
+                .trimStart()
+        } else {
+            written
+        }
+
         val isFenced = start.startsWith(prefix = FENCE)
         val line = start.indexOf(char = '\n')
         val isFirstLineCut = isFenced && line < 0
@@ -64,5 +78,7 @@ internal class JsonFence {
     private companion object {
         const val MARK = '`'
         const val FENCE = "```"
+        const val THOUGHT = "<|channel>"
+        const val THOUGHT_END = "<channel|>"
     }
 }

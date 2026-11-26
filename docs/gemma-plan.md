@@ -467,6 +467,22 @@ figure of its answer; figures held; the part of the note the sentences cover; an
 past its first 8,000 characters. Held is not right: a card can ask what its sentence does not answer, and the set
 lists each note's cards so that a round's changes can be read.
 
+**The cards as they were, and Gemma's empty thought** (E4B, 2026-11-26): 47 of 217 dev notes gave a card at all.
+172 of the 223 replies began with Gemma's thought channel, `<|channel>thought<channel|>`, empty in 167 of them with
+thinking off, then the JSON in its fence; the engine's `JsonFence` took a fence off only at the reply's start, and the
+cards' reader reads the reply whole. The chat's own JSON is read from its first brace and never showed it; the
+choices, the search's translation and the plan's reader read the reply whole as the cards do. `JsonFence` now drops a
+thought before the fence:
+
+| Dev, 217 notes | Notes with a card | Proposed | Kept | Held | Figures held | Cover |
+|---|---|---|---|---|---|---|
+| As they were (`cards-base`) | 47 | 353 | 335 | 96 % | 99 % | 11 % |
+| The thought dropped (`cards-fence`) | 214 | 1,551 | 1,444 | 97 % | 100 % | 55 % |
+
+Of the 1,551 proposed, 58 quote no sentence of the note and 49 are not backed. The six long notes: four make eight
+cards each, all from their first 8,000 characters (cover 3 to 14 %); two give none, as the model thinks for 2,000 to
+3,000 characters and runs out of its 900 tokens.
+
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
