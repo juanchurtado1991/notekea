@@ -460,11 +460,15 @@ note read (40 never found).
 | The call after one made again sampled at temperature 1 | 211 | — | — | no: the same repeats |
 | No entry marked: open (v1), or those the words fit best (v2) | 211, 213 | — | frame: 23 more needless questions | no |
 | An answer from search results alone held once, to read the note (`SearchedUnread`) | 222 | 259 | dev 312 both ways | yes |
+| Several notes marked asked once more which one the task means (the pick) | frame: 28 more missed questions | — | frame: no better | no |
 
 The withheld repeat already exists (`OfferedTools`): the E2B's repeats alternate two calls. The entries' marks are
 the model's: the E4B also marks every entry "no" for a change to the note as a whole, so the code cannot tell the two
 apart without a rule for one size. `SearchedUnread` never fires on the E4B, which reads before it answers; on the E2B
 it moves 11 from never found, and 12 more run out of steps, the read costing steps.
+The pick picks one where the person must choose (two Toms), on both sizes: a question the frame leaves open is one
+the model cannot settle. What is left on the E2B is its own reading: it repeats a read whose result was folded away
+(`StepRecall` shows it again, and the loop takes no repeat for it), and answers from what it read.
 
 ## 8. After the tuning: the study cards
 
@@ -589,6 +593,13 @@ sentence's box says so and offers "Write it anew": the model writes up to three 
 the reranker) is shown beside the card, with "Use the new one" and "Keep this one". Nothing changes until the first
 is chosen; then `ReplaceCardUseCase` writes it over the card's line, its schedule dropped, and it is asked at once as
 the new card it is. No offer for a card without its sentence or whose note no longer writes it.
+
+**The developer, 2026-11-26 evening**: a note's cards cover all of it, every sentence with something to study (a
+fact, a figure, a name, a date, a definition, a rule), not half; the questions' quality is measured (a judge with a
+rubric: answerable without the sentence, one right answer, no yes or no, not the sentence copied, the sentence's main
+point, the note's language; checked against the developer's own marks on a sample); and cards are made on their own
+in the background. Decided: cards made on their own are kept apart, in Notekea, until first reviewed, and only then
+written in the note; and made only for the notes or folders the person marks to study.
 
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
