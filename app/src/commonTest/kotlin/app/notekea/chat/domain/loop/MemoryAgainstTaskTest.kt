@@ -53,7 +53,8 @@ class MemoryAgainstTaskTest {
             task = "what is my sister's phone?",
             found = listOf("read \"Rosa Quesada\":\nphone: 8855-2310"),
             summary = "",
-            memory = listOf("\"my sister\" is [[Rosa Quesada]]")
+            memory = listOf("\"my sister\" is [[Rosa Quesada]]"),
+            onText = {}
         )
 
         val asked = engine

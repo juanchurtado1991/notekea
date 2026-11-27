@@ -15,7 +15,7 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
 import kotlin.time.Duration.Companion.minutes
 
-private val HEADER = Regex(pattern = "^(Scope|Outcome|Answered with): ")
+private val HEADER = Regex(pattern = "^(Scope|Outcome): ")
 internal const val QUESTION_FIELD = "Ask about your notes…"
 internal const val NOT_FOUND = "I couldn't find this in your notes."
 internal const val WATER = "How much water does the arepa dough take?"
@@ -56,13 +56,6 @@ internal fun CaseScope.openChat(withArepas: Boolean = true) {
 
     pressInWindow(shortcut = Mod + Key.L)
     expectText(text = QUESTION_FIELD)
-}
-
-/** Chooses [mode] in the menu under the chat's field, with Medium in use (it reads "Medium · Auto" until then). */
-internal fun CaseScope.chooseMode(mode: String) {
-    click(text = "Medium · Auto")
-    click(text = mode)
-    expectText(text = "Medium · $mode")
 }
 
 /** Asks [question] in the chat's field and waits until its reply is whole (the Stop button is Send again). */

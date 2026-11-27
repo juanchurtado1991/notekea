@@ -20,13 +20,8 @@ class AgentWideCase(
 
     enum class End { ANSWER, PROPOSE, ASK }
 
-    /** This task for today's agent, which has no way to ask: a question back is a finished turn that asks. */
-    fun forToday(): AgentEvalCase = checked(canAsk = false)
-
     /** This task for the one loop, which asks with `ask_user`. */
-    fun forLoop(): AgentEvalCase = checked(canAsk = true)
-
-    private fun checked(canAsk: Boolean): AgentEvalCase = AgentEvalCase(task = task) { end ->
+    fun forLoop(): AgentEvalCase = AgentEvalCase(task = task) { end ->
         val text = when (end) {
             is AgentStep.Finished -> end.summary
             is AgentStep.Proposed -> end.summary + end.steps
@@ -45,13 +40,10 @@ class AgentWideCase(
             FairText.plain(text = it) in text
         }
 
-        val isQuestion = end is AgentStep.Finished && "?" in end.summary
-        val isAsked = if (canAsk) end is AgentStep.Asked else isQuestion
-
         val isEnd = when (ends) {
             End.ANSWER -> end is AgentStep.Finished
             End.PROPOSE -> end is AgentStep.Proposed
-            End.ASK -> isAsked
+            End.ASK -> end is AgentStep.Asked
         }
 
         when {

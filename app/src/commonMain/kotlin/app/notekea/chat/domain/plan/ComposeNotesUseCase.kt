@@ -22,7 +22,7 @@ import app.notekea.core.notes.domain.RelativePath
 class ComposeNotesUseCase(
     private val llmEngine: LlmEngine,
     private val noteTextCache: NoteTextCache,
-    private val planReader: ActionPlanReader,
+    private val notesReader: TextNotesReader,
     private val clipper: WebPageClipper? = null,
     private val cardMaker: CardMaker? = null
 ) {
@@ -267,7 +267,7 @@ class ComposeNotesUseCase(
                 jsonSchema = TextNotesPrompt.SCHEMA
             )
 
-            made += planReader.readNotes(json = json).orEmpty()
+            made += notesReader.readNotes(json = json).orEmpty()
         }
 
         if (made.isEmpty()) throw ComposeProblem(ActionProblem.Missing(step.kind, ActionField.TEXT))

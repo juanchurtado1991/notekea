@@ -12,8 +12,8 @@ enum class WorkKind(
     WRITE(
         written = "write",
         description = "a new note is written (a summary, a table, a comparison, a list, study cards or a " +
-            "quiz), whatever it is written from (notes, tasks, meetings), an empty note is created, or text " +
-            "is added to a note. Never a task, tag, property or link added to a note (organize)."
+            "quiz), whatever it is written from (notes, tasks, meetings), a pasted text turned into notes, an " +
+            "empty note is created, or text is added to a note. Never a task, tag, property or link added to a note (organize)."
     ),
     ORGANIZE(
         written = "organize",

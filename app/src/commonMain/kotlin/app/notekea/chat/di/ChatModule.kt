@@ -1,16 +1,13 @@
 package app.notekea.chat.di
 
 import app.notekea.chat.data.BundledHelpGuideSource
-import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.data.GhostModelJson
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.CompactChatUseCase
-import app.notekea.chat.domain.agent.AgentAnswerUseCase
-import app.notekea.chat.domain.agent.AgentTaskUseCase
 import app.notekea.chat.domain.agent.ProposalCheck
-import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.help.HelpGuideSource
 import app.notekea.chat.domain.loop.ChatLoop
@@ -19,11 +16,9 @@ import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
 import app.notekea.chat.domain.loop.TaskFramer
 import app.notekea.chat.domain.loop.TurnFrames
-import app.notekea.chat.domain.plan.ActOnRequestUseCase
-import app.notekea.chat.domain.plan.ActionPlanReader
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
-import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.plan.TextNotesReader
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
 import app.notekea.chat.domain.tool.ModelJson
@@ -33,27 +28,23 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-/** The chat: answers from the notes with the local model (3.2), its panel (3.3) and its actions (3.8, 3.9). */
+/** The chat: the agent's loop on the whole vault, answers from a note or a folder (3.2), its panel (3.3). */
 val chatModule = module {
-    factoryOf(::AnswerFromNotesUseCase)
-    factoryOf(::PlanRequestUseCase)
+    factoryOf(::PassageSearch)
     factoryOf(::CheckPlanUseCase)
 
     factory {
         ComposeNotesUseCase(
             llmEngine = get(),
             noteTextCache = get(),
-            planReader = get(),
+            notesReader = get(),
             clipper = get(),
             cardMaker = get()
         )
     }
 
-    factoryOf(::ActOnRequestUseCase)
     factoryOf(::ConverseUseCase)
     factoryOf(::AnswerFromPagesUseCase)
-    factoryOf(::AgentAnswerUseCase)
-    factoryOf(::AgentTaskUseCase)
     factoryOf(::VaultGuide)
     factoryOf(::ProposalCheck)
     factoryOf(::LoopTools)
@@ -82,24 +73,18 @@ val chatModule = module {
     factoryOf(::AnswerHelpUseCase)
     factoryOf(::DescribeVaultUseCase)
     factoryOf(::CompactChatUseCase)
-    factoryOf(::AnswerFromFoundUseCase)
-    factory<ActionPlanReader> { GhostActionPlanReader() }
+    factory<TextNotesReader> { GhostTextNotesReader() }
     factory<ModelJson> { GhostModelJson() }
     single<HelpGuideSource> { BundledHelpGuideSource(dispatchers = get()) }
 
     viewModel { parameters ->
         ChatViewModel(
             vaultPath = parameters.get(),
-            answerFromNotes = get(),
             converse = get(),
-            agentAnswer = get(),
             answerHelp = get(),
             describeVault = get(),
             conventions = get(),
-            actOnRequest = get(),
-            agentTask = get(),
             compactChat = get(),
-            answerFromFound = get(),
             actionRunner = get(),
             localCalendar = get(),
             clock = get(),

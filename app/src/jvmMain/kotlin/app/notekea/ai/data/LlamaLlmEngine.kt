@@ -1,6 +1,5 @@
 package app.notekea.ai.data
 
-import app.notekea.ai.domain.ModeMeasures
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSetupSource
 import app.notekea.ai.domain.ModelSize
@@ -120,8 +119,6 @@ class LlamaLlmEngine(
                     value = LlmModelInfo(
                         isSmall = isSmall,
                         tier = TIERS.getValue(found.value.size),
-                        hasAgent = found.value.size in AGENT_SIZES,
-                        isAgentPicked = ModeMeasures.isAgentPicked(size = found.value.size),
                         contextTokens = found.value.contextTokens * found.value.slots
                     )
                 )
@@ -340,10 +337,6 @@ class LlamaLlmEngine(
         // Closing with Koin (a case of the Auto-Test ending) waits this long for a reply; quitting waits longer.
         private val CLOSE_WAIT = 2.seconds
         private val CLOSE_POLL = 50.milliseconds
-
-        // Agent mode (4.7): Medium (83 % on its evaluation) and Large (70 %, by the developer's choice of
-        // 2026-11-11); not Small (10 %). docs/answer-quality.md, 4.7.
-        val AGENT_SIZES = setOf(ModelSize.MEDIUM, ModelSize.LARGE)
 
         val TIERS = mapOf(
             ModelSize.SMALL to ModelTier.SMALL,

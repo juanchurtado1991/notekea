@@ -27,7 +27,9 @@ class FinalAnswerTest {
                 finalAnswer.written(
                     task = "how much is the rent?",
                     found = listOf(it),
-                    summary = SUMMARY
+                    summary = SUMMARY,
+                    memory = emptyList(),
+                    onText = {}
                 )
             }
 

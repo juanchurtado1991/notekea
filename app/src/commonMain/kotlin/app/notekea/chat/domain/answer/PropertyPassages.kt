@@ -2,7 +2,6 @@ package app.notekea.chat.domain.answer
 
 import app.notekea.chat.domain.plan.NoteProperties
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
 
 /**
@@ -32,8 +31,7 @@ internal object PropertyPassages {
 
     fun of(
         question: String,
-        notes: Collection<NoteEntry>,
-        only: Set<RelativePath>?
+        notes: Collection<NoteEntry>
     ): List<AnswerSource> {
         val words = wordsOf(text = question).filter {
             it !in COMMON
@@ -50,9 +48,6 @@ internal object PropertyPassages {
         if (asked.isEmpty()) return emptyList()
 
         return notes
-            .filter {
-                only == null || it.file.path in only
-            }
             .mapNotNull { note ->
                 val properties = NoteProperties.of(note = note)
                 if (properties.isEmpty()) return@mapNotNull null

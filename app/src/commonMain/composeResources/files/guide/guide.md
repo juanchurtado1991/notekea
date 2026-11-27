@@ -7,11 +7,12 @@ newNoteShortcut), written for the person's system. Every feature that adds or ch
 
 # What the chat can do
 words: what can you do, help, ayuda, qué puedes hacer, que puedes hacer, para qué sirves, capabilities, chat
-Ask your notes anything and the chat answers from what they say, citing the notes as numbered chips; click a chip to
-open the passage. It also does things for you when you ask in plain words: create a note (also from a template or from
+Ask your notes anything and the chat answers from what they say, listing the notes it comes from; click one to open
+the passage. It also does things for you when you ask in plain words: create a note (also from a template or from
 other notes, like a summary), add text or a task to a note, tag notes, set a property, link notes, bookmark, rename,
-move or trash notes, create folders, turn a pasted text into a folder of linked notes, list notes by their properties
-or your tasks, open a note or today's note, show a panel, and change the color theme. Anything that changes your notes
+move or trash notes, create folders, turn a pasted text into a folder of linked notes, list notes by their properties,
+the notes with no tag, the broken links or your tasks, open a note or today's note, show a panel, and change the color
+theme. Anything that changes your notes
 is shown first on a card with Do it and Cancel, and Undo takes it back. It can also explain how to use Notekea. Open
 the chat with {chat}.
 
@@ -19,8 +20,8 @@ the chat with {chat}.
 words: what can't you do, what cannot you do, limits, limitations, qué no puedes hacer, que no puedes hacer, qué no podés hacer, que no podes hacer, límites, no puedes, can't you
 It works only with the notes of this vault, on this computer, and it never goes online by itself. It cannot send
 emails or messages, set reminders or alarms (it can add a task with a due date, which shows in Today and Tasks),
-look at the calendar, or know the weather and the news by itself. It searches the web only when you ask it to, with
-the chat's new loop on (see Search the web). It can't change Settings or the AI model (it can change the color theme), delete notes for good (it moves
+look at the calendar, or know the weather and the news by itself. It searches the web only when you ask it to (see
+Search the web). It can't change Settings or the AI model (it can change the color theme), delete notes for good (it moves
 them to the trash, and Undo brings them back), or reach files outside the vault. When it cannot do something it says
 so, and what it can do instead.
 
@@ -205,20 +206,13 @@ words: vault, bóveda, boveda, open folder, abrir carpeta, another vault, otra b
 Press {openFolder} to open a folder as a vault, or click the vaults button at the bottom of the tool rail to switch to a
 recent one.
 
-# Chat modes: Auto, Fast, Agent
-words: mode, modo, modes, modos, auto, fast, rápido, normal, agent, agente, step by step, paso a paso
-At the bottom right of the chat's question field it says the model in use and the mode, such as "Medium · Auto"; a
-click opens the modes. Auto, the default, answers fast, and hands the agent a task whose note it must look for first
-only with a model on which the agent was measured to work well. Fast is one answer, the quickest. Agent works step by
-step. Agent comes with the Medium and Large models.
-
 # Copy the chat
 words: copy chat, copiar chat, clear history, borrar historial, report, reportar
 Click ⋯ at the top right of the chat: Copy chat puts the conversation on the clipboard, and Clear history empties it.
 
 # The chat's memory of this conversation
 words: conversation memory, context, contexto, context window, ventana de contexto, compact, compactar, ring, rueda, círculo
-The chat remembers the conversation so you can ask "and the water?" or "make it shorter". The ring beside the mode, at
+The chat remembers the conversation so you can ask "and the water?" or "make it shorter". The ring beside the model, at
 the bottom right of the question field, fills as the conversation grows; hold the pointer on it to see how full it
 is. When it is full, or when you ask again after half an hour or in a chat from an earlier session, the chat writes
 the earlier conversation into a short summary by itself and keeps going with it.
@@ -282,7 +276,7 @@ A scanned PDF without text cannot be read yet.
 # Remember things across chats
 words: remember, recuerda, recordar, from now on, a partir de ahora, forget, olvida, olvidar, what do you know about me, qué sabes de mí, memory note, Memory.md, aprende, learn
 try: remember that …
-With the chat's new loop on, the chat can remember what you tell it from one chat to the next. It keeps only what you
+The chat can remember what you tell it from one chat to the next. It keeps only what you
 approve, in a note of your vault, Notekea/Memory.md, which you can open, edit, sync or delete like any other.
 - When the chat asks which note you mean (two Lauras, two budgets), tick Remember for next time before you choose. It
   won't ask again.
@@ -305,7 +299,7 @@ In Settings → Chat memory:
 # Search the web
 words: search the web, look it up online, busca en internet, buscar en internet, google, web search, búsqueda web, sources, fuentes, where can I buy, dónde comprar, research, investiga, trusted sources, fuentes confiables
 try: search the web: …
-With the chat's new loop on, ask "search the web for …" or "research … and make notes", or click Search the web when
+Ask "search the web for …" or "research … and make notes", or click Search the web when
 your notes don't hold an answer. The chat never searches by itself.
 - **The search:** each search shows as a step with what was searched. It never carries your notes' text, only your
   words and, when it helps, your country (from the request, or Settings → Chat memory).
@@ -341,11 +335,13 @@ in Study cards, in the tool rail on the left: Show answer (Space), then Hard, Go
 back when it is due.
 
 
-# Agent mode
-words: agent, agente, modo agente, agent mode, step by step, paso a paso, multi-step, varios pasos, do a task, haz una tarea
+# How the chat works
+words: agent, agente, modo agente, agent mode, mode, modo, modes, modos, step by step, paso a paso, multi-step, varios pasos, do a task, haz una tarea, fast, auto
 try: find my unfinished books and tag them with to-read
-With the Medium or Large model, choose Agent in the mode menu at the bottom right of the chat's field (Auto also uses it when
-a task names a note it must look for first). It works step by step, listing each step (searched, read a note, listed
-notes, looked at the tasks), and ends on the usual card: nothing changes until you press Do it. Help, what the notes
+The chat works on every request step by step, with any model, listing each step (searched, read a note, listed notes,
+looked at the tasks); there are no modes to choose. The model in use shows at the bottom right of the question field.
+A question about the open note or its folder (the scope above the chat) looks only there. An answer lists the notes it
+comes from; the notes or tasks it found show as a table, each row opening its note. A change ends on the usual card:
+nothing changes until you press Do it. Help, what the notes
 are about and talk are answered as usual. It reads a web page only when your request writes its address, and stops
 after 30 steps or 10 minutes.

@@ -249,8 +249,6 @@
     <string name="rail_settings">Ajustes</string>
     <string name="rail_graph">Grafo</string>
     <string name="rail_side_panel">Panel lateral</string>
-    <string name="settings_chat_loop">El nuevo bucle del chat</string>
-    <string name="settings_chat_loop_hint">Una vista previa de la nueva forma de trabajar del chat: toda petición sobre la bóveda entera, sea cual sea el modo, se trabaja paso a paso. Lee los documentos largos por partes, hace él mismo sumas y fechas, abre notas y paneles, y pregunta cuando una petición se puede entender de dos maneras. Acierta más y tarda más. Apagado, o con el modelo pequeño, el chat funciona como antes.</string>
     <string name="settings_section_memory">Memoria del chat</string>
     <string name="settings_memory_on">Recordar entre conversaciones</string>
     <string name="settings_memory_on_detail">El chat solo guarda lo que tú apruebas, en tu bóveda.</string>
@@ -622,9 +620,6 @@
     <string name="chat_send">Enviar</string>
     <string name="chat_small_hint">The small model is wrong now and then: check its answers against the sources.</string>
     <string name="chat_sources">Sources</string>
-    <string name="chat_step_reading">Reading %1$d notes…</string>
-    <string name="chat_step_reading_one">Reading 1 note…</string>
-    <string name="chat_step_searching">Searching your notes…</string>
     <string name="chat_step_writing">Writing the answer…</string>
     <string name="chat_stop">Detener</string>
     <string name="chat_stopped">Stopped</string>
@@ -895,9 +890,6 @@
     <string name="chat_retry_es">Reintentar</string>
     <string name="chat_sources_es">Fuentes</string>
     <string name="chat_small_hint_es">El modelo pequeño se equivoca a veces: compara sus respuestas con las fuentes.</string>
-    <string name="chat_step_searching_es">Buscando en tus notas…</string>
-    <string name="chat_step_reading_es">Leyendo %1$d notas…</string>
-    <string name="chat_step_reading_one_es">Leyendo 1 nota…</string>
     <string name="chat_step_writing_es">Escribiendo la respuesta…</string>
     <string name="chat_step_planning_es">Entendiendo tu petición…</string>
     <string name="chat_step_composing_es">Escribiendo las notas…</string>
@@ -968,8 +960,6 @@
     <string name="chat_problem_long_es">El texto tiene %1$d palabras, más de las que puedo convertir en notas de una vez. Pégalo por partes.</string>
     <string name="chat_problem_failed_es">El modelo de IA se detuvo antes de terminar. No se cambió nada.</string>
     <string name="chat_problem_refused_es">Eso no lo puedo hacer desde el chat. Puedo crear, editar, etiquetar, mover y organizar notas, y encontrarlas.</string>
-    <string name="chat_step_further">Looking further in your notes…</string>
-    <string name="chat_step_further_es">Buscando más a fondo en tus notas…</string>
     <string name="chat_copy">Copiar el chat</string>
     <string name="chat_compact">Compactar el chat</string>
     <string name="chat_memory">Memoria del chat %1$d %% · se compacta sola cuando se llena o después de media hora</string>
@@ -1164,14 +1154,6 @@
     <string name="chat_problem_not_backed_es">No pude escribirla solo con lo que dicen tus notas, así que no escribí nada en vez de rellenarla con ejemplos.</string>
     <string name="rail_study">Tarjetas de estudio</string>
     <string name="chat_step_working">Working on it, step by step…</string>
-    <string name="chat_mode_label">%1$s · %2$s</string>
-    <string name="chat_mode_description">Modelo y modo: %1$s. Elige el modo</string>
-    <string name="chat_mode_auto">Auto</string>
-    <string name="chat_mode_auto_hint">Elige el modo para cada pedido</string>
-    <string name="chat_mode_fast">Rápido</string>
-    <string name="chat_mode_fast_hint">Una respuesta, la más rápida</string>
-    <string name="chat_mode_agent">Agente</string>
-    <string name="chat_mode_agent_hint">Trabaja paso a paso y luego muestra su plan</string>
     <string name="chat_model_small">Pequeño</string>
     <string name="chat_model_medium">Mediano</string>
     <string name="chat_model_large">Grande</string>

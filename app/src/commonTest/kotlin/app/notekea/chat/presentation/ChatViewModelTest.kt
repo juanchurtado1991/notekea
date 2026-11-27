@@ -1,25 +1,16 @@
 package app.notekea.chat.presentation
 
-import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.TurnOutcome
-import app.notekea.chat.domain.agent.AgentAnswerUseCase
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
-import app.notekea.chat.domain.answer.ConverseUseCase
-import app.notekea.chat.domain.plan.ActOnRequestUseCase
-import app.notekea.chat.domain.plan.CheckPlanUseCase
-import app.notekea.chat.domain.plan.ComposeNotesUseCase
-import app.notekea.chat.domain.plan.PlanRequestUseCase
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatEffect
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ModelStatus
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.domain.Outcome
-import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmError
@@ -30,7 +21,6 @@ import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.index.NoteChunk
 import app.notekea.core.presentation.ViewModelTestBase
@@ -44,7 +34,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.time.Clock
 
 /** The chat panel over the real answer, with fakes of the index, the models and the history. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,7 +62,12 @@ class ChatViewModelTest : ViewModelTestBase() {
                 body = AREPAS_BODY
             )
 
-            engine.reply = { "Corn flour and warm water [1]." }
+            looked(
+                query = "dough",
+                note = "Arepas",
+                answer = DOUGH
+            )
+
             val viewModel = started()
 
             viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "What goes in the dough?"))
@@ -87,7 +81,7 @@ class ChatViewModelTest : ViewModelTestBase() {
                 .single()
 
             assertEquals(
-                expected = listOf(TurnOutcome.ANSWERED, "Corn flour and warm water [1].", AREPAS, ""),
+                expected = listOf(TurnOutcome.ANSWERED, DOUGH, AREPAS, ""),
                 actual = listOf(
                     entry.outcome,
                     entry.answer,
@@ -119,7 +113,12 @@ class ChatViewModelTest : ViewModelTestBase() {
                 body = AREPAS_BODY
             )
 
-            engine.reply = { "Corn flour and warm water [1]." }
+            looked(
+                query = "dough",
+                note = "Arepas",
+                answer = DOUGH
+            )
+
             val viewModel = started()
 
             viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "What goes in the dough?"))
@@ -133,7 +132,7 @@ class ChatViewModelTest : ViewModelTestBase() {
                 expected = listOf(true, true, true),
                 actual = listOf(
                     "## What goes in the dough?" in copied,
-                    "Corn flour and warm water [1]." in copied,
+                    DOUGH in copied,
                     "[1] Recipes/Arepas.md: $AREPAS_BODY" in copied
                 )
             )
@@ -184,7 +183,12 @@ class ChatViewModelTest : ViewModelTestBase() {
                 body = BEANS_BODY
             )
 
-            engine.reply = { "Soak them overnight [1]." }
+            looked(
+                query = "flour",
+                note = "Black beans",
+                answer = "The Black beans note says to soak them overnight [1]."
+            )
+
             val viewModel = started()
 
             viewModel.onIntent(intent = ChatIntent.OnActiveNoteChange(path = BEANS))
@@ -204,12 +208,13 @@ class ChatViewModelTest : ViewModelTestBase() {
                 actual = entry.sources.map { it.note } to entry.scopeName
             )
 
+            // The search of the note's turn sees only the open note: no prompt holds the arepas' corn.
             assertFalse(
-                actual = engine
-                    .generated
-                    .single()[1]
-                    .text
-                    .contains(other = "corn")
+                actual = engine.generated.any { messages ->
+                    messages.any {
+                        "corn" in it.text
+                    }
+                }
             )
 
             viewModel.onIntent(intent = ChatIntent.OnSourceClick(source = entry.sources.single()))
@@ -250,7 +255,16 @@ class ChatViewModelTest : ViewModelTestBase() {
             )
 
             engine.failure = null
-            engine.reply = { "Corn flour [1]." }
+
+            engine.reply = { messages ->
+                val isRoute = messages
+                    .first()
+                    .text
+                    .startsWith(prefix = ROUTER)
+
+                if (isRoute) TALK else "Corn flour [1]."
+            }
+
             viewModel.onIntent(intent = ChatIntent.OnRetry(id = failed.id))
             advanceUntilIdle()
 
@@ -300,18 +314,21 @@ class ChatViewModelTest : ViewModelTestBase() {
         runTest(
             testDispatcher
         ) {
-            engine.reply = { messages ->
-                val isPlan = messages
-                    .first()
-                    .text
-                    .startsWith(prefix = "You turn a request")
+            val calls = ArrayDeque(elements = listOf(CREATE, PROPOSE))
 
-                if (isPlan) PLAN else "A short list of groceries."
+            engine.reply = { messages ->
+                val asked = messages.first().text
+
+                when {
+                    asked.startsWith(prefix = ROUTER) -> WRITE
+                    asked.startsWith(prefix = CALLS) -> calls.removeFirst()
+                    else -> "A short note."
+                }
             }
 
             val viewModel = started()
 
-            viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "create a note Groceries with a list"))
+            viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "create a note Groceries"))
             viewModel.onIntent(intent = ChatIntent.OnSend)
             advanceUntilIdle()
 
@@ -321,11 +338,9 @@ class ChatViewModelTest : ViewModelTestBase() {
                 .entries
                 .last()
 
-            val draft = proposed
+            val step = proposed
                 .action
                 ?.steps
-                ?.single()
-                ?.content
                 ?.single()
 
             viewModel.onIntent(intent = ChatIntent.OnActionConfirm(id = proposed.id))
@@ -345,14 +360,14 @@ class ChatViewModelTest : ViewModelTestBase() {
             assertEquals(
                 expected = listOf<Any?>(
                     ActionStatus.PROPOSED,
-                    "Groceries.md",
+                    "Groceries",
                     ActionStatus.DONE,
                     ActionStatus.UNDONE,
                     1
                 ),
                 actual = listOf(
                     proposed.action?.status,
-                    draft?.path?.value,
+                    step?.title,
                     done,
                     viewModel
                         .state
@@ -365,6 +380,32 @@ class ChatViewModelTest : ViewModelTestBase() {
                 )
             )
         }
+
+    // The loop of a question: routed as one, a search for [query], the [note] it found read, then the [answer],
+    // which is also the one written.
+    private fun looked(
+        query: String,
+        note: String,
+        answer: String
+    ) {
+        val calls = ArrayDeque(
+            elements = listOf(
+                """{"tool":"search","query":"$query"}""",
+                """{"tool":"read","note":"$note"}""",
+                """{"tool":"answer","text":"$answer"}"""
+            )
+        )
+
+        engine.reply = { messages ->
+            val asked = messages.first().text
+
+            when {
+                asked.startsWith(prefix = ROUTER) -> ASK
+                asked.startsWith(prefix = CALLS) -> calls.removeFirst()
+                else -> answer
+            }
+        }
+    }
 
     private fun TestScope.started(): ChatViewModel {
         val viewModel = chatViewModel(
@@ -396,8 +437,14 @@ class ChatViewModelTest : ViewModelTestBase() {
     }
 
     private companion object {
-        const val PLAN =
-            "{\"steps\":[{\"action\":\"create_note\",\"title\":\"Groceries\",\"text\":\"a list\"}]}"
+        const val ROUTER = "You say how a request"
+        const val CALLS = "You work on a task in the person's notes"
+        const val TALK = """{"work":"talk","skill":"none"}"""
+        const val ASK = """{"work":"ask","skill":"none"}"""
+        const val DOUGH = "The Arepas note says corn flour and warm water [1]."
+        const val WRITE = """{"work":"write","skill":"none"}"""
+        const val CREATE = """{"tool":"create_note","title":"Groceries"}"""
+        const val PROPOSE = """{"tool":"propose","summary":"A note Groceries."}"""
         val AREPAS = RelativePath(value = "Recipes/Arepas.md")
         val BEANS = RelativePath(value = "Recipes/Black beans.md")
         const val AREPAS_BODY = "Mix corn flour with warm water and salt."

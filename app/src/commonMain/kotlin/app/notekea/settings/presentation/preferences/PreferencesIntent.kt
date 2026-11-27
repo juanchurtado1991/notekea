@@ -10,9 +10,6 @@ sealed interface PreferencesIntent {
 
     data object OnOpenLastVaultToggle : PreferencesIntent
 
-    /** Agent mode with the one loop, or today's agent. */
-    data object OnChatLoopToggle : PreferencesIntent
-
     /** Show again: the first-run welcome comes back the next time Settings closes. */
     data object OnShowWelcomeAgain : PreferencesIntent
 

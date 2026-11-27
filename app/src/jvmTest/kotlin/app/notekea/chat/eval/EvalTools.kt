@@ -186,11 +186,6 @@ internal object EvalTools {
         postfix = "]}"
     ) { it.schema(leading = "\"$NAMED\":{\"const\":\"${it.name}\"}") }
 
-    /** Today's plan, each of its steps a [call]. */
-    fun plan(tools: List<EvalTool>): String =
-        "{\"type\":\"object\",\"properties\":{\"steps\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5," +
-            "\"items\":${call(tools = tools)}}},\"required\":[\"steps\"]}"
-
     /** [tools] as lines of a prompt, for our JSON: what the model's own format writes by itself. */
     fun listed(tools: List<EvalTool>): String = tools
         .joinToString(

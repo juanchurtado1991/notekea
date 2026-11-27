@@ -5,8 +5,8 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 /**
- * Agent mode with the one loop (`docs/agent-loop.md`, step 5), turned on in Settings → General while it is a
- * preview. By hand: it needs the Medium model.
+ * The one loop (`docs/agent-loop.md`, step 5), which works every request of the whole vault. By hand: it needs the
+ * Medium model.
  */
 
 internal fun SuiteBuilder.loopCases() {
@@ -15,23 +15,20 @@ internal fun SuiteBuilder.loopCases() {
         reason = ManualReason.COSTLY
     ) {
         prepare(SAMPLE)
-        title(text = "Con el nuevo bucle, el modo Agente pregunta con botones y hace las sumas")
+        title(text = "El chat pregunta con botones y hace las sumas")
 
         steps(
             text =
-            "1. Con el modelo Mediano, abre Ajustes → General y activa El nuevo bucle del " +
-                "chat.\n2. Abre la Sample Vault y el chat; elige el modo Agente.\n3. Pregunta: " +
-                "summarize the meeting\n4. Haz clic en uno de los botones que ofrece.\n5. Pregunta: " +
-                "how many books do I still need to read for my reading challenge?\n6. Desactiva el " +
-                "ajuste y repite el paso 3."
+            "1. Con el modelo Mediano, abre la Sample Vault y el chat.\n2. Pregunta: " +
+                "summarize the meeting\n3. Haz clic en uno de los botones que ofrece.\n4. Pregunta: " +
+                "how many books do I still need to read for my reading challenge?"
         )
 
         expected(
             text =
-            "El paso 3 termina en una pregunta con un botón por cada reunión, sin resumir ninguna " +
+            "El paso 2 termina en una pregunta con un botón por cada reunión, sin resumir ninguna " +
                 "por su cuenta; el clic manda esa reunión como siguiente mensaje y el chat la " +
-                "resume. El paso 5 responde 7, con 17 de 24. Con el ajuste apagado, el modo Agente " +
-                "responde como antes, sin botones."
+                "resume. El paso 4 responde 7, con 17 de 24."
         )
     }
 
@@ -40,12 +37,12 @@ internal fun SuiteBuilder.loopCases() {
         reason = ManualReason.COSTLY
     ) {
         prepare(SAMPLE)
-        title(text = "Con el nuevo bucle, el chat conversa, abre notas y paneles, y describe la bóveda")
+        title(text = "El chat conversa, abre notas y paneles, y describe la bóveda")
 
         steps(
             text =
-            "1. Con el modelo Mediano y El nuevo bucle del chat activado en Ajustes → General, abre la " +
-                "Sample Vault y el chat; deja el modo en Auto.\n2. Escribe: hello!\n3. Escribe: open " +
+            "1. Con el modelo Mediano, abre la " +
+                "Sample Vault y el chat.\n2. Escribe: hello!\n3. Escribe: open " +
                 "today's note\n4. Escribe: show the backlinks\n5. Escribe: what does my vault hold?"
         )
 

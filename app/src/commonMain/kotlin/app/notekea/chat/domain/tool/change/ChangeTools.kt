@@ -18,6 +18,15 @@ object ChangeTools {
         optional = setOf(ActionField.FOLDER)
     )
 
+    // The text pasted in the request split into notes by topic (3.9): the app writes them from that text alone.
+    val notesFromText = ChangeTool(
+        name = "notes_from_text",
+        description = "the long text pasted in the task turned into notes, one per topic, in a new folder: the " +
+            "folder's name. The app writes the notes from the pasted text; never write_note or create_note for it.",
+        kind = ActionKind.NOTES_FROM_TEXT,
+        fields = listOf(ActionField.FOLDER)
+    )
+
     val createNote = ChangeTool(
         name = "create_note",
         description = "a new empty note, or one from a template: its title, and the folder or the template " +

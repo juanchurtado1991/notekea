@@ -1,7 +1,6 @@
 package app.notekea.chat.presentation.model
 
 import app.notekea.chat.domain.ChatScope
-import app.notekea.chat.domain.agent.AgentUse
 import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.plan.NewNotePlace
 import app.notekea.core.llm.domain.ModelTier
@@ -10,8 +9,8 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The chat panel: its [entries] (oldest first), the [question] being written, the [scope] it will be asked of (the
- * open note is [noteName], its folder [folderName]), the model in use ([tier]) and the [mode] it answers in; where the
- * person is ([working]), shared with the model as chips unless removed ([isPlaceHidden], [isSelectedHidden]).
+ * open note is [noteName], its folder [folderName]) and the model in use ([tier]); where the person is ([working]),
+ * shared with the model as chips unless removed ([isPlaceHidden], [isSelectedHidden]).
  */
 data class ChatState(
     val entries: List<ChatEntry> = emptyList(),
@@ -20,9 +19,6 @@ data class ChatState(
     val model: ModelStatus = ModelStatus.CHECKING,
     val isSmall: Boolean = false,
     val tier: ModelTier? = null,
-    val isAgentOffered: Boolean = false,
-    val isAgentPicked: Boolean = false,
-    val mode: ChatMode = ChatMode.AUTO,
     val contextUsage: Float = 0f,
     val isCompacting: Boolean = false,
     val isIndexReady: Boolean = false,
@@ -39,21 +35,6 @@ data class ChatState(
         copy(folders = NewNotePlace.foldersOf(notes = notes))
 
     val isAnswering: Boolean get() = entries.lastOrNull()?.isAnswering == true
-
-    /** The modes the model in use offers: Auto and Fast always, the agent where it helps. */
-    val modes: List<ChatMode>
-        get() = listOfNotNull(
-            ChatMode.AUTO,
-            ChatMode.FAST,
-            ChatMode.AGENT.takeIf { isAgentOffered }
-        )
-
-    /** When a request goes to the agent in this mode, on this model. */
-    internal val agentUse: AgentUse
-        get() = mode.agentUse(
-            isAgentOffered = isAgentOffered,
-            isAgentPicked = isAgentPicked
-        )
 
     /** What the model is told of where the person is: [working] without the chips removed. */
     val shared: WorkContext?

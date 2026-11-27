@@ -33,8 +33,7 @@ class PropertyPassagesTest {
                 PropertyPassages
                     .of(
                         question = question,
-                        notes = listOf(cafe),
-                        only = null
+                        notes = listOf(cafe)
                     )
                     .map { it.text }
             }

@@ -1,12 +1,11 @@
 package app.notekea.chat.domain.agent
 
 import app.notekea.chat.domain.context.ContextBudget
-import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.chat.domain.prompt.AnswerLinks
+import app.notekea.chat.domain.prompt.FoundAnswerPrompt
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
-import app.notekea.core.llm.domain.ReplyText
 
 /**
  * The answer agent mode ends a question with, written from what its moves found and nothing else (the developer's
@@ -22,7 +21,8 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
         task: String,
         found: List<String>,
         summary: String,
-        memory: List<String> = emptyList()
+        memory: List<String>,
+        onText: suspend (String) -> Unit
     ): String {
         // "(search … again: its result is above)" is no result.
         val looked = found.filter { isResult(entry = it) }
@@ -35,22 +35,31 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
 
         if (isEmptyHanded) return ""
 
-        val text = try {
-            ReplyText.of(
-                llmEngine = llmEngine,
-                messages = AgentTaskPrompt.answer(
-                    task = task,
-                    found = saidOf(memory = memory) + looked,
-                    conclusion = summary
-                ),
-                options = GenerationOptions(
-                    maxTokens = ANSWER_TOKENS,
-                    temperature = 0f
+        // Shown as it is written, as an answer from the notes always was.
+        val written = StringBuilder()
+
+        try {
+            llmEngine
+                .generate(
+                    messages = FoundAnswerPrompt.answer(
+                        task = task,
+                        found = saidOf(memory = memory) + looked,
+                        conclusion = summary
+                    ),
+                    options = GenerationOptions(
+                        maxTokens = ANSWER_TOKENS,
+                        temperature = 0f
+                    )
                 )
-            )
+                .collect { piece ->
+                    written.append(piece)
+                    onText(written.toString())
+                }
         } catch (_: LlmException) {
             return summary
         }
+
+        val text = written.toString()
 
         return AnswerLinks
             .kept(

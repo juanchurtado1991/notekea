@@ -105,7 +105,7 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
         where: String,
         context: ToolContext
     ): List<NoteEntry>? {
-        val all = context.notes.filter { it.file.path.isMarkdown }
+        val all = context.looked.filter { it.file.path.isMarkdown }
         if (where.isEmpty()) return all
         if (where.startsWith(prefix = TAG_MARK)) return all.filter { it.hasTag(tag = where) }
 
@@ -117,7 +117,7 @@ class CountTool(private val noteTextCache: NoteTextCache) : ChatTool {
             "/$folder/" in "/${it.file.path.value.lowercase()}"
         }
 
-        val note = context.noteNamed(name = where)
+        val note = context.lookedNamed(name = where)
 
         return when {
             inFolder.isNotEmpty() -> inFolder

@@ -3,8 +3,7 @@ package app.notekea.chat.eval
 import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
-import app.notekea.chat.domain.answer.AnswerStep
+import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
@@ -25,7 +24,7 @@ import kotlin.test.assertTrue
 /**
  * The memory of chatting (3.7), as an 8 GB computer chats: Small on the CPU with one slot, on the Sample Vault. The
  * process's resident memory before the model, its peak over ten answers, and after the model is let go; and the time
- * to the first words; 5.4's budget is 2.5 GB, 3.7 measured 3.3. Run by hand like [AnswerEvalChatModelTest].
+ * to the first words; 5.4's budget is 2.5 GB, 3.7 measured 3.3. Run by hand like [AgentEvalChatModelTest].
  */
 class ChatMemoryChatModelTest {
     private val folder = Path.of(System.getProperty("notekea.chat.models").orEmpty())
@@ -64,7 +63,16 @@ class ChatMemoryChatModelTest {
             )
 
             val cache = NoteTextCache(contentStore = indexed.store)
-            val answer = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)
+
+            // The chat's one loop, as every question of the whole vault is answered.
+            val loop = LoopEval.loopOf(
+                engine = engine,
+                embedder = embedder,
+                indexed = indexed,
+                runner = AgentEvalSetup.runnerOf(indexed, cache, engine)
+            )
+
+            val context = AgentEvalSetup.contextOf(notes = indexed.notes)
 
             val before = residentMb()
             var peak = before
@@ -80,13 +88,15 @@ class ChatMemoryChatModelTest {
                 val start = System.nanoTime()
                 var first = 0L
 
-                answer(
+                loop(
+                    task = question,
                     vaultPath = indexed.path,
                     notes = indexed.notes,
-                    question = question
+                    context = context,
+                    openNote = null
                 ).collect { step ->
-                    val isFirst =
-                        (step is AnswerStep.Writing || step is AnswerStep.Done) && first == 0L
+                    val isWritten = step is AgentStep.Writing && step.answer != null
+                    val isFirst = (isWritten || step is AgentStep.Finished) && first == 0L
 
                     if (isFirst) first = (System.nanoTime() - start) / NANOS_PER_MILLI
                 }

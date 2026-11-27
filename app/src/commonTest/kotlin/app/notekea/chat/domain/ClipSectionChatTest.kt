@@ -1,6 +1,6 @@
 package app.notekea.chat.domain
 
-import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
@@ -83,7 +83,7 @@ class ClipSectionChatTest {
         noteTextCache = NoteTextCache(
             contentStore = FakeNoteContentStore()
         ),
-        planReader = GhostActionPlanReader(),
+        notesReader = GhostTextNotesReader(),
         clipper = clipper
     )
 

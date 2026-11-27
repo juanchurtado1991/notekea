@@ -4,7 +4,6 @@ import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.Placeholders
 import app.notekea.chat.domain.plan.PlannedStep
-import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.core.notes.domain.RelativePath
 
 /**
@@ -17,15 +16,15 @@ internal object GroundedSteps {
     val WRITTEN = setOf(ActionKind.CREATE_NOTE, ActionKind.WRITE_FROM_NOTES)
 
     fun of(
-        move: AgentTaskMove,
+        proposal: AgentProposal,
         read: List<RelativePath>
-    ): AgentTaskMove {
-        if (read.isEmpty()) return move
+    ): AgentProposal {
+        if (read.isEmpty()) return proposal
 
         val names = read.map { it.bare() }
 
-        return move.copy(
-            steps = move.steps.map { step ->
+        return proposal.copy(
+            steps = proposal.steps.map { step ->
                 // A note asked for empty (no text to write) stays empty, whatever was read on the way.
                 val isFree =
                     step.kind == ActionKind.CREATE_NOTE &&
@@ -56,7 +55,7 @@ internal object GroundedSteps {
     fun asked(
         planned: List<PlannedStep>,
         read: List<RelativePath>
-    ): AgentTaskMove? {
+    ): AgentProposal? {
         val isWriting =
             planned.isNotEmpty() &&
                 planned.all { it.kind.isConfirmed } &&
@@ -65,10 +64,7 @@ internal object GroundedSteps {
         if (!isWriting || read.isEmpty()) return null
 
         return of(
-            move = AgentTaskMove(
-                move = AgentTaskPrompt.PROPOSE,
-                steps = planned
-            ),
+            proposal = AgentProposal(steps = planned),
             read = read
         )
     }

@@ -3,38 +3,35 @@ package app.notekea.chat.eval
 import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
-import app.notekea.chat.data.GhostActionPlanReader
-import app.notekea.chat.domain.ChatScope
-import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.data.GhostModelJson
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.FakeChatHistoryStore
-import app.notekea.chat.domain.TurnOutcome
-import app.notekea.chat.domain.agent.AgentAnswerUseCase
-import app.notekea.chat.domain.agent.AgentTaskUseCase
-import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.help.HelpGuide
-import app.notekea.chat.domain.plan.ActOnRequestUseCase
+import app.notekea.chat.domain.loop.ChatLoop
+import app.notekea.chat.domain.loop.LoopTools
+import app.notekea.chat.domain.loop.RunTurnUseCase
+import app.notekea.chat.domain.loop.TaskFramer
+import app.notekea.chat.domain.loop.TurnFrames
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageProblem
-import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.chat.domain.sources.AnswerFromPagesUseCase
 import app.notekea.chat.presentation.model.ChatIntent
-import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.viewmodel.ChatSources
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
-import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.documents.data.DocumentAwareContentStore
 import app.notekea.core.documents.data.TikaDocumentReader
 import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.domain.Outcome
-import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.GenerationOptions
@@ -44,9 +41,7 @@ import app.notekea.core.notes.data.GhostFrontmatterParser
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.data.LuceneVectorIndex
 import app.notekea.core.notes.data.NioNoteFileAttributes
-import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.notes.data.OkioNoteContentStore
-import app.notekea.core.notes.data.OkioNoteFileOperations
 import app.notekea.core.notes.data.OkioNoteScanner
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteMetadata
@@ -54,31 +49,15 @@ import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.index.ChunkNoteUseCase
-import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.links.PlanLinkUpdatesUseCase
-import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
-import app.notekea.core.notes.domain.templates.FillTemplateUseCase
+import app.notekea.core.preferences.domain.FakeAppPreferencesStore
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
-import app.notekea.query.data.GhostQueryJsonReader
-import app.notekea.query.domain.BuildQueryCatalogUseCase
-import app.notekea.query.domain.QueryYaml
-import app.notekea.query.domain.RunQueryUseCase
-import app.notekea.query.domain.SetPropertyUseCase
-import app.notekea.query.domain.TranslateQueryUseCase
+import app.notekea.core.web.domain.WebSearchProblem
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase
-import app.notekea.shell.data.chat.VaultActionFinder
 import app.notekea.shell.data.chat.VaultActionRunner
-import app.notekea.tasks.domain.ListTasksUseCase
-import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tree.data.OkioNoteMetadataReader
-import app.notekea.tree.data.VaultFolderTrash
-import app.notekea.tree.domain.ApplyTemplateUseCase
-import app.notekea.tree.domain.FakeBookmarkStore
-import app.notekea.tree.domain.OpenDailyNoteUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -101,8 +80,8 @@ import kotlin.time.Clock
 
 /**
  * The chat as a person uses it: the app's [ChatViewModel] over the real models and a copy of the Sample Vault, fed the
- * conversations of `smoke-data/eval/chat-probes.txt` (`@mode`, `@open`, `@confirm` as directions) and written out as
- * Copy chat writes them, with the plans, to `build/reports/chat-probe-<size>.md`. A tool to read, not a pass or fail.
+ * conversations of `smoke-data/eval/chat-probes.txt` (`@open`, `@confirm` as directions) and written out as Copy
+ * chat writes them, with the loop's calls, to `build/reports/chat-probe-<size>.md`. A tool to read, not a pass or fail.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChatProbeChatModelTest {
@@ -134,24 +113,25 @@ class ChatProbeChatModelTest {
         dispatchers = dispatchers
     )
 
-    // The plans the model wrote for each conversation, written under it in the report to tell why a reply went wrong.
-    private val plans = mutableListOf<String>()
+    // The calls the loop's model wrote for each conversation, written under it in the report to tell why a reply went
+    // wrong.
+    private val calls = mutableListOf<String>()
 
-    private val planning = object : LlmEngine by engine {
+    private val calling = object : LlmEngine by engine {
         override fun generate(
             messages: List<ChatMessage>,
             options: GenerationOptions
         ): Flow<String> = flow {
-            val plan = StringBuilder()
+            val call = StringBuilder()
 
             engine
                 .generate(messages, options)
                 .collect {
-                    plan.append(it)
+                    call.append(it)
                     emit(value = it)
                 }
 
-            plans += plan.toString()
+            calls += call.toString()
         }
     }
 
@@ -225,7 +205,7 @@ class ChatProbeChatModelTest {
             )
 
             report.append("\n<!-- ${ProbeMemory.of(chat = chat.second)} -->")
-            plans.forEach { report.append("\n<!-- plan: $it -->") }
+            calls.forEach { report.append("\n<!-- call: $it -->") }
 
             report.append(
                 CommittedVault.writtenSince(
@@ -250,17 +230,6 @@ class ChatProbeChatModelTest {
         val viewModel = chat.second
 
         when {
-            line.startsWith(MODE) -> viewModel.onIntent(
-                intent = ChatIntent.OnModeChoose(
-                    mode = ChatMode.valueOf(
-                        line
-                            .removePrefix(MODE)
-                            .trim()
-                            .uppercase()
-                    )
-                )
-            )
-
             line.startsWith(OPEN) -> viewModel.onIntent(
                 intent = ChatIntent.OnActiveNoteChange(
                     path = RelativePath(value = line.removePrefix(OPEN).trim())
@@ -332,7 +301,7 @@ class ChatProbeChatModelTest {
                 fileSystem = fileSystem,
                 dispatchers = dispatchers
             ),
-            answer = AnswerFromNotesUseCase(embedder, index, cache, engine),
+            answer = PassageSearch(embedder, index, cache, engine),
             cache = cache,
             clipboard = clipboard,
             history = CommittedVault.earlierChat(
@@ -352,44 +321,23 @@ class ChatProbeChatModelTest {
     private fun viewModelOf(
         vault: File,
         runner: VaultActionRunner,
-        answer: AnswerFromNotesUseCase,
+        answer: PassageSearch,
         cache: NoteTextCache,
         clipboard: FakeTextClipboard,
         history: FakeChatHistoryStore
     ): ChatViewModel {
-        val compose = ComposeNotesUseCase(engine, cache, GhostActionPlanReader())
         val guide = HelpGuide.of(markdown = File(GUIDE).readText())
 
         return ChatViewModel(
             vaultPath = vault.path,
-            answerFromNotes = answer,
             converse = ConverseUseCase(engine, cache),
-            agentAnswer = AgentAnswerUseCase(answer, cache, engine, GhostActionPlanReader()),
             answerHelp = AnswerHelpUseCase(
                 llmEngine = engine,
                 guideSource = { guide }
             ),
             describeVault = DescribeVaultUseCase(llmEngine = engine),
             conventions = PreviewPlatformConventions.linux,
-            actOnRequest = ActOnRequestUseCase(
-                PlanRequestUseCase(planning, GhostActionPlanReader()),
-                CheckPlanUseCase(),
-                compose,
-                runner
-            ),
-            agentTask = AgentTaskUseCase(
-                llmEngine = planning,
-                planReader = GhostActionPlanReader(),
-                answerFromNotes = answer,
-                noteTextCache = cache,
-                actionRunner = runner,
-                pageReader = { Outcome.Failure(error = PageProblem.OFFLINE) },
-                checkPlan = CheckPlanUseCase(),
-                composeNotes = compose,
-                clock = Clock.System
-            ),
             compactChat = CompactChatUseCase(llmEngine = engine),
-            answerFromFound = AnswerFromFoundUseCase(llmEngine = engine),
             actionRunner = runner,
             localCalendar = JvmLocalCalendar(),
             clock = Clock.System,
@@ -399,6 +347,53 @@ class ChatProbeChatModelTest {
             sources = ChatSources(
                 answerFromPages = AnswerFromPagesUseCase(llmEngine = engine),
                 sourceSites = null
+            ),
+            loop = ChatLoop(
+                runTurn = loopOf(
+                    runner = runner,
+                    answer = answer,
+                    cache = cache
+                ),
+                preferencesStore = FakeAppPreferencesStore()
+            )
+        )
+    }
+
+    // The loop as the app builds it, offline, its calls kept by [calling].
+    private fun loopOf(
+        runner: VaultActionRunner,
+        answer: PassageSearch,
+        cache: NoteTextCache
+    ): RunTurnUseCase {
+        val vaultGuide = VaultGuide(noteTextCache = cache)
+
+        val tools = LoopTools(
+            llmEngine = calling,
+            passageSearch = answer,
+            noteTextCache = cache,
+            actionRunner = runner,
+            pageReader = { Outcome.Failure(error = PageProblem.OFFLINE) },
+            linkFinder = JetBrainsMarkdownLinkFinder(),
+            webSearch = { _, _ -> Outcome.Failure(error = WebSearchProblem.OFFLINE) }
+        )
+
+        return RunTurnUseCase(
+            llmEngine = calling,
+            toolsets = tools.toolsets(),
+            vaultGuide = vaultGuide,
+            proposal = ProposalCheck(
+                checkPlan = CheckPlanUseCase(),
+                composeNotes = ComposeNotesUseCase(engine, cache, GhostTextNotesReader())
+            ),
+            clock = Clock.System,
+            modelJson = GhostModelJson(),
+            frames = TurnFrames(
+                framer = TaskFramer(
+                    llmEngine = calling,
+                    modelJson = GhostModelJson()
+                ),
+                passageSearch = answer,
+                vaultGuide = vaultGuide
             )
         )
     }
@@ -423,7 +418,6 @@ class ChatProbeChatModelTest {
         const val GPU_SLOTS = 4
         const val SETTLE_MILLIS = 300L
         const val NANOS_PER_SECOND = 1_000_000_000L
-        const val MODE = "@mode"
         const val OPEN = "@open"
         const val CONFIRM = "@confirm"
         const val HISTORY = "@history"

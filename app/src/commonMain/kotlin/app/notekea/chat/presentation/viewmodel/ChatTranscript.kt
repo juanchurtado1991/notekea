@@ -22,7 +22,7 @@ internal object ChatTranscript {
             ?.name
             ?.lowercase() ?: if (state.isSmall) "small" else "medium or large"
 
-        appendLine("Model: $model · Mode: ${state.mode.name.lowercase()}")
+        appendLine("Model: $model")
 
         state.entries.forEach { entry ->
             appendLine()
@@ -30,7 +30,6 @@ internal object ChatTranscript {
             appendLine()
             appendLine("Scope: ${entry.scope.name.lowercase()}${entry.scopeName?.let { " ($it)" }.orEmpty()}")
             appendLine("Outcome: ${entry.outcome?.name?.lowercase() ?: "answering"}")
-            entry.answeredWith?.let { appendLine("Answered with: ${it.name.lowercase()}") }
             entry.error?.let { appendLine("Error: $it") }
             entry.moves.forEach { appendLine("Step: ${it.move} ${it.target}") }
 

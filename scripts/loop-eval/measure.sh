@@ -1,13 +1,11 @@
 #!/bin/bash
-# measure.sh <label> <frame|tuned|dev|pool|fast|fastdev|reference|sealed|cards|judge> <medium|large> [seed]
+# measure.sh <label> <frame|tuned|dev|pool|reference|sealed|cards|judge> <medium|large> [seed]
 #
 # Measures the loop with a real model and copies the reports to $NOTEKEA_RUNS/<label> (docs/loop-goal-plan.md).
 #   frame   the frame alone on the tuned and development tasks (FrameEvalChatModelTest), minutes
 #   tuned   the 259 tuned tasks and the fresh vault ("the one loop is measured*"), about 40 minutes
 #   dev     the nine exams retired from the blind set ("blind exams*"), about 35 minutes
 #   pool    ten unsealed exams of the blind pool, picked by <seed>, about 40 minutes
-#   fast    the same ten exams worked on by the chat in Fast mode (FastRun), to set Fast beside the agent
-#   fastdev the development exams in Fast mode, to read why Fast misses what it misses
 #   judge   the cards of a cards run (NOTEKEA_CARDS=<its .tsv>) judged by the size given, the 12B, and their cover
 #   reference  the 40 unsealed exams, once, to compare every round with: about 3 hours the 4B, 4 hours the 9B
 #   sealed  the ten sealed exams: once, for the final number, and only with NOTEKEA_FINAL=yes
@@ -30,12 +28,12 @@ tests=app.notekea.chat.eval.AgentEvalChatModelTest
 # then differ only where the code does. Never for the reference nor the sealed exams, whose numbers stand alone.
 replies=(); kept=""
 [ -n "${NOTEKEA_REPLIES:-}" ] && case $what in
-  frame|tuned|dev|fastdev|cards|judge) kept=$NOTEKEA_REPLIES ;;
-  pool|fast) kept=$NOTEKEA_REPLIES-pool ;;
+  frame|tuned|dev|cards|judge) kept=$NOTEKEA_REPLIES ;;
+  pool) kept=$NOTEKEA_REPLIES-pool ;;
 esac
 [ -n "$kept" ] && replies=("-PchatReplies=$kept")
 # NOTEKEA_TASKS=<file> measures only the tasks the file lists, a line each (fastset.py): a shorter round to tune with.
-[ -n "${NOTEKEA_TASKS:-}" ] && case $what in tuned|dev|fastdev) replies+=("-PchatTaskFile=$NOTEKEA_TASKS") ;; esac
+[ -n "${NOTEKEA_TASKS:-}" ] && case $what in tuned|dev) replies+=("-PchatTaskFile=$NOTEKEA_TASKS") ;; esac
 
 case $what in
   frame) filter="app.notekea.chat.eval.FrameEvalChatModelTest"; extra=(); files="frame-*-$size.md" ;;
@@ -44,13 +42,11 @@ case $what in
   tuned) filter="$tests.the one loop is measured*"; extra=(); files="loop-*-$size.md" ;;
   dev) filter="$tests.blind exams*"; extra=(); files="blind-*-$size.md" ;;
   pool) filter="$tests.blind pool*"; extra=(-PchatPool=sample "-PchatPoolSeed=$seed"); files="pool-*-$size.md" ;;
-  fast) filter="$tests.blind pool*"; extra=(-PchatPool=sample "-PchatPoolSeed=$seed" -PchatFast=true); files="pool-*-$size.md" ;;
-  fastdev) filter="$tests.blind exams*"; extra=(-PchatFast=true); files="blind-*-$size.md" ;;
   reference) filter="$tests.blind pool*"; extra=(-PchatPool=all); files="pool-*-$size.md" ;;
   sealed)
     [ "${NOTEKEA_FINAL:-}" = yes ] || { echo "The sealed exams are for the final number only."; exit 1; }
     filter="$tests.blind pool*"; extra=(-PchatPool=sealed); files="pool-*-$size.md" ;;
-  *) echo "frame, tuned, dev, pool, fast, fastdev, reference, sealed, cards or judge"; exit 1 ;;
+  *) echo "frame, tuned, dev, pool, reference, sealed, cards or judge"; exit 1 ;;
 esac
 
 mkdir -p "$out"

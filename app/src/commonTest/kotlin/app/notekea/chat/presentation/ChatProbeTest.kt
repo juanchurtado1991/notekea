@@ -3,13 +3,8 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.TurnOutcome
-import app.notekea.chat.domain.plan.ActionProblem
-import app.notekea.chat.domain.plan.FoundNotes
-import app.notekea.chat.domain.plan.FoundRow
-import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatIntent
-import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.chat.presentation.viewmodel.after
 import app.notekea.core.domain.FakeClock
@@ -19,7 +14,6 @@ import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.ViewModelTestBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -31,14 +25,13 @@ import kotlin.test.assertEquals
 import kotlin.time.Instant
 
 /**
- * The chat probe of 2026-11-11 in the chat itself: a question that found tables is answered in words, a refusal says
- * its own why, and the chat's memory fills, is compacted into a summary, and gives it to the next question.
+ * The chat probe of 2026-11-11 in the chat itself: the chat's memory fills, is compacted into a summary, and gives it
+ * to the next question, and the talk knows what changed today.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChatProbeTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
-    private var plan = ""
 
     @BeforeTest
     fun setUp() {
@@ -46,9 +39,8 @@ class ChatProbeTest : ViewModelTestBase() {
             val system = messages.first().text
 
             when {
-                system.startsWith("You turn a request") -> plan
+                system.startsWith("You say how a request") -> TALK
                 system.startsWith("Summarize this conversation") -> "They asked about arepas and books."
-                system.contains("from the tables of the person's notes") -> TABLES_ANSWER
                 else -> "A long answer about the notes. ".repeat(n = 20)
             }
         }
@@ -91,72 +83,8 @@ class ChatProbeTest : ViewModelTestBase() {
     }
 
     @Test
-    fun `a question the plan answers with tables is answered in words above them`() =
-        runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"find_notes\",\"request\":\"books finished\"}]}"
-            runner.found = FoundNotes(rows = listOf(FoundRow(note = RelativePath(value = "Books/Dune.md"))))
-
-            val entry = asked(
-                viewModel = started(),
-                question = "cuántos libros terminé?"
-            )
-
-            assertEquals(
-                expected = listOf<Any?>(TABLES_ANSWER, TurnOutcome.ANSWERED, 1),
-                actual = listOf(entry.answer, entry.outcome, entry.action?.found?.size)
-            )
-        }
-
-    // The chat probe of 2026-11-11: the tables' answer was cut at its first words, its turn already ended.
-    @Test
-    fun `the turn is answering while the tables found are answered in words`() =
-        runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"find_notes\",\"request\":\"books finished\"}]}"
-            runner.found = FoundNotes(rows = listOf(FoundRow(note = RelativePath(value = "Books/Dune.md"))))
-            val viewModel = started()
-            var isAnswering = false
-            val tablesReply = engine.reply
-
-            engine.reply = { messages ->
-                val isTables = messages
-                    .first()
-                    .text
-                    .contains("from the tables")
-
-                if (isTables) isAnswering = viewModel.state.value.isAnswering
-                tablesReply(messages)
-            }
-
-            asked(
-                viewModel = viewModel,
-                question = "how many books did I finish?"
-            )
-
-            assertEquals(
-                expected = true,
-                actual = isAnswering
-            )
-        }
-
-    @Test
-    fun `a refusal is the model's own why, in the person's words`() = runTest(testDispatcher) {
-        plan = "{\"steps\":[{\"action\":\"refuse\",\"text\":\"Notekea no puede enviar recordatorios.\"}]}"
-
-        val entry = asked(
-            viewModel = started(),
-            question = "mandame un recordatorio mañana a las 9"
-        )
-
-        assertEquals(
-            expected = ActionProblem.Refused(reason = "Notekea no puede enviar recordatorios."),
-            actual = entry.action?.problem
-        )
-    }
-
-    @Test
     fun `the memory fills, compacts itself into a summary when full, and gives it to the next question`() =
         runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val viewModel = started()
 
             val usages = (1..16).map {
@@ -195,7 +123,6 @@ class ChatProbeTest : ViewModelTestBase() {
     @Test
     fun `compact chat writes the summary when asked, and clear forgets it`() =
         runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val viewModel = started()
 
             repeat(times = 4) {
@@ -222,7 +149,6 @@ class ChatProbeTest : ViewModelTestBase() {
     @Test
     fun `a chat left for half an hour is compacted before the next question, one asked at once is not`() =
         runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val viewModel = started()
 
             repeat(times = 4) {
@@ -270,7 +196,6 @@ class ChatProbeTest : ViewModelTestBase() {
     @Test
     fun `the chat's first exchange is given to a question long after it`() =
         runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val viewModel = started()
 
             listOf("how much flour do the arepas take?", "a", "b", "c", "d", "e").forEach {
@@ -300,101 +225,11 @@ class ChatProbeTest : ViewModelTestBase() {
             )
         }
 
-    // The chat probe of 2026-11-11: in Auto, questions the passages could not answer were left unanswered.
-    @Test
-    fun `in auto a question the notes' passages do not answer is worked on by the agent`() =
-        runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"answer\",\"request\":\"who owns the launch?\"}]}"
-
-            engine.readiness = app
-                .notekea
-                .core
-                .domain
-                .Outcome
-                .Success(
-                    value = app
-                        .notekea
-                        .core
-                        .llm
-                        .domain
-                        .LlmModelInfo(
-                            isSmall = false,
-                            hasAgent = true,
-                            isAgentPicked = true
-                        )
-                )
-
-            val agentReply = engine.reply
-
-            engine.reply = { messages ->
-                when {
-                    messages.first().text.startsWith("You work on a task") -> "{\"move\":\"finish\",\"summary\":\"Ana.\"}"
-                    else -> agentReply(messages)
-                }
-            }
-
-            val entry = asked(
-                viewModel = started(),
-                question = "who owns the launch?"
-            )
-
-            assertEquals(
-                expected = listOf<Any?>(ChatMode.AGENT, "Ana.", TurnOutcome.ANSWERED),
-                actual = listOf(entry.answeredWith, entry.answer, entry.outcome)
-            )
-        }
-
-    // The chat probe of 2026-11-11: a question Auto thought through was left unanswered, the agent never asked.
-    @Test
-    fun `in auto a deep question the passages do not answer is worked on by the agent too`() =
-        runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"answer\",\"request\":\"what did I learn from my books?\"}]}"
-
-            engine.readiness = app
-                .notekea
-                .core
-                .domain
-                .Outcome
-                .Success(
-                    value = app
-                        .notekea
-                        .core
-                        .llm
-                        .domain
-                        .LlmModelInfo(
-                            isSmall = false,
-                            hasAgent = true,
-                            isAgentPicked = true
-                        )
-                )
-
-            val agentReply = engine.reply
-
-            engine.reply = { messages ->
-                when {
-                    messages.first().text.startsWith("You work on a task") -> FINISHED
-                    messages.first().text.startsWith("Answer in one") -> AnswerPrompt.NOT_FOUND
-                    else -> agentReply(messages)
-                }
-            }
-
-            val entry = asked(
-                viewModel = started(),
-                question = "why did I learn so little from my books, and how do I compare them?"
-            )
-
-            assertEquals(
-                expected = listOf<Any?>(ChatMode.AGENT, "Focus.", TurnOutcome.ANSWERED),
-                actual = listOf(entry.answeredWith, entry.answer, entry.outcome)
-            )
-        }
-
     // The Auto-Test on the real app, 2026-11-11: with a long chat from an earlier session, the ring stayed on
     // Compacting after the replies.
     @Test
     fun `a long chat from an earlier session is compacted, and the ring says the memory again`() =
         runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
             val history = FakeChatHistoryStore()
 
             history.turns[app.notekea.core.notes.domain.NoteFixtures.VAULT] = (1..60).map {
@@ -445,8 +280,6 @@ class ChatProbeTest : ViewModelTestBase() {
     @Test
     fun `the talk knows the notes changed today and the last one changed`() =
         runTest(testDispatcher) {
-            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
-
             clock.currentTime = kotlin
                 .time
                 .Instant
@@ -486,7 +319,6 @@ class ChatProbeTest : ViewModelTestBase() {
 
     private companion object {
         const val THREE_DAYS = 3L * 24 * 60 * 60 * 1_000
-        const val TABLES_ANSWER = "Terminaste 3: Deep Work, Dune y Sapiens."
-        const val FINISHED = "{\"move\":\"finish\",\"summary\":\"Focus.\"}"
+        const val TALK = """{"work":"talk","skill":"none"}"""
     }
 }

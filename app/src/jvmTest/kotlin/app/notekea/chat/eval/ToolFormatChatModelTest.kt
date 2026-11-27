@@ -39,18 +39,12 @@ class ToolFormatChatModelTest {
         const val SET_FILE = "../smoke-data/eval/actions.json"
         const val REPORTS = "build/reports"
 
-        // One slot wide enough for today's instructions and the tools written out beside them.
+        // One slot wide enough for the tools written out.
         const val CONTEXT_TOKENS = 12_288
 
         val ARMS = listOf(
-            ToolArm.plan(isPerTool = false),
-            ToolArm.plan(isPerTool = true),
             ToolArm.ours(tools = EvalTools.ALL),
-            ToolArm.native(tools = EvalTools.ALL),
-            ToolArm.native(
-                tools = EvalTools.ALL,
-                isInstructed = true
-            )
+            ToolArm.native(tools = EvalTools.ALL)
         )
     }
 }

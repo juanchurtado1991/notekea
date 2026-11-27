@@ -32,9 +32,6 @@ sealed interface ChatIntent {
     /** Compact chat: what the chat remembers of itself written short, as Claude Code's /compact. */
     data object OnCompact : ChatIntent
 
-    /** The [mode] the chat answers in, from the menu under its question field. */
-    data class OnModeChoose(val mode: ChatMode) : ChatIntent
-
     data object OnModelSettingsOpen : ChatIntent
 
     /** The panel shows the chat: the model in use is looked at again, a download may have ended meanwhile. */

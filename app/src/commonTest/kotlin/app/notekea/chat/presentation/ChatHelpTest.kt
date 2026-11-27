@@ -32,7 +32,7 @@ import kotlin.test.assertEquals
 class ChatHelpTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
-    private var plan = ""
+    private var route = ""
 
     private val guide = HelpGuide.of(
         markdown = "# Create a note\nwords: create a note, nueva nota\ntry: create a note called …\n" +
@@ -43,7 +43,7 @@ class ChatHelpTest : ViewModelTestBase() {
     fun setUp() {
         engine.reply = { messages ->
             when {
-                messages.isPrompt(start = "You turn a request") -> plan
+                messages.isPrompt(start = "You say how a request") -> route
 
                 messages.isPrompt(
                     start = "You are the assistant of Notekea, a notes app that runs on the user's " +
@@ -104,9 +104,8 @@ class ChatHelpTest : ViewModelTestBase() {
         runTest(testDispatcher) {
             val viewModel = started()
 
-            // A small model may plan the note too: help wins, and nothing is proposed.
-            plan = "{\"steps\":[{\"action\":\"help\",\"request\":\"how do I create a note?\"}," +
-                "{\"action\":\"create_note\",\"title\":\"How do I create a new note?\"}]}"
+            // Help is the chat's own reply: nothing is proposed.
+            route = """{"work":"help","skill":"none"}"""
 
             val entry = asked(
                 viewModel = viewModel,
@@ -137,7 +136,7 @@ class ChatHelpTest : ViewModelTestBase() {
     fun `what is in the notes is told from the vault's folders and names`() =
         runTest(testDispatcher) {
             val viewModel = started()
-            plan = "{\"steps\":[{\"action\":\"overview\"}]}"
+            route = """{"work":"overview","skill":"none"}"""
 
             val entry = asked(
                 viewModel = viewModel,
@@ -159,14 +158,14 @@ class ChatHelpTest : ViewModelTestBase() {
     @Test
     fun `in Spanish says the last reply again from the chat so far`() = runTest(testDispatcher) {
         val viewModel = started()
-        plan = "{\"steps\":[{\"action\":\"overview\"}]}"
+        route = """{"work":"overview","skill":"none"}"""
 
         asked(
             viewModel = viewModel,
             question = "what is in my notes?"
         )
 
-        plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+        route = """{"work":"talk","skill":"none"}"""
 
         val again = asked(
             viewModel = viewModel,

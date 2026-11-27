@@ -15,8 +15,8 @@ import app.notekea.core.web.domain.FoundSource
 
 /**
  * A question of the chat and its answer, keyed by [id]: [step] says where it stands, [sources] are the passages its
- * `[n]` cite, an action holds its [action], a help answer may offer a request ([offered], "…" where they finish it),
- * and [answeredWith] is the mode Auto, or the person, used for it.
+ * `[n]` cite, an action holds its [action], and a help answer may offer a request ([offered], "…" where they finish
+ * it).
  */
 data class ChatEntry(
     val id: Long,
@@ -25,7 +25,6 @@ data class ChatEntry(
     val step: ChatStep,
     val answer: String,
     val sources: List<AnswerSource>,
-    val readNotes: Int,
     val scopeName: String?,
     val outcome: TurnOutcome?,
     val error: ChatError?,
@@ -37,14 +36,13 @@ data class ChatEntry(
     val progress: PageProgress? = null,
     val moves: List<AgentMoveLine> = emptyList(),
     // The steps it already left, oldest first: the checked lines over the one it is on.
-    val passed: List<PassedStep> = emptyList(),
+    val passed: List<ChatStep> = emptyList(),
     // The notes did not hold the answer: the sites of the vault's web sources it may be looked for in ([sites]),
     // then their pages that may hold it ([sitePages], null until looked for), the ones ticked [pickedPages].
     val sites: List<String> = emptyList(),
     val sitePages: List<SourcePage>? = null,
     val pickedPages: Set<String> = emptySet(),
     val isLookingInSites: Boolean = false,
-    val answeredWith: ChatMode? = null,
     // The answers to choose from when the chat asked back in place of guessing: buttons under its question.
     val options: List<String> = emptyList(),
     // What the chosen answer can be remembered as, with a checkbox under the buttons (docs/agent-memory.md).

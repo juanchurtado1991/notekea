@@ -1,7 +1,7 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.agent.AgentStep
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.tool.lookup.ReadTool
 import app.notekea.chat.domain.tool.lookup.SearchTool
@@ -51,7 +51,7 @@ class SearchedUnreadTurnTest {
                     byKind = mapOf(
                         WorkKind.ASK to listOf(
                             SearchTool(
-                                answerFromNotes = AnswerFromNotesUseCase(
+                                passageSearch = PassageSearch(
                                     textEmbedder = FakeTextEmbedder(),
                                     vectorIndex = FakeVectorIndex(),
                                     noteTextCache = cache,

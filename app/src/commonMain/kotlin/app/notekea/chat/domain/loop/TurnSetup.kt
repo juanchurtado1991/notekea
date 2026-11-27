@@ -24,10 +24,12 @@ internal object TurnSetup {
         remembered: List<MemoryLine>,
         openNote: RelativePath?,
         frame: TaskFrame? = null,
-        sources: List<String> = emptyList()
+        sources: List<String> = emptyList(),
+        scope: Set<RelativePath>? = null
     ): ToolContext = ToolContext(
         vaultPath = vaultPath,
         notes = notes,
+        scope = scope,
         task = task,
         openNote = openNote,
         today = CalendarDate.ofIso(text = today),

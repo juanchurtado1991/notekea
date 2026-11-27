@@ -1,8 +1,8 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.agent.AgentFinalAnswer
+import app.notekea.chat.domain.agent.AgentProposal
 import app.notekea.chat.domain.agent.AgentStep
-import app.notekea.chat.domain.agent.AgentTaskMove
 import app.notekea.chat.domain.agent.GroundedSteps
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.agent.ProposalVault
@@ -22,10 +22,12 @@ internal class TurnEnd(
     private val proposal: ProposalCheck,
     private val review: ProposalReview
 ) {
+    /** The step the turn ends on; what it shows while it writes its notes or its answer goes to [report]. */
     suspend fun stepOf(
         call: ToolCall,
         tool: ChatTool,
-        state: TurnState
+        state: TurnState,
+        report: suspend (AgentStep) -> Unit
     ): AgentStep {
         val isEmpty = state
             .turn
@@ -52,33 +54,90 @@ internal class TurnEnd(
             )
 
             ProposeTool.NAME -> if (isEmpty) {
-                unchanged(state = state)
+                unchanged(
+                    state = state,
+                    report = report
+                )
             } else {
                 reviewed(
                     call = call,
-                    state = state
+                    state = state,
+                    report = report
                 )
             }
 
             else -> if (isClaimed) {
-                unchanged(state = state)
+                unchanged(
+                    state = state,
+                    report = report
+                )
             } else {
-                AgentStep.Finished(
-                    summary = finalAnswer.written(
-                        task = state.task,
-                        found = fittedOf(state = state),
-                        summary = answer,
-                        memory = state.memory.map { it.text }
-                    )
+                answered(
+                    state = state,
+                    summary = answer,
+                    report = report
                 )
             }
         }
     }
 
+    /**
+     * The end of a turn whose next call could not be read, or whose steps ran out: the changes it added on the card,
+     * an answer from what it found, the model's failure when it found nothing because the model failed, or stopped.
+     */
+    suspend fun unread(
+        state: TurnState,
+        report: suspend (AgentStep) -> Unit
+    ): AgentStep {
+        val hasLooked = state.found.any { AgentFinalAnswer.isResult(entry = it) }
+        val failure = state.failures.lastOrNull()
+
+        return when {
+            state.turn.work.changes.isNotEmpty() -> proposed(state, "", report)
+            !hasLooked && failure != null -> AgentStep.Failed(error = failure)
+            !hasLooked -> AgentStep.Stopped(problem = null)
+            else -> answered(state, "", report)
+        }
+    }
+
+    /**
+     * The answer written from what the turn [found] (all it found, as far as the context goes, unless said), shown as
+     * it is written ([report]), with the tables it found and the sources of the notes it names; the call's own
+     * [summary] when it looked nothing up.
+     */
+    suspend fun answered(
+        state: TurnState,
+        summary: String,
+        report: suspend (AgentStep) -> Unit,
+        found: List<String>? = null
+    ): AgentStep {
+        val text = finalAnswer.written(
+            task = state.task,
+            found = found ?: fittedOf(state = state),
+            summary = summary,
+            memory = state.memory.map { it.text },
+            onText = { report(AgentStep.Writing(answer = it)) }
+        )
+
+        return AgentStep.Finished(
+            summary = text,
+            tables = state
+                .turn
+                .tables
+                .distinct(),
+            sources = TurnSources.of(
+                answer = text,
+                passages = state.turn.passages,
+                read = state.turn.reads.read
+            )
+        )
+    }
+
     // The card of what the review left: a summary written before it would tell of notes the card no longer changes.
     private suspend fun reviewed(
         call: ToolCall,
-        state: TurnState
+        state: TurnState,
+        report: suspend (AgentStep) -> Unit
     ): AgentStep {
         val isCut = review.review(
             state = state,
@@ -89,7 +148,8 @@ internal class TurnEnd(
 
         return proposed(
             state = state,
-            summary = summary
+            summary = summary,
+            report = report
         )
     }
 
@@ -113,11 +173,11 @@ internal class TurnEnd(
      */
     suspend fun proposed(
         state: TurnState,
-        summary: String
+        summary: String,
+        report: suspend (AgentStep) -> Unit
     ): AgentStep {
-        val move = GroundedSteps.of(
-            move = AgentTaskMove(
-                move = ProposeTool.NAME,
+        val grounded = GroundedSteps.of(
+            proposal = AgentProposal(
                 summary = summary,
                 steps = state.turn.work.changes
             ),
@@ -125,26 +185,28 @@ internal class TurnEnd(
         )
 
         return proposal.stepOf(
-            move = move,
+            proposal = grounded,
             unreadable = state.turn.reads.blind,
             task = state.task,
             vault = ProposalVault(
                 path = state.turn.vaultPath,
                 notes = state.turn.notes,
                 openNote = state.turn.openNote
-            )
+            ),
+            report = report
         )
     }
 
     // The loop's eighth run ended "Lowered the rating to 3 for Atomic Habits and Sapiens" with every set_property
     // refused: the summary of an empty proposal shown as done.
-    private suspend fun unchanged(state: TurnState): AgentStep = AgentStep.Finished(
-        summary = finalAnswer.written(
-            task = state.task,
-            found = fittedOf(state = state) + NOTHING_CHANGED,
-            summary = "",
-            memory = state.memory.map { it.text }
-        )
+    private suspend fun unchanged(
+        state: TurnState,
+        report: suspend (AgentStep) -> Unit
+    ): AgentStep = answered(
+        state = state,
+        summary = "",
+        report = report,
+        found = fittedOf(state = state) + NOTHING_CHANGED
     )
 
     companion object {

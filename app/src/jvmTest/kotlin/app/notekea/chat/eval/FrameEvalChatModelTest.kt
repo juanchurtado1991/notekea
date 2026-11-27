@@ -4,7 +4,7 @@ import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
 import app.notekea.chat.data.GhostModelJson
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.loop.TaskFramer
 import app.notekea.chat.domain.loop.TurnFrames
 import app.notekea.chat.domain.loop.TurnRouter
@@ -140,7 +140,7 @@ class FrameEvalChatModelTest {
                 llmEngine = trace.recorded,
                 modelJson = GhostModelJson()
             ),
-            answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine),
+            passageSearch = PassageSearch(embedder, indexed.index, cache, engine),
             vaultGuide = vaultGuide
         )
 

@@ -1,11 +1,15 @@
 package app.notekea.chat.domain.tool.reading
 
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionRunner
+import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
+import app.notekea.chat.domain.tool.lookup.FoundRows
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.LinkFinder
@@ -13,18 +17,28 @@ import app.notekea.core.notes.domain.links.LinkResolver
 
 /**
  * The notes a note links to and the notes that link to it, as following a link and the backlinks panel find them:
- * how the person's notes hang together, for "what is related to…" (`docs/agent-loop.md`, step 4).
+ * how the person's notes hang together, for "what is related to…" (`docs/agent-loop.md`, step 4). With no note, the
+ * vault's links that lead to no note, as the app lists them.
  */
 class LinksTool(
     private val noteTextCache: NoteTextCache,
-    private val linkFinder: LinkFinder
+    private val linkFinder: LinkFinder,
+    actionRunner: ActionRunner
 ) : ChatTool {
+    private val foundRows = FoundRows(actionRunner = actionRunner)
+
     override val name = NAME
 
     override val description =
-        "a note's name; you get the notes it links to and the notes that link to it."
+        "a note's name; you get the notes it links to and the notes that link to it. With no note, the " +
+            "vault's broken links: the links that lead to no note."
 
-    override val arguments = listOf(ToolArgument(name = NOTE))
+    override val arguments = listOf(
+        ToolArgument(
+            name = NOTE,
+            isRequired = false
+        )
+    )
     override val effect = ToolEffect.READS
 
     override fun targetOf(
@@ -42,7 +56,14 @@ class LinksTool(
     ): ToolResult {
         val name = call.text(name = NOTE)
 
-        val path = context.noteNamed(name = name)
+        if (name.isBlank()) {
+            return foundRows.of(
+                step = ActionStep(kind = ActionKind.LIST_BROKEN_LINKS),
+                context = context
+            )
+        }
+
+        val path = context.lookedNamed(name = name)
             ?: return ToolResult(forModel = "links \"$name\": no note of that name.")
 
         val notes = context.notes.filter { it.file.path.isMarkdown }

@@ -55,7 +55,7 @@ class AnswerLinksTest {
             "read \"Greenhouse\": status active",
             "fetch https://en.wikipedia.org/wiki/Lisbon: 545,000"
         ).map { found ->
-            AgentTaskPrompt
+            FoundAnswerPrompt
                 .answer(
                     task = "what is it?",
                     found = listOf(found)

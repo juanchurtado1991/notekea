@@ -39,7 +39,6 @@ internal object ChatPreviewData {
         step = ChatStep.DONE,
         answer = "Mix the flour with warm water and salt [1], then rest it five minutes [2].",
         sources = sources,
-        readNotes = 3,
         scopeName = null,
         outcome = TurnOutcome.ANSWERED,
         error = null

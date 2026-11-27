@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool
 
+import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.tool.app.CalculateTool
 import app.notekea.chat.domain.tool.reading.ListTool
 import app.notekea.chat.domain.tool.work.AskUserTool
@@ -49,7 +50,13 @@ class WorkToolsTest {
 
     @Test
     fun `the new tools write their lines of the prompt and their grammar as any tool does`() {
-        val registry = ToolRegistry(tools = listOf(ListTool(), CalculateTool(), AskUserTool()))
+        val registry = ToolRegistry(
+            tools = listOf(
+                ListTool(actionRunner = FakeActionRunner()),
+                CalculateTool(),
+                AskUserTool()
+            )
+        )
 
         val schema = registry.schema()
 

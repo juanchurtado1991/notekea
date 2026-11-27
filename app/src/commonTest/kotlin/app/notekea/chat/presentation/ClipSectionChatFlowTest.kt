@@ -28,19 +28,21 @@ import kotlin.test.assertEquals
 /** A pasted documentation page in the chat: it asks, and the button clips the page with its links on one card. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClipSectionChatFlowTest : ViewModelTestBase() {
+    private var calls = 0
+
+    // The loop clips the page the request writes: asked of the whole vault, a request goes to it.
     private val engine = FakeLlmEngine().apply {
         reply = { messages ->
-            val request = messages
-                .last()
-                .text
-                .substringAfterLast(delimiter = "Request: ")
+            val asked = messages.first().text
 
-            if (messages.first().text.startsWith("You turn a request")) {
-                "{\"steps\":[{\"action\":\"clip_url\",\"url\":\"$URL\"}]}".takeIf {
-                    "x.com" in request
-                } ?: ""
-            } else {
-                ""
+            when {
+                asked.startsWith(prefix = "You say how a request") -> """{"work":"web","skill":"none"}"""
+
+                // Each turn clips the page, then proposes the clip.
+                asked.startsWith(prefix = "You work on a task in the person's notes") ->
+                    if (calls++ % 2 == 0) CLIP else PROPOSE
+
+                else -> ""
             }
         }
     }
@@ -266,5 +268,7 @@ class ClipSectionChatFlowTest : ViewModelTestBase() {
     private companion object {
         const val URL = "https://x.com/docs/overview"
         const val FOUND = 12
+        const val CLIP = """{"tool":"clip","url":"$URL"}"""
+        const val PROPOSE = """{"tool":"propose","summary":"Clipped."}"""
     }
 }
