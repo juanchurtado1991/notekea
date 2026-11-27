@@ -600,6 +600,10 @@ rubric: answerable without the sentence, one right answer, no yes or no, not the
 point, the note's language; checked against the developer's own marks on a sample); and cards are made on their own
 in the background. Decided: cards made on their own are kept apart, in Notekea, until first reviewed, and only then
 written in the note; and made only for the notes or folders the person marks to study.
+A note changed, its cards follow it, in the background once it settles: the same fact worded anew is rewritten and
+keeps its schedule; a fact changed (a figure, a date, a name) is rewritten and starts again as new; a sentence taken
+out takes its card with it; a new sentence with something to study gets one; a card written by hand is never touched.
+The old sentence is matched to the most alike of the note's new ones.
 
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
