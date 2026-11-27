@@ -604,6 +604,10 @@ A note changed, its cards follow it, in the background once it settles: the same
 keeps its schedule; a fact changed (a figure, a date, a name) is rewritten and starts again as new; a sentence taken
 out takes its card with it; a new sentence with something to study gets one; a card written by hand is never touched.
 The old sentence is matched to the most alike of the note's new ones.
+Quality comes before cover (the developer: no question for its own sake). A card counts only when the judge passes
+it: it asks what one would want to remember, not a filler detail; it cannot be guessed (no yes or no); it is no
+sentence with a gap; it has one right answer; it is understood without the note. Cover is the sentences worth
+studying, as the judge marks them, that have a passing card; a sentence with nothing worth asking gets none.
 
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
