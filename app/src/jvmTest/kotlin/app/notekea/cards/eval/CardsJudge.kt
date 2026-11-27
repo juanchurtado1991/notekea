@@ -86,7 +86,9 @@ internal class CardsJudge(private val engine: LlmEngine) {
 
     private companion object {
         const val CARD_TOKENS = 120
-        const val WORTH_TOKENS = 8
+
+        // A sentence's line of the reply, "S12": "yes", as the model indents it: about ten tokens.
+        const val WORTH_TOKENS = 16
 
         // Each rule and the reply that passes it.
         val RULE_NAMES = listOf(
