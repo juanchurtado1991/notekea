@@ -281,8 +281,18 @@ class AgentEvalChatModelTest {
     fun `blind exams on nine vaults the loop was never tuned on`() = runBlocking {
         assumeTrue(Files.isRegularFile(Path.of(setup.modelPath)))
 
+        // -PchatFast=true: worked on by the chat in Fast mode ([FastRun]), as the blind pool can be.
+        val isFast = System.getProperty("notekea.chat.fast") == "true"
+        if (isFast) Dispatchers.setMain(dispatcher = main)
+
         BlindExams.all.forEach { exam ->
-            measured(exam.vault, exam.cases.map { it.forLoop() }, "blind-${exam.id}", isLoop = true)
+            measured(
+                vault = exam.vault,
+                all = exam.cases.map { it.forLoop() },
+                name = "blind-${exam.id}",
+                isLoop = !isFast,
+                isFast = isFast
+            )
         }
     }
 
