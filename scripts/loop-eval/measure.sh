@@ -1,5 +1,5 @@
 #!/bin/bash
-# measure.sh <label> <frame|tuned|dev|pool|fast|fastdev|reference|sealed|cards> <medium|large> [seed]
+# measure.sh <label> <frame|tuned|dev|pool|fast|fastdev|reference|sealed|cards|judge> <medium|large> [seed]
 #
 # Measures the loop with a real model and copies the reports to $NOTEKEA_RUNS/<label> (docs/loop-goal-plan.md).
 #   frame   the frame alone on the tuned and development tasks (FrameEvalChatModelTest), minutes
@@ -8,6 +8,7 @@
 #   pool    ten unsealed exams of the blind pool, picked by <seed>, about 40 minutes
 #   fast    the same ten exams worked on by the chat in Fast mode (FastRun), to set Fast beside the agent
 #   fastdev the development exams in Fast mode, to read why Fast misses what it misses
+#   judge   the cards of a cards run (NOTEKEA_CARDS=<its .tsv>) judged by the size given, the 12B, and their cover
 #   reference  the 40 unsealed exams, once, to compare every round with: about 3 hours the 4B, 4 hours the 9B
 #   sealed  the ten sealed exams: once, for the final number, and only with NOTEKEA_FINAL=yes
 #   cards   the study cards of the dev vaults and the long notes (CardsEvalChatModelTest, docs/gemma-plan.md section 8)
@@ -29,7 +30,7 @@ tests=app.notekea.chat.eval.AgentEvalChatModelTest
 # then differ only where the code does. Never for the reference nor the sealed exams, whose numbers stand alone.
 replies=(); kept=""
 [ -n "${NOTEKEA_REPLIES:-}" ] && case $what in
-  frame|tuned|dev|fastdev|cards) kept=$NOTEKEA_REPLIES ;;
+  frame|tuned|dev|fastdev|cards|judge) kept=$NOTEKEA_REPLIES ;;
   pool|fast) kept=$NOTEKEA_REPLIES-pool ;;
 esac
 [ -n "$kept" ] && replies=("-PchatReplies=$kept")
@@ -38,7 +39,8 @@ esac
 
 case $what in
   frame) filter="app.notekea.chat.eval.FrameEvalChatModelTest"; extra=(); files="frame-*-$size.md" ;;
-  cards) filter="app.notekea.cards.eval.CardsEvalChatModelTest"; extra=(); files="cards-*-$size.md" ;;
+  cards) filter="app.notekea.cards.eval.CardsEvalChatModelTest"; extra=(); files="cards-*-$size.*" ;;
+  judge) filter="app.notekea.cards.eval.CardsJudgeChatModelTest"; extra=("-PcardsJudged=${NOTEKEA_CARDS:?NOTEKEA_CARDS=<a cards run .tsv>}"); files="cards-judge-* cards-sample-* cards-key-*" ;;
   tuned) filter="$tests.the one loop is measured*"; extra=(); files="loop-*-$size.md" ;;
   dev) filter="$tests.blind exams*"; extra=(); files="blind-*-$size.md" ;;
   pool) filter="$tests.blind pool*"; extra=(-PchatPool=sample "-PchatPoolSeed=$seed"); files="pool-*-$size.md" ;;
@@ -48,7 +50,7 @@ case $what in
   sealed)
     [ "${NOTEKEA_FINAL:-}" = yes ] || { echo "The sealed exams are for the final number only."; exit 1; }
     filter="$tests.blind pool*"; extra=(-PchatPool=sealed); files="pool-*-$size.md" ;;
-  *) echo "frame, tuned, dev, pool, fast, fastdev, reference, sealed or cards"; exit 1 ;;
+  *) echo "frame, tuned, dev, pool, fast, fastdev, reference, sealed, cards or judge"; exit 1 ;;
 esac
 
 mkdir -p "$out"
@@ -60,10 +62,10 @@ git -C "$worktree" checkout --quiet --detach "$commit" || exit 1
 echo "$what $size seed=$seed commit $(git -C "$repo" rev-parse --short HEAD)" >> "$out/commit.txt"
 
 cd "$worktree" || exit 1
-rm -f app/build/reports/$files
+for f in $files; do rm -f app/build/reports/$f; done
 start=$(date +%s)
 ./gradlew :app:chatModelTest --rerun --console=plain --tests "$filter" \
   "-PchatModels=$models" "-PchatSize=$size" "${extra[@]}" "${replies[@]}" > "$out/gradle-$what-$size.log" 2>&1
 echo "$what $size exit=$? minutes=$(( ($(date +%s) - start) / 60 ))" | tee -a "$out/status.txt"
 [ -n "$kept" ] && tail -n 1 "$kept/rounds.txt" | tee -a "$out/status.txt"
-cp app/build/reports/$files "$out/" 2>/dev/null
+for f in $files; do cp app/build/reports/$f "$out/" 2>/dev/null; done

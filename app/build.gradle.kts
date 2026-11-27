@@ -281,6 +281,7 @@ tasks.register<Test>("chatModelTest") {
     // -PchatPool=all the 40 unsealed ones, -PchatPool=sealed the ten sealed ones, only for the final number.
     systemProperty("notekea.chat.pool", providers.gradleProperty("chatPool").getOrElse("sample"))
     systemProperty("notekea.chat.fast", providers.gradleProperty("chatFast").getOrElse("false"))
+    systemProperty("notekea.cards.judged", providers.gradleProperty("cardsJudged").getOrElse(""))
     systemProperty("notekea.chat.poolSeed", providers.gradleProperty("chatPoolSeed").getOrElse("1"))
     // The web's evaluation keeps the pages it downloads here, and reads only those with -PwebReplay=true.
     systemProperty("notekea.web.pages", providers.gradleProperty("webPages").getOrElse(""))

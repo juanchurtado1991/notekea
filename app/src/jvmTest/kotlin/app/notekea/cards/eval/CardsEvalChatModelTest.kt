@@ -190,6 +190,21 @@ class CardsEvalChatModelTest {
             writeText(text = report)
         }
 
+        // The cards kept, a line each, for the cards' judge (`CardsJudgeChatModelTest`).
+        File("build/reports/$name-${size.id}.tsv").writeText(
+            text = notes.flatMap { note ->
+                note.kept.map {
+                    MadeCard(
+                        vault = note.vault,
+                        note = note.note,
+                        sentence = it.card.sentence,
+                        question = it.card.question,
+                        answer = it.card.answer
+                    ).line()
+                }
+            }.joinToString(separator = "\n")
+        )
+
         println(
             report
                 .lines()
