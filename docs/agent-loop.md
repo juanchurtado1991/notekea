@@ -483,9 +483,8 @@ parentheses, percents, thousands; what is not arithmetic is said, never guessed)
 tasks in the vault, a folder, a tag or a note) and `DateTool` (`DatePhrases`: "tomorrow", "next Friday", "in 3
 weeks", "end of month", in English and Spanish, from `ToolContext.today`).
 
-**Working** (`tool/work`). `TurnWork` is the turn's working memory in `ToolContext`: the plan (`PlanTool`,
-written whole and ticked as it goes) and the facts noted with their passages (`NoteTool`), described for the
-prompt, where they stay whatever the budget trims. `AskUserTool` ends the turn with a question and two to four
+**Working** (`tool/work`). `TurnWork` holds the changes a turn adds to its proposal. The plan and the noted facts
+(`PlanTool`, `NoteTool`) were written and never put in a toolset, and were taken out on 2026-11-26. `AskUserTool` ends the turn with a question and two to four
 answers. A list argument reaches a tool one item a line (`ToolCall.list`).
 
 **Skills and the vault's instructions** (`chat/domain/skill`). `BuiltInSkills`: a comparison table, a document

@@ -9,8 +9,8 @@ import app.notekea.core.memory.domain.MemoryLine
 
 /**
  * What the model is given at each step of the one loop (`docs/agent-loop.md`, step 5): how it works, the tools of
- * this turn as they describe themselves, the vault's own instructions and the skill chosen, then the task, the
- * turn's working memory and what its calls gave back.
+ * this turn as they describe themselves, the vault's own instructions and the skill chosen, then the task and what
+ * its calls gave back.
  */
 internal object LoopPrompt {
     /** Told to the model when its last call could not be read, before it is asked for it again. */
@@ -106,13 +106,11 @@ Tools:
         system: String,
         task: String,
         context: ActionContext,
-        work: String,
         found: List<String>,
         left: Int,
         isEnding: Boolean
     ): List<ChatMessage> {
         val seen = found.joinToString(separator = "\n\n").ifEmpty { "Nothing yet." }
-        val working = if (work.isEmpty()) "" else "$work\n\n"
 
         return listOf(
             ChatMessage(
@@ -121,7 +119,7 @@ Tools:
             ),
             ChatMessage(
                 role = ChatRole.USER,
-                text = "${head(task = task, context = context)}\n\n${working}Results so far:\n$seen\n\n" +
+                text = "${head(task = task, context = context)}\n\nResults so far:\n$seen\n\n" +
                     tail(
                         left = left,
                         isEnding = isEnding

@@ -426,10 +426,6 @@ class RunTurnUseCase(
                     system = state.system,
                     task = state.task,
                     context = state.context,
-                    work = state
-                        .turn
-                        .work
-                        .described(),
                     found = fitted.entries,
                     left = left,
                     isEnding = isEnding
