@@ -798,6 +798,33 @@ held at all (a plural title word, a Spanish word for an English title).
 **Item 7, done (2026-11-15):** with the small model the chat keeps today's agent even when the loop is turned on in
 Settings (`ChatLoop.isOn`), and the setting's hint says so.
 
+## Step 6, finished: one loop for every request — planned 2026-11-27
+
+The developer's decision (2026-11-27): the chat has one way of working, the loop, measured on the blind pool
+(`docs/gemma-plan.md`, "The modes measured": 59.0 / 79.4 / 84.7 % against Fast's 40.1 / 45.1 / 55.4 %). No modes, no
+menu, no setting, no second path; the loop gets every skill the app needs, built as part of it (a tool, a step of
+its end, a field of the turn), never as a special case beside it. On every model, the small one too: the reason it
+was kept off the 2B (item 7) was Qwen's 2B; Gemma's E2B was measured on the loop.
+
+What only the old paths did, from the map of 2026-11-14 and the code as it stands, and where each goes in the loop:
+
+| # | What | In the loop |
+|---|---|---|
+| 1 | Notes made from a pasted text (`notes_from_text`) | A change tool of *write*, its notes written as today (`ComposeNotesUseCase`) |
+| 2 | The notes with no tag, the broken links (`list_untagged`, `list_broken_links`) | Looking tools of every set that looks, their rows a table |
+| 3 | A table of the notes or tasks found, each row opening its note | The finding tools keep their tables on the turn; the turn's end carries them |
+| 4 | A clip's question "only this page, or its linked pages too?" | The proposal's check stops on it, and the chat asks it as before |
+| 5 | A clip of many pages: how far it is; "Writing…" while notes are written | The proposal's check reports its progress as steps of the turn |
+| 6 | Cards asked of several notes: a note that backs none left out | The proposal's check, as the plan did |
+| 7 | A question asked of the open note or its folder | The turn's scope: its looking tools see only those notes |
+| 8 | The sources of an answer, and the answer written as it comes | The turn's end carries the passages and notes its answer is from; the answer streams |
+
+Then the old paths go, with the tests that only test them: the planner and its word rules, the question agent,
+today's agent, the modes and their menu, the setting, Fast's evaluation.
+
+The gate: the unit tests of each piece, the whole check, and the blind pool of the 4B on the loop (79.4 %) not lower
+after the new tools; the Auto-Test cases of 3.8, 3.9 and 4.7 that cover these skills are read for what they expect.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and

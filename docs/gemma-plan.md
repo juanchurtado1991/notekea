@@ -618,3 +618,24 @@ studying, as the judge marks them, that have a passing card; a sentence with not
 Later, not decided: explaining a note in one's own words and being told what was left out (no mark given), and a
 briefing of the day made without the model from what Today, Tasks and the cards due already know. Left out: a note's
 gaps found before studying, and cards that cross notes with the web, as a small model makes both up.
+
+### The judge measured, and the developer's review (2026-11-27)
+
+The 12B judged the E4B's kept cards of the dev notes (`cards-judge-e4b2`, after the judge's reply of sentences worth
+a card was no longer cut short, c2200142): **1,073 of 1,495 pass (71 %)**; cover **575 of 1,787 sentences worth a
+card (32 %)**. Failures by rule: standalone 338, memorable 119, one answer 93, guessable 81, gap 1.
+
+The developer's review of 40 of those cards (`cards-sample-cards-dev-medium.md`): no answer is wrong against its
+sentence; two lose a detail (36 drops "up to … each year", 27 drops ", Zapopan"); ten do not name what they ask about
+("¿Cuál es la renta?" with no flat named): 3, 4, 17, 21, 25, 27, 30, 38, 39, 40. The judge's standalone rule agreed
+on only three of the ten (17, 27, 39) and failed six the review passed (2, 11, 16, 32, 35, 36): it is not yet a
+measure. Next, in order: the judge's standalone rule made to ask that the card name its subject, checked against the
+review until they agree; the maker made to name the subject; an automatic check that each answer holds what its
+sentence says, its limits included ("up to", "each year"); then cover, every sentence worth a card. The developer
+reviews another sheet once the judge agrees.
+
+### One mode: the loop (2026-11-27)
+
+Fast was measured on the blind pool beside the loop (the table in "The modes measured"): the loop won on every size
+by 19 to 34 points. The developer's decision: the chat is the loop alone, no modes, no menu, no setting, and the loop
+gets every skill the app needs (`docs/agent-loop.md`, "Step 6, finished"). Deep thinking had already gone.
