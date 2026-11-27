@@ -37,6 +37,9 @@ import app.notekea.shell.data.chat.VaultActionFinder
 import app.notekea.tasks.domain.ListTasksUseCase
 import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tree.data.OkioNoteMetadataReader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -44,11 +47,14 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import okio.FileSystem
 import org.junit.Assume.assumeTrue
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.Executors
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -59,6 +65,7 @@ import kotlin.time.Clock
  * models, its moves and end written to `build/reports/agent-eval-<size>.md`. A size is offered agent mode only when
  * it reaches [OFFER_BAR]. Run by hand like [AnswerEvalChatModelTest], with `--tests '*AgentEval*'`.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class AgentEvalChatModelTest {
     private val folder = Path.of(System.getProperty("notekea.chat.models").orEmpty())
     private val size =
@@ -95,8 +102,13 @@ class AgentEvalChatModelTest {
     private val trace = EvalTrace(engine = engine)
     private val recorded = trace.recorded
 
+    // The chat's own thread, for [FastRun]: its view model works on the main dispatcher.
+    private val main = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
     @AfterTest
     fun tearDown() {
+        Dispatchers.resetMain()
+        main.close()
         (engine as? ReplyCache)?.note()
         llama.close()
         embedder.close()
@@ -290,8 +302,18 @@ class AgentEvalChatModelTest {
             else -> BlindPool.sampleOf(seed = seed)
         }
 
+        // -PchatFast=true: the same exams worked on by the chat in Fast mode ([FastRun]), the agent's checks kept.
+        val isFast = System.getProperty("notekea.chat.fast") == "true"
+        if (isFast) Dispatchers.setMain(dispatcher = main)
+
         exams.forEach { exam ->
-            measured(exam.vault, exam.cases.map { it.forLoop() }, "pool-${exam.id}", isLoop = true)
+            measured(
+                vault = exam.vault,
+                all = exam.cases.map { it.forLoop() },
+                name = "pool-${exam.id}",
+                isLoop = !isFast,
+                isFast = isFast
+            )
         }
     }
 
@@ -301,7 +323,8 @@ class AgentEvalChatModelTest {
         all: List<AgentEvalCase>,
         name: String,
         isLoop: Boolean = false,
-        written: Map<String, String> = emptyMap()
+        written: Map<String, String> = emptyMap(),
+        isFast: Boolean = false
     ): Pair<Double, String> {
         val indexed = EvalVault.of(
             vault = vault,
@@ -334,6 +357,8 @@ class AgentEvalChatModelTest {
             trace = trace
         )
 
+        val fast = FastRun(indexed, notes, recorded, embedder, runner)
+
         val slots = Semaphore(permits = setup.slots)
 
         val results = coroutineScope {
@@ -345,11 +370,13 @@ class AgentEvalChatModelTest {
 
                             val context = AgentEvalSetup.contextOf(notes = notes)
 
-                            val steps = if (isLoop) {
-                                loop(case.task, indexed.path, notes, context, null).toList()
-                            } else {
-                                agent(case.task, indexed.path, notes, context, null).toList()
+                            val worked = when {
+                                isFast -> null
+                                isLoop -> loop(case.task, indexed.path, notes, context, null)
+                                else -> agent(case.task, indexed.path, notes, context, null)
                             }
+
+                            val steps = worked?.toList() ?: fast.of(task = case.task)
 
                             val seconds = (System.nanoTime() - start) / NANOS_PER_SECOND
 

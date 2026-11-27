@@ -1,11 +1,12 @@
 #!/bin/bash
-# measure.sh <label> <frame|tuned|dev|pool|reference|sealed|cards> <medium|large> [seed]
+# measure.sh <label> <frame|tuned|dev|pool|fast|reference|sealed|cards> <medium|large> [seed]
 #
 # Measures the loop with a real model and copies the reports to $NOTEKEA_RUNS/<label> (docs/loop-goal-plan.md).
 #   frame   the frame alone on the tuned and development tasks (FrameEvalChatModelTest), minutes
 #   tuned   the 259 tuned tasks and the fresh vault ("the one loop is measured*"), about 40 minutes
 #   dev     the nine exams retired from the blind set ("blind exams*"), about 35 minutes
 #   pool    ten unsealed exams of the blind pool, picked by <seed>, about 40 minutes
+#   fast    the same ten exams worked on by the chat in Fast mode (FastRun), to set Fast beside the agent
 #   reference  the 40 unsealed exams, once, to compare every round with: about 3 hours the 4B, 4 hours the 9B
 #   sealed  the ten sealed exams: once, for the final number, and only with NOTEKEA_FINAL=yes
 #   cards   the study cards of the dev vaults and the long notes (CardsEvalChatModelTest, docs/gemma-plan.md section 8)
@@ -28,7 +29,7 @@ tests=app.notekea.chat.eval.AgentEvalChatModelTest
 replies=(); kept=""
 [ -n "${NOTEKEA_REPLIES:-}" ] && case $what in
   frame|tuned|dev|cards) kept=$NOTEKEA_REPLIES ;;
-  pool) kept=$NOTEKEA_REPLIES-pool ;;
+  pool|fast) kept=$NOTEKEA_REPLIES-pool ;;
 esac
 [ -n "$kept" ] && replies=("-PchatReplies=$kept")
 # NOTEKEA_TASKS=<file> measures only the tasks the file lists, a line each (fastset.py): a shorter round to tune with.
@@ -40,11 +41,12 @@ case $what in
   tuned) filter="$tests.the one loop is measured*"; extra=(); files="loop-*-$size.md" ;;
   dev) filter="$tests.blind exams*"; extra=(); files="blind-*-$size.md" ;;
   pool) filter="$tests.blind pool*"; extra=(-PchatPool=sample "-PchatPoolSeed=$seed"); files="pool-*-$size.md" ;;
+  fast) filter="$tests.blind pool*"; extra=(-PchatPool=sample "-PchatPoolSeed=$seed" -PchatFast=true); files="pool-*-$size.md" ;;
   reference) filter="$tests.blind pool*"; extra=(-PchatPool=all); files="pool-*-$size.md" ;;
   sealed)
     [ "${NOTEKEA_FINAL:-}" = yes ] || { echo "The sealed exams are for the final number only."; exit 1; }
     filter="$tests.blind pool*"; extra=(-PchatPool=sealed); files="pool-*-$size.md" ;;
-  *) echo "frame, tuned, dev, pool, reference, sealed or cards"; exit 1 ;;
+  *) echo "frame, tuned, dev, pool, fast, reference, sealed or cards"; exit 1 ;;
 esac
 
 mkdir -p "$out"
