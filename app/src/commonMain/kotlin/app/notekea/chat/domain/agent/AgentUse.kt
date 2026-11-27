@@ -8,7 +8,7 @@ import app.notekea.chat.domain.plan.ActionProblem
  * whatever the mode, since the plan answers them better.
  */
 enum class AgentUse {
-    /** Normal and Deep thinking, and a model that does not offer it. */
+    /** Fast, and a model that does not offer it. */
     NEVER,
 
     /** Auto: only a plan that names something the vault does not hold as named ("the recipe with black beans"). */

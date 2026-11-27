@@ -41,7 +41,6 @@ internal class ChatReplies(
         message: String,
         history: List<ChatExchange>,
         notes: Collection<NoteEntry>,
-        isDeep: Boolean,
         onStep: (ChatStep) -> Unit,
         only: Set<RelativePath>?
     ): Flow<AnswerStep> = repliedIn(
@@ -49,7 +48,6 @@ internal class ChatReplies(
         message = message,
         history = history,
         notes = notes,
-        isDeep = isDeep,
         onStep = onStep,
         only = only,
         language = SpokenLanguage.inChat(
@@ -63,7 +61,6 @@ internal class ChatReplies(
         message: String,
         history: List<ChatExchange>,
         notes: Collection<NoteEntry>,
-        isDeep: Boolean,
         onStep: (ChatStep) -> Unit,
         only: Set<RelativePath>?,
         language: String?
@@ -85,7 +82,6 @@ internal class ChatReplies(
             question = reply.question,
             notes = notes,
             only = only,
-            isDeep = isDeep,
             onStep = onStep,
             language = language
         )
@@ -118,7 +114,6 @@ internal class ChatReplies(
     private fun answered(
         question: String,
         notes: Collection<NoteEntry>,
-        isDeep: Boolean,
         onStep: (ChatStep) -> Unit,
         only: Set<RelativePath>?,
         language: String?
@@ -131,7 +126,6 @@ internal class ChatReplies(
             notes = notes,
             question = question,
             only = only,
-            drafts = if (isDeep) DEEP_DRAFTS else 1,
             language = language
         ).collect { step ->
             if (step == AnswerStep.NotFound) isNotFound = true else emit(value = step)
@@ -150,10 +144,5 @@ internal class ChatReplies(
                 language = language
             )
         )
-    }
-
-    private companion object {
-        // Three drafts and a vote (3.6, docs/answer-quality.md).
-        const val DEEP_DRAFTS = 3
     }
 }

@@ -270,7 +270,6 @@ tasks.register<Test>("chatModelTest") {
     systemProperty(chatModelsSystemProperty, providers.gradleProperty(chatModelsGradleProperty).getOrElse(""))
     systemProperty("notekea.chat.size", providers.gradleProperty("chatSize").getOrElse("small"))
     systemProperty("notekea.chat.gpu", providers.gradleProperty("chatGpu").getOrElse("true"))
-    systemProperty("notekea.chat.drafts", providers.gradleProperty("chatDrafts").getOrElse("1"))
     systemProperty("notekea.chat.agent", providers.gradleProperty("chatAgent").getOrElse("false"))
     systemProperty("notekea.chat.probes", providers.gradleProperty("chatProbes").getOrElse(""))
     systemProperty("notekea.chat.vault", providers.gradleProperty("chatVault").getOrElse(""))

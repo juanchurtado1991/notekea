@@ -70,6 +70,9 @@ So 3.2's single call stays the answer pipeline: none of 3.5's steps beats it.
 
 ## 3.6 — Deep answer
 
+Taken out on 2026-11-26: on Gemma 4 it was never better than one draft (`docs/gemma-plan.md`). What follows is how
+it was measured on Qwen.
+
 Three drafts written at once (temperature 0.7, seeds 1–3) over the same five passages; the draft whose words the
 other two share most wins (`DraftVote`), and the notes do not answer when most drafts say so. Same set, same GPU.
 
@@ -235,7 +238,6 @@ plainly, in the person's language), a difference, or a matter of taste. The diff
 - **Due dates nobody asked for:** "add those as tasks here" got today's; a due date stays only when the request
   writes or names one.
 - **Notes that disagree:** said to disagree only when two excerpts give different values for the same thing.
-- **Deep thinking** hands a question it cannot answer to the agent, as Auto does.
 
 Final round, after the fixes: every factual answer of Medium and Large matches Claude's, on both sizes and in English,
 Spanish and French. The last two differences, of wording, are fixed too: a count is said only when asked for

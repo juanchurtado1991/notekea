@@ -622,7 +622,6 @@
     <string name="chat_send">Send</string>
     <string name="chat_small_hint">The small model is wrong now and then: check its answers against the sources.</string>
     <string name="chat_sources">Sources</string>
-    <string name="chat_step_drafting">Writing drafts and comparing them…</string>
     <string name="chat_step_reading">Reading %1$d notes…</string>
     <string name="chat_step_reading_one">Reading 1 note…</string>
     <string name="chat_step_searching">Searching your notes…</string>
@@ -900,7 +899,6 @@
     <string name="chat_step_reading_es">Leyendo %1$d notas…</string>
     <string name="chat_step_reading_one_es">Leyendo 1 nota…</string>
     <string name="chat_step_writing_es">Escribiendo la respuesta…</string>
-    <string name="chat_step_drafting_es">Escribiendo borradores y comparándolos…</string>
     <string name="chat_step_planning_es">Entendiendo tu petición…</string>
     <string name="chat_step_composing_es">Escribiendo las notas…</string>
     <string name="chat_action_will_es">Notekea hará:</string>
@@ -1172,8 +1170,6 @@
     <string name="chat_mode_auto_hint">Picks the mode for each request</string>
     <string name="chat_mode_fast">Fast</string>
     <string name="chat_mode_fast_hint">One answer, the quickest</string>
-    <string name="chat_mode_deep">Deep thinking</string>
-    <string name="chat_mode_deep_hint">Three drafts and a vote: slower, more often right</string>
     <string name="chat_mode_agent">Agent</string>
     <string name="chat_mode_agent_hint">Works step by step, then shows its plan</string>
     <string name="chat_model_small">Small</string>

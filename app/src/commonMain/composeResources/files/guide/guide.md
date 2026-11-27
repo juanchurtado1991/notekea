@@ -205,13 +205,12 @@ words: vault, bóveda, boveda, open folder, abrir carpeta, another vault, otra b
 Press {openFolder} to open a folder as a vault, or click the vaults button at the bottom of the tool rail to switch to a
 recent one.
 
-# Chat modes: Auto, Fast, Deep thinking, Agent
-words: mode, modo, modes, modos, deep thinking, deep answer, respuesta profunda, pensar, more precise, más preciso, slower, drafts, auto, fast, rápido, normal
+# Chat modes: Auto, Fast, Agent
+words: mode, modo, modes, modos, auto, fast, rápido, normal, agent, agente, step by step, paso a paso
 At the bottom right of the chat's question field it says the model in use and the mode, such as "Medium · Auto"; a
-click opens the modes. Auto, the default, picks for each request: Deep thinking for a question that asks to compare,
-explain or sum up, the agent for a task whose note it must look for first, and a fast answer for the rest. Fast is
-one answer, the quickest. Deep thinking writes three drafts and keeps the one they agree on: slower, more often right.
-Agent works step by step. Deep thinking comes with the Medium model, Agent with Medium and Large.
+click opens the modes. Auto, the default, answers fast, and hands the agent a task whose note it must look for first
+only with a model on which the agent was measured to work well. Fast is one answer, the quickest. Agent works step by
+step. Agent comes with the Medium and Large models.
 
 # Copy the chat
 words: copy chat, copiar chat, clear history, borrar historial, report, reportar

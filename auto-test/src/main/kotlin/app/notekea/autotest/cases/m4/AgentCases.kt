@@ -132,8 +132,8 @@ private fun SuiteBuilder.autoPicks() {
 
         title(
             text =
-            "Auto piensa a fondo una comparación y le pasa al agente una tarea cuya nota " +
-                "debe encontrar"
+            "Auto responde una comparación con una sola respuesta y no le pasa al agente una " +
+                "tarea cuya nota debe encontrar: el agente no llega aún a su meta en ningún tamaño"
         )
 
         steps(
@@ -146,10 +146,9 @@ private fun SuiteBuilder.autoPicks() {
 
         expected(
             text =
-            "El paso 2 dice que está escribiendo borradores y comparándolos; el paso 3 " +
-                "muestra los pasos del agente y termina en una tarjeta que agrega la tarea a " +
-                "Black beans. El chat copiado dice Answered with: deep para el paso 2 y Answered " +
-                "with: agent para el paso 3."
+            "El paso 2 se responde con las notas, con sus fuentes; el paso 3 lo hace el plan, " +
+                "sin la lista de pasos del agente. El chat copiado dice Answered with: fast para " +
+                "los dos, y el menú de modos ofrece Auto, Rápido y Agente, sin Pensamiento profundo."
         )
     }
 }

@@ -138,7 +138,6 @@ class ChatPanelTest {
             show(
                 state = ChatPreviewData.state.copy(
                     tier = ModelTier.MEDIUM,
-                    isDeepOffered = true,
                     isAgentOffered = true
                 ),
                 intents = intents
@@ -150,11 +149,11 @@ class ChatPanelTest {
                 onAllNodesWithText(text = it).fetchSemanticsNodes().isNotEmpty()
             }
 
-            onNodeWithText(text = DEEP_THINKING).performClick()
+            onNodeWithText(text = AGENT).performClick()
 
             assertEquals(
-                expected = listOf(true, true, true, true) to
-                    listOf<ChatIntent>(ChatIntent.OnModeChoose(mode = ChatMode.DEEP)),
+                expected = listOf(true, true, true) to
+                    listOf<ChatIntent>(ChatIntent.OnModeChoose(mode = ChatMode.AGENT)),
                 actual = shown to intents
             )
         }
@@ -169,7 +168,7 @@ class ChatPanelTest {
         onNodeWithText(text = "Small · Auto").performClick()
 
         assertEquals(
-            expected = listOf(true, true, false, false),
+            expected = listOf(true, true, false),
             actual = MODES.map { onAllNodesWithText(text = it).fetchSemanticsNodes().isNotEmpty() }
         )
     }
@@ -181,7 +180,7 @@ class ChatPanelTest {
         const val MODEL_ACTION = "Choose a model"
         const val STEPS_PLACE = "Arepas › Steps"
         const val QUESTION = "How long does the dough rest?"
-        const val DEEP_THINKING = "Deep thinking"
-        val MODES = listOf("Auto", "Fast", DEEP_THINKING, "Agent")
+        const val AGENT = "Agent"
+        val MODES = listOf("Auto", "Fast", AGENT)
     }
 }

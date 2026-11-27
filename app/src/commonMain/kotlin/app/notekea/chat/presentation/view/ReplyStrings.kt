@@ -188,8 +188,6 @@ import app.notekea.resources.chat_step_clipping
 import app.notekea.resources.chat_step_clipping_es
 import app.notekea.resources.chat_step_composing
 import app.notekea.resources.chat_step_composing_es
-import app.notekea.resources.chat_step_drafting
-import app.notekea.resources.chat_step_drafting_es
 import app.notekea.resources.chat_step_finding
 import app.notekea.resources.chat_step_finding_es
 import app.notekea.resources.chat_step_further
@@ -282,7 +280,6 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_step_reading to Res.string.chat_step_reading_es,
     Res.string.chat_step_reading_one to Res.string.chat_step_reading_one_es,
     Res.string.chat_step_writing to Res.string.chat_step_writing_es,
-    Res.string.chat_step_drafting to Res.string.chat_step_drafting_es,
     Res.string.chat_step_planning to Res.string.chat_step_planning_es,
     Res.string.chat_step_composing to Res.string.chat_step_composing_es,
     Res.string.chat_action_will to Res.string.chat_action_will_es,

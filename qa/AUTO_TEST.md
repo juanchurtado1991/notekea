@@ -94,8 +94,8 @@ Everything else is `Auto-Test`. When part of a case is automatic and part needs 
 **A case that needs what not every machine has is skipped there, not failed.** Test Buddy's `Precondition` says what
 the case needs; without it the case is reported as skipped (JUnit's aborted test in CI) and the report and the
 manager name what was missing. The cases of M3 that ask the chat model (`ChatModels.any`, `ChatModels.medium` for
-Deep answer) use a model already on the machine, never downloaded: on the developer's machine the folder of
-`-PchatModels` (`./gradlew :auto-test:test -Pcases=3.3,3.6,3.8,3.9 -PchatModels=$HOME/.cache/notekea-spike/models`,
+agent mode) use a model already on the machine, never downloaded: on the developer's machine the folder of
+`-PchatModels` (`./gradlew :auto-test:test -Pcases=3.3,3.8,3.9 -PchatModels=$HOME/.cache/notekea-spike/models`,
 or `:auto-test:run`), and on a tester's the model they downloaded in Notekea QA's Settings → AI model (Open Notekea
 on a manual case). Each case links the files into its own data folder (a hard link, a symbolic one or a copy) and
 puts Medium in use, or the size there is. CI has no model, so there they are skipped. Their checks are stable facts,

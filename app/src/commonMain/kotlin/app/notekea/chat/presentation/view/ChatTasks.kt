@@ -35,7 +35,6 @@ import app.notekea.resources.chat_agent_search
 import app.notekea.resources.chat_agent_tasks
 import app.notekea.resources.chat_agent_web_search
 import app.notekea.resources.chat_step_composing
-import app.notekea.resources.chat_step_drafting
 import app.notekea.resources.chat_step_further
 import app.notekea.resources.chat_step_planning
 import app.notekea.resources.chat_step_reading
@@ -150,8 +149,6 @@ private fun textOf(passed: PassedStep): String = when {
         replyString(resource = Res.string.chat_step_reading_one)
 
     passed.step == ChatStep.READING -> replyString(Res.string.chat_step_reading, passed.readNotes)
-
-    passed.step == ChatStep.DRAFTING -> replyString(resource = Res.string.chat_step_drafting)
 
     passed.step == ChatStep.WORKING -> replyString(resource = Res.string.chat_step_working)
 

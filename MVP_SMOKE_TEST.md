@@ -544,11 +544,8 @@ wording.
 
 ### 3.6 Deep thinking
 
-Same vault and model as 3.3; Deep thinking (Deep answer until 2026-11-11) is offered with Medium only (`docs/answer-quality.md`, 3.6).
-
-| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
-|---|---|---|---|---|---|---|---|---|
-| 3.6-01 | In the Playground Vault with Medium in use, choose Deep thinking in the mode menu at the bottom right of the question field and ask How much water does the arepa dough take?; press Esc during another Deep answer; switch to Small in Settings → AI model and look at the field | Deep answer and its hint fit on one line; the step line says Writing drafts and comparing them…, then the whole answer shows at once with its citation; Esc stops it, marked Stopped; with Small the Deep answer box is not there | 3.6 | Auto-Test | 3.6-01, `ChatPanelTest`, `DraftVoteTest`, `AnswerFromNotesUseCaseTest`, `AnswerEvalChatModelTest` (by hand) | | | |
+Taken out on 2026-11-26 (`docs/gemma-plan.md`): on Gemma three drafts and a vote were never better than one draft, and
+three times as slow. Case 3.6-01 went with it.
 
 ### 3.8 Questions in plain words
 
@@ -639,7 +636,7 @@ Run on the Playground Vault with the Medium model (Medium and Large offer it).
 | 4.7-01 | Open the chat, choose Agent in the mode menu (Medium · Auto at the bottom right of the field) and ask "find my recipe made with corn flour and tag it with latin"; wait; click Do it | Each step is listed with a check (Searched the notes for …, Read Arepas), the one going on with a turning ring; it ends on the card and Arepas is unchanged until Do it, which adds the tag | 4.7 | Auto-Test | 4.7-01, `AgentTaskTest`, `ChatAgentTest`, `AgentEvalChatModelTest` | | | |
 | 4.7-02 | With the Small model, open the chat and click Small · Auto at the bottom right of the field | Only Auto and Fast are offered; the chat works as before | 4.7 | Manual (costly) | `ChatAgentTest` | | | |
 | 4.7-03 | With Medium, choose Agent and ask "me podes contar de que tratan las notas?"; then Copy chat | Told from the vault's folders (Recipes, Travel…), not a search for the word "notas"; the copied chat says Answered with: fast | 4.7 | Auto-Test | 4.7-03, `ChatAgentTest` | | | |
-| 4.7-04 | With Medium in Auto, ask in the Sample Vault "compare Deep Work and Atomic Habits", then "add a task 'buy beans' to the recipe that uses black beans"; Copy chat | The first is Answered with: deep, the second lists the agent's steps and ends on a card for Black beans | 4.7 | Manual (costly) | `ChatModeTest`, `ChatAgentTest` | | | |
+| 4.7-04 | With Medium in Auto, ask in the Sample Vault "compare Deep Work and Atomic Habits", then "add a task 'buy beans' to the recipe that uses black beans"; Copy chat | Both are Answered with: fast; the second is done by the plan, with no list of the agent's steps (Auto hands the agent nothing until it is measured to its target on that size); the modes menu offers Auto, Fast and Agent | 4.7 | Manual (costly) | `ChatModeTest`, `ChatAgentTest` | | | |
 | 4.7-05 | With Medium in Auto, ask "¿cuánta agua llevan las arepas?", then "¿y cuánto reposa la masa?", then "mandame un recordatorio mañana a las 9"; Copy chat | Both answers are in Spanish (2½ tazas, cinco minutos); the reminder is refused plainly, saying a task with a due date is what it can add | 4.7 | Auto-Test | 4.7-05, `ChatProbeRulesTest`, `ChatProbeRoundsTest` | | | |
 | 4.7-06 | With Medium in Auto, ask three questions about the recipes; hold the pointer on the ring beside Medium · Auto; click ⋯ → Compact chat; ask "and the first recipe I asked about, how much water did it take?" | The ring fills with each reply and its tooltip says how full the memory is; after Compact chat it is not higher (lower once there is enough to summarize), and the last question is still answered about the arepas | 4.7 | Auto-Test | 4.7-06, `ChatMemoryRingUiTest`, `ChatProbeTest` | | | |
 | 4.7-07 | Paste a PDF or a Word document with text into a note and leave it open; ask the chat: create a note with a table of the pros and cons of that document; click Do it; ask: did you make that up?; repeat with a note that only holds a scanned picture | The note is written with what the document says (its names, measures and figures), with no example rows nor "replace with your data"; asked, it says which document it read and that it did not make it up; with the scanned picture it says it could read no text and writes no note | 4.7 | Manual (costly) | `GroundedWorkTest`, `WorkRecordTest` | | | |

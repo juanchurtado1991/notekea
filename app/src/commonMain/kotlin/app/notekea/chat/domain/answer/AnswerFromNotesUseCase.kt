@@ -2,7 +2,6 @@ package app.notekea.chat.domain.answer
 
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.agent.AgentAnswerUseCase
-import app.notekea.chat.domain.agent.DraftVote
 import app.notekea.chat.domain.language.inLanguage
 import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.core.domain.Outcome
@@ -10,16 +9,12 @@ import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmException
-import app.notekea.core.llm.domain.ReplyText
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.notes.domain.index.SearchHit
 import app.notekea.core.notes.domain.index.VectorIndex
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -35,16 +30,12 @@ class AnswerFromNotesUseCase(
     private val noteTextCache: NoteTextCache,
     private val llmEngine: LlmEngine
 ) {
-    /**
-     * The answer to [question] from [notes] of the vault at [vaultPath], only from the notes [only] names if given;
-     * with more than one of [drafts] (Deep answer, 3.6), several are written and voted on ([DraftVote]).
-     */
+    /** The answer to [question] from [notes] of the vault at [vaultPath], only from the notes [only] names if given. */
     operator fun invoke(
         vaultPath: String,
         notes: Collection<NoteEntry>,
         question: String,
         only: Set<RelativePath>? = null,
-        drafts: Int = 1,
         language: String? = null
     ): Flow<AnswerStep> = flow {
         emit(value = AnswerStep.Searching)
@@ -71,22 +62,13 @@ class AnswerFromNotesUseCase(
 
         if (read.isEmpty()) return@flow emit(value = AnswerStep.NotFound)
 
-        val answer = if (drafts > 1) {
-            voted(
-                question = question,
-                read = read,
-                drafts = drafts,
-                language = language
-            )
-        } else {
-            written(
+        emitAll(
+            flow = written(
                 question = question,
                 read = read,
                 language = language
             )
-        }
-
-        emitAll(flow = answer)
+        )
     }
 
     /** The answer written once, shown as it is written. */
@@ -141,70 +123,6 @@ class AnswerFromNotesUseCase(
             )
         )
     }
-
-    /** [drafts] answers written at once with different seeds, the one [DraftVote] chooses shown when all are done. */
-    private fun voted(
-        question: String,
-        read: List<AnswerSource>,
-        drafts: Int,
-        language: String?
-    ): Flow<AnswerStep> = flow {
-        emit(value = AnswerStep.Drafting(drafts = drafts))
-
-        val texts = try {
-            coroutineScope {
-                (1..drafts)
-                    .map { seed ->
-                        async {
-                            draftOf(
-                                question = question,
-                                read = read,
-                                seed = seed,
-                                language = language
-                            )
-                        }
-                    }
-                    .awaitAll()
-            }
-        } catch (exception: LlmException) {
-            return@flow emit(value = failed(error = ChatError.Model(error = exception.error)))
-        }
-
-        val winner =
-            DraftVote.winner(drafts = texts) ?: return@flow emit(value = AnswerStep.NotFound)
-
-        emit(
-            value = AnswerStep.Done(
-                answer = AnswerCitations.of(
-                    text = winner.trim(),
-                    read = read
-                )
-            )
-        )
-    }
-
-    private suspend fun draftOf(
-        question: String,
-        read: List<AnswerSource>,
-        seed: Int,
-        language: String?
-    ): String = ReplyText.of(
-        llmEngine = llmEngine,
-        messages = AnswerPrompt
-            .messages(
-                question = question,
-                excerpts = read.map { it.text }
-            )
-            .inLanguage(
-                language = language,
-                kept = AnswerPrompt.NOT_FOUND
-            ),
-        options = GenerationOptions(
-            maxTokens = MAX_TOKENS,
-            temperature = DRAFT_TEMPERATURE,
-            seed = seed
-        )
-    )
 
     /**
      * The passages the reranker scores best for [query], as the answer would read them (none under [GATE]): what the
@@ -333,6 +251,5 @@ class AnswerFromNotesUseCase(
         private const val MAX_TOKENS = 200
 
         // Drafts must differ to be worth a vote (docs/spikes/2026-11-08-answer-quality.md, "Vote").
-        private const val DRAFT_TEMPERATURE = 0.7f
     }
 }

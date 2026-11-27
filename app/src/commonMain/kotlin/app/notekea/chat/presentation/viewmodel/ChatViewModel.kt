@@ -428,9 +428,7 @@ class ChatViewModel(
                         it.copy(
                             isSmall = info.isSmall,
                             tier = info.tier,
-                            isDeepOffered = info.hasDeepAnswer,
                             isAgentOffered = info.hasAgent,
-                            isDeepPicked = info.isDeepPicked,
                             isAgentPicked = info.isAgentPicked
                         )
                     }

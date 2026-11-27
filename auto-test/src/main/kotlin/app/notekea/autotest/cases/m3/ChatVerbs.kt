@@ -92,7 +92,7 @@ internal fun CaseScope.awaitReplyStart(running: String = STOP) {
 /**
  * Waits for a step of the reply to be the one going on ([text], its line in the list of steps). The steps before it
  * ask the model too (understanding the request), which on a loaded laptop takes longer than a text's usual wait: the
- * model's own time is given (3.6-01 stayed on Understanding your request… past it, 2026-11-14).
+ * model's own time is given (a case stayed on Understanding your request… past it, 2026-11-14).
  */
 internal fun CaseScope.awaitStep(text: String) {
     step(description = "Wait for the step “$text”")

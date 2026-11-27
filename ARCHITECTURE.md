@@ -318,13 +318,12 @@ question ─▶ 1 Rewrite ─▶ Search ×queries ─▶ 2 Rerank ─▶ 3 Extra
                           (parallel)                     (parallel)
          ─▶ 4 Answer ─▶ 5 Verify ×sentences ─▶ answer
                           (parallel)
-Deep answer: 4 Answer ×drafts (parallel) ─▶ 5 Verify each ─▶ the draft with the most supported sentences
 ```
 
 - **One use case per step** in `chat.domain` (`RewriteQuestionUseCase`, `RerankChunksUseCase`,
-  `ExtractEvidenceUseCase`, `WriteAnswerUseCase`, `VerifyAnswerUseCase`), composed by `AnswerQuestionUseCase`;
-  `DeepAnswerUseCase` reuses the same steps with several drafts. Each step is unit tested with `FakeLlmEngine`
-  scripted outputs.
+  `ExtractEvidenceUseCase`, `WriteAnswerUseCase`, `VerifyAnswerUseCase`), composed by `AnswerQuestionUseCase`.
+  Each step is unit tested with `FakeLlmEngine` scripted outputs. (Deep answer, several drafts and a vote, was taken
+  out on 2026-11-26: on Gemma it was never better than one draft, `docs/gemma-plan.md`.)
 - **Ports:** `LlmEngine` (generation, streaming and grammar-constrained JSON) and a separate `Reranker`, both
   implemented in `jvmMain` with java-llama.cpp. One chat model is loaded once with several parallel slots; the
   reranker is a second, small model.
@@ -338,9 +337,9 @@ Deep answer: 4 Answer ×drafts (parallel) ─▶ 5 Verify each ─▶ the draft 
   model is asked whether it supports the sentence. Unsupported sentences are removed, never kept with a warning;
   an empty result becomes "I couldn't find this in your notes".
 - **Progress is part of the contract:** the pipeline emits a `Flow` of plain-language steps (searching, reading N
-  notes, checking sources, writing N drafts, comparing drafts) that the chat panel shows instead of a bare spinner.
+  notes, checking sources, writing the answer) that the chat panel shows instead of a bare spinner.
 - **Options for measurement:** `AnswerPipelineOptions` switches each step on or off for the evaluation (3.4); users
-  only see the Deep answer toggle.
+  see none of them.
 - **Rules:** no loop where a model critiques or debates its own output without evidence from the notes; a new step
   or prompt change ships only with an evaluation run showing better citation accuracy within the latency budget for
   every model size.

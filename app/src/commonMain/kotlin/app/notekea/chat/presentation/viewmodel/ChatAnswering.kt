@@ -94,17 +94,12 @@ internal class ChatAnswering(
         reply: ChatReply,
         history: List<ChatExchange>
     ) {
-        val isDeep = host
-            .state
-            .value
-            .isDeepFor(reply = reply)
-
         // Tables found are answered in words while the turn is still answering: its end was the action's
         // (the chat probe, 2026-11-11: the reply was cut at its first words).
         host
             .update(id) {
                 it.copy(
-                    answeredWith = if (isDeep) ChatMode.DEEP else ChatMode.FAST,
+                    answeredWith = ChatMode.FAST,
                     outcome = if (reply is ChatReply.FromFound) null else it.outcome
                 )
             }
@@ -116,7 +111,6 @@ internal class ChatAnswering(
                 history = history,
                 notes = host.notes,
                 only = notesOf(scope, host.notes, host.activeNote),
-                isDeep = isDeep,
                 onStep = { step ->
                     host.update(id) { it.copy(step = step) }
                 }

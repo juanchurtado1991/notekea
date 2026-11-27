@@ -13,9 +13,6 @@ enum class ChatStep {
     READING,
     WRITING,
 
-    /** Deep answer: drafts are written and compared, so nothing shows before the chosen one. */
-    DRAFTING,
-
     /** The text of the notes an action will write is being written. */
     COMPOSING,
 

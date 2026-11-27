@@ -21,8 +21,6 @@ internal fun ChatEntry.after(step: AnswerStep): ChatEntry = when (step) {
         sources = step.read
     )
 
-    is AnswerStep.Drafting -> copy(step = ChatStep.DRAFTING)
-
     is AnswerStep.Offered -> copy(offered = step.request)
 
     is AnswerStep.Done -> copy(

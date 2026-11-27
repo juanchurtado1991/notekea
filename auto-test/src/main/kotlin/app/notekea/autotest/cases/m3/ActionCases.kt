@@ -16,56 +16,16 @@ private const val RATING_EN = "notes with a rating of 4 or more"
 private const val RATING_ES = "notas con calificación de más de 3"
 
 /**
- * The cases of 3.6, 3.8 and 3.9 (`MVP_SMOKE_TEST.md`): Deep thinking, plain-word queries and actions, with a chat model
- * on the machine ([ChatModels]); the actions that change notes are in `ActionChangeCases.kt`.
+ * The cases of 3.8 and 3.9 (`MVP_SMOKE_TEST.md`): plain-word queries and actions, with a chat model on the machine
+ * ([ChatModels]); the actions that change notes are in `ActionChangeCases.kt`.
  */
 fun SuiteBuilder.actionCases() {
-    deepAnswer()
     describeQuery()
     chatLists()
     noteFromTemplate()
     summaryOfNotes()
     notesFromText()
     actionChangeCases()
-}
-
-private fun SuiteBuilder.deepAnswer() {
-    automated(
-        id = "3.6-01",
-        title = "Deep thinking writes drafts and shows one answer, with Medium",
-        timeout = MODEL_CASE_TIMEOUT,
-        precondition = ChatModels.medium
-    ) {
-        openChat()
-        chooseMode(mode = "Deep thinking")
-        send(question = WATER)
-        awaitStep(text = "Writing drafts and comparing them…")
-        awaitReply()
-
-        val chat = copiedChat()
-        expectInChat(chat, "Mode: deep")
-
-        expectInChat(
-            replyTo(
-                chat = chat,
-                question = WATER
-            ),
-            *TWO_AND_A_HALF
-        )
-
-        expectInChat(
-            replyTo(
-                chat = chat,
-                question = WATER
-            ),
-            "] Recipes/Arepas"
-        )
-
-        send(question = REST)
-        awaitReplyStart()
-        press(key = Key.Escape)
-        expectText(text = "Stopped")
-    }
 }
 
 private fun SuiteBuilder.describeQuery() {

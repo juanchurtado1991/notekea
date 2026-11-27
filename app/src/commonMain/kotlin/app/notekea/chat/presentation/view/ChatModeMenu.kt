@@ -34,8 +34,6 @@ import app.notekea.resources.chat_mode_agent
 import app.notekea.resources.chat_mode_agent_hint
 import app.notekea.resources.chat_mode_auto
 import app.notekea.resources.chat_mode_auto_hint
-import app.notekea.resources.chat_mode_deep
-import app.notekea.resources.chat_mode_deep_hint
 import app.notekea.resources.chat_mode_description
 import app.notekea.resources.chat_mode_fast
 import app.notekea.resources.chat_mode_fast_hint
@@ -114,14 +112,12 @@ internal fun ChatModeMenu(
 private fun nameOf(mode: ChatMode): StringResource = when (mode) {
     ChatMode.AUTO -> Res.string.chat_mode_auto
     ChatMode.FAST -> Res.string.chat_mode_fast
-    ChatMode.DEEP -> Res.string.chat_mode_deep
     ChatMode.AGENT -> Res.string.chat_mode_agent
 }
 
 private fun hintOf(mode: ChatMode): StringResource = when (mode) {
     ChatMode.AUTO -> Res.string.chat_mode_auto_hint
     ChatMode.FAST -> Res.string.chat_mode_fast_hint
-    ChatMode.DEEP -> Res.string.chat_mode_deep_hint
     ChatMode.AGENT -> Res.string.chat_mode_agent_hint
 }
 

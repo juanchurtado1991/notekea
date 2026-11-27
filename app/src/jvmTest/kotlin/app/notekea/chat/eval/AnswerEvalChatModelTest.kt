@@ -34,7 +34,6 @@ class AnswerEvalChatModelTest {
     private val folder = Path.of(System.getProperty(MODELS_PROPERTY).orEmpty())
     private val size = ModelSize.fromId(id = System.getProperty(SIZE_PROPERTY)) ?: ModelSize.SMALL
     private val onGpu = System.getProperty(GPU_PROPERTY) != "false"
-    private val drafts = System.getProperty(DRAFTS_PROPERTY)?.toIntOrNull() ?: 1
     private val isAgent = System.getProperty(AGENT_PROPERTY) == "true"
     private val dispatchers = JvmAppDispatchers()
     private val natives = Files.createTempDirectory("notekea-natives").toString()
@@ -80,15 +79,14 @@ class AnswerEvalChatModelTest {
                 )
             }
 
-        val label = "${size.id} on the ${if (onGpu) "GPU" else "CPU"}, $drafts draft(s)"
+        val label = "${size.id} on the ${if (onGpu) "GPU" else "CPU"}"
 
         val report = AnswerEvalReport(
             label = label,
             answered = answered
         )
 
-        val name =
-            "answer-eval-${size.id}" + (if (drafts > 1) "-drafts$drafts" else "") + if (isAgent) "-agent" else ""
+        val name = "answer-eval-${size.id}" + if (isAgent) "-agent" else ""
 
         File(REPORTS, "$name.txt").run {
             parentFile.mkdirs()
@@ -158,10 +156,8 @@ class AnswerEvalChatModelTest {
         answer(
             vaultPath = indexed.path,
             notes = indexed.notes,
-            question = question.question,
-            drafts = drafts
+            question = question.question
         ).collect { step ->
-            // With drafts nothing shows before the chosen one is done.
             val isFirstShown =
                 (step is AnswerStep.Writing || step is AnswerStep.Done) && first == null
 
@@ -212,7 +208,6 @@ class AnswerEvalChatModelTest {
         const val MODELS_PROPERTY = "notekea.chat.models"
         const val SIZE_PROPERTY = "notekea.chat.size"
         const val GPU_PROPERTY = "notekea.chat.gpu"
-        const val DRAFTS_PROPERTY = "notekea.chat.drafts"
         const val AGENT_PROPERTY = "notekea.chat.agent"
         const val EMBEDDING_PROPERTY = "notekea.embedding.model"
         const val REPORTS = "build/reports"

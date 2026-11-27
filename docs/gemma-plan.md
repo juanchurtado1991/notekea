@@ -450,6 +450,12 @@ was never tuned on, falls short, on all three sizes. Deep thinking is never bett
 points) and takes two to three times as long (E2B 8 minutes against 4, 12B 37 against 13). The tuning goes to the
 blind pool, the E2B first, where the gap is widest.
 
+**The same target for Fast** (the developer, 2026-11-26): Fast and Agent both reach 65 / 80 / 90 % on the blind pool,
+not only on the answer and plan sets. The plan's "actions" set (126 requests that change or show something) checks the
+plan Fast writes in one call; the agent does the same work tool by tool, measured in the blind pool. So Fast is
+measured on the same pool (`measure.sh <label> fast <size>`, `FastRun`: the chat itself in Fast mode, its last reply
+read as the agent's end), and both are tuned to the target; the modes menu is decided on those numbers.
+
 **The E2B tuned, 2026-11-26 evening** (dev 393 tasks with the replies kept in `replies-e2b`; the pool seed 10). At HEAD:
 dev 211, pool 257 of 439 (58.5 %). Its causes against the E4B's (pool, counts): it repeats exact calls (61 out of
 steps, `tally` 199 times in the failed questions), ends the wrong way (56), and answers from search results with no

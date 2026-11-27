@@ -2,10 +2,8 @@ package app.notekea.chat.presentation.model
 
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.agent.AgentUse
-import app.notekea.chat.domain.answer.DeepQuestion
 import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.plan.NewNotePlace
-import app.notekea.chat.presentation.viewmodel.ChatReply
 import app.notekea.core.llm.domain.ModelTier
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
@@ -22,9 +20,7 @@ data class ChatState(
     val model: ModelStatus = ModelStatus.CHECKING,
     val isSmall: Boolean = false,
     val tier: ModelTier? = null,
-    val isDeepOffered: Boolean = false,
     val isAgentOffered: Boolean = false,
-    val isDeepPicked: Boolean = false,
     val isAgentPicked: Boolean = false,
     val mode: ChatMode = ChatMode.AUTO,
     val contextUsage: Float = 0f,
@@ -44,27 +40,13 @@ data class ChatState(
 
     val isAnswering: Boolean get() = entries.lastOrNull()?.isAnswering == true
 
-    /** The modes the model in use offers: Auto and Fast always, Deep thinking and the agent where they help. */
+    /** The modes the model in use offers: Auto and Fast always, the agent where it helps. */
     val modes: List<ChatMode>
         get() = listOfNotNull(
             ChatMode.AUTO,
             ChatMode.FAST,
-            ChatMode.DEEP.takeIf { isDeepOffered },
             ChatMode.AGENT.takeIf { isAgentOffered }
         )
-
-    /** Whether [reply] is answered with Deep thinking: chosen, or picked by Auto for a question that asks to reason. */
-    internal fun isDeepFor(reply: ChatReply): Boolean = when (mode) {
-        ChatMode.DEEP -> isDeepOffered
-
-        ChatMode.AUTO ->
-            isDeepOffered &&
-                isDeepPicked &&
-                reply is ChatReply.Question &&
-                DeepQuestion.isAsked(reply.question)
-
-        else -> false
-    }
 
     /** When a request goes to the agent in this mode, on this model. */
     internal val agentUse: AgentUse

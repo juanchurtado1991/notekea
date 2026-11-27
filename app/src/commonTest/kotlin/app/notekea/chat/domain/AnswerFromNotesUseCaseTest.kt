@@ -171,54 +171,14 @@ class AnswerFromNotesUseCaseTest {
         )
     }
 
-    @Test
-    fun `Deep answer writes three drafts with their own seeds and shows only the one voted for`() =
-        runTest {
-            indexed(
-                path = AREPAS,
-                body = AREPAS_BODY
-            )
-
-            val drafts = ArrayDeque(
-                elements = listOf(
-                    "Use corn flour and warm water [1].",
-                    "Use rice flour [1].",
-                    "Use corn flour with warm water [1]."
-                )
-            )
-
-            engine.reply = { drafts.removeFirst() }
-
-            val steps = steps(
-                question = "What goes in the arepa dough?",
-                drafts = 3
-            )
-
-            assertEquals(
-                expected = Triple(
-                    listOf(AnswerStep.Drafting(drafts = 3)),
-                    "Use corn flour and warm water [1].",
-                    listOf(1, 2, 3)
-                ),
-                actual = Triple(
-                    steps.filterIsInstance<AnswerStep.Drafting>() +
-                        steps.filterIsInstance<AnswerStep.Writing>(),
-                    (steps.last() as AnswerStep.Done).answer.text,
-                    engine.options.map { it.seed }
-                )
-            )
-        }
-
     private suspend fun steps(
         question: String,
-        only: Set<RelativePath>? = null,
-        drafts: Int = 1
+        only: Set<RelativePath>? = null
     ): List<AnswerStep> = answer(
         vaultPath = VAULT,
         notes = notes,
         question = question,
-        only = only,
-        drafts = drafts
+        only = only
     ).toList()
 
     // The developer's doubt of 2026-11-14: a citation of a clipped page could be of the summary a model wrote about
