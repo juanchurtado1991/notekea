@@ -33,7 +33,7 @@ object ModeMeasures {
             target = 65.0,
             fast = 83.3,
             deep = 82.4,
-            agent = 58.1
+            agent = 59.0
         ),
         ModelSize.MEDIUM to Measured(
             target = 80.0,

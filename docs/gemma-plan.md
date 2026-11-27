@@ -450,6 +450,22 @@ was never tuned on, falls short, on all three sizes. Deep thinking is never bett
 points) and takes two to three times as long (E2B 8 minutes against 4, 12B 37 against 13). The tuning goes to the
 blind pool, the E2B first, where the gap is widest.
 
+**The E2B tuned, 2026-11-26 evening** (dev 393 tasks with the replies kept in `replies-e2b`; the pool seed 10). At HEAD:
+dev 211, pool 257 of 439 (58.5 %). Its causes against the E4B's (pool, counts): it repeats exact calls (61 out of
+steps, `tally` 199 times in the failed questions), ends the wrong way (56), and answers from search results with no
+note read (40 never found).
+
+| Idea | Dev | Pool | E4B | Kept |
+|---|---|---|---|---|
+| The call after one made again sampled at temperature 1 | 211 | — | — | no: the same repeats |
+| No entry marked: open (v1), or those the words fit best (v2) | 211, 213 | — | frame: 23 more needless questions | no |
+| An answer from search results alone held once, to read the note (`SearchedUnread`) | 222 | 259 | dev 312 both ways | yes |
+
+The withheld repeat already exists (`OfferedTools`): the E2B's repeats alternate two calls. The entries' marks are
+the model's: the E4B also marks every entry "no" for a change to the note as a whole, so the code cannot tell the two
+apart without a rule for one size. `SearchedUnread` never fires on the E4B, which reads before it answers; on the E2B
+it moves 11 from never found, and 12 more run out of steps, the read costing steps.
+
 ## 8. After the tuning: the study cards
 
 A list of ideas for a local notes app (evidence on cards, structured replies, small steps, retries) was read against
