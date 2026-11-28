@@ -232,6 +232,31 @@ class TaskFramerTest {
             )
         }
 
+    // The E4B's blind pool, seed 10, 2026-11-28: every entry of "Contrato maíz" writes maíz, and the one marked was
+    // left open with the others.
+    @Test
+    fun `the words of the note's own name tell none of its entries apart`() = runTest {
+        val contract = candidate(
+            path = "Contratos/Contrato maíz.md",
+            entries = listOf("- Producto: maíz blanco criollo", "- Solo maíz blanco, seco")
+        )
+
+        val frame = frameOf(
+            task = "ponle status firmado al contrato de maíz",
+            candidates = listOf(contract),
+            replies = mapOf(
+                FramePrompts.COUNT to appointment,
+                FramePrompts.PICK to """{"pick":"N1"}""",
+                FramePrompts.MARK_ENTRIES to """{"E1":"yes","E2":"no"}"""
+            )
+        )
+
+        assertEquals(
+            expected = contract.entries[0],
+            actual = frame?.entry
+        )
+    }
+
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
     fun `a question about an item marks no entry, as it may add them up`() = runTest {

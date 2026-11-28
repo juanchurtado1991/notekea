@@ -139,7 +139,9 @@ class TaskFramer(
         val entries = if (reply.isItem && meant.entries.size > 1) {
             val marked = asking.markedEntriesOf(task, meant, memory) ?: return null
 
-            marked.singleOrNull()?.let { EntryRivals.of(task, it, meant.entries) } ?: marked
+            marked.singleOrNull()?.let {
+                EntryRivals.of(task, meant.path.nameWithoutExtension, it, meant.entries)
+            } ?: marked
         } else {
             emptyList()
         }
