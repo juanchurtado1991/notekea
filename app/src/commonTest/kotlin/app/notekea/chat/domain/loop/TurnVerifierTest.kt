@@ -60,6 +60,7 @@ class TurnVerifierTest {
                 ),
                 WorkKind.ORGANIZE to listOf(
                     ChangeTools.addTag,
+                    ChangeTools.append,
                     ChangeTools.createNote,
                     AskUserTool(),
                     ProposeTool()
@@ -220,6 +221,50 @@ class TurnVerifierTest {
                     "\"answer\"" in schema,
                     steps.last() is AgentStep.Asked
                 )
+            )
+        }
+
+    // The 12B's blind pool, seed 10, 2026-11-28: asked to give Begoña's note a phone property, it was held to ask
+    // which of the note's entries, though a property is on the note, none of its entries.
+    @Test
+    fun `entries left open hold back a change written in the note, not one to the note as a whole`() =
+        runTest {
+            val laura = RelativePath(value = "People/Laura Castro.md")
+
+            frames += TaskFrame(
+                targets = listOf(
+                    FrameTarget(
+                        note = laura,
+                        entries = listOf("- Email: laura@example.com", "- Lives in Madrid.")
+                    )
+                ),
+                count = FrameCount.ONE,
+                candidates = listOf(laura)
+            )
+
+            suspend fun ended(change: String): AgentStep {
+                script(
+                    change,
+                    """{"tool":"propose","summary":"$SUMMARY"}""",
+                    """{"tool":"ask_user","question":"Which entry?","options":["Email","Madrid"]}""",
+                    work = "organize"
+                )
+
+                return run(
+                    task = "tag Laura's note friend",
+                    notes = notes + entry(path = laura.value)
+                ).last()
+            }
+
+            val tagged =
+                ended(change = """{"tool":"add_tag","notes":["Laura Castro"],"tag":"friend"}""")
+
+            val written =
+                ended(change = """{"tool":"append","note":"Laura Castro","text":"Phone: 600 123 987"}""")
+
+            assertEquals(
+                expected = listOf(true, true),
+                actual = listOf(tagged is AgentStep.Proposed, written is AgentStep.Asked)
             )
         }
 

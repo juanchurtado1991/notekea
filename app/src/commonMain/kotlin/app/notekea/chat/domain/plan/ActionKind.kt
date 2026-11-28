@@ -11,7 +11,9 @@ enum class ActionKind(
     val isWriting: Boolean = false,
     val isOrganizing: Boolean = false,
     val isComposed: Boolean = false,
-    val isMemory: Boolean = false
+    val isMemory: Boolean = false,
+    // A change to the note as a whole (its properties, tags, name or place), to none of the entries in it.
+    val isOnNote: Boolean = false
 ) {
     FIND_NOTES(
         written = "find_notes",
@@ -87,12 +89,14 @@ enum class ActionKind(
     SET_PROPERTY(
         written = "set_property",
         needs = setOf(ActionField.PROPERTY, ActionField.VALUE),
-        isWriting = true
+        isWriting = true,
+        isOnNote = true
     ),
     ADD_TAG(
         written = "add_tag",
         needs = setOf(ActionField.TAG),
-        isWriting = true
+        isWriting = true,
+        isOnNote = true
     ),
     ADD_TASK(
         written = "add_task",
@@ -116,7 +120,8 @@ enum class ActionKind(
     ),
     BOOKMARK(
         written = "bookmark",
-        isWriting = true
+        isWriting = true,
+        isOnNote = true
     ),
 
     // Organizing, confirmed first with every note listed.
@@ -128,16 +133,19 @@ enum class ActionKind(
     RENAME(
         written = "rename",
         needs = setOf(ActionField.TITLE),
-        isOrganizing = true
+        isOrganizing = true,
+        isOnNote = true
     ),
     MOVE(
         written = "move",
         needs = setOf(ActionField.TARGET),
-        isOrganizing = true
+        isOrganizing = true,
+        isOnNote = true
     ),
     TRASH(
         written = "trash",
-        isOrganizing = true
+        isOrganizing = true,
+        isOnNote = true
     ),
 
     // A line of the chat's memory written or taken out (docs/agent-memory.md).
