@@ -77,6 +77,7 @@ class ToolRegistry(val tools: List<ChatTool>) {
             val type = when {
                 it.isList -> LIST
                 it.isValue -> VALUE
+                it.isReason -> REASON
                 else -> TEXT
             }
 
@@ -99,6 +100,7 @@ class ToolRegistry(val tools: List<ChatTool>) {
         /** The field of a call that names its tool, written first. */
         const val NAMED = "tool"
         private const val TEXT = "{\"type\":\"string\"}"
+        private const val REASON = "{\"type\":\"string\",\"maxLength\":240}"
         private const val VALUE =
             "{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"},{\"type\":\"boolean\"}]}"
         private const val LIST =

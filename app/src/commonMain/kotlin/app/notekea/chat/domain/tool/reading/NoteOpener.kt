@@ -16,7 +16,7 @@ internal class NoteOpener(noteTextCache: NoteTextCache) {
         name: String,
         context: ToolContext
     ): OpenedNote? {
-        val path = context.noteNamed(name = name) ?: return null
+        val path = context.lookedNamed(name = name) ?: return null
 
         val note = context.notes.firstOrNull {
             it.file.path == path

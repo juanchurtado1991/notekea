@@ -208,6 +208,70 @@ class AppToolsTest {
             )
         }
 
+    // The E2B's blind pool, seed 10, 2026-11-27: "1.240 € | Pedido maderas octubre" was refused, as the table row
+    // that writes it does not write the note's name.
+    @Test
+    fun `a tally finds a figure on a line of the note its item names`() = runTest {
+        store.texts[arepas] = "| Roble francés | 0,6 m³ | 1.240 € |\n| Nogal americano | 0,5 m³ | 1.860 € |"
+
+        val tally = TallyTool(
+            noteTextCache = NoteTextCache(contentStore = store)
+        )
+
+        val said = tally.run(
+            call = ToolCall(
+                name = tally.name,
+                arguments = mapOf(
+                    "how" to "sum",
+                    "items" to "1.240 € | Arepas\n1.860 € | Arepas"
+                )
+            ),
+            context = context
+        ).forModel
+
+        assertEquals(
+            expected = listOf(true, true),
+            actual = listOf(said.startsWith(prefix = "tally sum of 2:"), "Roble" in said)
+        )
+    }
+
+    // The E2B's blind pool, seed 10, 2026-11-28: a whole row given as the item was counted by its date's year.
+    @Test
+    fun `a tally of whole lines counts each line's amount, not its date`() = runTest {
+        store.texts[arepas] = listOf(
+            "| 2026-08-05 | Cascade Pacific | gas | \$38 |",
+            "| 2026-09-10 | Cascade Pacific | parking | \$12 |",
+            "- [x] Cuota 1 (anteproyecto): \$3.500.000 — pagada 2025-12-03"
+        ).joinToString(separator = "\n")
+
+        val tally = TallyTool(
+            noteTextCache = NoteTextCache(contentStore = store)
+        )
+
+        suspend fun sumOf(items: String) = tally
+            .run(
+                call = ToolCall(
+                    name = tally.name,
+                    arguments = mapOf(
+                        "how" to "sum",
+                        "items" to items
+                    )
+                ),
+                context = context
+            )
+            .forModel
+            .lines()
+            .first()
+
+        assertEquals(
+            expected = listOf("tally sum of 2: 50", "tally sum of 1: 3500000"),
+            actual = listOf(
+                sumOf(items = "| 2026-08-05 | Cascade Pacific | gas | \$38 |\n| 2026-09-10 | Cascade Pacific | parking | \$12 |"),
+                sumOf(items = "- [x] Cuota 1 (anteproyecto): \$3.500.000 — pagada 2025-12-03")
+            )
+        )
+    }
+
     // 14 November 2026 is a Saturday.
     @Test
     fun `a phrase names its day from today, in English and in Spanish`() {

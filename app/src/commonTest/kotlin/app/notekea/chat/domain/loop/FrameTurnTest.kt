@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.plan.ActionContext
@@ -111,6 +111,36 @@ class FrameTurnTest {
             assertEquals(
                 expected = true,
                 actual = end is AgentStep.Finished
+            )
+        }
+
+    // Dev, 2026-11-25: asked back of a question nothing left open, the Gemma E4B was right 0 times of 33.
+    @Test
+    fun `a question nothing left open is never asked back, and ask_user is no longer offered`() =
+        runTest {
+            script(
+                first = ASK,
+                then = ASK
+            )
+
+            val end = run(frame = frameOf(FrameCount.ONE, listOf(work))).last()
+
+            val offered = engine
+                .options
+                .drop(n = 1)
+                .mapNotNull { it.jsonSchema }
+                .filter {
+                    "\"answer\"" in it
+                }
+
+            assertEquals(
+                expected = listOf(false, false),
+                actual = listOf(
+                    end is AgentStep.Asked,
+                    offered.drop(n = 1).any {
+                        "ask_user" in it
+                    }
+                )
             )
         }
 

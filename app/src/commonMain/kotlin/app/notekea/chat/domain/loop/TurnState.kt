@@ -4,6 +4,7 @@ import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolRegistry
+import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.memory.domain.MemoryLine
 
 /**
@@ -19,7 +20,8 @@ internal class TurnState(
     val turn: ToolContext,
     val budget: ContextBudget,
     val memory: List<MemoryLine> = emptyList(),
-    val frame: TaskFrame? = null
+    val frame: TaskFrame? = null,
+    val kind: WorkKind? = null
 ) {
     val found = mutableListOf<String>()
     val made = mutableSetOf<String>()
@@ -31,6 +33,9 @@ internal class TurnState(
     // The results not shown whole at the last step (dropped or folded), and where each call's result is in [found].
     val hidden = mutableSetOf<Int>()
     val foundAt = mutableMapOf<String, Int>()
+
+    // What the model failed with when a call could not be asked of it.
+    val failures = mutableListOf<LlmError>()
 
     // The changes refused, so one refused again as it was counts as made again.
     val refused = mutableListOf<String>()

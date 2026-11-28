@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.plan.ActionContext
@@ -23,9 +23,8 @@ import kotlin.test.assertEquals
 import kotlin.time.Clock
 
 /**
- * Bugs of the loop's code, not of the model (the bug hunt of 2026-11-17, each seen in the eighth run): a change taken
- * out could never be added again, two refused changes took turns until step 30, and a figure the task writes settled
- * which note it meant.
+ * Bugs of the loop's code, not of the model (the bug hunt of 2026-11-17, each seen in the eighth run): two refused
+ * changes took turns until step 30, and a figure the task writes settled which note it meant.
  */
 class LoopBugsTest {
     private val engine = FakeLlmEngine()
@@ -79,26 +78,6 @@ class LoopBugsTest {
             ),
             openNote = null
         ).toList()
-    }
-
-    @Test
-    fun `a change taken out with drop is added again when it is asked for again`() = runTest {
-        val tag = """{"tool":"add_tag","notes":"Recipes/Arepas","tag":"latin"}"""
-        val drop = """{"tool":"propose","summary":"Tag.","drop":"Recipes/Arepas"}"""
-        val propose = """{"tool":"propose","summary":"Tag Arepas with latin."}"""
-        val script = listOf(tag, drop, tag, propose)
-
-        val last = steps(task = "tag the arepas with latin") {
-            script[it.coerceAtMost(script.lastIndex)]
-        }.last()
-
-        assertEquals(
-            expected = listOf("Arepas"),
-            actual = (last as AgentStep.Proposed)
-                .steps
-                .flatMap { it.notes }
-                .map { it.nameWithoutExtension }
-        )
     }
 
     @Test

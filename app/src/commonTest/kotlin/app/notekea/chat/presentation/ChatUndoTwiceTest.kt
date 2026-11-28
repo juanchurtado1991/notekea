@@ -23,17 +23,23 @@ class ChatUndoTwiceTest : ViewModelTestBase() {
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
 
+    private var calls = 0
+
     @BeforeTest
     fun setUp() {
         engine.scoreOf = { _, _ -> 1f }
 
         engine.reply = { messages ->
-            val isPlan = messages
-                .first()
-                .text
-                .startsWith(prefix = "You turn a request")
+            val asked = messages.first().text
 
-            if (isPlan) PLAN else "A short list of groceries."
+            when {
+                asked.startsWith(prefix = "You say how a request") -> """{"work":"write","skill":"none"}"""
+
+                asked.startsWith(prefix = "You work on a task in the person's notes") ->
+                    if (calls++ == 0) CREATE else PROPOSE
+
+                else -> "A short note."
+            }
         }
     }
 
@@ -55,7 +61,7 @@ class ChatUndoTwiceTest : ViewModelTestBase() {
             viewModel.onIntent(intent = ChatIntent.OnIndexChange(isReady = true))
             advanceUntilIdle()
 
-            viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "create a note Groceries with a list"))
+            viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "create a note Groceries"))
             viewModel.onIntent(intent = ChatIntent.OnSend)
             advanceUntilIdle()
 
@@ -89,7 +95,7 @@ class ChatUndoTwiceTest : ViewModelTestBase() {
         }
 
     private companion object {
-        const val PLAN =
-            "{\"steps\":[{\"action\":\"create_note\",\"title\":\"Groceries\",\"text\":\"a list\"}]}"
+        const val CREATE = """{"tool":"create_note","title":"Groceries"}"""
+        const val PROPOSE = """{"tool":"propose","summary":"A note Groceries."}"""
     }
 }

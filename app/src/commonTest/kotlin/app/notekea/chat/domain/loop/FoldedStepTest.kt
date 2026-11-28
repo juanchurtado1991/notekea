@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.context.FakeStepMemory
 import app.notekea.chat.domain.plan.ActionContext

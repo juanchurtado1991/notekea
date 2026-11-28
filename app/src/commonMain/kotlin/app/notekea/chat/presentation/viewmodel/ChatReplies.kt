@@ -1,57 +1,39 @@
 package app.notekea.chat.presentation.viewmodel
 
 import app.notekea.chat.domain.ChatExchange
-import app.notekea.chat.domain.agent.AgentAnswerUseCase
-import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
 import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.language.SpokenLanguage
-import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 
 /**
  * How the chat replies once it knows what was asked, for [ChatViewModel]: talk ([ConverseUseCase]), how to use the
- * app ([AnswerHelpUseCase], with the [shortcuts] of this system), what the vault holds ([DescribeVaultUseCase]), or an
- * answer from the notes that, when the first search finds nothing in the whole vault, the agent tries again.
+ * app ([AnswerHelpUseCase], with the [shortcuts] of this system), or what the vault holds ([DescribeVaultUseCase]).
  */
 internal class ChatReplies(
     private val vaultPath: String,
-    private val answerFromNotes: AnswerFromNotesUseCase,
     private val converse: ConverseUseCase,
-    private val agentAnswer: AgentAnswerUseCase,
     private val answerHelp: AnswerHelpUseCase,
     private val describeVault: DescribeVaultUseCase,
-    private val answerFromFound: AnswerFromFoundUseCase,
     private val shortcuts: Map<String, String>,
-    private val today: () -> String,
-    private val todayIn: (Collection<NoteEntry>) -> String = { today() },
-    private val working: () -> WorkContext? = { null }
+    private val todayIn: (Collection<NoteEntry>) -> String,
+    private val working: () -> WorkContext?
 ) {
-    /** The steps of the reply to [message]; [only] limits an answer to a note or a folder, [onStep] shows progress. */
+    /** The steps of the reply to [message]. */
     fun stepsFor(
         reply: ChatReply,
         message: String,
         history: List<ChatExchange>,
-        notes: Collection<NoteEntry>,
-        isDeep: Boolean,
-        onStep: (ChatStep) -> Unit,
-        only: Set<RelativePath>?
+        notes: Collection<NoteEntry>
     ): Flow<AnswerStep> = repliedIn(
         reply = reply,
         message = message,
         history = history,
         notes = notes,
-        isDeep = isDeep,
-        onStep = onStep,
-        only = only,
         language = SpokenLanguage.inChat(
             text = message,
             history = history
@@ -63,9 +45,6 @@ internal class ChatReplies(
         message: String,
         history: List<ChatExchange>,
         notes: Collection<NoteEntry>,
-        isDeep: Boolean,
-        onStep: (ChatStep) -> Unit,
-        only: Set<RelativePath>?,
         language: String?
     ): Flow<AnswerStep> = when (reply) {
         is ChatReply.Talk -> converse(
@@ -81,15 +60,6 @@ internal class ChatReplies(
             notes = notes
         )
 
-        is ChatReply.Question -> answered(
-            question = reply.question,
-            notes = notes,
-            only = only,
-            isDeep = isDeep,
-            onStep = onStep,
-            language = language
-        )
-
         is ChatReply.Help -> answerHelp(
             question = message,
             request = reply.request,
@@ -103,57 +73,5 @@ internal class ChatReplies(
             notes = notes,
             language = language
         )
-
-        is ChatReply.FromFound -> answerFromFound(
-            question = reply.question,
-            tables = reply.tables,
-            notes = notes,
-            language = language,
-            today = today()
-        )
-
-        ChatReply.Acted, is ChatReply.Agent -> flow { }
-    }
-
-    private fun answered(
-        question: String,
-        notes: Collection<NoteEntry>,
-        isDeep: Boolean,
-        onStep: (ChatStep) -> Unit,
-        only: Set<RelativePath>?,
-        language: String?
-    ): Flow<AnswerStep> = flow {
-        onStep(ChatStep.SEARCHING)
-        var isNotFound = false
-
-        answerFromNotes(
-            vaultPath = vaultPath,
-            notes = notes,
-            question = question,
-            only = only,
-            drafts = if (isDeep) DEEP_DRAFTS else 1,
-            language = language
-        ).collect { step ->
-            if (step == AnswerStep.NotFound) isNotFound = true else emit(value = step)
-        }
-
-        if (!isNotFound) return@flow
-        if (only != null) return@flow emit(value = AnswerStep.NotFound)
-
-        onStep(ChatStep.LOOKING_FURTHER)
-
-        emitAll(
-            flow = agentAnswer(
-                vaultPath = vaultPath,
-                notes = notes,
-                question = question,
-                language = language
-            )
-        )
-    }
-
-    private companion object {
-        // Three drafts and a vote (3.6, docs/answer-quality.md).
-        const val DEEP_DRAFTS = 3
     }
 }

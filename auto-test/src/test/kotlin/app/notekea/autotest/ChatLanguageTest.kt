@@ -15,8 +15,8 @@ class ChatLanguageTest {
     }
 
     private companion object {
-        const val REPLY = "## ¿qué opinas de este viaje?\n\nScope: vault\nOutcome: answered\n" +
-            "Answered with: fast\n\nEn mi opinión, este viaje a Lisboa parece muy interesante.\n\nSources:\n" +
+        const val REPLY = "## ¿qué opinas de este viaje?\n\nScope: vault\nOutcome: answered\n\n" +
+            "En mi opinión, este viaje a Lisboa parece muy interesante.\n\nSources:\n" +
             "[1] Travel/Lisbon trip.md:  # Lisbon trip  | Day | Plan | Alfama walk, the tram and the monastery"
     }
 }

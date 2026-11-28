@@ -21,12 +21,24 @@ internal object UnsettledEnd {
         if (!isEnd || call.name == AskUserTool.NAME) return null
 
         val frame = state.frame?.takeIf { it.isOpen } ?: return null
+        // Entries left open hold back no proposal whose every change is to the note as a whole: the 12B was held to
+        // ask which of Begoña's entries to give a phone property (blind pool, seed 10, 2026-11-28).
+        val isWholeNote = frame.openNotes.isEmpty() && isOnNote(state = state)
+        if (isWholeNote) return null
+
         if (!state.told.add(MUST_ASK)) return null
 
         val what = if (frame.openNotes.isNotEmpty()) "notes" else "entries"
 
         return "(Not done: the task means one of ${frame.options.size} $what and does not say which: " +
             "${frame.options.joinToString(separator = "; ")}. Ask the person with ask_user, these as the options.)"
+    }
+
+    // Whether the proposal holds changes, every one of them to a note as a whole.
+    private fun isOnNote(state: TurnState): Boolean {
+        val changes = state.turn.work.changes
+
+        return changes.isNotEmpty() && changes.all { it.kind.isOnNote }
     }
 
     /** Whether the next call may only be ask_user: the turn was held back for a question it must ask. */

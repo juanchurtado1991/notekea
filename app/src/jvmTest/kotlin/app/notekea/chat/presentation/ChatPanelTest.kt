@@ -17,7 +17,6 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import app.notekea.chat.presentation.model.ChatIntent
-import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.chat.presentation.model.ChatState
 import app.notekea.chat.presentation.model.ModelStatus
@@ -28,7 +27,7 @@ import kotlin.test.assertEquals
 
 /**
  * The chat panel on screen: what it offers without a model, a source that opens its passage, Enter that sends, and
- * the model and the mode under the field, with only the modes the model offers.
+ * the model in use under the field.
  */
 @OptIn(ExperimentalTestApi::class)
 class ChatPanelTest {
@@ -131,46 +130,17 @@ class ChatPanelTest {
     }
 
     @Test
-    fun `the model and the mode show at the field's bottom, and a mode is chosen from the menu`() =
-        runComposeUiTest {
-            val intents = mutableListOf<ChatIntent>()
-
-            show(
-                state = ChatPreviewData.state.copy(
-                    tier = ModelTier.MEDIUM,
-                    isDeepOffered = true,
-                    isAgentOffered = true
-                ),
-                intents = intents
-            )
-
-            onNodeWithText(text = "Medium · Auto").performClick()
-
-            val shown = MODES.map {
-                onAllNodesWithText(text = it).fetchSemanticsNodes().isNotEmpty()
-            }
-
-            onNodeWithText(text = DEEP_THINKING).performClick()
-
-            assertEquals(
-                expected = listOf(true, true, true, true) to
-                    listOf<ChatIntent>(ChatIntent.OnModeChoose(mode = ChatMode.DEEP)),
-                actual = shown to intents
-            )
-        }
-
-    @Test
-    fun `Small offers only Auto and Fast`() = runComposeUiTest {
+    fun `the model in use shows at the field's bottom`() = runComposeUiTest {
         show(
-            state = ChatPreviewData.state.copy(tier = ModelTier.SMALL),
+            state = ChatPreviewData.state.copy(tier = ModelTier.MEDIUM),
             intents = mutableListOf()
         )
 
-        onNodeWithText(text = "Small · Auto").performClick()
-
         assertEquals(
-            expected = listOf(true, true, false, false),
-            actual = MODES.map { onAllNodesWithText(text = it).fetchSemanticsNodes().isNotEmpty() }
+            expected = 1,
+            actual = onAllNodesWithText(text = "Medium")
+                .fetchSemanticsNodes()
+                .size
         )
     }
 
@@ -181,7 +151,5 @@ class ChatPanelTest {
         const val MODEL_ACTION = "Choose a model"
         const val STEPS_PLACE = "Arepas › Steps"
         const val QUESTION = "How long does the dough rest?"
-        const val DEEP_THINKING = "Deep thinking"
-        val MODES = listOf("Auto", "Fast", DEEP_THINKING, "Agent")
     }
 }

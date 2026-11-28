@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.tool.lookup
 
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.plan.NoteProperties
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolArgument
@@ -17,7 +17,7 @@ import app.notekea.core.notes.domain.RelativePath
  * [noteTextCache], every note whose text writes them all: "tag the journal notes that mention the garden".
  */
 class SearchTool(
-    private val answerFromNotes: AnswerFromNotesUseCase,
+    private val passageSearch: PassageSearch,
     private val noteTextCache: NoteTextCache? = null
 ) : ChatTool {
     override val name = NAME
@@ -37,12 +37,15 @@ class SearchTool(
     ): ToolResult {
         val query = call.text(name = QUERY)
 
-        val passages = answerFromNotes
-            .excerpts(context.vaultPath, context.notes, query)
+        val passages = passageSearch
+            .excerpts(context.vaultPath, context.looked, query)
             .valueOrNull()
             .orEmpty()
 
-        val lines = passages.take(n = PASSAGES).map {
+        val shown = passages.take(n = PASSAGES)
+        context.passages += shown
+
+        val lines = shown.map {
             "- ${it.note.nameWithoutExtension}: ${it.text.take(n = PASSAGE_CHARS).replace('\n', ' ')}"
         } + propertiesMatching(
             query = query,
@@ -68,7 +71,7 @@ class SearchTool(
         if (words.isEmpty()) return emptyList()
 
         val names = cache
-            .textsOf(context.vaultPath, context.notes.filter { it.file.path.isMarkdown })
+            .textsOf(context.vaultPath, context.looked.filter { it.file.path.isMarkdown })
             .filterValues { text ->
                 val body = text.body.lowercase()
 
@@ -113,7 +116,7 @@ class SearchTool(
         val words = wordsOf(query = query)
 
         return context
-            .notes
+            .looked
             .filter { note ->
                 val values = NoteProperties
                     .of(note = note)

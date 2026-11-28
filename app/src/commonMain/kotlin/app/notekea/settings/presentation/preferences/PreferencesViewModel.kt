@@ -36,8 +36,6 @@ class PreferencesViewModel(
 
             is PreferencesIntent.OnWebUpdateChoose -> save { it.copy(webUpdate = intent.every) }
 
-            PreferencesIntent.OnChatLoopToggle -> save { it.copy(chatLoop = !it.chatLoop) }
-
             is PreferencesIntent.OnTextSizeChoose -> save { it.copy(textSize = intent.size) }
 
             is PreferencesIntent.OnLineWidthChoose -> save { it.copy(lineWidth = intent.width) }

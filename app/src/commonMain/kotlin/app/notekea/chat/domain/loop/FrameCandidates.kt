@@ -10,14 +10,15 @@ import app.notekea.core.notes.domain.RelativePath
 internal object FrameCandidates {
     /**
      * A note shown to the frame's model: its path, its first line, the entries the task's words touch, the [lines]
-     * that write one of them, and every word it writes ([words]): what tells it apart from a note of the same name.
+     * that write one of them, and what tells it from a note of the same name: the [words] it writes and its [title].
      */
     data class Candidate(
         val path: RelativePath,
         val gist: String,
         val entries: List<String>,
         val lines: List<String> = emptyList(),
-        val words: Set<String> = emptySet()
+        val words: Set<String> = emptySet(),
+        val title: String = ""
     )
 
     fun of(
@@ -38,7 +39,11 @@ internal object FrameCandidates {
                 task = task,
                 text = text
             ),
-            words = FrameWords.of(text = text)
+            words = FrameWords.of(text = text),
+            title = text
+                .lineSequence()
+                .firstOrNull { it.startsWith(prefix = "# ") }
+                .orEmpty()
         )
     }
 
@@ -132,30 +137,10 @@ internal object FrameCandidates {
         val words = FrameWords.of(text = task)
         if (words.isEmpty()) return emptyList()
 
-        // Each line with whether the heading above it touches the task: the section it is in.
-        val lines = text
-            .lineSequence()
-            .map { it.trim() }
-            .toList()
+        val entries = NoteEntries.of(text = text)
 
-        val sections = lines
-            .runningFold(initial = false) { isTouched, line ->
-                if (line.startsWith(prefix = "#")) {
-                    touches(
-                        line = line,
-                        words = words
-                    )
-                } else {
-                    isTouched
-                }
-            }
-
-        val entries = lines
-            .zip(other = sections.drop(n = 1))
-            .filter { (line, _) -> isEntry(line = line) }
-
-        val touched = entries.filter { (line, isSection) ->
-            isSection || touches(line = line, words = words)
+        val touched = entries.filter {
+            touches(it.line, words) || touches(it.heading, words)
         }
 
         // Fewer than two touched: every entry, for the model to mark. "My physio appointment" touched the one
@@ -167,10 +152,21 @@ internal object FrameCandidates {
             }
             .orEmpty()
             .ifEmpty { entries }
-            .map { (line, _) -> line.take(n = ENTRY) }
+            .map { it.shown }
             .distinct()
             .take(n = MOST_ENTRIES)
     }
+
+    /** The entries of [text] that write one of [words]. */
+    fun touchedOf(
+        words: Set<String>,
+        text: String
+    ): List<String> = NoteEntries
+        .of(text = text)
+        .filter { touches(it.line, words) }
+        .map { it.shown }
+        .distinct()
+        .take(n = MOST_ENTRIES)
 
     private fun touches(
         line: String,
@@ -183,16 +179,6 @@ internal object FrameCandidates {
             )
         }
     }
-
-    // A list item, a task, a numbered item or a table row that is not the table's rule.
-    private fun isEntry(line: String): Boolean {
-        val isRule = line.startsWith(prefix = "|") && line.all { it in RULE }
-
-        return ITEM.containsMatchIn(input = line) || (line.startsWith(prefix = "|") && !isRule)
-    }
-
-    private val ITEM = Regex(pattern = "^([-*+]\\s|\\d+[.)]\\s)")
-    private const val RULE = "|-: "
 
     private const val MOST = 10
     private const val NAMESAKES = 4

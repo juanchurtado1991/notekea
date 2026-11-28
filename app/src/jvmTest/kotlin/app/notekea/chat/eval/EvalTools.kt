@@ -52,15 +52,9 @@ internal data class EvalTool(
     }
 }
 
-/** Today's 33 actions as tools, and the ways to give a set of them to the model. */
+/** The app's 28 actions as tools, and the ways to give a set of them to the model. */
 internal object EvalTools {
     val ALL = listOf(
-        EvalTool(
-            kind = ActionKind.ANSWER,
-            description = "Answer in the chat a question about what the notes say, or explain, summarize or " +
-                "list what a note says. request: the question, standing alone.",
-            fields = listOf(REQUEST)
-        ),
         EvalTool(
             kind = ActionKind.FIND_NOTES,
             description = "List notes chosen by the values of their properties (rating, status, finished, " +
@@ -74,28 +68,10 @@ internal object EvalTools {
             fields = listOf(TITLE, TEXT, NOTES, FOLDER, TAG, NOTE)
         ),
         EvalTool(
-            kind = ActionKind.HELP,
-            description = "Explain how to use Notekea or what it can do (\"how do I…\", \"what can you do\"). " +
-                "Never does the thing. request: what they want to know how to do, in English.",
-            fields = listOf(REQUEST)
-        ),
-        EvalTool(
             kind = ActionKind.SHOW_TASKS,
             description = "Show tasks. folder, tag and period (overdue, today, this week, later, no date, " +
                 "done) are optional.",
             fields = listOf(FOLDER, TAG, PERIOD)
-        ),
-        EvalTool(
-            kind = ActionKind.CHAT,
-            description = "Reply to a greeting, thanks, small talk, or a request for your opinion, advice or " +
-                "ideas; also to say your last reply another way, or a question about what you did. note: the " +
-                "note it is about, if any.",
-            fields = listOf(NOTE)
-        ),
-        EvalTool(
-            kind = ActionKind.OVERVIEW,
-            description = "Say what the notes or the vault hold as a whole (\"what is in my notes?\", \"how " +
-                "many notes do I have?\")."
         ),
         EvalTool(
             kind = ActionKind.LIST_UNTAGGED,
@@ -186,11 +162,6 @@ internal object EvalTools {
         postfix = "]}"
     ) { it.schema(leading = "\"$NAMED\":{\"const\":\"${it.name}\"}") }
 
-    /** Today's plan, each of its steps a [call]. */
-    fun plan(tools: List<EvalTool>): String =
-        "{\"type\":\"object\",\"properties\":{\"steps\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5," +
-            "\"items\":${call(tools = tools)}}},\"required\":[\"steps\"]}"
-
     /** [tools] as lines of a prompt, for our JSON: what the model's own format writes by itself. */
     fun listed(tools: List<EvalTool>): String = tools
         .joinToString(
@@ -267,13 +238,6 @@ private object EvalChangeTools {
             kind = ActionKind.TRASH,
             description = "Move a note, several notes or a folder to the trash; a plain \"delete\" is this.",
             fields = listOf(NOTE, NOTES, FOLDER)
-        ),
-        EvalTool(
-            kind = ActionKind.REFUSE,
-            description = "Only for what Notekea cannot do: deleting for good, settings, models, files " +
-                "outside the vault, code, emails, reminders, the calendar, the web, the weather, the news. " +
-                "text: one sentence saying so and what it can do instead.",
-            fields = listOf(TEXT)
         )
     )
 }

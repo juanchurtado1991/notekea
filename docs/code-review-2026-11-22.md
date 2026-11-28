@@ -125,9 +125,8 @@ order of the checks); the per-feature effects and error types; the wikilink and 
   subset.
 - **`WorkspaceViewModels` is built anew on every recomposition** of `VaultWindow`. A `remember` there passes the
   file and function limits only by moving code out; measure the recompositions first.
-- **Dead tools**: `NoteTool`, `PlanTool`, `NotedFact`, `PlanStep` and `TurnWork`'s plan and notes are registered in
-  no toolset, so `LoopPrompt`'s `work` is always empty, while `BuiltInSkills` still tells the model to "Note".
-  Removing them changes a prompt: measure.
+- **Dead tools**: taken out on 2026-11-26 with `LoopPrompt`'s `work`, always empty, so no prompt changed. The
+  comparison skill's "Note, for each" is the verb, not the tool.
 - **The blind cases as data files** (2,573 cases, about 19,000 lines of Kotlin to one JSONL an exam): after block 7
   and the measuring, with the same golden file as the guard.
 - Smaller bugs reported and not fixed: `SyncEngines.engines` is an unsynchronised map; `LlamaLlmEngine.withModels`

@@ -56,7 +56,10 @@ class ChangeTool(
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val called = calledOf(call = call)
+        val called = NewNoteTitle.placed(
+            step = calledOf(call = call),
+            notes = context.notes
+        )
 
         val empty = emptyOf(call = call)
         if (empty != null) return ToolResult(forModel = "$name: not added. $empty")
@@ -271,18 +274,39 @@ class ChangeTool(
                 .substringAfterLast(delimiter = '/')
                 .removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)
 
-            val paths = context
-                .notes
-                .map { it.file.path }
-                .filter {
-                    it.nameWithoutExtension.equals(
+            val sharing = context.notes.filter {
+                it
+                    .file
+                    .path
+                    .nameWithoutExtension
+                    .equals(
                         other = name,
                         ignoreCase = true
                     )
-                }
+            }
+
+            val paths = sharing.map { it.file.path }
+
+            // The one the task's words tell apart, when it is the one called: "in the lab budget", Lab/Budget.
+            val told = NamedApart
+                .of(
+                    task = context.task,
+                    notes = sharing
+                )
+                ?.file
+                ?.path
+
+            val isTold = told != null &&
+                told.bare().equals(
+                    other = named.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION),
+                    ignoreCase = true
+                )
 
             // Said when the frame names one of them as meant; with no frame, nothing is held back for it.
-            val isSaid = frame == null || frame.notes.count { it in paths } == 1
+            val isSaid =
+                frame == null ||
+                    frame.notes.count { it in paths } == 1 ||
+                    isTold
 
             if (paths.size < 2 || isSaid) {
                 null

@@ -14,13 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.chat.domain.prompt.AgentTaskPrompt
+import app.notekea.chat.domain.tool.lookup.FetchTool
+import app.notekea.chat.domain.tool.lookup.FindTool
+import app.notekea.chat.domain.tool.lookup.ReadTool
+import app.notekea.chat.domain.tool.lookup.SearchTool
 import app.notekea.chat.domain.tool.web.WebSearchTool
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.chat.presentation.model.ChatStep
-import app.notekea.chat.presentation.model.PassedStep
 import app.notekea.core.memory.domain.MemoryLines
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -35,12 +37,7 @@ import app.notekea.resources.chat_agent_search
 import app.notekea.resources.chat_agent_tasks
 import app.notekea.resources.chat_agent_web_search
 import app.notekea.resources.chat_step_composing
-import app.notekea.resources.chat_step_drafting
-import app.notekea.resources.chat_step_further
 import app.notekea.resources.chat_step_planning
-import app.notekea.resources.chat_step_reading
-import app.notekea.resources.chat_step_reading_one
-import app.notekea.resources.chat_step_searching
 import app.notekea.resources.chat_step_working
 import app.notekea.resources.chat_step_writing
 
@@ -67,9 +64,7 @@ internal fun ChatTasks(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        entry.passed.forEach {
-            TaskLine(text = textOf(passed = it).removeSuffix(suffix = ELLIPSIS))
-        }
+        entry.passed.forEach { TaskLine(text = textOf(step = it).removeSuffix(suffix = ELLIPSIS)) }
 
         entry.moves.forEach { line ->
             if (line.move == MemoryLines.MOVE) {
@@ -83,13 +78,8 @@ internal fun ChatTasks(
         }
 
         if (isGoing) {
-            val going = PassedStep(
-                step = entry.step,
-                readNotes = entry.readNotes
-            )
-
             TaskLine(
-                text = textOf(passed = going),
+                text = textOf(step = entry.step),
                 isDone = false
             )
         }
@@ -137,33 +127,19 @@ private fun TaskLine(
 }
 
 @Composable
-private fun textOf(passed: PassedStep): String = when {
-    passed.step == ChatStep.SEARCHING -> replyString(resource = Res.string.chat_step_searching)
-
-    passed.step == ChatStep.PLANNING -> replyString(resource = Res.string.chat_step_planning)
-
-    passed.step == ChatStep.LOOKING_FURTHER -> replyString(resource = Res.string.chat_step_further)
-
-    passed.step == ChatStep.COMPOSING -> replyString(resource = Res.string.chat_step_composing)
-
-    passed.step == ChatStep.READING && passed.readNotes == 1 ->
-        replyString(resource = Res.string.chat_step_reading_one)
-
-    passed.step == ChatStep.READING -> replyString(Res.string.chat_step_reading, passed.readNotes)
-
-    passed.step == ChatStep.DRAFTING -> replyString(resource = Res.string.chat_step_drafting)
-
-    passed.step == ChatStep.WORKING -> replyString(resource = Res.string.chat_step_working)
-
-    else -> replyString(resource = Res.string.chat_step_writing)
+private fun textOf(step: ChatStep): String = when (step) {
+    ChatStep.PLANNING -> replyString(resource = Res.string.chat_step_planning)
+    ChatStep.COMPOSING -> replyString(resource = Res.string.chat_step_composing)
+    ChatStep.WORKING -> replyString(resource = Res.string.chat_step_working)
+    ChatStep.WRITING, ChatStep.DONE -> replyString(resource = Res.string.chat_step_writing)
 }
 
 @Composable
 private fun textOf(line: AgentMoveLine): String = when (line.move) {
-    AgentTaskPrompt.SEARCH -> replyString(Res.string.chat_agent_search, line.target)
-    AgentTaskPrompt.READ -> replyString(Res.string.chat_agent_read, line.target)
-    AgentTaskPrompt.FIND -> replyString(Res.string.chat_agent_find, line.target)
-    AgentTaskPrompt.FETCH -> replyString(Res.string.chat_agent_fetch, line.target)
+    SearchTool.NAME -> replyString(Res.string.chat_agent_search, line.target)
+    ReadTool.NAME -> replyString(Res.string.chat_agent_read, line.target)
+    FindTool.NAME -> replyString(Res.string.chat_agent_find, line.target)
+    FetchTool.NAME -> replyString(Res.string.chat_agent_fetch, line.target)
     MemoryLines.MOVE -> replyString(Res.string.chat_agent_memory, line.target)
     WebSearchTool.NAME -> replyString(Res.string.chat_agent_web_search, line.target)
     else -> replyString(resource = Res.string.chat_agent_tasks)
@@ -176,19 +152,14 @@ private fun ChatTasksPreview() {
         ChatTasks(
             entry = ChatPreviewData.writing.copy(
                 step = ChatStep.WORKING,
-                passed = listOf(
-                    PassedStep(
-                        step = ChatStep.PLANNING,
-                        readNotes = 0
-                    )
-                ),
+                passed = listOf(ChatStep.PLANNING),
                 moves = listOf(
                     AgentMoveLine(
-                        move = AgentTaskPrompt.SEARCH,
+                        move = SearchTool.NAME,
                         target = "sleep"
                     ),
                     AgentMoveLine(
-                        move = AgentTaskPrompt.READ,
+                        move = ReadTool.NAME,
                         target = "Atomic Habits"
                     )
                 )

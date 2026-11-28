@@ -1,10 +1,10 @@
 package app.notekea.chat.eval
 
-import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.data.GhostModelJson
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.data.SqliteStepMemory
 import app.notekea.chat.domain.agent.ProposalCheck
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.loop.FrameSource
 import app.notekea.chat.domain.loop.LoopTools
 import app.notekea.chat.domain.loop.RunTurnUseCase
@@ -42,12 +42,12 @@ internal object LoopEval {
     ): RunTurnUseCase {
         val cache = NoteTextCache(contentStore = indexed.store)
 
-        val answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine)
+        val passageSearch = PassageSearch(embedder, indexed.index, cache, engine)
         val vaultGuide = VaultGuide(noteTextCache = cache)
 
         val tools = LoopTools(
             llmEngine = engine,
-            answerFromNotes = answerFromNotes,
+            passageSearch = passageSearch,
             noteTextCache = cache,
             actionRunner = runner,
             pageReader = pageReader,
@@ -61,7 +61,7 @@ internal object LoopEval {
             vaultGuide = vaultGuide,
             proposal = ProposalCheck(
                 checkPlan = CheckPlanUseCase(),
-                composeNotes = ComposeNotesUseCase(engine, cache, GhostActionPlanReader(), clipper)
+                composeNotes = ComposeNotesUseCase(engine, cache, GhostTextNotesReader(), clipper)
             ),
             clock = Clock.System,
             modelJson = GhostModelJson(),
@@ -73,14 +73,14 @@ internal object LoopEval {
             wholeLast = StepRecall.WHOLE_LAST.takeIf {
                 System.getProperty("notekea.stepmemory") == "fold"
             },
-            frames = framesOf(engine, answerFromNotes, vaultGuide, trace)
+            frames = framesOf(engine, passageSearch, vaultGuide, trace)
         )
     }
 
     // The app's frames, kept by the trace when there is one so a report can say each task's frame.
     private fun framesOf(
         engine: LlmEngine,
-        answerFromNotes: AnswerFromNotesUseCase,
+        passageSearch: PassageSearch,
         vaultGuide: VaultGuide,
         trace: EvalTrace?
     ): FrameSource {
@@ -89,7 +89,7 @@ internal object LoopEval {
                 llmEngine = engine,
                 modelJson = GhostModelJson()
             ),
-            answerFromNotes = answerFromNotes,
+            passageSearch = passageSearch,
             vaultGuide = vaultGuide
         )
 

@@ -183,7 +183,7 @@ internal class NoteWriter(
 
     /** A step of no kind above: the chat's memory written (`docs/agent-memory.md`); else shown, not written. */
     suspend fun otherwise(step: ActionStep): Outcome<Unit, ActionProblem> =
-        if (step.kind.isLoopOnly) {
+        if (step.kind.isMemory) {
             remembered(step = step)
         } else {
             Outcome.Success(value = Unit)

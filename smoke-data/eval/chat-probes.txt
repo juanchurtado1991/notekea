@@ -1,10 +1,7 @@
 # Conversations for ChatProbeChatModelTest, over the committed Sample Vault. `---` between conversations;
-# @mode auto|fast|deep|agent, @open <path>, @confirm press Do it. Lines starting with # are comments.
+# @open <path>, @confirm press Do it. Lines starting with # are comments.
 me podes contar de que tratan las notas?
 y cuales son las mas importantes?
----
-@mode agent
-me podes contar de que tratan las notas?
 ---
 hola, que podés hacer?
 ---
@@ -96,13 +93,10 @@ how many servings do the black beans make?
 what did I cook on October 22?
 going back to the start: how much flour was it?
 ---
-@mode fast
 compare Deep Work and Atomic Habits
 ---
-@mode deep
 what did I learn from my books?
 ---
-@mode agent
 which of my projects is late, and what should I do next?
 ---
 quiero que me digas cuál de mis proyectos está más atrasado

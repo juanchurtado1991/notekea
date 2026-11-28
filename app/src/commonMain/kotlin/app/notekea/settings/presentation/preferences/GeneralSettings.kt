@@ -20,8 +20,6 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.settings.SettingsSpotlight
 import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.resources.Res
-import app.notekea.resources.settings_chat_loop
-import app.notekea.resources.settings_chat_loop_hint
 import app.notekea.resources.settings_language
 import app.notekea.resources.settings_language_english
 import app.notekea.resources.settings_language_hint
@@ -75,16 +73,6 @@ internal fun GeneralSettings(
 
         NotekeaSettingsGroup(
             rows = listOf({
-                ChatLoop(
-                    preferences = preferences,
-                    onIntent = onIntent
-                )
-            }),
-            footnote = stringResource(resource = Res.string.settings_chat_loop_hint)
-        )
-
-        NotekeaSettingsGroup(
-            rows = listOf({
                 ShowWelcome(
                     onIntent = onIntent,
                     spotlight = spotlight
@@ -131,21 +119,6 @@ private fun OpenLastVault(
         onToggle = { onIntent(PreferencesIntent.OnOpenLastVaultToggle) },
         detail = stringResource(resource = Res.string.settings_open_last_vault_hint),
         spotlitAt = spotlight?.serialFor(place = SettingsPlace.GENERAL_OPEN_LAST_VAULT)
-    )
-}
-
-// Agent mode with the one loop: a preview, beside today's agent, until the loop replaces it (`docs/agent-loop.md`).
-@Composable
-private fun ChatLoop(
-    preferences: AppPreferences,
-    onIntent: (PreferencesIntent) -> Unit
-) {
-    val label = stringResource(resource = Res.string.settings_chat_loop)
-
-    NotekeaSettingsSwitchRow(
-        label = label,
-        isOn = preferences.chatLoop,
-        onToggle = { onIntent(PreferencesIntent.OnChatLoopToggle) }
     )
 }
 

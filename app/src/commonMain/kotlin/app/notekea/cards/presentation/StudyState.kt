@@ -1,12 +1,14 @@
 package app.notekea.cards.presentation
 
 import app.notekea.cards.domain.CardChoices
+import app.notekea.cards.domain.ProposedCard
 import app.notekea.cards.domain.StudyCard
 import app.notekea.core.domain.time.CalendarDate
 
 /**
- * The Study tab: the cards [due] today in order, the first shown, its answer [isShown], how many [reviewed], and when
- * the next comes back ([nextDate]); with a chat model the card's [choices] (made while [isMakingChoices]) and [chosen].
+ * The Study tab: the cards [due] today in order, the first shown, its answer [isShown], how many [reviewed], when the
+ * next comes back ([nextDate]); with a chat model the card's [choices] ([isMakingChoices]) and [chosen], and for a hard
+ * card a new wording proposed ([rewrite], written while [isRewriting]), or none found ([isRewriteFailed]).
  */
 data class StudyState(
     val isLoading: Boolean = true,
@@ -17,7 +19,10 @@ data class StudyState(
     val nextDate: CalendarDate? = null,
     val choices: CardChoices? = null,
     val chosen: Int? = null,
-    val isMakingChoices: Boolean = false
+    val isMakingChoices: Boolean = false,
+    val rewrite: ProposedCard? = null,
+    val isRewriting: Boolean = false,
+    val isRewriteFailed: Boolean = false
 ) {
     val current: StudyCard? get() = due.firstOrNull()
 

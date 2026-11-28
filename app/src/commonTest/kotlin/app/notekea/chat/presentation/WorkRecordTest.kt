@@ -40,7 +40,6 @@ class WorkRecordTest {
         step = ChatStep.DONE,
         answer = "",
         sources = emptyList(),
-        readNotes = 0,
         scopeName = null,
         outcome = TurnOutcome.ACTED,
         error = null,

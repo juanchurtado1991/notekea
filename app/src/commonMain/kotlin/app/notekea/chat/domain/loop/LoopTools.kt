@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.PageReader
 import app.notekea.chat.domain.tool.ChatTool
@@ -38,7 +38,7 @@ import app.notekea.core.web.domain.WebSearchProvider
  */
 class LoopTools(
     private val llmEngine: LlmEngine,
-    private val answerFromNotes: AnswerFromNotesUseCase,
+    private val passageSearch: PassageSearch,
     private val noteTextCache: NoteTextCache,
     private val actionRunner: ActionRunner,
     private val pageReader: PageReader,
@@ -47,13 +47,13 @@ class LoopTools(
 ) {
     fun toolsets(): Toolsets {
         val search = SearchTool(
-            answerFromNotes = answerFromNotes,
+            passageSearch = passageSearch,
             noteTextCache = noteTextCache
         )
 
         val read = ReadTool(noteTextCache = noteTextCache)
         val outline = OutlineTool(noteTextCache = noteTextCache)
-        val list = ListTool()
+        val list = ListTool(actionRunner = actionRunner)
         val find = FindTool(actionRunner = actionRunner)
         val tasks = TasksTool(actionRunner = actionRunner)
         val ask = AskUserTool()
@@ -67,7 +67,8 @@ class LoopTools(
 
         val links = LinksTool(
             noteTextCache = noteTextCache,
-            linkFinder = linkFinder
+            linkFinder = linkFinder,
+            actionRunner = actionRunner
         )
 
         val looking = listOf(search, read, find, tasks, list)
@@ -84,6 +85,7 @@ class LoopTools(
                 WorkKind.WRITE to linking + listOf(
                     outline,
                     changes.writeNote,
+                    changes.notesFromText,
                     changes.createNote,
                     changes.append,
                     // A note written often comes with a task for it; the router may also send "add a task" here.

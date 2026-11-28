@@ -34,26 +34,53 @@ class ChatWorkTest : ViewModelTestBase() {
         selected = "2 1/2 cups warm water"
     )
 
+    private var route = TALK
+
     @BeforeTest
     fun setUp() {
-        engine.reply = { TALK }
+        engine.reply = { messages ->
+            val asked = messages.first().text
+
+            when {
+                asked.startsWith(prefix = "You say how a request") -> route
+                asked.startsWith(prefix = CALLS) -> """{"tool":"answer","text":"It is short."}"""
+                else -> "It is short."
+            }
+        }
     }
 
     @Test
-    fun `where the person is and what they selected reach the plan and the talk, as one line`() =
+    fun `where the person is and what they selected reach the loop and the talk, as one line`() =
         runTest(testDispatcher) {
             val viewModel = started()
 
             viewModel.onIntent(intent = ChatIntent.OnWorkChange(working = arepas))
+            route = ASK
             asked(viewModel = viewModel)
 
-            val told = engine.generated.map { messages -> messages.last().text }
+            val call = engine.generated.first {
+                it
+                    .first()
+                    .text
+                    .startsWith(prefix = CALLS)
+            }
+
+            route = TALK
+            asked(viewModel = viewModel)
 
             assertEquals(
                 expected = listOf(true, true),
                 actual = listOf(
-                    told.first().contains(LINE),
-                    told.last().contains(LINE)
+                    call
+                        .last()
+                        .text
+                        .contains(LINE),
+                    engine
+                        .generated
+                        .last()
+                        .last()
+                        .text
+                        .contains(LINE)
                 )
             )
         }
@@ -120,7 +147,9 @@ class ChatWorkTest : ViewModelTestBase() {
     }
 
     private companion object {
-        const val TALK = "{\"steps\":[{\"action\":\"chat\"}]}"
+        const val TALK = """{"work":"talk","skill":"none"}"""
+        const val ASK = """{"work":"ask","skill":"none"}"""
+        const val CALLS = "You work on a task in the person's notes"
         const val LINE = "The person is in the note Recipes/Arepas, at the section \"Ingredients\"."
     }
 }

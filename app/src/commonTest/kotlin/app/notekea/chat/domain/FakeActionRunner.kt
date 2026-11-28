@@ -8,8 +8,12 @@ import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry
 
-/** [ActionRunner] that keeps what it was asked: the steps [ran], the plans [undone], the [themes] set. */
+/**
+ * [ActionRunner] that keeps what it was asked: the finds [asked], the steps [ran], the plans [undone], the [themes]
+ * set.
+ */
 class FakeActionRunner : ActionRunner {
+    val asked = mutableListOf<ActionStep>()
     val ran = mutableListOf<List<ActionStep>>()
     val undone = mutableListOf<DonePlan>()
     val themes = mutableListOf<String>()
@@ -23,8 +27,11 @@ class FakeActionRunner : ActionRunner {
         vaultPath: String,
         step: ActionStep,
         notes: Collection<NoteEntry>
-    ): Outcome<FoundNotes, ActionProblem> =
-        problem?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = found)
+    ): Outcome<FoundNotes, ActionProblem> {
+        asked += step
+
+        return problem?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = found)
+    }
 
     override suspend fun run(
         vaultPath: String,

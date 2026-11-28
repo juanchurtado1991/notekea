@@ -21,13 +21,14 @@ internal class FoundRows(private val actionRunner: ActionRunner) {
         keep: (FoundRow) -> Boolean = { true }
     ): ToolResult {
         val found = when (
-            val result = actionRunner.find(context.vaultPath, step, context.notes)
+            val result = actionRunner.find(context.vaultPath, step, context.looked)
         ) {
             is Outcome.Success -> result.value
             is Outcome.Failure -> return ToolResult(forModel = failedOf(step, result.error))
         }
 
         val rows = found.rows.filter(predicate = keep)
+        if (rows.isNotEmpty()) context.tables += found.copy(rows = rows)
 
         // The query it ran, so the next call can try other words when a tag or a property was guessed wrong.
         if (rows.isEmpty()) {

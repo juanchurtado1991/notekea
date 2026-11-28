@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.loop
 
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.skill.VaultGuide
 import app.notekea.core.domain.Outcome
 import app.notekea.core.memory.domain.MemoryLine
@@ -15,7 +15,7 @@ import app.notekea.core.notes.domain.RelativePath
  */
 class TurnFrames(
     private val framer: TaskFramer,
-    private val answerFromNotes: AnswerFromNotesUseCase,
+    private val passageSearch: PassageSearch,
     private val vaultGuide: VaultGuide
 ) : FrameSource {
     override suspend fun of(
@@ -26,7 +26,7 @@ class TurnFrames(
         isChange: Boolean,
         openNote: RelativePath?
     ): TaskFrame? {
-        val found = answerFromNotes
+        val found = passageSearch
             .excerpts(vaultPath, notes, task)
             .valueOrNull()
             .orEmpty()

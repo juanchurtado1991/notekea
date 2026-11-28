@@ -41,7 +41,6 @@ class ChatMemoryTest {
             step = ChatStep.DONE,
             answer = answer,
             sources = emptyList(),
-            readNotes = 0,
             scopeName = null,
             outcome = TurnOutcome.ANSWERED,
             error = null

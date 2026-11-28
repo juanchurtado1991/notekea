@@ -83,9 +83,13 @@ class ChatSiteSearchTest : ViewModelTestBase() {
         engine.reply = { messages ->
             val asked = messages.first().text
 
+            // The loop finds nothing in the notes; the answer from the pages clipped is written from them.
+            val isFromPages = "shop plugin" in messages.last().text
+
             when {
-                asked.startsWith("You turn a request") -> "{\"steps\":[{\"action\":\"answer\"}]}"
-                asked.startsWith("Write the answer to the task") -> "Install the **shop plugin**."
+                asked.startsWith("You say how a request") -> """{"work":"ask","skill":"none"}"""
+                asked.startsWith("You work on a task in the person's notes") -> """{"tool":"answer","text":"NOT_FOUND"}"""
+                asked.startsWith("Write the answer to the task") && isFromPages -> "Install the **shop plugin**."
                 else -> "NOT_FOUND"
             }
         }

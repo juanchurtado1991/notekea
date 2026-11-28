@@ -1,5 +1,6 @@
 package app.notekea.chat.domain.tool
 
+import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.plan.TextParts
 import app.notekea.chat.domain.tool.lookup.ReadTool
 import app.notekea.chat.domain.tool.reading.DigestTool
@@ -151,7 +152,7 @@ class ReadingToolsTest {
     @Test
     fun `a folder or a tag is listed by name with its properties, and with neither the last changed first`() =
         runTest {
-            val list = ListTool()
+            val list = ListTool(actionRunner = FakeActionRunner())
 
             assertEquals(
                 expected = listOf(
@@ -181,7 +182,8 @@ class ReadingToolsTest {
 
         val links = LinksTool(
             noteTextCache = cache,
-            linkFinder = JetBrainsMarkdownLinkFinder()
+            linkFinder = JetBrainsMarkdownLinkFinder(),
+            actionRunner = FakeActionRunner()
         )
 
         assertEquals(

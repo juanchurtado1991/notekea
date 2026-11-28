@@ -15,7 +15,7 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
 import kotlin.time.Duration.Companion.minutes
 
-private val HEADER = Regex(pattern = "^(Scope|Outcome|Answered with): ")
+private val HEADER = Regex(pattern = "^(Scope|Outcome): ")
 internal const val QUESTION_FIELD = "Ask about your notes…"
 internal const val NOT_FOUND = "I couldn't find this in your notes."
 internal const val WATER = "How much water does the arepa dough take?"
@@ -58,13 +58,6 @@ internal fun CaseScope.openChat(withArepas: Boolean = true) {
     expectText(text = QUESTION_FIELD)
 }
 
-/** Chooses [mode] in the menu under the chat's field, with Medium in use (it reads "Medium · Auto" until then). */
-internal fun CaseScope.chooseMode(mode: String) {
-    click(text = "Medium · Auto")
-    click(text = mode)
-    expectText(text = "Medium · $mode")
-}
-
 /** Asks [question] in the chat's field and waits until its reply is whole (the Stop button is Send again). */
 internal fun CaseScope.ask(question: String) {
     send(question = question)
@@ -92,7 +85,7 @@ internal fun CaseScope.awaitReplyStart(running: String = STOP) {
 /**
  * Waits for a step of the reply to be the one going on ([text], its line in the list of steps). The steps before it
  * ask the model too (understanding the request), which on a loaded laptop takes longer than a text's usual wait: the
- * model's own time is given (3.6-01 stayed on Understanding your request… past it, 2026-11-14).
+ * model's own time is given (a case stayed on Understanding your request… past it, 2026-11-14).
  */
 internal fun CaseScope.awaitStep(text: String) {
     step(description = "Wait for the step “$text”")

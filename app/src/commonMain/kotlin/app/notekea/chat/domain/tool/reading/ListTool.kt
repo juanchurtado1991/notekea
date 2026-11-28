@@ -1,25 +1,30 @@
 package app.notekea.chat.domain.tool.reading
 
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionRunner
+import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.tool.ChatTool
 import app.notekea.chat.domain.tool.ToolArgument
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.chat.domain.tool.ToolEffect
 import app.notekea.chat.domain.tool.ToolResult
+import app.notekea.chat.domain.tool.lookup.FoundRows
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * What is in a folder or under a tag, by name, or the notes changed last when neither is given: the vault seen as
- * its tree shows it, without reading any note (`docs/agent-loop.md`, step 4).
+ * What is in a folder or under a tag, by name, the notes with no tag ([NO_TAG]), or the notes changed last when
+ * neither is given: the vault seen as its tree shows it, without reading any note (`docs/agent-loop.md`, step 4).
  */
-class ListTool : ChatTool {
+class ListTool(actionRunner: ActionRunner) : ChatTool {
+    private val foundRows = FoundRows(actionRunner = actionRunner)
+
     override val name = NAME
 
     override val description =
         "a folder's name or a tag; you get the names of the notes there, each with its properties' names, " +
-            "its tags and its open tasks. " +
-            "With neither, the notes changed last."
+            "its tags and its open tasks. Tag $NO_TAG: the notes with no tag. With neither, the notes changed last."
 
     override val arguments = listOf(
         ToolArgument(
@@ -43,7 +48,15 @@ class ListTool : ChatTool {
         call: ToolCall,
         context: ToolContext
     ): ToolResult {
-        val notes = context.notes.filter { it.file.path.isMarkdown }
+        // The app's own list of the notes with no tag, a table the person can open them from.
+        if (call.text(name = TAG).lowercase() == NO_TAG) {
+            return foundRows.of(
+                step = ActionStep(kind = ActionKind.LIST_UNTAGGED),
+                context = context
+            )
+        }
+
+        val notes = context.looked.filter { it.file.path.isMarkdown }
         val asked = call.text(name = FOLDER).trim('/')
 
         // "Tags/idea", "#idea", or a folder no note is in that is a tag: the 9B listed "Tags/idea" three times.
@@ -169,6 +182,7 @@ class ListTool : ChatTool {
         const val NAME = "list"
         const val FOLDER = "folder"
         const val TAG = "tag"
+        const val NO_TAG = "none"
         private const val MAX_NAMES = 60
         private const val RECENT = 20
         private const val TAGS = "tags"

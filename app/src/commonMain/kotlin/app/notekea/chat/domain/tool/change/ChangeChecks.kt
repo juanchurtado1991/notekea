@@ -69,8 +69,6 @@ internal object ChangeChecks {
 
         is ActionProblem.UnknownLine -> "no one line of the note reads \"${problem.text}\""
 
-        is ActionProblem.Refused -> "it is refused: ${problem.reason}"
-
         else -> "the vault cannot take it as written"
     }
 

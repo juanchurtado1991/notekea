@@ -270,19 +270,23 @@ tasks.register<Test>("chatModelTest") {
     systemProperty(chatModelsSystemProperty, providers.gradleProperty(chatModelsGradleProperty).getOrElse(""))
     systemProperty("notekea.chat.size", providers.gradleProperty("chatSize").getOrElse("small"))
     systemProperty("notekea.chat.gpu", providers.gradleProperty("chatGpu").getOrElse("true"))
-    systemProperty("notekea.chat.drafts", providers.gradleProperty("chatDrafts").getOrElse("1"))
     systemProperty("notekea.chat.agent", providers.gradleProperty("chatAgent").getOrElse("false"))
     systemProperty("notekea.chat.probes", providers.gradleProperty("chatProbes").getOrElse(""))
     systemProperty("notekea.chat.vault", providers.gradleProperty("chatVault").getOrElse(""))
     // Only the evaluation tasks whose text holds one of these words (comma separated): a quick rerun of the failures.
     systemProperty("notekea.chat.tasks", providers.gradleProperty("chatTasks").getOrElse(""))
+    // Only the tasks a file lists, a line each: the fast set of a round that tunes (scripts/loop-eval/fastset.py).
+    systemProperty("notekea.chat.taskFile", providers.gradleProperty("chatTaskFile").getOrElse(""))
     // The blind pool (docs/eval-blind.md): -PchatPool=sample measures ten unsealed exams picked by -PchatPoolSeed,
     // -PchatPool=all the 40 unsealed ones, -PchatPool=sealed the ten sealed ones, only for the final number.
     systemProperty("notekea.chat.pool", providers.gradleProperty("chatPool").getOrElse("sample"))
+    systemProperty("notekea.cards.judged", providers.gradleProperty("cardsJudged").getOrElse(""))
     systemProperty("notekea.chat.poolSeed", providers.gradleProperty("chatPoolSeed").getOrElse("1"))
     // The web's evaluation keeps the pages it downloads here, and reads only those with -PwebReplay=true.
     systemProperty("notekea.web.pages", providers.gradleProperty("webPages").getOrElse(""))
     systemProperty("notekea.web.replay", providers.gradleProperty("webReplay").getOrElse("false"))
+    // The model's replies kept in this folder and read from it (ReplyCache): only for the rounds that tune.
+    systemProperty("notekea.chat.replies", providers.gradleProperty("chatReplies").getOrElse(""))
     systemProperty("notekea.roleplay", providers.gradleProperty("rolePlay").getOrElse(""))
     systemProperty("notekea.stepmemory", providers.gradleProperty("stepMemory").getOrElse(""))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.

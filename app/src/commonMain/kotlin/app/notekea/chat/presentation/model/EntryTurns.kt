@@ -47,7 +47,6 @@ internal object EntryTurns {
         step = ChatStep.DONE,
         answer = turn.answer,
         sources = turn.sources,
-        readNotes = 0,
         scopeName = turn.scopeName,
         outcome = turn.outcome,
         error = null,

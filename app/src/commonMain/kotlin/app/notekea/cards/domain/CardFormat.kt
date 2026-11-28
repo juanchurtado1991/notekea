@@ -21,6 +21,13 @@ object CardFormat {
     private const val FENCE = "```"
     private val SCHEDULE = Regex(pattern = "<!--SR:!(\\d{4})-(\\d{2})-(\\d{2}),(\\d+),(\\d+)-->")
 
+    // The sentence a card comes from, before its schedule: on its own line it would cost the card its schedule in
+    // the plugin, which skips the line after a comment (its parser, read 2026-11-26).
+    private const val SOURCE_OPEN = "<!--source: "
+    private const val SOURCE_CLOSE = "-->"
+    private val SOURCE = Regex(pattern = "<!--source:(.*?)-->")
+    private const val MIN_SENTENCE = 12
+
     /** The cards of the note at [note] with [text]; none in a note without the deck's tag ([TAG]). */
     fun cardsOf(
         note: RelativePath,
@@ -39,7 +46,8 @@ object CardFormat {
                 note = note,
                 index = index,
                 line = line,
-                below = lines.getOrNull(index = index + 1)
+                below = lines.getOrNull(index = index + 1),
+                text = text
             )
         }
     }
@@ -66,30 +74,94 @@ object CardFormat {
         return lines.joinToString(separator = "\n")
     }
 
-    /** New cards to add at a note's end, under a heading and the tag the plugin looks for. */
-    fun blockOf(cards: List<Pair<String, String>>): String = buildString {
+    /**
+     * New cards to add at a note's end, under a heading and the tag the plugin looks for, each with the note's
+     * sentence it comes from in a comment before its schedule's, where the plugin keeps it and shows nothing.
+     */
+    fun blockOf(cards: List<ProposedCard>): String = buildString {
         append("\n\n## Flashcards\n\n").append(TAG).append("\n\n")
+        cards.forEach { append(lineOf(card = it)).append('\n') }
+    }
 
-        cards.forEach { (question, answer) ->
-            append(clean(question))
-                .append(SEPARATOR)
-                .append(clean(answer))
-                .append('\n')
+    /** [card] as it is in [text] now: at its line, or found by its question when the note moved on; null when gone. */
+    fun located(
+        text: String,
+        card: StudyCard
+    ): StudyCard? {
+        val current = cardsOf(
+            note = card.note,
+            text = text
+        )
+
+        return current.firstOrNull {
+            it.line == card.line && it.question == card.question
         }
+            ?: current.firstOrNull {
+                it.question == card.question
+            }
+    }
+
+    /**
+     * [text] with [card] written as [with] on its line, where it starts again as a new card: its schedule, on its line
+     * or below, goes with the old wording, and the line keeps its indent and list mark.
+     */
+    fun replaced(
+        text: String,
+        card: StudyCard,
+        with: ProposedCard
+    ): String {
+        val lines = text.lines().toMutableList()
+        val line = lines[card.line]
+        val lead = line.takeWhile { it.isWhitespace() }
+        val mark = if (line.trimStart().startsWith(prefix = "- ")) "- " else ""
+
+        lines[card.line] = lead + mark + lineOf(card = with)
+
+        val below = lines.getOrNull(index = card.line + 1)
+        val isScheduleBelow = below != null && SCHEDULE.matches(input = below.trim())
+        if (isScheduleBelow) lines.removeAt(index = card.line + 1)
+
+        return lines.joinToString(separator = "\n")
+    }
+
+    // A card's line: its question and answer, and its sentence in a comment the plugin keeps and shows nothing of.
+    private fun lineOf(card: ProposedCard): String =
+        clean(card.question) + SEPARATOR + clean(card.answer) + " " +
+            SOURCE_OPEN + clean(card.sentence).replace(
+                oldValue = "--",
+                newValue = "-"
+            ) + SOURCE_CLOSE
+
+    /** Whether [sentence] is written in [text], case, spaces and marks aside, the cards' own comments left out. */
+    fun isQuoted(
+        sentence: String,
+        text: String
+    ): Boolean = plain(text = sentence).let {
+        it.length >= MIN_SENTENCE && it in plain(text = SOURCE.replace(input = text, replacement = ""))
     }
 
     private fun cardOf(
         note: RelativePath,
         index: Int,
         line: String,
+        text: String,
         below: String?
     ): StudyCard? {
         val schedule = SCHEDULE.find(input = line) ?: below?.trim()?.let {
             SCHEDULE.matchEntire(input = it)
         }
 
-        val content = SCHEDULE.replace(
-            input = line,
+        val source = SOURCE
+            .find(input = line)
+            ?.groupValues
+            ?.get(1)
+            ?.trim()
+
+        val content = SOURCE.replace(
+            input = SCHEDULE.replace(
+                input = line,
+                replacement = ""
+            ),
             replacement = ""
         ).trim()
 
@@ -121,9 +193,13 @@ object CardFormat {
                 )
             },
             interval = values?.get(3) ?: 0,
-            ease = values?.get(4) ?: CardSchedule.START_EASE
+            ease = values?.get(4) ?: CardSchedule.START_EASE,
+            source = source,
+            isOutdated = source != null && !isQuoted(sentence = source, text = text)
         )
     }
+
+    private fun plain(text: String): String = text.lowercase().filter { it.isLetterOrDigit() }
 
     private fun clean(text: String): String = text
         .replace(SEPARATOR, ":")

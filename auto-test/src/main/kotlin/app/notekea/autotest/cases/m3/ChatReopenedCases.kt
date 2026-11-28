@@ -18,7 +18,7 @@ internal fun SuiteBuilder.chatReopenedCases() {
 
         steps(
             text =
-            "1. Con un modelo de chat, en modo Agente pide: haz una nota con una tabla de mis " +
+            "1. Con un modelo de chat, pide: haz una nota con una tabla de mis " +
                 "recetas.\n2. Cuando aparezca la tarjeta, haz clic en Cancelar.\n3. Pregunta " +
                 "otra cosa y, mientras responde, cierra Notekea.\n4. Abre Notekea y el chat " +
                 "(Mod+L).\n5. Pregunta: ¿qué hiciste con la tabla que te pedí?"

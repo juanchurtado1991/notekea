@@ -12,6 +12,10 @@ object CardSchedule {
     const val START_EASE = 250
     private const val MIN_EASE = 130
     private const val EASE_STEP = 20
+
+    // Four Hard answers more than Easy ones: the card is offered to be written anew from its sentence.
+    private const val HARD_ANSWERS = 4
+    const val STRUGGLING_EASE = START_EASE - HARD_ANSWERS * EASE_STEP
     private const val EASY_BONUS = 1.3
     private const val PERCENT = 100.0
     private val FIRST = mapOf(CardAnswer.HARD to 1, CardAnswer.GOOD to 3, CardAnswer.EASY to 4)

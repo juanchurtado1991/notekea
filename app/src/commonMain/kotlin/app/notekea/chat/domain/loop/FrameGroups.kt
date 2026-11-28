@@ -15,11 +15,10 @@ internal object FrameGroups {
         task: String,
         candidates: List<FrameCandidates.Candidate>
     ): List<List<FrameCandidates.Candidate>> {
-        val named = FrameWords
-            .of(text = task)
-            .filter { word ->
-                word.any { it.isLetter() } && candidates.any { isNamed(it, word) }
-            }
+        // A name the task writes names its set alone: in "Chris's note", note is a word of Meeting Notes too, and
+        // asked of every note the two Chris were no set (the 12B's blind pool, seed 10, 2026-11-28).
+        val named = namedOf(FrameWords.namesOf(text = task), candidates)
+            .ifEmpty { namedOf(FrameWords.of(text = task), candidates) }
 
         val holding = candidates.filter { candidate ->
             named.any { isNamed(candidate, it) }
@@ -44,8 +43,11 @@ internal object FrameGroups {
         task: String,
         group: List<FrameCandidates.Candidate>
     ): FrameCandidates.Candidate? {
-        // A number of a name is a word of it too: "ADR-015", "sprint 47", "chapter 2" (the frame alone, 2026-11-18).
-        val words = FrameWords.of(text = task) + FrameWords.numbersOf(text = task)
+        // A number of a name is a word of it too: "ADR-015", "sprint 47", "chapter 2" (the frame alone, 2026-11-18);
+        // and one of three letters: "my lab budget" is Lab/Budget.
+        val words = FrameWords.of(text = task) +
+            FrameWords.numbersOf(text = task) +
+            FrameWords.shortOf(text = task)
 
         val named = group.filter { candidate ->
             val others = group
@@ -127,6 +129,37 @@ internal object FrameGroups {
         }
     }
 
+    /**
+     * The notes of [group] another of it is a rival of: two things of one kind, which a vault keeps in one folder or
+     * gives one name. A meeting with Marco and the person Marco are no rivals, nor an experiment and a paper.
+     */
+    fun rivalsOf(group: List<FrameCandidates.Candidate>): List<FrameCandidates.Candidate> =
+        group.filter { one ->
+            group.any {
+                it != one && isRival(one, it)
+            }
+        }
+
+    private fun isRival(
+        one: FrameCandidates.Candidate,
+        other: FrameCandidates.Candidate
+    ): Boolean {
+        val isBeside = one.path.parent == other.path.parent
+
+        return isBeside || one.path.nameWithoutExtension.equals(
+            other = other.path.nameWithoutExtension,
+            ignoreCase = true
+        )
+    }
+
+    // The [words] a name of [candidates] writes.
+    private fun namedOf(
+        words: Set<String>,
+        candidates: List<FrameCandidates.Candidate>
+    ): List<String> = words.filter { word ->
+        word.any { it.isLetter() } && candidates.any { isNamed(it, word) }
+    }
+
     private fun isNamed(
         candidate: FrameCandidates.Candidate,
         word: String
@@ -152,7 +185,9 @@ internal object FrameGroups {
             .path
             .bare()
 
-        return FrameWords.of(text = title) + FrameWords.numbersOf(text = title)
+        return FrameWords.of(text = title) +
+            FrameWords.numbersOf(text = title) +
+            FrameWords.of(text = candidate.title)
     }
 
     private const val MOST = 6

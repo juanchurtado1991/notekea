@@ -120,8 +120,7 @@ class CheckPlanUseCaseTest {
                         kind = ActionKind.ADD_TAG,
                         field = ActionField.TAG
                     )
-                ),
-                Outcome.Failure(error = ActionProblem.Refused(reason = "Settings"))
+                )
             ),
             actual = listOf(
                 moved.value[1].target,
@@ -135,12 +134,6 @@ class CheckPlanUseCaseTest {
                     PlannedStep(
                         kind = ActionKind.ADD_TAG,
                         fields = mapOf(ActionField.NOTE to "Dune")
-                    )
-                ),
-                checked(
-                    PlannedStep(
-                        kind = ActionKind.REFUSE,
-                        fields = mapOf(ActionField.TEXT to "Settings")
                     )
                 )
             )

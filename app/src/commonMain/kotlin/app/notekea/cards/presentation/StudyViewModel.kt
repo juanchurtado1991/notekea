@@ -6,6 +6,8 @@ import app.notekea.cards.domain.CardAnswer
 import app.notekea.cards.domain.CardChoices
 import app.notekea.cards.domain.MakeChoicesUseCase
 import app.notekea.cards.domain.ReadDeckUseCase
+import app.notekea.cards.domain.ReplaceCardUseCase
+import app.notekea.cards.domain.RewriteCardUseCase
 import app.notekea.cards.domain.StudyCard
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
@@ -20,15 +22,17 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 /**
- * The Study tab of the vault at [vaultPath] (4.6): its cards due today, the new ones last, one at a time; an answer
- * schedules the card in its note ([AnswerCardUseCase]) and shows the next. It reads the cards only while it shows.
- * With a chat model each card is asked as a multiple choice question ([MakeChoicesUseCase]), the next one made ahead.
+ * The Study tab of the vault at [vaultPath] (4.6): its cards due today, new ones last, one at a time, each answer
+ * scheduled in its note ([AnswerCardUseCase]); read only while it shows. With a chat model a card is multiple choice
+ * ([MakeChoicesUseCase]), the next made ahead, and a hard one can be written anew ([RewriteCardUseCase]) on request.
  */
 class StudyViewModel(
     private val vaultPath: String,
     private val readDeck: ReadDeckUseCase,
     private val answerCard: AnswerCardUseCase,
     private val makeChoices: MakeChoicesUseCase,
+    private val rewriteCard: RewriteCardUseCase,
+    private val replaceCard: ReplaceCardUseCase,
     private val localCalendar: LocalCalendar,
     private val clock: Clock
 ) : BaseViewModel<StudyState, StudyIntent, StudyEffect>(initialState = StudyState()) {
@@ -62,6 +66,17 @@ class StudyViewModel(
             is StudyIntent.OnChoose -> choose(index = intent.index)
 
             StudyIntent.OnNext -> next()
+
+            StudyIntent.OnRewrite -> rewrite()
+
+            StudyIntent.OnUseRewrite -> useRewrite()
+
+            StudyIntent.OnKeepCard -> reduce {
+                it.copy(
+                    rewrite = null,
+                    isRewriteFailed = false
+                )
+            }
 
             StudyIntent.OnOpenNote ->
                 state
@@ -109,6 +124,9 @@ class StudyViewModel(
                     isShown = isSame && it.isShown,
                     choices = if (isSame) it.choices else null,
                     chosen = if (isSame) it.chosen else null,
+                    rewrite = if (isSame) it.rewrite else null,
+                    isRewriting = isSame && it.isRewriting,
+                    isRewriteFailed = isSame && it.isRewriteFailed,
                     total = cards.size,
                     nextDate = cards
                         .mapNotNull { card -> card.due }
@@ -208,6 +226,9 @@ class StudyViewModel(
                 isShown = false,
                 choices = null,
                 chosen = null,
+                rewrite = null,
+                isRewriting = false,
+                isRewriteFailed = false,
                 reviewed = it.reviewed + 1
             )
         }
@@ -241,6 +262,94 @@ class StudyViewModel(
                 val next = listOfNotNull(current.nextDate, answered?.card?.due).minOrNull()
                 current.copy(nextDate = next)
             }
+        }
+    }
+
+    // The hard card shown written anew; what comes back is kept only while that card still shows.
+    private fun rewrite() {
+        val current = state.value
+        val card = current.current ?: return
+
+        if (!card.isStruggling ||
+            current.isRewriting ||
+            current.rewrite != null
+        ) {
+            return
+        }
+
+        reduce {
+            it.copy(
+                isRewriting = true,
+                isRewriteFailed = false
+            )
+        }
+
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
+            val written = try {
+                rewriteCard(card = card)
+            } finally {
+                reduce { it.copy(isRewriting = false) }
+            }
+
+            reduce {
+                val isStill = it.current?.let(::keyOf) == keyOf(card = card)
+
+                if (isStill) {
+                    it.copy(
+                        rewrite = written,
+                        isRewriteFailed = written == null
+                    )
+                } else {
+                    it
+                }
+            }
+        }
+    }
+
+    // The new wording written over the card in its note, and asked at once as the new card it now is.
+    private fun useRewrite() {
+        val card = state.value.current ?: return
+        val with = state.value.rewrite ?: return
+
+        launchLogged(
+            message = FAILED_MESSAGE,
+            severity = Severity.Warn
+        ) {
+            val replaced = writing.withLock {
+                replaceCard(
+                    vaultPath = vaultPath,
+                    card = card,
+                    with = with
+                )
+            } ?: return@launchLogged
+
+            made.remove(key = keyOf(card = card))
+
+            emit(
+                effect = StudyEffect.NoteRewritten(
+                    path = card.note,
+                    original = replaced.original
+                )
+            )
+
+            reduce {
+                val isStill = it.current?.let(::keyOf) == keyOf(card = card)
+                if (!isStill) return@reduce it
+
+                it.copy(
+                    due = listOf(replaced.card) + it.due.drop(n = 1),
+                    isShown = false,
+                    choices = null,
+                    chosen = null,
+                    rewrite = null,
+                    isRewriteFailed = false
+                )
+            }
+
+            askCurrent()
         }
     }
 

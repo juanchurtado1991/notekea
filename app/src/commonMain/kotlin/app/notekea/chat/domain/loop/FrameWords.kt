@@ -15,6 +15,35 @@ internal object FrameWords {
         .map { folded(text = it) }
         .toSet()
 
+    /** The words of three letters [text] writes in any case: one names a note only as a word of its path, "lab". */
+    fun shortOf(text: String): Set<String> = WORD
+        .findAll(input = text)
+        .map { it.value }
+        .filter {
+            it.length == NAME
+        }
+        .map { folded(text = it) }
+        .toSet()
+
+    /** The names [text] writes: its words of three letters or more with a capital, and its numbers and codes whole. */
+    fun namesOf(text: String): Set<String> = WORD
+        .findAll(input = text)
+        .map { it.value }
+        .filter {
+            it.length >= NAME && it.first().isUpperCase()
+        }
+        .map { folded(text = it) }
+        .toSet() + codesOf(text = text)
+
+    /** The numbers and codes [text] writes, each whole: "11:00" is not "09:00", nor "2026-038" another of 2026. */
+    fun codesOf(text: String): Set<String> = CODE
+        .findAll(input = text)
+        .map { folded(text = it.value) }
+        .filter { code ->
+            code.any { it.isDigit() }
+        }
+        .toSet()
+
     /** The numbers [text] writes, as written: a number names a note only exactly, "47" is no "470". */
     fun numbersOf(text: String): Set<String> = NUMBER
         .findAll(input = text)
@@ -45,6 +74,7 @@ internal object FrameWords {
         .joinToString(separator = "")
 
     private val WORD = Regex(pattern = "[\\p{L}\\p{N}]+")
+    private val CODE = Regex(pattern = "[\\p{L}\\p{N}]+(?:[-:./,][\\p{L}\\p{N}]+)*")
     private val NUMBER = Regex(pattern = "(?<![\\p{L}\\p{N}])\\p{N}+(?![\\p{L}\\p{N}])")
 
     private const val LONG = 4

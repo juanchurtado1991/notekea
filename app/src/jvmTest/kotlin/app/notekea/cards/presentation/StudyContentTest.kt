@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -12,7 +13,9 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import app.notekea.cards.domain.CardChoices
+import app.notekea.cards.domain.ProposedCard
 import app.notekea.cards.domain.StudyCard
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
@@ -74,4 +77,117 @@ class StudyContentTest {
             actual = intents
         )
     }
+
+    // Design A of 2026-11-26: the sentence a card comes from under its answer, and a chip when the note dropped it.
+    @Test
+    fun `a card's sentence shows under its answer, and the note changed when it no longer says it`() =
+        runComposeUiTest {
+            val card = StudyCard(
+                note = RelativePath(value = "Lisbon trip.md"),
+                line = 4,
+                question = "Which tram climbs to Alfama?",
+                answer = "Line 28",
+                source = "The 28 tram climbs to Alfama.",
+                isOutdated = true
+            )
+
+            var state by mutableStateOf(
+                value = StudyState(
+                    isLoading = false,
+                    due = listOf(card)
+                )
+            )
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    StudyContent(
+                        state = state,
+                        onIntent = {}
+                    )
+                }
+            }
+
+            val hidden = onAllNodesWithText(text = "“The 28 tram climbs to Alfama.”")
+                .fetchSemanticsNodes()
+                .size
+
+            state = state.copy(isShown = true)
+            waitForIdle()
+
+            onNodeWithText(text = "“The 28 tram climbs to Alfama.”").assertExists()
+            onNodeWithText(text = "From the note").assertExists()
+            onNodeWithText(text = "Note changed").assertExists()
+            onNodeWithText(text = "The note no longer says this. Check the card before you grade it.").assertExists()
+
+            assertEquals(
+                expected = 0,
+                actual = hidden
+            )
+        }
+
+    // Plan step 4, 2026-11-26: a hard card offers a new wording in its sentence's box, shown beside it, chosen or not.
+    @Test
+    fun `a hard card offers to be written anew, and the new wording shows with its choice`() =
+        runComposeUiTest {
+            val card = StudyCard(
+                note = RelativePath(value = "Lisbon trip.md"),
+                line = 4,
+                question = "Which tram climbs to Alfama?",
+                answer = "Line 28",
+                due = CalendarDate(
+                    year = 2026,
+                    month = 11,
+                    day = 26
+                ),
+                interval = 1,
+                ease = 170,
+                source = "The 28 tram climbs to Alfama."
+            )
+
+            val intents = mutableListOf<StudyIntent>()
+
+            var state by mutableStateOf(
+                value = StudyState(
+                    isLoading = false,
+                    due = listOf(card),
+                    isShown = true
+                )
+            )
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    StudyContent(
+                        state = state,
+                        onIntent = { intents += it }
+                    )
+                }
+            }
+
+            onNodeWithText(text = "This card has been hard for you.").assertExists()
+            onNodeWithText(text = "Write it anew").performClick()
+
+            state = state.copy(
+                rewrite = ProposedCard(
+                    question = "Which tram goes up to Alfama?",
+                    answer = "The 28",
+                    sentence = "The 28 tram climbs to Alfama."
+                )
+            )
+
+            waitForIdle()
+
+            onNodeWithText(text = "New version").assertExists()
+            onNodeWithText(text = "Which tram goes up to Alfama?").assertExists()
+            onNodeWithText(text = "Use the new one").performClick()
+            onNodeWithText(text = "Keep this one").performClick()
+
+            assertEquals(
+                expected = listOf(
+                    StudyIntent.OnRewrite,
+                    StudyIntent.OnUseRewrite,
+                    StudyIntent.OnKeepCard
+                ),
+                actual = intents
+            )
+        }
 }

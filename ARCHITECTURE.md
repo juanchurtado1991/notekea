@@ -307,40 +307,31 @@ themselves.
 - Layout primitives and plain content stay allowed everywhere: `Text`, `Surface`, `Icon`, `MaterialTheme`, and the
   foundation layouts (`Row`, `Column`, `Box`, lazy lists).
 
-## 12. Answer pipeline (M3)
+## 12. The chat: one loop (M3, M4)
 
-Local models are small (about 2B, 4B or 8B), so precision comes from the steps around the model, not from the model
-alone (`ROADMAP.md` M3). The pipeline below is the design of 3.5 and 3.6; its numbers (slot count, latency budget)
-come from the 3.0 spike.
+Local models are small, so precision comes from the steps around the model, not from the model alone (`ROADMAP.md`
+M3). Every request of the chat, of the whole vault or of the open note or its folder, is worked on by one loop on
+every model (`docs/agent-loop.md`; decided with the developer on 2026-11-27, measured in `docs/gemma-plan.md`):
 
 ```
-question ─▶ 1 Rewrite ─▶ Search ×queries ─▶ 2 Rerank ─▶ 3 Extract evidence ×chunks
-                          (parallel)                     (parallel)
-         ─▶ 4 Answer ─▶ 5 Verify ×sentences ─▶ answer
-                          (parallel)
-Deep answer: 4 Answer ×drafts (parallel) ─▶ 5 Verify each ─▶ the draft with the most supported sentences
+request ─▶ router (a kind of work) ─▶ frame (which notes it means) ─▶ call ─▶ tool ─▶ result ─▶ … ─▶ end
+                                                                       (one at a time, 30 at most)
+end: an answer from what was found (streamed, with its sources and tables) · a question with buttons ·
+     the card of its changes (written out, done only on Do it) · a step shown at once · talk, help, overview
 ```
 
-- **One use case per step** in `chat.domain` (`RewriteQuestionUseCase`, `RerankChunksUseCase`,
-  `ExtractEvidenceUseCase`, `WriteAnswerUseCase`, `VerifyAnswerUseCase`), composed by `AnswerQuestionUseCase`;
-  `DeepAnswerUseCase` reuses the same steps with several drafts. Each step is unit tested with `FakeLlmEngine`
-  scripted outputs.
-- **Ports:** `LlmEngine` (generation, streaming and grammar-constrained JSON) and a separate `Reranker`, both
-  implemented in `jvmMain` with java-llama.cpp. One chat model is loaded once with several parallel slots; the
-  reranker is a second, small model.
-- **Parallelism with coroutines:** independent work runs with `async` + `awaitAll`, bounded by a `Semaphore` sized to
-  the engine's slot count, so a burst never queues more generations than the engine can serve. Cancelling the
-  answer (Stop) cancels every running step. Koog is not used for this pipeline: plain coroutines are simpler to test
-  with fakes; Koog stays for extensions after the MVP, unless 3.0 shows agent mode (`ROADMAP.md` 4.7) needs it.
-- **Structured steps never parse free text:** rewrite, evidence and verification outputs are JSON constrained by a
-  grammar (`jsonSchemaToGrammar`) and parsed with Ghost; only the final answer is free text.
-- **Deterministic checks first:** a cited quote must appear in its note (after normalizing whitespace) before the
-  model is asked whether it supports the sentence. Unsupported sentences are removed, never kept with a warning;
-  an empty result becomes "I couldn't find this in your notes".
-- **Progress is part of the contract:** the pipeline emits a `Flow` of plain-language steps (searching, reading N
-  notes, checking sources, writing N drafts, comparing drafts) that the chat panel shows instead of a bare spinner.
-- **Options for measurement:** `AnswerPipelineOptions` switches each step on or off for the evaluation (3.4); users
-  only see the Deep answer toggle.
-- **Rules:** no loop where a model critiques or debates its own output without evidence from the notes; a new step
-  or prompt change ships only with an evaluation run showing better citation accuracy within the latency budget for
-  every model size.
+- **`chat/domain/loop`** holds the loop (`RunTurnUseCase`, `TurnRouter`, `TaskFramer`, `TurnChecks`, `TurnEnd`);
+  **`chat/domain/tool`** its tools, a small set for each kind of work (`LoopTools`, `Toolsets`, 25 at most): looking
+  (search, read, find, list, links, tasks), figures worked out by the app (tally, calculate, days, count), changes
+  (`ChangeTools`, proposed, never done by the model), the app (shown at once), the web, the memory, and the ends.
+- **Ports:** `LlmEngine` (generation, streaming and grammar-constrained JSON, and the reranker) implemented in
+  `jvmMain` with java-llama.cpp; `PassageSearch` gives the reranked passages of the index (none under its gate).
+- **Structured steps never parse free text:** every call is JSON constrained by a grammar and parsed with Ghost;
+  only the answer is free text, written from what the turn found and nothing else (`AgentFinalAnswer`).
+- **Deterministic checks first:** a change is checked against the vault (`CheckPlanUseCase`) and its notes are
+  written out (`ComposeNotesUseCase`) before the card; the checks of a turn (`TurnChecks`) hold an end the code can
+  tell is wrong (an answer with no note read, a change of a note not named) and say why.
+- **Progress is part of the contract:** a turn emits a `Flow` of `AgentStep`s (each move, the notes being written,
+  the answer so far) that the chat lists instead of a bare spinner.
+- **Rules:** no special cases for words or tasks (`AGENTS.md`); a change to a prompt, a tool or a check ships only
+  with the blind pool measured on the models, never lower than before.

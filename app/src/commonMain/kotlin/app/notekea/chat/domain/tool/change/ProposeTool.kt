@@ -16,17 +16,9 @@ class ProposeTool : ChatTool {
 
     override val description =
         "end the task: the changes you added are shown to the person to confirm, with one sentence saying " +
-            "what they do. Call it once every change the task asks for is added. drop, optional: notes to take " +
-            "out of the changes, the ones the task does not ask for."
+            "what they do. Call it once every change the task asks for is added."
 
-    override val arguments = listOf(
-        ToolArgument(name = SUMMARY),
-        ToolArgument(
-            name = DROP,
-            isRequired = false,
-            isList = true
-        )
-    )
+    override val arguments = listOf(ToolArgument(name = SUMMARY))
     override val effect = ToolEffect.ENDS
 
     override fun targetOf(
@@ -42,6 +34,5 @@ class ProposeTool : ChatTool {
     companion object {
         const val NAME = "propose"
         const val SUMMARY = "summary"
-        const val DROP = "drop"
     }
 }

@@ -1,8 +1,10 @@
 package app.notekea.cards.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -12,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +26,7 @@ import app.notekea.core.presentation.designsystem.components.ChoiceState
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
+import app.notekea.core.presentation.designsystem.components.NotekeaChip
 import app.notekea.core.presentation.designsystem.components.NotekeaChoiceRow
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSkeletonRow
@@ -30,27 +34,33 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
+import app.notekea.resources.study_changed
 import app.notekea.resources.study_continue
 import app.notekea.resources.study_easy
 import app.notekea.resources.study_good
 import app.notekea.resources.study_hard
 import app.notekea.resources.study_making
 import app.notekea.resources.study_open_note
+import app.notekea.resources.study_outdated
 import app.notekea.resources.study_position
 import app.notekea.resources.study_progress_label
 import app.notekea.resources.study_right
 import app.notekea.resources.study_show
+import app.notekea.resources.study_source
 import app.notekea.resources.study_wrong
 import org.jetbrains.compose.resources.stringResource
 
 private val SKELETON_WIDTHS = listOf(0.7f, 0.55f, 0.8f, 0.6f)
 private const val PREVIEW_WIDTH_DP = 560
+private const val WARNING_ALPHA = 0.18f
 
 private val PREVIEW_CARD = StudyCard(
     note = RelativePath(value = "Lisbon trip.md"),
     line = 4,
     question = "Which tram climbs to Alfama?",
-    answer = "Line 28"
+    answer = "Line 28",
+    source = "The 28 tram climbs from Baixa up to Alfama, past the cathedral.",
+    isOutdated = true
 )
 
 /**
@@ -66,7 +76,8 @@ internal fun StudyCardView(
     Header(
         deck = card.note.nameWithoutExtension,
         position = state.position,
-        sitting = state.sitting
+        sitting = state.sitting,
+        isOutdated = card.isOutdated
     )
 
     NotekeaCard(modifier = Modifier.fillMaxWidth()) {
@@ -102,6 +113,26 @@ internal fun StudyCardView(
                     )
                 }
             }
+
+            val source = card.source
+
+            if (state.isShown && source != null) {
+                Source(
+                    sentence = source,
+                    isOutdated = card.isOutdated
+                ) {
+                    if (card.isStruggling && !card.isOutdated) {
+                        CardRewrite(
+                            isRewriting = state.isRewriting,
+                            isRewriteFailed = state.isRewriteFailed,
+                            onRewrite = { onIntent(StudyIntent.OnRewrite) },
+                            onUse = { onIntent(StudyIntent.OnUseRewrite) },
+                            onKeep = { onIntent(StudyIntent.OnKeepCard) },
+                            rewrite = state.rewrite
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -115,16 +146,29 @@ internal fun StudyCardView(
 private fun Header(
     deck: String,
     position: Int,
-    sitting: Int
+    sitting: Int,
+    isOutdated: Boolean
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = deck,
-                modifier = Modifier.weight(weight = 1f),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            if (isOutdated) {
+                NotekeaChip(
+                    label = stringResource(resource = Res.string.study_changed),
+                    containerColor = NotekeaColors.warning.copy(alpha = WARNING_ALPHA)
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(weight = 1f))
 
             Text(
                 text = stringResource(Res.string.study_position, position, sitting),
@@ -138,6 +182,48 @@ private fun Header(
             fraction = (position - 1).toFloat() / sitting.coerceAtLeast(minimumValue = 1),
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+// The note's sentence the card was made from, under its answer (the developer's design A of 2026-11-26), a word
+// when the note no longer writes it, and what a hard card offers ([below]).
+@Composable
+private fun Source(
+    sentence: String,
+    isOutdated: Boolean,
+    below: @Composable () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = MaterialTheme.shapes.small
+            )
+            .padding(all = NotekeaDimensions.SpacingM),
+        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
+    ) {
+        Text(
+            text = stringResource(resource = Res.string.study_source),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Text(
+            text = "“$sentence”",
+            style = MaterialTheme.typography.bodyMedium,
+            fontStyle = FontStyle.Italic
+        )
+
+        if (isOutdated) {
+            Text(
+                text = stringResource(resource = Res.string.study_outdated),
+                style = MaterialTheme.typography.bodySmall,
+                color = NotekeaColors.warning
+            )
+        }
+
+        below()
     }
 }
 

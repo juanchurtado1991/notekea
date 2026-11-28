@@ -1,7 +1,6 @@
 package app.notekea.chat.eval
 
 import app.notekea.chat.domain.plan.ActionContext
-import app.notekea.chat.domain.prompt.ActionPrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import com.fasterxml.jackson.databind.JsonNode
@@ -83,10 +82,10 @@ internal class ToolArm(
         asked: String,
         context: ActionContext
     ): Pair<RawReply, EvalStep?> {
-        val user = ActionPrompt.messages(
-            request = asked,
-            context = context
-        ).last()
+        val user = ChatMessage(
+            role = ChatRole.USER,
+            text = "${context.described()}\n\nRequest: $asked"
+        )
 
         val reply = model.reply(
             messages = listOf(
@@ -104,57 +103,13 @@ internal class ToolArm(
 
     companion object {
         private const val MAX_TOKENS = 400
-        private const val PLAN_OPENING =
-            "You turn a request to a notes app into a plan of 1 to 5 steps, as JSON."
 
-        private val INSTRUCTIONS = ActionPrompt
-            .messages(
-                request = "",
-                context = ActionContext(today = "")
-            )
-            .first()
-            .text
-
-        /** Today's prompt and its plan, each step an action and any field ([isPerTool]: only its own). */
-        fun plan(isPerTool: Boolean): ToolArm = ToolArm(
-            name = if (isPerTool) "plan, a grammar per tool" else "plan, flat schema (today)",
-            system = INSTRUCTIONS,
-            request = { model ->
-                val schema =
-                    if (isPerTool) EvalTools.plan(tools = EvalTools.ALL) else ActionPrompt.SCHEMA
-
-                set<JsonNode>("json_schema", model.tree(text = schema))
-            },
-            read = { reply, model ->
-                EvalStep.of(
-                    written = model
-                        .parsed(text = reply.text)
-                        ?.path("steps")
-                        ?.path(0)
-                )
-            }
+        /** The model's own tool calls over [tools]. */
+        fun native(tools: List<EvalTool>): ToolArm = native(
+            name = "native calls",
+            system = EvalTools.SYSTEM,
+            tools = tools
         )
-
-        /** The model's own tool calls over [tools], with today's instructions ([isInstructed]) or a line. */
-        fun native(
-            tools: List<EvalTool>,
-            isInstructed: Boolean = false
-        ): ToolArm {
-            val system = if (!isInstructed) {
-                EvalTools.SYSTEM
-            } else {
-                INSTRUCTIONS.replace(
-                    oldValue = PLAN_OPENING,
-                    newValue = "You call the tool that does a request to a notes app."
-                )
-            }
-
-            return native(
-                name = if (isInstructed) "native calls, today's instructions" else "native calls",
-                system = system,
-                tools = tools
-            )
-        }
 
         private fun native(
             name: String,

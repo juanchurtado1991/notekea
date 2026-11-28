@@ -58,13 +58,12 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
         context: ToolContext
     ): ToolResult {
         val name = call.text(name = NOTE)
-        val missing = ToolResult(forModel = "read \"$name\": no note of that name.")
-        val path = context.noteNamed(name = name) ?: return missing
+        val path = context.lookedNamed(name = name) ?: return missingOf(name, context)
 
         // The open tab is no note when it is a folder or a view: it reads as a name nothing matches.
         val note = context.notes.firstOrNull {
             it.file.path == path
-        } ?: return missing
+        } ?: return missingOf(name, context)
 
         val read = attachedTexts.of(
             vaultPath = context.vaultPath,
@@ -190,8 +189,21 @@ class ReadTool(private val noteTextCache: NoteTextCache) : ChatTool {
         )
     }
 
+    // Asked of a note or a folder, a note elsewhere is not read, and the model is told why.
+    private fun missingOf(
+        name: String,
+        context: ToolContext
+    ): ToolResult {
+        val isElsewhere = context.noteNamed(name = name) != null
+        val why = if (isElsewhere) OUTSIDE else "no note of that name."
+
+        return ToolResult(forModel = "read \"$name\": $why")
+    }
+
     companion object {
         const val NAME = "read"
+        private const val OUTSIDE =
+            "not in the note or the folder this question is asked of; answer from those only."
         const val NOTE = "note"
         const val SECTION = "section"
         private const val SECTION_CHARS = 6_000

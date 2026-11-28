@@ -4,7 +4,7 @@ import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
 import app.notekea.chat.data.GhostModelJson
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.loop.TaskFramer
 import app.notekea.chat.domain.loop.TurnFrames
 import app.notekea.chat.domain.loop.TurnRouter
@@ -54,15 +54,22 @@ class FrameEvalChatModelTest {
         onGpu = true
     )
 
-    private val engine = LlamaLlmEngine(
+    private val llama = LlamaLlmEngine(
         setupSource = { Outcome.Success(value = setup) },
         nativeFolder = natives,
         dispatchers = dispatchers
     )
 
+    // The model, its replies kept on disk when a round asks for it (`ReplyCache`).
+    private val engine = ReplyCache.around(
+        engine = llama,
+        modelPath = setup.modelPath
+    )
+
     @AfterTest
     fun tearDown() {
-        engine.close()
+        (engine as? ReplyCache)?.note()
+        llama.close()
         embedder.close()
     }
 
@@ -133,7 +140,7 @@ class FrameEvalChatModelTest {
                 llmEngine = trace.recorded,
                 modelJson = GhostModelJson()
             ),
-            answerFromNotes = AnswerFromNotesUseCase(embedder, indexed.index, cache, engine),
+            passageSearch = PassageSearch(embedder, indexed.index, cache, engine),
             vaultGuide = vaultGuide
         )
 

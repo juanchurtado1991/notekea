@@ -35,7 +35,7 @@ internal object TopicNotes {
             .mapNotNull { context.noteNamed(name = it.groupValues[1].trim()) }
             .toSet()
 
-        val near = context.notes.filter { other ->
+        val near = context.looked.filter { other ->
             val path = other.file.path
             val isNear = path in linked || other.allTags.any { it.lowercase() in tags }
 

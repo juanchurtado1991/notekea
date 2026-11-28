@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.sources
 
-import app.notekea.chat.domain.prompt.AgentTaskPrompt
+import app.notekea.chat.domain.prompt.FoundAnswerPrompt
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +22,7 @@ class AnswerFromPagesUseCase(private val llmEngine: LlmEngine) {
 
         llmEngine
             .generate(
-                messages = AgentTaskPrompt.answer(
+                messages = FoundAnswerPrompt.answer(
                     task = question,
                     found = found
                 ),

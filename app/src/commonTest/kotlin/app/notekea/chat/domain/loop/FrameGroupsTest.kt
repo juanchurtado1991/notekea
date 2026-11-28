@@ -25,6 +25,27 @@ class FrameGroupsTest {
     private val habits = candidate(path = "Books/Atomic Habits.md")
     private val shown = listOf(castro, mendez, contacts, home, work, dune, habits)
 
+    // Dev, 2026-11-25: of the sets left open across folders by names that differ, none was right to ask.
+    @Test
+    fun `rivals are notes of one folder or one name, and a meeting with Marco is no rival of Marco`() {
+        val marco = candidate(path = "People/Marco Brandt.md")
+        val meeting = candidate(path = "Meetings/2026-10-28 Marco Brandt.md")
+        val laura = candidate(path = "Contacts/Laura Castro.md")
+
+        assertEquals(
+            expected = listOf(
+                emptyList(),
+                listOf(castro, mendez),
+                listOf(castro, laura)
+            ),
+            actual = listOf(
+                FrameGroups.rivalsOf(group = listOf(marco, meeting)),
+                FrameGroups.rivalsOf(group = listOf(castro, mendez, meeting)),
+                FrameGroups.rivalsOf(group = listOf(castro, laura, home))
+            )
+        )
+    }
+
     @Test
     fun `the notes whose names share a word the task writes are a set`() {
         assertEquals(
@@ -66,6 +87,23 @@ class FrameGroupsTest {
         assertEquals(
             expected = listOf(emptyList(), listOf(listOf(azoresFood))),
             actual = listOf(none, named)
+        )
+    }
+
+    // The 12B's blind pool, seed 10, 2026-11-28: in "Chris's note", note is a word of Meeting Notes too, so the two
+    // Chris made no set and the model picked one.
+    @Test
+    fun `a name the task writes makes its set alone`() {
+        val doyle = candidate(path = "People/Chris Doyle.md")
+        val okafor = candidate(path = "People/Chris Okafor.md")
+        val minutes = candidate(path = "Work/Meeting Notes.md")
+
+        assertEquals(
+            expected = listOf(listOf(doyle, okafor)),
+            actual = FrameGroups.of(
+                task = "Chris's note",
+                candidates = listOf(doyle, okafor, minutes)
+            )
         )
     }
 
@@ -176,6 +214,30 @@ class FrameGroupsTest {
                 FrameGroups.toldOf(
                     task = "add 'Japan photos' to Tomás's note",
                     group = listOf(herrera, vargas)
+                )
+            )
+        )
+    }
+
+    // Dev, 2026-11-24: "my lab budget" was open between Lab/Budget and Travel/Budget, as "lab" has three letters, and
+    // "the team budget" between two whose first heading says which is the team's.
+    @Test
+    fun `a folder of three letters and a note's own title settle the set`() {
+        val lab = candidate(path = "Lab/Budget.md")
+        val travel = candidate(path = "Travel/Budget.md")
+        val admin = candidate(path = "Admin/Budget.md").copy(title = "# Team budget 2026")
+        val hiring = candidate(path = "Hiring/Budget.md").copy(title = "# Open roles")
+
+        assertEquals(
+            expected = listOf(lab, admin),
+            actual = listOf(
+                FrameGroups.settledOf(
+                    task = "how much of my lab budget is paid?",
+                    group = listOf(lab, travel)
+                ),
+                FrameGroups.settledOf(
+                    task = "how much of the team budget is left?",
+                    group = listOf(admin, hiring)
                 )
             )
         )

@@ -158,8 +158,6 @@ import app.notekea.resources.chat_problem_query
 import app.notekea.resources.chat_problem_query_es
 import app.notekea.resources.chat_problem_query_failed
 import app.notekea.resources.chat_problem_query_failed_es
-import app.notekea.resources.chat_problem_refused
-import app.notekea.resources.chat_problem_refused_es
 import app.notekea.resources.chat_problem_task
 import app.notekea.resources.chat_problem_task_es
 import app.notekea.resources.chat_retry
@@ -188,20 +186,10 @@ import app.notekea.resources.chat_step_clipping
 import app.notekea.resources.chat_step_clipping_es
 import app.notekea.resources.chat_step_composing
 import app.notekea.resources.chat_step_composing_es
-import app.notekea.resources.chat_step_drafting
-import app.notekea.resources.chat_step_drafting_es
 import app.notekea.resources.chat_step_finding
 import app.notekea.resources.chat_step_finding_es
-import app.notekea.resources.chat_step_further
-import app.notekea.resources.chat_step_further_es
 import app.notekea.resources.chat_step_planning
 import app.notekea.resources.chat_step_planning_es
-import app.notekea.resources.chat_step_reading
-import app.notekea.resources.chat_step_reading_es
-import app.notekea.resources.chat_step_reading_one
-import app.notekea.resources.chat_step_reading_one_es
-import app.notekea.resources.chat_step_searching
-import app.notekea.resources.chat_step_searching_es
 import app.notekea.resources.chat_step_working
 import app.notekea.resources.chat_step_working_es
 import app.notekea.resources.chat_step_writing
@@ -246,7 +234,6 @@ private fun replyStringPreview() {
 
 // The chat's replies in Spanish, the other language its models are evaluated in (docs/answer-quality.md).
 private val SPANISH: Map<StringResource, StringResource> = mapOf(
-    Res.string.chat_step_further to Res.string.chat_step_further_es,
     Res.string.chat_not_found to Res.string.chat_not_found_es,
     Res.string.chat_stopped to Res.string.chat_stopped_es,
     Res.string.chat_acted to Res.string.chat_acted_es,
@@ -278,11 +265,7 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_retry to Res.string.chat_retry_es,
     Res.string.chat_sources to Res.string.chat_sources_es,
     Res.string.chat_small_hint to Res.string.chat_small_hint_es,
-    Res.string.chat_step_searching to Res.string.chat_step_searching_es,
-    Res.string.chat_step_reading to Res.string.chat_step_reading_es,
-    Res.string.chat_step_reading_one to Res.string.chat_step_reading_one_es,
     Res.string.chat_step_writing to Res.string.chat_step_writing_es,
-    Res.string.chat_step_drafting to Res.string.chat_step_drafting_es,
     Res.string.chat_step_planning to Res.string.chat_step_planning_es,
     Res.string.chat_step_composing to Res.string.chat_step_composing_es,
     Res.string.chat_action_will to Res.string.chat_action_will_es,
@@ -344,6 +327,5 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_problem_query to Res.string.chat_problem_query_es,
     Res.string.chat_problem_query_failed to Res.string.chat_problem_query_failed_es,
     Res.string.chat_problem_long to Res.string.chat_problem_long_es,
-    Res.string.chat_problem_failed to Res.string.chat_problem_failed_es,
-    Res.string.chat_problem_refused to Res.string.chat_problem_refused_es
+    Res.string.chat_problem_failed to Res.string.chat_problem_failed_es
 )

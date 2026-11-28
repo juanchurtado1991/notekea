@@ -99,6 +99,29 @@ class TaskFramerTest {
             )
         }
 
+    // Dev, 2026-11-25: "when does Marco go on sabbatical?" was asked between his meeting and his note.
+    @Test
+    fun `notes of other kinds that share a word are no open set, and the model picks among them`() =
+        runTest {
+            val frame = frameOf(
+                task = "when does Marco go on sabbatical?",
+                candidates = listOf(
+                    candidate(path = "Meetings/2026-10-28 Marco Brandt.md"),
+                    candidate(path = "People/Marco Brandt.md")
+                ),
+                replies = mapOf(
+                    FramePrompts.COUNT to """{"count":"one","words":"Marco","thing":"note"}""",
+                    FramePrompts.PICK to """{"pick":"N1"}"""
+                ),
+                isChange = false
+            )
+
+            assertEquals(
+                expected = listOf(false, "Meetings/2026-10-28 Marco Brandt.md", FrameReason.PICK),
+                actual = listOf(frame?.isOpen, frame?.meant?.value, frame?.reason)
+            )
+        }
+
     // The frame alone, 2026-11-18: "add a task in Tom's note: call him about the March trip" was told apart by the
     // one Tom whose note writes March, a word of what to add, not of which note.
     @Test
@@ -180,6 +203,60 @@ class TaskFramerTest {
             )
         }
 
+    // The 12B's blind pool, seed 10, 2026-11-28: "move my meeting with Ms. Lee" was settled on the one meeting of
+    // several the model marked.
+    @Test
+    fun `an entry marked is open with those that write the same task words, settled by a word of its own`() =
+        runTest {
+            val visits = candidate(
+                path = "Health/Visits.md",
+                entries = listOf("- 12/01 dentist cleaning", "- 12/09 dentist filling", "- 12/12 haircut")
+            )
+
+            suspend fun marked(task: String) = frameOf(
+                task = task,
+                candidates = listOf(visits),
+                replies = mapOf(
+                    FramePrompts.COUNT to appointment,
+                    FramePrompts.PICK to """{"pick":"N1"}""",
+                    FramePrompts.MARK_ENTRIES to """{"E1":"yes","E2":"no","E3":"no"}"""
+                )
+            )
+
+            val shared = marked(task = "move the dentist appointment to 11:00")
+            val own = marked(task = "move the dentist cleaning to 11:00")
+
+            assertEquals(
+                expected = listOf(visits.entries.take(n = 2), visits.entries[0]),
+                actual = listOf(shared?.openEntries, own?.entry)
+            )
+        }
+
+    // The E4B's blind pool, seed 10, 2026-11-28: every entry of "Contrato maíz" writes maíz, and the one marked was
+    // left open with the others.
+    @Test
+    fun `the words of the note's own name tell none of its entries apart`() = runTest {
+        val contract = candidate(
+            path = "Contratos/Contrato maíz.md",
+            entries = listOf("- Producto: maíz blanco criollo", "- Solo maíz blanco, seco")
+        )
+
+        val frame = frameOf(
+            task = "ponle status firmado al contrato de maíz",
+            candidates = listOf(contract),
+            replies = mapOf(
+                FramePrompts.COUNT to appointment,
+                FramePrompts.PICK to """{"pick":"N1"}""",
+                FramePrompts.MARK_ENTRIES to """{"E1":"yes","E2":"no"}"""
+            )
+        )
+
+        assertEquals(
+            expected = contract.entries[0],
+            actual = frame?.entry
+        )
+    }
+
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
     fun `a question about an item marks no entry, as it may add them up`() = runTest {
@@ -249,4 +326,21 @@ class TaskFramerTest {
                 actual = listOf(every?.isSeveral, calls, cut, nothing, engine.generated.size)
             )
         }
+
+    @Test
+    fun `what the task says to tell its thing from another of its name settles it`() = runTest {
+        val words =
+            """{"count":"one","words":"the budget","which":"the kitchen one","thing":"note"}"""
+
+        val frame = frameOf(
+            task = "what is the total of the budget, the kitchen one?",
+            candidates = listOf(kitchen, work),
+            replies = mapOf(FramePrompts.COUNT to words)
+        )
+
+        assertEquals(
+            expected = kitchen.path,
+            actual = frame?.meant
+        )
+    }
 }

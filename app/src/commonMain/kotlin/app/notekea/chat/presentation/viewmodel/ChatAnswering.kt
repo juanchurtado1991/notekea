@@ -1,23 +1,13 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.ChatScope
-import app.notekea.chat.domain.TurnOutcome
-import app.notekea.chat.domain.agent.AgentUse
-import app.notekea.chat.domain.answer.AnswerStep
-import app.notekea.chat.presentation.model.ChatEntry
-import app.notekea.chat.presentation.model.ChatMode
-import app.notekea.chat.presentation.model.ChatStep
-import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.RelativePath
 
 /**
- * A question answered for [ChatViewModel]: planned in the whole vault (an action, talk, help) or answered from a note
- * or a folder, written step by step, and handed to the agent when it asks for it or when Auto found no answer.
+ * A question answered for [ChatViewModel]: worked on by the agent's loop, of the whole vault or of the open note or
+ * its folder; talk, help and the overview the loop hands back are written by the chat's own replies.
  */
 internal class ChatAnswering(
     private val keeping: ChatKeeping,
-    private val actions: ChatActions,
     private val agent: ChatAgent,
     private val replies: ChatReplies,
     private val host: ChatHost
@@ -29,97 +19,21 @@ internal class ChatAnswering(
     ) {
         val history = keeping.historyBefore(id = id)
 
-        val current = host.state.value
-
-        val isVault = scope == ChatScope.VAULT
-
-        // With the one loop on, it takes every request of the whole vault; talk, help and the overview it hands back.
-        if (isVault && agent.isLooping()) {
-            val handed =
-                agent.takeOver(id, question, host.notes, history, host.activeNote) ?: return
-
-            return written(
-                id = id,
-                question = question,
-                scope = scope,
-                reply = handed,
-                history = history
-            )
-        }
-
-        // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
-        val reply = if (isVault) {
-            actions.act(
-                id = id,
-                request = question,
-                notes = host.notes,
-                history = history,
-                openNote = host.activeNote,
-                agentUse = current.mode.agentUse(isAgentOffered = current.isAgentOffered)
-            )
-        } else {
-            ChatReply.Question(question = question)
-        }
-
-        // The agent ends on a card or with what it found, never in an answer of 3.2.
-        if (reply is ChatReply.Agent) {
-            agent.takeOver(id, question, host.notes, history, host.activeNote, reply.planned)
-
-            return
-        }
-
-        if (reply == ChatReply.Acted) return
-
-        written(
+        val reply = agent.takeOver(
             id = id,
-            question = question,
-            scope = scope,
-            reply = reply,
-            history = history
-        )
-
-        // Auto does what it can: a question the notes' passages did not answer is worked on by the agent.
-        val isAgentNext =
-            host.state.value.entries.lastOrNull { it.id == id }?.outcome == TurnOutcome.NOT_FOUND &&
-                scope == ChatScope.VAULT &&
-                current.mode.agentUse(current.isAgentOffered) == AgentUse.WHEN_STUCK
-
-        if (isAgentNext) agent.takeOver(id, question, host.notes, history, host.activeNote)
-    }
-
-    private suspend fun written(
-        id: Long,
-        question: String,
-        scope: ChatScope,
-        reply: ChatReply,
-        history: List<ChatExchange>
-    ) {
-        val isDeep = host
-            .state
-            .value
-            .isDeepFor(reply = reply)
-
-        // Tables found are answered in words while the turn is still answering: its end was the action's
-        // (the chat probe, 2026-11-11: the reply was cut at its first words).
-        host
-            .update(id) {
-                it.copy(
-                    answeredWith = if (isDeep) ChatMode.DEEP else ChatMode.FAST,
-                    outcome = if (reply is ChatReply.FromFound) null else it.outcome
-                )
-            }
+            task = question,
+            notes = host.notes,
+            history = history,
+            openNote = host.activeNote,
+            scope = notesOf(scope, host.notes, host.activeNote)
+        ) ?: return
 
         replies
             .stepsFor(
                 reply = reply,
                 message = question,
                 history = history,
-                notes = host.notes,
-                only = notesOf(scope, host.notes, host.activeNote),
-                isDeep = isDeep,
-                onStep = { step ->
-                    host.update(id) { it.copy(step = step) }
-                }
+                notes = host.notes
             )
             .collect { step -> host.follow(id, step) }
     }

@@ -114,14 +114,11 @@ class LlamaLlmEngine(
         when (val found = setupSource.current()) {
             is Outcome.Success -> {
                 val isSmall = found.value.size == ModelSize.SMALL
-                val hasDeepAnswer = found.value.size in DEEP_ANSWER_SIZES
 
                 Outcome.Success(
                     value = LlmModelInfo(
                         isSmall = isSmall,
                         tier = TIERS.getValue(found.value.size),
-                        hasDeepAnswer = hasDeepAnswer,
-                        hasAgent = found.value.size in AGENT_SIZES,
                         contextTokens = found.value.contextTokens * found.value.slots
                     )
                 )
@@ -340,13 +337,6 @@ class LlamaLlmEngine(
         // Closing with Koin (a case of the Auto-Test ending) waits this long for a reply; quitting waits longer.
         private val CLOSE_WAIT = 2.seconds
         private val CLOSE_POLL = 50.milliseconds
-
-        // The sizes whose answers three drafts and a vote make better on the 3.4 set (docs/answer-quality.md, 3.6).
-        val DEEP_ANSWER_SIZES = setOf(ModelSize.MEDIUM)
-
-        // Agent mode (4.7): Medium (83 % on its evaluation) and Large (70 %, by the developer's choice of
-        // 2026-11-11); not Small (10 %). docs/answer-quality.md, 4.7.
-        val AGENT_SIZES = setOf(ModelSize.MEDIUM, ModelSize.LARGE)
 
         val TIERS = mapOf(
             ModelSize.SMALL to ModelTier.SMALL,

@@ -65,6 +65,9 @@ class TaskFramer(
         // the garden plan", budget names the property, not the note (the loop's run of 2026-11-17).
         val words = reply.words.ifBlank { task }
 
+        // What tells it from another of its kind is no word of its name: "Rita, the one from the book club".
+        val told = "$words ${reply.which}"
+
         val group = FrameGroups
             .of(
                 task = words,
@@ -74,16 +77,27 @@ class TaskFramer(
 
         val (fits, reason) = group
             ?.let {
-                fitsOf(task, words, it, memory) ?: return null
+                fitsOf(task, told, it, memory) ?: return null
             }
             ?: (emptyList<FrameCandidates.Candidate>() to FrameReason.PICK)
 
         // None marked is no answer either: the 4B marks every one "no" when it cannot tell them apart (the frame
         // alone, 2026-11-18), so the set stays open, as when several are marked.
-        if (group != null && fits.size != 1) return targetsOf(fits.ifEmpty { group }) to reason
+        val open = group
+            ?.takeIf {
+                fits.size != 1
+            }
+            ?.let {
+                fits.ifEmpty { it }
+            }
+            .orEmpty()
 
+        val rivals = FrameGroups.rivalsOf(group = open)
+        if (rivals.isNotEmpty()) return targetsOf(rivals) to reason
+
+        // Notes of other kinds that share a word are told apart by what the task is about: the model picks one.
         val picked = fits.singleOrNull()
-            ?: asking.pickOf(task, candidates, memory)
+            ?: asking.pickOf(task, open.ifEmpty { candidates }, memory)
             ?: return emptyList<FrameTarget>() to FrameReason.PICK
 
         // The note picked has namesakes the task's words did not find, in another language ("el presupuesto" for two
@@ -99,12 +113,12 @@ class TaskFramer(
         }
 
         val (meant, by) = if (group == null && namesakes.size > 1) {
-            val (fitting, said) = fitsOf(task, words, namesakes, memory) ?: return null
+            val (fitting, said) = fitsOf(task, told, namesakes, memory) ?: return null
             if (fitting.size != 1) return targetsOf(fitting.ifEmpty { namesakes }) to said
 
             fitting.single() to said
         } else {
-            picked to if (fits.isEmpty()) FrameReason.PICK else reason
+            picked to if (fits.size == 1) reason else FrameReason.PICK
         }
 
         return entriesOf(task, reply, meant, memory, by)
@@ -123,7 +137,11 @@ class TaskFramer(
         // None marked is the whole note: leaving them open made the 4B ask on 99 of 319 tasks that need no
         // question (the frame alone, 2026-11-18), as it marks every entry "no" for a question about the note.
         val entries = if (reply.isItem && meant.entries.size > 1) {
-            asking.markedEntriesOf(task, meant, memory) ?: return null
+            val marked = asking.markedEntriesOf(task, meant, memory) ?: return null
+
+            marked.singleOrNull()?.let {
+                EntryRivals.of(task, meant.path.nameWithoutExtension, it, meant.entries)
+            } ?: marked
         } else {
             emptyList()
         }

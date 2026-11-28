@@ -133,4 +133,30 @@ class ToolRegistryTest {
             actual = listOf<Any>(blind, reads.read.map { it.value }, reads.blind)
         )
     }
+
+    // Dev, 2026-11-24: a reason before each call halved the figures worked out wrong, and brought questions back; kept
+    // to the tools that work a figure out, it is written after the tool and before its figures.
+    @Test
+    fun `a reason is a short text the grammar asks for before the rest of the call`() {
+        val figures = FakeTool(
+            name = "tally",
+            description = "figures.",
+            arguments = listOf(
+                ToolArgument(
+                    name = "why",
+                    isReason = true
+                ),
+                ToolArgument(name = "how")
+            )
+        )
+
+        val reason = "{\"type\":\"string\",\"maxLength\":240}"
+
+        assertEquals(
+            expected = "{\"anyOf\":[{\"type\":\"object\",\"properties\":{\"tool\":{\"const\":\"tally\"}," +
+                "\"why\":$reason,\"how\":{\"type\":\"string\"}},\"required\":[\"tool\",\"why\",\"how\"]," +
+                "\"additionalProperties\":false}]}",
+            actual = ToolRegistry(tools = listOf(figures)).schema()
+        )
+    }
 }

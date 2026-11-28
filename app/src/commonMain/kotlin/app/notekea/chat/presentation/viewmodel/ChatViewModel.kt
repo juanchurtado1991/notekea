@@ -5,10 +5,7 @@ import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.CompactChatUseCase
-import app.notekea.chat.domain.agent.AgentAnswerUseCase
-import app.notekea.chat.domain.agent.AgentTaskUseCase
-import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
@@ -16,7 +13,6 @@ import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.conversation.ConversationMemory
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.loop.ChatLoop
-import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.chat.presentation.model.ChatEffect
@@ -46,21 +42,16 @@ import kotlinx.coroutines.flow.flow
 import kotlin.time.Clock
 
 /**
- * The chat of the vault at [vaultPath]: questions answered from its notes ([answerFromNotes]) one at a time, the
+ * The chat of the vault at [vaultPath]: requests worked on by the agent's loop ([ChatLoop]) one at a time, the
  * answer shown as it is written, kept in the vault's history ([historyStore]); the model in use is looked at when the
  * chat shows, so it can offer Settings → AI model instead of a question field that cannot answer.
  */
 class ChatViewModel(
     private val vaultPath: String,
-    answerFromNotes: AnswerFromNotesUseCase,
     converse: ConverseUseCase,
-    agentAnswer: AgentAnswerUseCase,
     answerHelp: AnswerHelpUseCase,
     describeVault: DescribeVaultUseCase,
-    answerFromFound: AnswerFromFoundUseCase,
     conventions: PlatformConventions,
-    actOnRequest: ActOnRequestUseCase,
-    agentTask: AgentTaskUseCase,
     compactChat: CompactChatUseCase,
     actionRunner: ActionRunner,
     localCalendar: LocalCalendar,
@@ -69,7 +60,7 @@ class ChatViewModel(
     private val clipboard: TextClipboard,
     private val llmEngine: LlmEngine,
     sources: ChatSources,
-    loop: ChatLoop? = null
+    loop: ChatLoop
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
 
     private val host = object :
@@ -102,21 +93,16 @@ class ChatViewModel(
 
     private val replies = ChatReplies(
         vaultPath = vaultPath,
-        answerFromNotes = answerFromNotes,
         converse = converse,
-        agentAnswer = agentAnswer,
         answerHelp = answerHelp,
         describeVault = describeVault,
-        answerFromFound = answerFromFound,
         shortcuts = HelpShortcuts.of(conventions = conventions),
-        today = { actions.today() },
         todayIn = { actions.todayIn(notes = it) },
         working = { state.value.shared }
     )
 
     private val actions = ChatActions(
         vaultPath = vaultPath,
-        actOnRequest = actOnRequest,
         actionRunner = actionRunner,
         localCalendar = localCalendar,
         clock = clock,
@@ -148,7 +134,6 @@ class ChatViewModel(
 
     private val agent = ChatAgent(
         vaultPath = vaultPath,
-        agentTask = agentTask,
         actions = actions,
         host = host,
         loop = loop
@@ -156,7 +141,6 @@ class ChatViewModel(
 
     private val answering = ChatAnswering(
         keeping = keeping,
-        actions = actions,
         agent = agent,
         replies = replies,
         host = host
@@ -189,12 +173,7 @@ class ChatViewModel(
 
             is ChatIntent.OnScopeSelect -> reduce { it.copy(scope = intent.scope) }
 
-            is ChatIntent.OnSourceClick -> emit(
-                effect = ChatEffect.Reveal(
-                    note = intent.source.note,
-                    range = intent.source.range
-                )
-            )
+            is ChatIntent.OnSourceClick -> emit(effect = shownOf(source = intent.source))
 
             is ChatIntent.OnRetry -> retry(id = intent.id)
 
@@ -203,8 +182,6 @@ class ChatViewModel(
             ChatIntent.OnCopyChat -> clipboard.copy(text = ChatTranscript.of(state = state.value))
 
             ChatIntent.OnCompact -> keeping.remember(isAsked = true)
-
-            is ChatIntent.OnModeChoose -> reduce { it.copy(mode = intent.mode) }
 
             ChatIntent.OnModelSettingsOpen -> emit(effect = ChatEffect.OpenModelSettings)
 
@@ -349,7 +326,6 @@ class ChatViewModel(
             step = ChatStep.PLANNING,
             answer = "",
             sources = emptyList(),
-            readNotes = 0,
             scopeName = scopeName,
             outcome = null,
             error = null
@@ -385,10 +361,8 @@ class ChatViewModel(
 
         if (step is AnswerStep.Failed) noteModelOf(error = step.error)
 
-        val isEnd =
-            step is AnswerStep.Done ||
-                step == AnswerStep.NotFound ||
-                step is AnswerStep.Failed
+        val isEnd = step is AnswerStep.Done ||
+            step is AnswerStep.Failed
 
         if (isEnd) keeping.save()
     }
@@ -418,6 +392,16 @@ class ChatViewModel(
         }
     }
 
+    // A note the answer read whole has no passage to show: the note opens.
+    private fun shownOf(source: AnswerSource): ChatEffect = if (source.range.isEmpty()) {
+        ChatEffect.Open(note = source.note)
+    } else {
+        ChatEffect.Reveal(
+            note = source.note,
+            range = source.range
+        )
+    }
+
     private fun checkModel() {
         launchLogged(message = UNEXPECTED_ERROR_MESSAGE) {
             val status = when (val ready = llmEngine.readiness()) {
@@ -427,9 +411,7 @@ class ChatViewModel(
                     reduce {
                         it.copy(
                             isSmall = info.isSmall,
-                            tier = info.tier,
-                            isDeepOffered = info.hasDeepAnswer,
-                            isAgentOffered = info.hasAgent
+                            tier = info.tier
                         )
                     }
 

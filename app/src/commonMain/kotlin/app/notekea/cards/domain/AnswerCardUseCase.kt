@@ -21,18 +21,10 @@ class AnswerCardUseCase(private val noteContentStore: NoteContentStore) {
             path = card.note
         ) ?: return null
 
-        val current = CardFormat.cardsOf(
-            note = card.note,
-            text = text
-        )
-
-        val found = current.firstOrNull {
-            it.line == card.line && it.question == card.question
-        }
-            ?: current.firstOrNull {
-                it.question == card.question
-            }
-            ?: return null
+        val found = CardFormat.located(
+            text = text,
+            card = card
+        ) ?: return null
 
         val scheduled = CardSchedule.after(
             card = found,

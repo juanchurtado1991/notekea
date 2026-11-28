@@ -7,6 +7,8 @@ import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteSections
+import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -104,7 +106,8 @@ class StudyCardsUseCasesTest {
             val made = MakeCardsUseCase(
                 llmEngine = engine,
                 reader = GhostCardsReader(),
-                noteContentStore = store
+                noteContentStore = store,
+                noteSections = NoteSections(outlineFinder = OutlineFinder())
             )(
                 vaultPath = VAULT,
                 note = note
@@ -124,7 +127,8 @@ class StudyCardsUseCasesTest {
         val made = MakeCardsUseCase(
             llmEngine = engine,
             reader = GhostCardsReader(),
-            noteContentStore = store
+            noteContentStore = store,
+            noteSections = NoteSections(outlineFinder = OutlineFinder())
         )(
             vaultPath = VAULT,
             note = note
@@ -133,6 +137,49 @@ class StudyCardsUseCasesTest {
         assertEquals(
             expected = Outcome.Failure(error = CardsProblem.NONE_BACKED),
             actual = made
+        )
+    }
+
+    @Test
+    fun `each card proposed is told by the first check it fails`() = runTest {
+        store.texts[note] = "# Peru\n\nThe capital of Peru is Lima, on the coast.\n\n#flashcards\nOld question::old"
+
+        engine.reply = {
+            "{\"language\":\"English\",\"cards\":[" +
+                "{\"question\":\"Capital of Peru?\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"Old question\",\"answer\":\"old\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"Its river?\",\"answer\":\"Rímac\",\"sentence\":\"Lima lies on the river Rímac\"}," +
+                "{\"question\":\"Its coast?\",\"answer\":\"Pacific\",\"sentence\":\"Lima, on the coast\"}," +
+                "{\"question\":\"Lima's people?\",\"answer\":\"Lima 10 million\",\"sentence\":\"The capital of Peru is Lima\"}," +
+                "{\"question\":\"capital of peru?\",\"answer\":\"Lima\",\"sentence\":\"The capital of Peru is Lima\"}]}"
+        }
+
+        engine.scoreOf = { query, _ ->
+            if ("Lima" in query) 2f else -8f
+        }
+
+        val judged = MakeCardsUseCase(
+            llmEngine = engine,
+            reader = GhostCardsReader(),
+            noteContentStore = store,
+            noteSections = NoteSections(outlineFinder = OutlineFinder())
+        ).judged(
+            vaultPath = VAULT,
+            note = note
+        )
+
+        assertEquals(
+            expected = listOf(
+                CardVerdict.KEPT,
+                CardVerdict.BLANK,
+                CardVerdict.KNOWN,
+                CardVerdict.UNQUOTED,
+                CardVerdict.UNBACKED,
+                CardVerdict.UNFIGURED,
+                CardVerdict.REPEATED
+            ),
+            actual = (judged as Outcome.Success).value.map { it.verdict }
         )
     }
 }

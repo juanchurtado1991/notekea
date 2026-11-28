@@ -3,7 +3,6 @@ package app.notekea.chat.presentation
 import app.notekea.chat.presentation.model.AnswerMarkdown
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.chat.presentation.model.ChatStep
-import app.notekea.chat.presentation.model.PassedStep
 import app.notekea.chat.presentation.viewmodel.changedBy
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,38 +46,17 @@ class AnswerMarkdownTest {
 
     @Test
     fun `an answer remembers each step it left, once, and none after it is done`() {
-        val asked = ChatPreviewData.writing.copy(
-            step = ChatStep.PLANNING,
-            readNotes = 0
-        )
+        val asked = ChatPreviewData.writing.copy(step = ChatStep.PLANNING)
 
         val entry = asked
-            .changedBy { it.copy(step = ChatStep.SEARCHING) }
+            .changedBy { it.copy(step = ChatStep.WORKING) }
             .changedBy { it.copy(answer = "same step") }
-            .changedBy {
-                it.copy(
-                    step = ChatStep.READING,
-                    readNotes = 6
-                )
-            }
-            .changedBy { it.copy(step = ChatStep.DONE) }
             .changedBy { it.copy(step = ChatStep.WRITING) }
+            .changedBy { it.copy(step = ChatStep.DONE) }
+            .changedBy { it.copy(step = ChatStep.COMPOSING) }
 
         assertEquals(
-            expected = listOf(
-                PassedStep(
-                    step = ChatStep.PLANNING,
-                    readNotes = 0
-                ),
-                PassedStep(
-                    step = ChatStep.SEARCHING,
-                    readNotes = 0
-                ),
-                PassedStep(
-                    step = ChatStep.READING,
-                    readNotes = 6
-                )
-            ),
+            expected = listOf(ChatStep.PLANNING, ChatStep.WORKING, ChatStep.WRITING),
             actual = entry.passed
         )
     }

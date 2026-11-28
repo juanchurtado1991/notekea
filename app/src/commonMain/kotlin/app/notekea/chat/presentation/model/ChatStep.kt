@@ -6,15 +6,9 @@ import app.notekea.chat.presentation.viewmodel.after
 enum class ChatStep {
     /** The model chooses whether to answer or what to do. */
     PLANNING,
-    SEARCHING,
 
-    /** The first search found nothing: the agent searches with other words or reads whole notes. */
-    LOOKING_FURTHER,
-    READING,
+    /** The answer is written. */
     WRITING,
-
-    /** Deep answer: drafts are written and compared, so nothing shows before the chosen one. */
-    DRAFTING,
 
     /** The text of the notes an action will write is being written. */
     COMPOSING,

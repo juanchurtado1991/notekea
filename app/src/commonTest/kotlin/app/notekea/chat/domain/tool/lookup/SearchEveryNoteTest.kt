@@ -1,6 +1,6 @@
 package app.notekea.chat.domain.tool.lookup
 
-import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.PassageSearch
 import app.notekea.chat.domain.tool.ToolCall
 import app.notekea.chat.domain.tool.ToolContext
 import app.notekea.core.embedding.domain.FakeTextEmbedder
@@ -27,7 +27,7 @@ class SearchEveryNoteTest {
     private val days = (20..23).map { RelativePath(value = "Journal/2026-10-$it.md") }
 
     private val search = SearchTool(
-        answerFromNotes = AnswerFromNotesUseCase(
+        passageSearch = PassageSearch(
             textEmbedder = FakeTextEmbedder(),
             vectorIndex = FakeVectorIndex(),
             noteTextCache = cache,

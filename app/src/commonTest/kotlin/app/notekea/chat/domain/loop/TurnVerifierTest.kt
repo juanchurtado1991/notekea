@@ -1,5 +1,5 @@
 package app.notekea.chat.domain.loop
-import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.data.GhostTextNotesReader
 import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.ProposalCheck
 import app.notekea.chat.domain.agent.Remembering
@@ -34,7 +34,7 @@ import kotlin.time.Clock
 
 /**
  * The loop's checks before a turn ends (`docs/agent-loop.md`, "Why the loop fails", items 3 and 4): a task that can
- * mean several notes is asked back, and a change to several notes is listed back once to drop what does not fit.
+ * mean several notes is asked back, and each note of a change to several is marked before the card.
  */
 class TurnVerifierTest {
     private val engine = FakeLlmEngine()
@@ -60,6 +60,7 @@ class TurnVerifierTest {
                 ),
                 WorkKind.ORGANIZE to listOf(
                     ChangeTools.addTag,
+                    ChangeTools.append,
                     ChangeTools.createNote,
                     AskUserTool(),
                     ProposeTool()
@@ -87,7 +88,8 @@ class TurnVerifierTest {
     private fun script(
         vararg calls: String,
         work: String = "ask",
-        skill: String = "none"
+        skill: String = "none",
+        marks: String = ""
     ) {
         val left = ArrayDeque(elements = calls.toList())
         val route = """{"work":"$work","skill":"$skill"}"""
@@ -98,6 +100,7 @@ class TurnVerifierTest {
             when {
                 asked.startsWith(prefix = "You say how a request") -> route
                 asked.startsWith(prefix = CALLS) -> left.removeFirst()
+                asked.startsWith(prefix = REVIEW) -> marks
                 else -> "The rent is **11,400 euros** a year."
             }
         }
@@ -221,6 +224,50 @@ class TurnVerifierTest {
             )
         }
 
+    // The 12B's blind pool, seed 10, 2026-11-28: asked to give Begoña's note a phone property, it was held to ask
+    // which of the note's entries, though a property is on the note, none of its entries.
+    @Test
+    fun `entries left open hold back a change written in the note, not one to the note as a whole`() =
+        runTest {
+            val laura = RelativePath(value = "People/Laura Castro.md")
+
+            frames += TaskFrame(
+                targets = listOf(
+                    FrameTarget(
+                        note = laura,
+                        entries = listOf("- Email: laura@example.com", "- Lives in Madrid.")
+                    )
+                ),
+                count = FrameCount.ONE,
+                candidates = listOf(laura)
+            )
+
+            suspend fun ended(change: String): AgentStep {
+                script(
+                    change,
+                    """{"tool":"propose","summary":"$SUMMARY"}""",
+                    """{"tool":"ask_user","question":"Which entry?","options":["Email","Madrid"]}""",
+                    work = "organize"
+                )
+
+                return run(
+                    task = "tag Laura's note friend",
+                    notes = notes + entry(path = laura.value)
+                ).last()
+            }
+
+            val tagged =
+                ended(change = """{"tool":"add_tag","notes":["Laura Castro"],"tag":"friend"}""")
+
+            val written =
+                ended(change = """{"tool":"append","note":"Laura Castro","text":"Phone: 600 123 987"}""")
+
+            assertEquals(
+                expected = listOf(true, true),
+                actual = listOf(tagged is AgentStep.Proposed, written is AgentStep.Asked)
+            )
+        }
+
     // Code review, 2026-11-15: held on the last step, the turn ran out and answered anyway, never asking.
     @Test
     fun `an answer held on the last step is followed by one call more, the question`() = runTest {
@@ -261,45 +308,89 @@ class TurnVerifierTest {
         )
     }
 
-    @Test
-    fun `a change to several notes is listed back once with what each holds, and the ones dropped are left out`() =
-        runTest {
-            val books =
-                listOf("4" to "Books/Dune.md", "3" to "Books/Sapiens.md").map { (rating, path) ->
-                    entry(
-                        path = path,
-                        metadata = NoteMetadata.NONE.copy(
-                            properties = listOf(
-                                NoteProperty(
-                                    key = "rating",
-                                    value = PropertyValue.Number(text = rating)
-                                )
-                            )
+    private val books =
+        listOf("4" to "Books/Dune.md", "3" to "Books/Sapiens.md").map { (rating, path) ->
+            entry(
+                path = path,
+                metadata = NoteMetadata.NONE.copy(
+                    properties = listOf(
+                        NoteProperty(
+                            key = "rating",
+                            value = PropertyValue.Number(text = rating)
                         )
                     )
+                )
+            )
+        }
+
+    // The card of a change to both books, each marked as [marks] says.
+    private suspend fun cardWith(marks: String): AgentStep.Proposed {
+        script(
+            """{"tool":"add_tag","notes":["Dune","Sapiens"],"tag":"later"}""",
+            """{"tool":"propose","summary":"$SUMMARY"}""",
+            work = "organize",
+            marks = marks
+        )
+
+        val steps = run(
+            task = "tag the books I rated 4 with later",
+            notes = notes + books
+        )
+
+        return steps.last() as AgentStep.Proposed
+    }
+
+    // The notes left on that card.
+    private suspend fun taggedWith(marks: String): List<String> = cardWith(marks = marks)
+        .steps
+        .single()
+        .notes
+        .map { it.nameWithoutExtension }
+
+    // Dev, 2026-11-24: asked to name the notes to drop, the Gemma E4B named those it meant to keep.
+    @Test
+    fun `each note of a change to several is marked by what it holds, and the ones marked no are left out`() =
+        runTest {
+            val tagged = taggedWith(marks = """{"N1":"yes","N2":"no"}""")
+
+            val shown = engine
+                .generated
+                .single {
+                    it
+                        .first()
+                        .text
+                        .startsWith(prefix = REVIEW)
                 }
-
-            script(
-                """{"tool":"add_tag","notes":["Dune","Sapiens"],"tag":"later"}""",
-                """{"tool":"propose","summary":"$SUMMARY"}""",
-                """{"tool":"propose","summary":"$SUMMARY","drop":["Sapiens"]}""",
-                work = "organize"
-            )
-
-            val steps = run(
-                task = "tag the books I rated 4 with later",
-                notes = notes + books
-            )
+                .last()
+                .text
 
             assertEquals(
-                expected = listOf(true, listOf("Dune")),
+                expected = listOf(listOf("Dune"), true),
+                actual = listOf(tagged, "N1 Dune: rating: 4\nN2 Sapiens: rating: 3" in shown)
+            )
+        }
+
+    @Test
+    fun `marks that say nothing, every note no or a reply cut short, leave the change as it was`() =
+        runTest {
+            assertEquals(
+                expected = List(size = 2) { listOf("Dune", "Sapiens") },
                 actual = listOf(
-                    "- Dune: rating: 4\n- Sapiens: rating: 3\n" in callPrompts()[2],
-                    (steps.last() as AgentStep.Proposed)
-                        .steps
-                        .single()
-                        .notes
-                        .map { it.nameWithoutExtension }
+                    taggedWith(marks = """{"N1":"no","N2":"no"}"""),
+                    taggedWith(marks = """{"N1":"n""")
+                )
+            )
+        }
+
+    // Dev, 2026-11-25: the card's summary, written before the review, named the notes it had taken out.
+    @Test
+    fun `a card the review took a note out of drops the summary that names it, and any other keeps its own`() =
+        runTest {
+            assertEquals(
+                expected = listOf("", SUMMARY),
+                actual = listOf(
+                    cardWith(marks = """{"N1":"yes","N2":"no"}""").summary,
+                    cardWith(marks = """{"N1":"yes","N2":"yes"}""").summary
                 )
             )
         }
@@ -307,5 +398,6 @@ class TurnVerifierTest {
     private companion object {
         const val SUMMARY = "Tags the books."
         const val CALLS = "You work on a task in the person's notes"
+        const val REVIEW = "A person's request changes notes"
     }
 }
