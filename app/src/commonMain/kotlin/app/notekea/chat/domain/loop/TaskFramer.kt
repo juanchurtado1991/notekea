@@ -95,15 +95,6 @@ class TaskFramer(
         val rivals = FrameGroups.rivalsOf(group = open)
         if (rivals.isNotEmpty()) return targetsOf(rivals) to reason
 
-        // An item no note is named for, held by several notes of one kind, is open between them: none is picked.
-        val holders = if (group == null && reply.isItem) {
-            FrameGroups.rivalsOf(group = ItemHolders.of(reply.words, candidates))
-        } else {
-            emptyList()
-        }
-
-        if (holders.size > 1) return targetsOf(holders) to FrameReason.WORDS
-
         // Notes of other kinds that share a word are told apart by what the task is about: the model picks one.
         val picked = fits.singleOrNull()
             ?: asking.pickOf(task, open.ifEmpty { candidates }, memory)

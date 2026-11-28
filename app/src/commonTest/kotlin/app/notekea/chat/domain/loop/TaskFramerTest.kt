@@ -289,39 +289,4 @@ class TaskFramerTest {
             actual = frame?.meant
         )
     }
-
-    // The E4B's blind pool, seed 10, 2026-11-27: one application of three that each list a supplement was picked.
-    @Test
-    fun `an item held by several notes of one kind is open between them, none picked`() = runTest {
-        val olympic = candidate(
-            path = "Applications/Olympic Coast.md",
-            entries = listOf("- Supplement: why Olympic Coast (300 words)")
-        )
-
-        val evergreen = candidate(
-            path = "Applications/Evergreen Ridge.md",
-            entries = listOf("- Supplement: why Evergreen (250 words)")
-        )
-
-        val frame = frameOf(
-            task = "mark the why-us supplement as second draft",
-            candidates = listOf(olympic, evergreen),
-            replies = mapOf(
-                FramePrompts.COUNT to """{"count":"one","words":"the why-us supplement","thing":"item"}"""
-            )
-        )
-
-        assertEquals(
-            expected = listOf<Any?>(
-                true,
-                listOf(olympic.path, evergreen.path),
-                listOf(FramePrompts.COUNT)
-            ),
-            actual = listOf(
-                frame?.isOpen,
-                frame?.targets?.map { it.note },
-                engine.generated.map { it.first().text }
-            )
-        )
-    }
 }
