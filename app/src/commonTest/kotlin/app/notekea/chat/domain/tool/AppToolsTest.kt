@@ -208,6 +208,33 @@ class AppToolsTest {
             )
         }
 
+    // The E2B's blind pool, seed 10, 2026-11-27: "1.240 € | Pedido maderas octubre" was refused, as the table row
+    // that writes it does not write the note's name.
+    @Test
+    fun `a tally finds a figure on a line of the note its item names`() = runTest {
+        store.texts[arepas] = "| Roble francés | 0,6 m³ | 1.240 € |\n| Nogal americano | 0,5 m³ | 1.860 € |"
+
+        val tally = TallyTool(
+            noteTextCache = NoteTextCache(contentStore = store)
+        )
+
+        val said = tally.run(
+            call = ToolCall(
+                name = tally.name,
+                arguments = mapOf(
+                    "how" to "sum",
+                    "items" to "1.240 € | Arepas\n1.860 € | Arepas"
+                )
+            ),
+            context = context
+        ).forModel
+
+        assertEquals(
+            expected = listOf(true, true),
+            actual = listOf(said.startsWith(prefix = "tally sum of 2:"), "Roble" in said)
+        )
+    }
+
     // 14 November 2026 is a Saturday.
     @Test
     fun `a phrase names its day from today, in English and in Spanish`() {

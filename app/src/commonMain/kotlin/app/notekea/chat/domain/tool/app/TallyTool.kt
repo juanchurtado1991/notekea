@@ -117,7 +117,7 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
     }
 
     // The lines of every note the turn read; with none read yet, of every note, as a figure may come from a search.
-    private suspend fun linesOf(context: ToolContext): List<String> {
+    private suspend fun linesOf(context: ToolContext): List<NoteLine> {
         val read = context
             .reads
             .read
@@ -134,11 +134,27 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
                 vaultPath = context.vaultPath,
                 notes = notes
             )
-            .values
-            .flatMap { it.body.lines() }
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+            .flatMap { (path, text) ->
+                text
+                    .body
+                    .lines()
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .map {
+                        NoteLine(
+                            text = it,
+                            note = path.bare()
+                        )
+                    }
+            }
     }
+
+    // A line of a note read, with the note's name: an item may name the note, not the line's own words. The E2B's
+    // blind pool, seed 10, 2026-11-27: "1.240 € | Pedido maderas octubre" was refused, its line a table row.
+    private class NoteLine(
+        val text: String,
+        val note: String
+    )
 
     private class Checked(
         val line: String,
@@ -151,7 +167,7 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
     // the paid sessions shown for the unpaid ones, and the 4B summed again (the loop's dev run, 2026-11-19).
     private fun checkedOf(
         item: String,
-        lines: List<String>,
+        lines: List<NoteLine>,
         used: MutableSet<Int>
     ): Checked {
         val figure = item.substringBefore(delimiter = SEPARATOR)
@@ -174,14 +190,14 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
             .indices
             .filter {
                 isWritten(
-                    line = lines[it],
+                    line = lines[it].text,
                     value = value
                 )
             }
             .map {
                 it to sharedOf(
                     words = words,
-                    line = lines[it]
+                    line = "${lines[it].text} ${lines[it].note}"
                 )
             }
             .filter { (_, shared) ->
@@ -205,7 +221,7 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
 
         return Checked(
             value = value,
-            line = lines[index].take(n = LINE),
+            line = lines[index].text.take(n = LINE),
             problem = ""
         )
     }
