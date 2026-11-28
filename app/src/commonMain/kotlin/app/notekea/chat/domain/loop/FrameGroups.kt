@@ -15,11 +15,10 @@ internal object FrameGroups {
         task: String,
         candidates: List<FrameCandidates.Candidate>
     ): List<List<FrameCandidates.Candidate>> {
-        val named = FrameWords
-            .of(text = task)
-            .filter { word ->
-                word.any { it.isLetter() } && candidates.any { isNamed(it, word) }
-            }
+        // A name the task writes names its set alone: in "Chris's note", note is a word of Meeting Notes too, and
+        // asked of every note the two Chris were no set (the 12B's blind pool, seed 10, 2026-11-28).
+        val named = namedOf(FrameWords.namesOf(text = task), candidates)
+            .ifEmpty { namedOf(FrameWords.of(text = task), candidates) }
 
         val holding = candidates.filter { candidate ->
             named.any { isNamed(candidate, it) }
@@ -151,6 +150,14 @@ internal object FrameGroups {
             other = other.path.nameWithoutExtension,
             ignoreCase = true
         )
+    }
+
+    // The [words] a name of [candidates] writes.
+    private fun namedOf(
+        words: Set<String>,
+        candidates: List<FrameCandidates.Candidate>
+    ): List<String> = words.filter { word ->
+        word.any { it.isLetter() } && candidates.any { isNamed(it, word) }
     }
 
     private fun isNamed(

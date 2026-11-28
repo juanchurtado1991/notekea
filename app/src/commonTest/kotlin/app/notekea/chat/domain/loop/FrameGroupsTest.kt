@@ -90,6 +90,23 @@ class FrameGroupsTest {
         )
     }
 
+    // The 12B's blind pool, seed 10, 2026-11-28: in "Chris's note", note is a word of Meeting Notes too, so the two
+    // Chris made no set and the model picked one.
+    @Test
+    fun `a name the task writes makes its set alone`() {
+        val doyle = candidate(path = "People/Chris Doyle.md")
+        val okafor = candidate(path = "People/Chris Okafor.md")
+        val minutes = candidate(path = "Work/Meeting Notes.md")
+
+        assertEquals(
+            expected = listOf(listOf(doyle, okafor)),
+            actual = FrameGroups.of(
+                task = "Chris's note",
+                candidates = listOf(doyle, okafor, minutes)
+            )
+        )
+    }
+
     // The loop's run of 2026-11-17: "the books budget" was a set of every note in Books.
     @Test
     fun `a folder's word makes no set`() {
