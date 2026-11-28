@@ -158,8 +158,6 @@ import app.notekea.resources.chat_problem_query
 import app.notekea.resources.chat_problem_query_es
 import app.notekea.resources.chat_problem_query_failed
 import app.notekea.resources.chat_problem_query_failed_es
-import app.notekea.resources.chat_problem_refused
-import app.notekea.resources.chat_problem_refused_es
 import app.notekea.resources.chat_problem_task
 import app.notekea.resources.chat_problem_task_es
 import app.notekea.resources.chat_retry
@@ -329,6 +327,5 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_problem_query to Res.string.chat_problem_query_es,
     Res.string.chat_problem_query_failed to Res.string.chat_problem_query_failed_es,
     Res.string.chat_problem_long to Res.string.chat_problem_long_es,
-    Res.string.chat_problem_failed to Res.string.chat_problem_failed_es,
-    Res.string.chat_problem_refused to Res.string.chat_problem_refused_es
+    Res.string.chat_problem_failed to Res.string.chat_problem_failed_es
 )

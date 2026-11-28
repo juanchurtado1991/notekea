@@ -86,6 +86,23 @@ class ProposalWritingTest {
         }
 
     @Test
+    fun `a change that writes no text says no writing`() = runTest {
+        val tagged = AgentProposal(
+            steps = listOf(
+                PlannedStep(
+                    kind = ActionKind.ADD_TAG,
+                    fields = mapOf(ActionField.NOTE to "WordPress", ActionField.TAG to "web")
+                )
+            )
+        )
+
+        assertEquals(
+            expected = emptyList(),
+            actual = stepsOf(proposal = tagged).filterIsInstance<AgentStep.Writing>()
+        )
+    }
+
+    @Test
     fun `cards of one note that backs none stop the turn on it`() = runTest {
         assertEquals(
             expected = AgentStep.Stopped(problem = ActionProblem.NoCards),

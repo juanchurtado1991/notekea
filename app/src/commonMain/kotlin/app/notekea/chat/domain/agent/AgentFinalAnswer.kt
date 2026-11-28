@@ -2,6 +2,7 @@ package app.notekea.chat.domain.agent
 
 import app.notekea.chat.domain.context.ContextBudget
 import app.notekea.chat.domain.prompt.AnswerLinks
+import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.chat.domain.prompt.FoundAnswerPrompt
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
@@ -53,7 +54,10 @@ internal class AgentFinalAnswer(private val llmEngine: LlmEngine) {
                 )
                 .collect { piece ->
                     written.append(piece)
-                    onText(written.toString())
+
+                    // The not found reply is said as one, never shown as it is written.
+                    val isShown = !AnswerPrompt.NOT_FOUND.startsWith(prefix = written.trim())
+                    if (isShown) onText(written.toString())
                 }
         } catch (_: LlmException) {
             return summary

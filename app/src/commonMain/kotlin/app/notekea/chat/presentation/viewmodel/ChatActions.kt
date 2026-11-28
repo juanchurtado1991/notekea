@@ -171,6 +171,7 @@ internal class ChatActions(
         val context = contextOf(
             request = "",
             notes = notes,
+            looked = notes,
             openNote = null
         )
 
@@ -234,10 +235,11 @@ internal class ChatActions(
         return latest to changedToday
     }
 
-    /** What the plan, or agent mode, may name in the vault: its names, the closest to [request] first. */
+    /** What the loop may name: the [looked] notes, the closest to [request] first, and every folder and tag. */
     fun contextOf(
         request: String,
         notes: Collection<NoteEntry>,
+        looked: Collection<NoteEntry>,
         openNote: RelativePath?
     ): ActionContext {
         val words = request
@@ -250,7 +252,8 @@ internal class ChatActions(
 
         val paths = notes.map { it.file.path }
 
-        val names = paths
+        val names = looked
+            .map { it.file.path }
             .sortedByDescending { path ->
                 words.count {
                     it in path.value.lowercase()

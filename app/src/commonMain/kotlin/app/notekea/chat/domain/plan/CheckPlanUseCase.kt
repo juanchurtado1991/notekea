@@ -34,12 +34,6 @@ class CheckPlanUseCase {
         step: PlannedStep,
         vault: VaultNames
     ): Outcome<ActionStep, ActionProblem> {
-        if (step.kind == ActionKind.REFUSE) {
-            val reason = step[ActionField.TEXT].orEmpty()
-
-            return Outcome.Failure(error = ActionProblem.Refused(reason = reason))
-        }
-
         val missing = step.missing.firstOrNull()
 
         if (missing != null) {

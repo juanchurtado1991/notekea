@@ -1,28 +1,18 @@
 package app.notekea.chat.domain.plan
 
 /**
- * What the chat can do for a request (3.9), as the model names it ([written]); the app carries it out, the model only
- * chooses. [needs] are the fields a step of it must fill. Showing something is done at once; writing ([isWriting]) or
- * organizing notes ([isOrganizing]) is always confirmed first, on one card for the whole plan.
+ * What the chat can do for a request (3.9), as the model names it ([written]); [needs] are the fields a step fills.
+ * Showing is done at once; writing ([isWriting]) or organizing ([isOrganizing]) is confirmed first, on one card; a
+ * step [isComposed] has its text written out before the card.
  */
 enum class ActionKind(
     val written: String,
     val needs: Set<ActionField> = emptySet(),
     val isWriting: Boolean = false,
     val isOrganizing: Boolean = false,
-    val isLoopOnly: Boolean = false
+    val isComposed: Boolean = false,
+    val isMemory: Boolean = false
 ) {
-    // Asked of the notes: 3.2's answer, a list of notes by their properties or the tasks (3.8).
-    ANSWER(written = "answer"),
-
-    // Not about what the notes say: a greeting, thanks, an opinion or advice, about a note or not.
-    CHAT(written = "chat"),
-
-    // How to use Notekea, from its guide; never an action ("how do I create a note?").
-    HELP(written = "help"),
-
-    // What the vault holds as a whole ("what is in my notes?"), from its folders and names.
-    OVERVIEW(written = "overview"),
     FIND_NOTES(
         written = "find_notes",
         needs = setOf(ActionField.REQUEST)
@@ -57,32 +47,37 @@ enum class ActionKind(
     CREATE_NOTE(
         written = "create_note",
         needs = setOf(ActionField.TITLE),
-        isWriting = true
+        isWriting = true,
+        isComposed = true
     ),
     WRITE_FROM_NOTES(
         written = "write_from_notes",
         needs = setOf(ActionField.TITLE, ActionField.TEXT),
-        isWriting = true
+        isWriting = true,
+        isComposed = true
     ),
 
     // Study cards made from a note and added to it (4.6); the open note when none is named.
     MAKE_CARDS(
         written = "make_cards",
-        isWriting = true
+        isWriting = true,
+        isComposed = true
     ),
 
     // A web page the request names, clipped into Web sources with notes about it (4.4).
     CLIP_URL(
         written = "clip_url",
         needs = setOf(ActionField.URL),
-        isWriting = true
+        isWriting = true,
+        isComposed = true
     ),
 
     // A long text pasted with the request becomes a folder of linked notes, with an index note (decided 2026-11-10).
     NOTES_FROM_TEXT(
         written = "notes_from_text",
         needs = setOf(ActionField.FOLDER),
-        isWriting = true
+        isWriting = true,
+        isComposed = true
     ),
     APPEND_TEXT(
         written = "append_text",
@@ -145,29 +140,20 @@ enum class ActionKind(
         isOrganizing = true
     ),
 
-    // Asked for something the chat never does (deleting for good, Settings, outside the vault, code).
-    REFUSE(written = "refuse"),
-
-    // A line of the chat's memory written or taken out (docs/agent-memory.md); the one loop's only, never planned.
+    // A line of the chat's memory written or taken out (docs/agent-memory.md).
     REMEMBER(
         written = "remember",
         needs = setOf(ActionField.TEXT),
         isWriting = true,
-        isLoopOnly = true
+        isMemory = true
     ),
     FORGET(
         written = "forget",
         needs = setOf(ActionField.TEXT),
         isWriting = true,
-        isLoopOnly = true
+        isMemory = true
     );
 
     /** Whether a step of this kind changes the vault, so the plan waits for the card's Do it. */
     val isConfirmed: Boolean get() = isWriting || isOrganizing
-
-    companion object {
-        fun of(written: String): ActionKind? = entries.firstOrNull {
-            it.written == written
-        }
-    }
 }

@@ -45,7 +45,7 @@ internal class ChatAgent(
     ): ChatReply? {
         host.update(id) { it.copy(step = ChatStep.WORKING) }
 
-        // The model is told the names of the notes it may look in.
+        // The model is told the names of the notes it may look in, and the folders, tags and properties of the vault.
         val looked = scope?.let { only ->
             notes.filter {
                 it.file.path in only
@@ -54,7 +54,8 @@ internal class ChatAgent(
 
         val context = actions.contextOf(
             request = task,
-            notes = looked,
+            notes = notes,
+            looked = looked,
             openNote = openNote
         ).copy(
             history = history,
@@ -82,7 +83,8 @@ internal class ChatAgent(
                 if (step is AgentStep.Replied) {
                     replies += replyOf(
                         kind = step.kind,
-                        task = task
+                        task = task,
+                        scope = scope
                     )
                 }
 
@@ -102,12 +104,14 @@ internal class ChatAgent(
         return replies.firstOrNull()
     }
 
+    // Talk asked of one note is about it ("what do you think of it?").
     private fun replyOf(
         kind: WorkKind,
-        task: String
+        task: String,
+        scope: Set<RelativePath>?
     ): ChatReply = when (kind) {
         WorkKind.HELP -> ChatReply.Help(request = task)
         WorkKind.OVERVIEW -> ChatReply.Overview
-        else -> ChatReply.Talk(note = null)
+        else -> ChatReply.Talk(note = scope?.singleOrNull())
     }
 }

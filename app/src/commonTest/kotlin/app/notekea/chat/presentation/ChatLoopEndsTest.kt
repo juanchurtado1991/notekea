@@ -1,5 +1,6 @@
 package app.notekea.chat.presentation
 
+import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.loop.Toolsets
@@ -45,9 +46,13 @@ class ChatLoopEndsTest : ViewModelTestBase() {
         rows = listOf(FoundRow(note = arepas))
     )
 
+    private val archived = RelativePath(value = "Archive/Old menu.md")
+
     private fun TestScope.asked(
         tool: String,
-        question: String
+        question: String,
+        work: String = "ask",
+        isOfNote: Boolean = false
     ): ChatViewModelAsked {
         var calls = 0
 
@@ -55,7 +60,7 @@ class ChatLoopEndsTest : ViewModelTestBase() {
             val asked = messages.first().text
 
             when {
-                asked.startsWith(prefix = "You say how a request") -> """{"work":"ask","skill":"none"}"""
+                asked.startsWith(prefix = "You say how a request") -> """{"work":"$work","skill":"none"}"""
                 asked.startsWith(prefix = CALLS) && calls++ == 0 -> tool
                 asked.startsWith(prefix = CALLS) -> """{"tool":"answer","text":"Arepas."}"""
                 asked.startsWith(prefix = "Write the answer") -> ANSWER
@@ -84,10 +89,16 @@ class ChatLoopEndsTest : ViewModelTestBase() {
             )
         )
 
-        val notes = listOf(entry(path = arepas.value))
+        val notes = listOf(entry(path = arepas.value), entry(path = archived.value))
 
         viewModel.onIntent(intent = ChatIntent.OnNotesChange(notes = notes))
         viewModel.onIntent(intent = ChatIntent.OnIndexChange(isReady = true))
+
+        if (isOfNote) {
+            viewModel.onIntent(intent = ChatIntent.OnActiveNoteChange(path = arepas))
+            viewModel.onIntent(intent = ChatIntent.OnScopeSelect(scope = ChatScope.NOTE))
+        }
+
         advanceUntilIdle()
 
         viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = question))
@@ -136,6 +147,50 @@ class ChatLoopEndsTest : ViewModelTestBase() {
                 .viewModel
                 .effects
                 .first()
+        )
+    }
+
+    @Test
+    fun `a question of one note still tells the model the vault's folders`() =
+        runTest(testDispatcher) {
+            asked(
+                tool = """{"tool":"read","note":"Arepas"}""",
+                question = "move it to the archive",
+                isOfNote = true
+            )
+
+            val told = engine
+                .generated
+                .flatten()
+                .filter {
+                    "Archive" in it.text
+                }
+
+            assertEquals(
+                expected = true,
+                actual = told.isNotEmpty()
+            )
+        }
+
+    @Test
+    fun `talk asked of one note reads it`() = runTest(testDispatcher) {
+        store.texts[arepas] = "Corn flour, warm water and salt."
+
+        asked(
+            tool = "",
+            question = "what do you think of it?",
+            work = "talk",
+            isOfNote = true
+        )
+
+        assertEquals(
+            expected = true,
+            actual = engine
+                .generated
+                .last()
+                .any {
+                    "Corn flour" in it.text
+                }
         )
     }
 

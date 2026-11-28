@@ -102,7 +102,7 @@ internal class TurnEnd(
 
     /**
      * The answer written from what the turn [found] (all it found, as far as the context goes, unless said), shown as
-     * it is written ([report]), with the tables it found and the sources of the notes it names; the call's own
+     * it is written ([report]), with the tables and the sources of the notes it is from; the call's own
      * [summary] when it looked nothing up.
      */
     suspend fun answered(
@@ -121,10 +121,10 @@ internal class TurnEnd(
 
         return AgentStep.Finished(
             summary = text,
-            tables = state
-                .turn
-                .tables
-                .distinct(),
+            tables = TurnSources.tablesOf(
+                answer = text,
+                tables = state.turn.tables
+            ),
             sources = TurnSources.of(
                 answer = text,
                 passages = state.turn.passages,

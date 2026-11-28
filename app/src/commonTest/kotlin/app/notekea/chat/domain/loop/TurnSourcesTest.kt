@@ -1,6 +1,8 @@
 package app.notekea.chat.domain.loop
 
 import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,6 +38,42 @@ class TurnSourcesTest {
                 Triple(2, arepas, 10..40)
             ),
             actual = sources.map { Triple(it.number, it.note, it.range) }
+        )
+    }
+
+    @Test
+    fun `a note is named only by its whole name, never inside another word`() {
+        val art = RelativePath(value = "Notes/Art.md")
+
+        assertEquals(
+            expected = emptyList(),
+            actual = TurnSources.of(
+                answer = "Start the dough at once.",
+                passages = emptyList(),
+                read = listOf(art)
+            )
+        )
+    }
+
+    @Test
+    fun `only the tables with a row the answer names show under it`() {
+        val named = FoundNotes(rows = listOf(FoundRow(note = soup)))
+
+        val corrected = FoundNotes(
+            rows = listOf(
+                FoundRow(
+                    note = lease,
+                    cells = listOf("rated 4")
+                )
+            )
+        )
+
+        assertEquals(
+            expected = listOf(named),
+            actual = TurnSources.tablesOf(
+                answer = "The Soup note serves 4.",
+                tables = listOf(corrected, named, named)
+            )
         )
     }
 

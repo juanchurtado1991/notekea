@@ -34,9 +34,6 @@ sealed interface ActionProblem {
     /** The model or the notes failed while the step's text was written. */
     data class Failed(val error: ChatError) : ActionProblem
 
-    /** Something the chat never does; [reason] as the model wrote it. */
-    data class Refused(val reason: String) : ActionProblem
-
     /** Agent mode ran out of moves or time, or its model failed, before it could propose or finish (4.7). */
     data object AgentStopped : ActionProblem
 

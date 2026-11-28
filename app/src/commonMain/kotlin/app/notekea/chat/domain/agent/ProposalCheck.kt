@@ -49,7 +49,7 @@ class ProposalCheck(
             is Outcome.Failure -> return AgentStep.Stopped(problem = plan.error)
         }
 
-        report(AgentStep.Writing())
+        if (checked.any { it.kind.isComposed }) report(AgentStep.Writing())
 
         // Cards asked of several notes ("study cards of WordPress"): a note that backs none is left out, and the turn
         // stops only when none backs any.
@@ -77,7 +77,8 @@ class ProposalCheck(
             }
         }
 
-        if (composed.isEmpty()) return AgentStep.Stopped(problem = ActionProblem.NoCards)
+        val isNoneBacked = isOfSeveral && composed.isEmpty()
+        if (isNoneBacked) return AgentStep.Stopped(problem = ActionProblem.NoCards)
 
         return AgentStep.Proposed(
             steps = composed,

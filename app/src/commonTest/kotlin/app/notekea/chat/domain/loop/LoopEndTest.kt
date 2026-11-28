@@ -85,6 +85,33 @@ class LoopEndTest {
         }
 
     @Test
+    fun `the not found reply is never shown as it is written`() = runTest {
+        store.texts[arepas] = "Mix the flour with water."
+        var calls = 0
+
+        engine.reply = { messages ->
+            val asked = messages.first().text
+
+            when {
+                asked.startsWith(prefix = "You say how a request") -> """{"work":"ask","skill":"none"}"""
+                asked.startsWith(prefix = CALLS) && calls++ == 0 -> """{"tool":"read","note":"Arepas"}"""
+                asked.startsWith(prefix = CALLS) -> """{"tool":"answer","text":"Not there."}"""
+                asked.startsWith(prefix = "Write the answer") -> "NOT_FOUND"
+                else -> ""
+            }
+        }
+
+        val steps = stepsOf(task = "when do the arepas go in the oven?")
+
+        assertEquals(
+            expected = emptyList(),
+            actual = steps.filter {
+                it is AgentStep.Writing && it.answer != null
+            }
+        )
+    }
+
+    @Test
     fun `a model that cannot be run ends the turn as its failure`() = runTest {
         engine.failure = LlmError.EngineFailed
 
