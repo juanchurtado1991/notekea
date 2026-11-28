@@ -293,7 +293,7 @@ class RunTurnUseCase(
         state: TurnState,
         tool: ChatTool?
     ): String? {
-        val first = SearchedUnread.readOf(
+        val first = UnreadConclusion.readOf(
             call = call,
             state = state
         )

@@ -71,8 +71,8 @@ internal object TurnSources {
     // A cell shorter than this ("4", "yes") is in many answers that are not from it.
     private const val MIN_CELL = 4
 
-    // Where [answer] first names the note [name] as a whole word: "Art" is not named by "start".
-    private fun namedAt(
+    /** Where [answer] first names the note [name] as a whole word: "Art" is not named by "start". */
+    fun namedAt(
         answer: String,
         name: String
     ): Int? = Regex(
