@@ -209,7 +209,9 @@ class RunTurnUseCase(
             val isStopped = state.mustStop && tool?.effect != ToolEffect.ENDS
             if (isStopped) return emit(value = turnEnd.unread(state) { emit(value = it) })
 
+            // A conclusion from search results alone: the loop reads the note first, and the model works it out again.
             val held = heldOf(
+                number = number,
                 call = call,
                 state = state,
                 tool = tool
@@ -283,19 +285,34 @@ class RunTurnUseCase(
         emit(value = turnEnd.unread(state) { emit(value = it) })
     }
 
-    // What the model is told instead of its call being made, else null.
-    private suspend fun heldOf(
+    // What the model is told instead of its call being made, else null: a conclusion from search results alone has
+    // the note read first, by the loop.
+    private suspend fun FlowCollector<AgentStep>.heldOf(
+        number: Int,
         call: ToolCall,
         state: TurnState,
         tool: ChatTool?
-    ): String? = TurnChecks.heldOf(
-        call = call,
-        state = state,
-        tool = tool
-    ) ?: otherTargets.heldOf(
-        call = call,
-        state = state
-    )
+    ): String? {
+        val first = SearchedUnread.readOf(
+            call = call,
+            state = state
+        )
+
+        if (first != null) {
+            made(number, first.call, first.tool, state)
+
+            return first.told
+        }
+
+        return TurnChecks.heldOf(
+            call = call,
+            state = state,
+            tool = tool
+        ) ?: otherTargets.heldOf(
+            call = call,
+            state = state
+        )
+    }
 
     // A call that reads or works: shown as a step, run once, and told when it is made again.
     private suspend fun FlowCollector<AgentStep>.made(
