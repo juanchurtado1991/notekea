@@ -203,6 +203,35 @@ class TaskFramerTest {
             )
         }
 
+    // The 12B's blind pool, seed 10, 2026-11-28: "move my meeting with Ms. Lee" was settled on the one meeting of
+    // several the model marked.
+    @Test
+    fun `an entry marked is open with those that write the same task words, settled by a word of its own`() =
+        runTest {
+            val visits = candidate(
+                path = "Health/Visits.md",
+                entries = listOf("- 12/01 dentist cleaning", "- 12/09 dentist filling", "- 12/12 haircut")
+            )
+
+            suspend fun marked(task: String) = frameOf(
+                task = task,
+                candidates = listOf(visits),
+                replies = mapOf(
+                    FramePrompts.COUNT to appointment,
+                    FramePrompts.PICK to """{"pick":"N1"}""",
+                    FramePrompts.MARK_ENTRIES to """{"E1":"yes","E2":"no","E3":"no"}"""
+                )
+            )
+
+            val shared = marked(task = "move the dentist appointment to 11:00")
+            val own = marked(task = "move the dentist cleaning to 11:00")
+
+            assertEquals(
+                expected = listOf(visits.entries.take(n = 2), visits.entries[0]),
+                actual = listOf(shared?.openEntries, own?.entry)
+            )
+        }
+
     // The frame alone, 2026-11-18: "total of our receipted donations" was asked which donation.
     @Test
     fun `a question about an item marks no entry, as it may add them up`() = runTest {

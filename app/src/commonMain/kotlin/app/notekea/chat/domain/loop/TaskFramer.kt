@@ -137,7 +137,9 @@ class TaskFramer(
         // None marked is the whole note: leaving them open made the 4B ask on 99 of 319 tasks that need no
         // question (the frame alone, 2026-11-18), as it marks every entry "no" for a question about the note.
         val entries = if (reply.isItem && meant.entries.size > 1) {
-            asking.markedEntriesOf(task, meant, memory) ?: return null
+            val marked = asking.markedEntriesOf(task, meant, memory) ?: return null
+
+            marked.singleOrNull()?.let { EntryRivals.of(task, it, meant.entries) } ?: marked
         } else {
             emptyList()
         }
