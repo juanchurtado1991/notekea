@@ -101,6 +101,29 @@ class UnreadConclusionTurnTest {
             )
         }
 
+    // The E2B's blind pool, seed 10, 2026-11-28: Home links [[Suppliers]], with no figure, and the figures were
+    // summed from a search, Suppliers never read.
+    @Test
+    fun `an answer naming a note a note read only links makes the loop read that note first`() =
+        runTest {
+            store.texts[readings] = "# Glucose\n\nSee [[Suppliers]]."
+            store.texts[suppliers] = "# Suppliers\n\n- BL-204 — $1,350 — pending"
+
+            val steps = stepsOf(
+                task = "how much is pending with suppliers?",
+                called = listOf(
+                    """{"tool":"read","note":"Glucose"}""",
+                    """{"tool":"answer","text":"Suppliers has 1,350 pending."}""",
+                    ANSWER
+                )
+            )
+
+            assertEquals(
+                expected = listOf<Any?>(listOf("read", "read"), true),
+                actual = listOf(movesOf(steps), steps.last() is AgentStep.Finished)
+            )
+        }
+
     private fun movesOf(steps: List<AgentStep>): List<String> = steps
         .filterIsInstance<AgentStep.Moving>()
         .map { it.move }

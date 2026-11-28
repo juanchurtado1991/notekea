@@ -7,6 +7,7 @@ import app.notekea.chat.domain.tool.app.FigureReason
 import app.notekea.chat.domain.tool.app.TallyTool
 import app.notekea.chat.domain.tool.lookup.ReadTool
 import app.notekea.chat.domain.tool.work.AnswerTool
+import app.notekea.core.domain.figures.FigureValues
 import app.notekea.core.notes.domain.RelativePath
 
 /**
@@ -46,9 +47,7 @@ internal object UnreadConclusion {
         )
     }
 
-    // The unread note the call names first, its reason left aside, told once each; one a note read writes is
-    // quoted from it. The E2B's blind pool, seed 10, 2026-11-27: a tally of "Deposits" rows, each linking a client,
-    // had every client read and the tally refused, one by one, until the turn ran out.
+    // The unread note the call names first, its reason left aside, told once each, unless quoted from a note read.
     private fun namedOf(
         call: ToolCall,
         state: TurnState
@@ -62,7 +61,7 @@ internal object UnreadConclusion {
             .joinToString(separator = "\n")
 
         val read = state.turn.reads.read
-        val quoted = readTextOf(state = state)
+        val readLines = readLinesOf(state = state)
 
         return state
             .turn
@@ -73,8 +72,12 @@ internal object UnreadConclusion {
                     it !in read &&
                     it.nameWithoutExtension.length >= MIN_NAME
             }
-            .filter {
-                TurnSources.namedAt(quoted, it.nameWithoutExtension) == null
+            .filterNot {
+                isQuoted(
+                    name = it.nameWithoutExtension,
+                    written = written,
+                    readLines = readLines
+                )
             }
             .mapNotNull { path ->
                 TurnSources
@@ -88,13 +91,43 @@ internal object UnreadConclusion {
             .firstOrNull { state.told.add(element = "$NAMED $it") }
     }
 
-    // What the notes read so far gave, as the model was shown it.
-    private fun readTextOf(state: TurnState): String = state
+    // A name quoted from a note read: a line of it writes the name and a figure the call writes with it. The E2B's
+    // blind pool, seed 10, 2026-11-27: "Deposits" rows, each linking a client, had every client read and the tally
+    // refused, one by one; a link of Home's, with no figure, left "Suppliers" unread and summed from a search.
+    private fun isQuoted(
+        name: String,
+        written: String,
+        readLines: List<String>
+    ): Boolean {
+        val figures = written
+            .lines()
+            .filter {
+                TurnSources.namedAt(it, name) != null
+            }
+            .flatMap { FigureValues.allIn(text = it) }
+
+        return readLines.any { line ->
+            val isNamed = TurnSources.namedAt(line, name) != null
+
+            isNamed &&
+                FigureValues.allIn(text = line).any { value ->
+                    figures.any {
+                        FigureValues.isSame(
+                            one = it,
+                            other = value
+                        )
+                    }
+                }
+        }
+    }
+
+    // The lines the notes read so far gave, as the model was shown them.
+    private fun readLinesOf(state: TurnState): List<String> = state
         .foundAt
         .filterKeys { it.startsWith(prefix = "${ReadTool.NAME}:") }
         .values
         .mapNotNull { state.found.getOrNull(index = it) }
-        .joinToString(separator = "\n")
+        .flatMap { it.lines() }
 
     // With nothing read, the first note the search showed, once.
     private fun searchedOf(state: TurnState): RelativePath? {
