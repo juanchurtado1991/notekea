@@ -121,14 +121,18 @@ class TaskFramer(
             picked to if (fits.size == 1) reason else FrameReason.PICK
         }
 
-        // The notes the model chose [meant] from: an entry of one of them that writes the same words is as meant.
-        val chosenFrom = when (by) {
-            FrameReason.PICK -> open.ifEmpty { candidates }
-            FrameReason.MARKS -> group.orEmpty()
-            else -> emptyList()
-        }.filter {
-            it.path != meant.path
-        }
+        // The notes of a set the model marked [meant] from: an entry of one of them that writes the same words is as
+        // meant. Not every note shown when it picked one: logs and people notes that mention it lost 13 tasks for 1
+        // on the 12B's blind pool (seed 10, 2026-11-28).
+        val chosenFrom = group
+            .orEmpty()
+            .takeIf {
+                by == FrameReason.MARKS
+            }
+            .orEmpty()
+            .filter {
+                it.path != meant.path
+            }
 
         return entriesOf(task, reply, meant, memory, by, chosenFrom)
     }
@@ -206,7 +210,7 @@ class TaskFramer(
     }
 
     // The notes [meant] was chosen from by the model that hold an entry as meant as the one marked: the 12B settled
-    // "the parking line from my budget" on the budget picked, of two with a parking line (blind pool, 2026-11-28).
+    // "update Anna's note" on the one of two Annas marked, though both write an email (blind pool, 2026-11-28).
     private fun rivalNotesOf(
         task: String,
         note: String,

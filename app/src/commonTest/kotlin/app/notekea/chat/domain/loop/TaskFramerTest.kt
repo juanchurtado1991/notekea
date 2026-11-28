@@ -232,46 +232,39 @@ class TaskFramerTest {
             )
         }
 
-    // The 12B's blind pool, seed 10, 2026-11-28: "the parking line from my budget" was settled on the budget the
-    // model picked, though the other budget shown has a parking line too.
+    // The 12B's blind pool, seed 10, 2026-11-28: "update Anna's note" was settled on the one of two Annas marked,
+    // though both write an email.
     @Test
-    fun `an entry marked is open with the notes picked from that hold one writing the same task words`() =
+    fun `an entry marked is open with the notes of its set that hold one writing the same task words`() =
         runTest {
-            val visits = candidate(
-                path = "Health/Visits.md",
-                entries = listOf("- 12/01 dentist cleaning", "- 12/12 haircut")
-            )
-
-            val checkups = candidate(
-                path = "Kids/Checkups.md",
-                entries = listOf("- 12/03 dentist cleaning for Ana", "- 12/20 eye test")
-            )
+            val home = kitchen.copy(entries = listOf("| Parking | 40 |", "| Tiles | 300 |"))
+            val work = servers.copy(entries = listOf("| Parking permit | 240 |", "| Rack | 900 |"))
 
             suspend fun marked(
                 task: String,
                 marks: String
             ) = frameOf(
                 task = task,
-                candidates = listOf(visits, checkups),
+                candidates = listOf(home, work),
                 replies = mapOf(
-                    FramePrompts.COUNT to appointment,
-                    FramePrompts.PICK to """{"pick":"N1"}""",
+                    FramePrompts.COUNT to """{"count":"one","words":"$worded","thing":"item"}""",
+                    FramePrompts.MARK_NOTES to """{"N1":"yes","N2":"no"}""",
                     FramePrompts.MARK_ENTRIES to marks
                 )
             )
 
             val shared = marked(
-                task = "move the dentist cleaning to 11:00",
+                task = "delete the parking line from $worded",
                 marks = """{"E1":"yes","E2":"no"}"""
             )
 
             val own = marked(
-                task = "move the haircut to 11:00",
+                task = "delete the tiles line from $worded",
                 marks = """{"E1":"no","E2":"yes"}"""
             )
 
             assertEquals(
-                expected = listOf(listOf(visits.path, checkups.path), visits.entries[1]),
+                expected = listOf(listOf(home.path, work.path), home.entries[1]),
                 actual = listOf(shared?.openNotes, own?.entry)
             )
         }
