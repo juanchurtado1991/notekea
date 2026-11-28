@@ -121,7 +121,16 @@ class TaskFramer(
             picked to if (fits.size == 1) reason else FrameReason.PICK
         }
 
-        return entriesOf(task, reply, meant, memory, by)
+        // The notes the model chose [meant] from: an entry of one of them that writes the same words is as meant.
+        val chosenFrom = when (by) {
+            FrameReason.PICK -> open.ifEmpty { candidates }
+            FrameReason.MARKS -> group.orEmpty()
+            else -> emptyList()
+        }.filter {
+            it.path != meant.path
+        }
+
+        return entriesOf(task, reply, meant, memory, by, chosenFrom)
     }
 
     // The entries of the note meant a change could be about, when its thing is an item and the note has several
@@ -132,15 +141,29 @@ class TaskFramer(
         reply: FrameCountReply,
         meant: FrameCandidates.Candidate,
         memory: List<MemoryLine>,
-        reason: FrameReason
+        reason: FrameReason,
+        chosenFrom: List<FrameCandidates.Candidate>
     ): Pair<List<FrameTarget>, FrameReason>? {
         // None marked is the whole note: leaving them open made the 4B ask on 99 of 319 tasks that need no
         // question (the frame alone, 2026-11-18), as it marks every entry "no" for a question about the note.
         val entries = if (reply.isItem && meant.entries.size > 1) {
             val marked = asking.markedEntriesOf(task, meant, memory) ?: return null
 
-            marked.singleOrNull()?.let {
-                EntryRivals.of(task, meant.path.nameWithoutExtension, it, meant.entries)
+            marked.singleOrNull()?.let { one ->
+                val name = meant.path.nameWithoutExtension
+
+                rivalNotesOf(task, name, one, chosenFrom)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        return listOf(
+                            FrameTarget(
+                                note = meant.path,
+                                entries = listOf(one)
+                            )
+                        ) + it to FrameReason.ENTRY
+                    }
+
+                EntryRivals.of(task, name, one, meant.entries)
             } ?: marked
         } else {
             emptyList()
@@ -180,6 +203,25 @@ class TaskFramer(
         return asking.markedNotesOf(task, told, memory)?.let {
             it to FrameReason.MARKS
         }
+    }
+
+    // The notes [meant] was chosen from by the model that hold an entry as meant as the one marked: the 12B settled
+    // "the parking line from my budget" on the budget picked, of two with a parking line (blind pool, 2026-11-28).
+    private fun rivalNotesOf(
+        task: String,
+        note: String,
+        marked: String,
+        chosenFrom: List<FrameCandidates.Candidate>
+    ): List<FrameTarget> = chosenFrom.mapNotNull { other ->
+        EntryRivals
+            .rivalsOf(task, note, marked, other.entries)
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+                FrameTarget(
+                    note = other.path,
+                    entries = it
+                )
+            }
     }
 
     private fun targetsOf(group: List<FrameCandidates.Candidate>): List<FrameTarget> =

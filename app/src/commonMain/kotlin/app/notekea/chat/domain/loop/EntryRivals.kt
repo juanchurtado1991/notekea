@@ -12,6 +12,17 @@ internal object EntryRivals {
         note: String,
         marked: String,
         entries: List<String>
+    ): List<String> = listOf(marked) + rivalsOf(task, note, marked, entries)
+
+    /**
+     * The entries of [entries], other than [marked], that write every task word [marked] writes besides the words of
+     * [note]'s name; none when [marked] writes no other task word.
+     */
+    fun rivalsOf(
+        task: String,
+        note: String,
+        marked: String,
+        entries: List<String>
     ): List<String> {
         // The note's own name is what every entry is about: "el contrato de maíz" tells none of its entries apart
         // (the E4B's blind pool, seed 10, 2026-11-28).
@@ -34,13 +45,11 @@ internal object EntryRivals {
             entry = marked
         )
 
-        if (own.isEmpty()) return listOf(marked)
+        if (own.isEmpty()) return emptyList()
 
-        val rivals = entries.filter { entry ->
+        return entries.filter { entry ->
             entry != marked && writtenOf(words = words, entry = entry).containsAll(elements = own)
         }
-
-        return listOf(marked) + rivals
     }
 
     // The task words [entry] writes.

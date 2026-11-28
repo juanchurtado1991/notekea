@@ -232,6 +232,50 @@ class TaskFramerTest {
             )
         }
 
+    // The 12B's blind pool, seed 10, 2026-11-28: "the parking line from my budget" was settled on the budget the
+    // model picked, though the other budget shown has a parking line too.
+    @Test
+    fun `an entry marked is open with the notes picked from that hold one writing the same task words`() =
+        runTest {
+            val visits = candidate(
+                path = "Health/Visits.md",
+                entries = listOf("- 12/01 dentist cleaning", "- 12/12 haircut")
+            )
+
+            val checkups = candidate(
+                path = "Kids/Checkups.md",
+                entries = listOf("- 12/03 dentist cleaning for Ana", "- 12/20 eye test")
+            )
+
+            suspend fun marked(
+                task: String,
+                marks: String
+            ) = frameOf(
+                task = task,
+                candidates = listOf(visits, checkups),
+                replies = mapOf(
+                    FramePrompts.COUNT to appointment,
+                    FramePrompts.PICK to """{"pick":"N1"}""",
+                    FramePrompts.MARK_ENTRIES to marks
+                )
+            )
+
+            val shared = marked(
+                task = "move the dentist cleaning to 11:00",
+                marks = """{"E1":"yes","E2":"no"}"""
+            )
+
+            val own = marked(
+                task = "move the haircut to 11:00",
+                marks = """{"E1":"no","E2":"yes"}"""
+            )
+
+            assertEquals(
+                expected = listOf(listOf(visits.path, checkups.path), visits.entries[1]),
+                actual = listOf(shared?.openNotes, own?.entry)
+            )
+        }
+
     // The E4B's blind pool, seed 10, 2026-11-28: every entry of "Contrato maíz" writes maíz, and the one marked was
     // left open with the others.
     @Test
