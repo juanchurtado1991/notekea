@@ -232,43 +232,6 @@ class TaskFramerTest {
             )
         }
 
-    // The 12B's blind pool, seed 10, 2026-11-28: "update Anna's note" was settled on the one of two Annas marked,
-    // though both write an email.
-    @Test
-    fun `an entry marked is open with the notes of its set that hold one writing the same task words`() =
-        runTest {
-            val home = kitchen.copy(entries = listOf("| Parking | 40 |", "| Tiles | 300 |"))
-            val work = servers.copy(entries = listOf("| Parking permit | 240 |", "| Rack | 900 |"))
-
-            suspend fun marked(
-                task: String,
-                marks: String
-            ) = frameOf(
-                task = task,
-                candidates = listOf(home, work),
-                replies = mapOf(
-                    FramePrompts.COUNT to """{"count":"one","words":"$worded","thing":"item"}""",
-                    FramePrompts.MARK_NOTES to """{"N1":"yes","N2":"no"}""",
-                    FramePrompts.MARK_ENTRIES to marks
-                )
-            )
-
-            val shared = marked(
-                task = "delete the parking line from $worded",
-                marks = """{"E1":"yes","E2":"no"}"""
-            )
-
-            val own = marked(
-                task = "delete the tiles line from $worded",
-                marks = """{"E1":"no","E2":"yes"}"""
-            )
-
-            assertEquals(
-                expected = listOf(listOf(home.path, work.path), home.entries[1]),
-                actual = listOf(shared?.openNotes, own?.entry)
-            )
-        }
-
     // The E4B's blind pool, seed 10, 2026-11-28: every entry of "Contrato maíz" writes maíz, and the one marked was
     // left open with the others.
     @Test
