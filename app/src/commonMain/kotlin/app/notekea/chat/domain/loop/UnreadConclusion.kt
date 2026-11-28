@@ -46,7 +46,9 @@ internal object UnreadConclusion {
         )
     }
 
-    // The unread note the call names first, its reason left aside, told once each.
+    // The unread note the call names first, its reason left aside, told once each; one a note read writes is
+    // quoted from it. The E2B's blind pool, seed 10, 2026-11-27: a tally of "Deposits" rows, each linking a client,
+    // had every client read and the tally refused, one by one, until the turn ran out.
     private fun namedOf(
         call: ToolCall,
         state: TurnState
@@ -60,6 +62,7 @@ internal object UnreadConclusion {
             .joinToString(separator = "\n")
 
         val read = state.turn.reads.read
+        val quoted = readTextOf(state = state)
 
         return state
             .turn
@@ -69,6 +72,9 @@ internal object UnreadConclusion {
                 it.isMarkdown &&
                     it !in read &&
                     it.nameWithoutExtension.length >= MIN_NAME
+            }
+            .filter {
+                TurnSources.namedAt(quoted, it.nameWithoutExtension) == null
             }
             .mapNotNull { path ->
                 TurnSources
@@ -81,6 +87,14 @@ internal object UnreadConclusion {
             .map { (path, _) -> path }
             .firstOrNull { state.told.add(element = "$NAMED $it") }
     }
+
+    // What the notes read so far gave, as the model was shown it.
+    private fun readTextOf(state: TurnState): String = state
+        .foundAt
+        .filterKeys { it.startsWith(prefix = "${ReadTool.NAME}:") }
+        .values
+        .mapNotNull { state.found.getOrNull(index = it) }
+        .joinToString(separator = "\n")
 
     // With nothing read, the first note the search showed, once.
     private fun searchedOf(state: TurnState): RelativePath? {

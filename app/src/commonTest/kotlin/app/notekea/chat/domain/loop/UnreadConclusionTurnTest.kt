@@ -79,6 +79,28 @@ class UnreadConclusionTurnTest {
         )
     }
 
+    // The E2B's blind pool, seed 10, 2026-11-27: a tally of "Deposits" rows, each linking a client, had every
+    // client read and the tally refused, one by one.
+    @Test
+    fun `an answer naming a note only as a note read links it is not held for that note`() =
+        runTest {
+            store.texts[readings] = "# Glucose"
+            store.texts[suppliers] = "# Suppliers\n\n- BL-204 — $1,350 — pending, for [[Glucose]]"
+
+            val steps = stepsOf(
+                task = "how much is pending with suppliers?",
+                called = listOf(
+                    """{"tool":"read","note":"Suppliers"}""",
+                    """{"tool":"answer","text":"BL-204, for Glucose: 1,350 pending."}"""
+                )
+            )
+
+            assertEquals(
+                expected = listOf<Any?>(listOf("read"), true),
+                actual = listOf(movesOf(steps), steps.last() is AgentStep.Finished)
+            )
+        }
+
     private fun movesOf(steps: List<AgentStep>): List<String> = steps
         .filterIsInstance<AgentStep.Moving>()
         .map { it.move }
