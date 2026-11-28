@@ -177,7 +177,7 @@ class TallyTool(private val noteTextCache: NoteTextCache) :
             missingDelimiterValue = ""
         )
 
-        val value = FigureValues.firstIn(text = figure) ?: FigureValues.firstIn(text = item)
+        val value = LineAmount.of(text = figure) ?: LineAmount.of(text = item)
             ?: return Checked(
                 value = null,
                 line = item,

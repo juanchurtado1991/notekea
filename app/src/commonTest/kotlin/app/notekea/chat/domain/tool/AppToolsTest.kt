@@ -235,6 +235,43 @@ class AppToolsTest {
         )
     }
 
+    // The E2B's blind pool, seed 10, 2026-11-28: a whole row given as the item was counted by its date's year.
+    @Test
+    fun `a tally of whole lines counts each line's amount, not its date`() = runTest {
+        store.texts[arepas] = listOf(
+            "| 2026-08-05 | Cascade Pacific | gas | \$38 |",
+            "| 2026-09-10 | Cascade Pacific | parking | \$12 |",
+            "- [x] Cuota 1 (anteproyecto): \$3.500.000 — pagada 2025-12-03"
+        ).joinToString(separator = "\n")
+
+        val tally = TallyTool(
+            noteTextCache = NoteTextCache(contentStore = store)
+        )
+
+        suspend fun sumOf(items: String) = tally
+            .run(
+                call = ToolCall(
+                    name = tally.name,
+                    arguments = mapOf(
+                        "how" to "sum",
+                        "items" to items
+                    )
+                ),
+                context = context
+            )
+            .forModel
+            .lines()
+            .first()
+
+        assertEquals(
+            expected = listOf("tally sum of 2: 50", "tally sum of 1: 3500000"),
+            actual = listOf(
+                sumOf(items = "| 2026-08-05 | Cascade Pacific | gas | \$38 |\n| 2026-09-10 | Cascade Pacific | parking | \$12 |"),
+                sumOf(items = "- [x] Cuota 1 (anteproyecto): \$3.500.000 — pagada 2025-12-03")
+            )
+        )
+    }
+
     // 14 November 2026 is a Saturday.
     @Test
     fun `a phrase names its day from today, in English and in Spanish`() {
